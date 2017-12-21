@@ -1,0 +1,3 @@
+#ifdef DRV_SIO_AT91
+    vxbAt91SioRegister();
+#endif /* DRV_SIO_AT91 */

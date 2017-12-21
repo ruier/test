@@ -1,0 +1,7 @@
+#ifdef INCLUDE_GT64120A_PCI
+extern void g64120aPciRegister (void);
+#endif /* INCLUDE_GT64120A_PCI */
+
+#ifdef INCLUDE_GT64120A_MF
+extern void g64120aMfRegister (void);
+#endif /* INCLUDE_GT64120A_MF */

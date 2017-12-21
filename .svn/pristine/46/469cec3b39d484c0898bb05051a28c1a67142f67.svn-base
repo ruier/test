@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTLR_MIPS_CAV
+IMPORT   void vxbMipsCavIntCtlrRegister();
+#endif /* DRV_INTCTLR_MIPS_CAV */

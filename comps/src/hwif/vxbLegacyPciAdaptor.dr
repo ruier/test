@@ -1,0 +1,3 @@
+#ifdef DRV_PCI_VIRTUAL
+    vxbVirtualPciRegister();
+#endif /* DRV_PCI_VIRTUAL */

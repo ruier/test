@@ -1,0 +1,3 @@
+#ifdef DRV_OMAP35XDPLL
+    vxbOmap35xDpllDrvRegister ();
+#endif

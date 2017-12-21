@@ -1,0 +1,3 @@
+#ifdef INCLUDE_NS8381X_VXB_END
+    nseRegister();
+#endif /* INCLUDE_NS8381X_VXB_END */

@@ -1,0 +1,3 @@
+---- FIOSEEK64 Matches (2 in 2 files) ----
+Fstest.c (d:\windriver\vxworks-6.8\target\config\vpx6-em512\vpx6-em512\fs\test):    ioctl(fd,FIOSEEK64,&offset);
+Fsusr.c (d:\windriver\vxworks-6.8\target\config\vpx6-em512\vpx6-em512\fs):        case FIOSEEK64:

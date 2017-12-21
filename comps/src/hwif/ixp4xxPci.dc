@@ -1,0 +1,6 @@
+#ifdef DRV_PCIBUS_IXP4XX
+extern void ixPciRegister (void);
+#ifdef INCLUDE_END2
+void vxbDmaEnd2BufIxp4xxPciInit (void);
+#endif
+#endif /* DRV_PCIBUS_IXP4XX */

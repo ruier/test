@@ -1,0 +1,4 @@
+#ifdef DRV_INTCTLR_DAVINCI
+    vxbDavinciIntCtlrRegister();
+#endif /* DRV_INTCTLR_DAVINCI */
+    

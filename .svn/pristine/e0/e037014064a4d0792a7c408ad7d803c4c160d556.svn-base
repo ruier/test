@@ -1,0 +1,3 @@
+#ifdef DRV_DMA_XLNX
+extern void xlnxDmaRegister(void);
+#endif /* DRV_DMA_XLNX */

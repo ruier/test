@@ -1,0 +1,4 @@
+#ifdef DRV_I2C_EEPROM
+    vxbI2cEepromRegister();
+#endif /* DRV_I2C_EEPROM */
+

@@ -1,0 +1,4 @@
+#ifdef INCLUDE_SCC_VXB_END
+IMPORT void sccRegister (void);
+#endif
+

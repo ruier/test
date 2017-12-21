@@ -1,0 +1,1085 @@
+\" wrSbc85xx/target.ref - WR SBC 85xx target specific documentation
+\"
+\" Copyright (c) 2003-2004, 2006-2008 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01i,14jul08,l_z  update IPNET native driver description
+\" 01h,22mar07,rec  WIND00091158 - add note regarding unsupported project images
+\" 01g,20nov06,rvm  Added workbench instructions for Flash Programming
+\" 01f,30jul06,tor  Add VxBus support information
+\" 01e,29oct04,mil  Updated TFFS info.
+\" 01d,03aug04,mil  Updated operating speed information.
+\" 01c,28jun04,mil  Removed long boot time workaround.
+\" 01b,20May04,mil  Update for Rev.2 board.
+\" 01a,27Oct03,mil  Created
+\"
+\"
+\TITLE wrSbc85xx - Wind River SBC8540 and SBC8560
+
+NAME `Wind River SBC 85xx - MPC8540/8560 Reference Board'
+
+INTRODUCTION
+This reference entry provides board-specific information necessary to run
+VxWorks with the wrSbc85xx BSP. Please read the section 
+"Getting the board running vxWorks" in order to configure the board
+to run vxWorks.
+
+Setting up the board and running vxWorks
+This section will guide you step by step how to get vxWorks running on this 
+board.
+
+0. Bootrom update required
+   Flashing a new bootrom is required if the board has a 1.2/0 bootrom.
+   This BSP version contains changes to the TLB mapping during initialization
+   as well as both the static and dynamic TLB entries.  The bootrom needs to
+   be updated in order for the RAM vxWorks iamges to work properly.  All
+   TS=1 entries are now in sysPhysMemDesc[], while TS=0 entries are in
+   sysStaticTlbDesc[].  The default mapping is just an example: applications
+   may need to change the mapping for specific needs, or to improve
+   performance.  Note that the mappings flagged IPROT are mandatory, and
+   RAM image TLB mappings should agree with bootrom image TLB mappings.
+
+   The BSP is also configured so that a RAM vxWorks image can be loaded
+   with either the bootrom or WindPowerICE.  The EXTRA_DEFINE=-DNO_VX_BOOTROM
+   in earlier versions of the BSP is no longer needed for ICE downloads.  
+   However, it may be necessary to define USE_ALT_BOOTLINE in config.h
+   and udpate ALT_BOOT_LINE to use the proper networking parameters.
+
+1. Setting the board Jumpers & Switches:
+
+   Rev.2 of the wrSbc85xx board with rev.2 of the MPC8540/8560 silicon is
+   the currently supported configuration by this BSP revision.  
+   Rev.1 of the wrSbc85xx board or processor silicon is obsolete.  
+   Information on such hardware in this document is retained for 
+   reference only.
+
+   In order to get the board running with the default configuration, the 
+   jumpers and switches need to be set as follows:
+
+\cs
+    Keys:
+    Switch "ON"  = CLOSED = Logic Value 0
+    Switch "OFF" = OPEN   = Logic Value 1
+    Refer to the board manaul for clarification.
+
+    WR SBC 85XX Rev.1 (obsolete)
+    Operating Mode Settings    Positions
+    --------------------------------------------------------------------
+    SW7-[4..1]                 0011  3:1 ratio for CCB:SYSCLK clock
+    SW7-[5..6]                   10  3:1 ratio for e500core:CCB clock *NB
+    SW8-[1],SW7-[8..7]          101  Local Bus GPCM - 8bit ROM
+    SW8-[3..2]                   11  CPU acts as host processor
+    SW8-[4]                       1  e500 core boots without waiting
+    SW8-[6..5]                   11  Boot sequencer disabled, no I2C ROM
+    SW8-[7]                       1  TSEC width standard
+    SW8-[8]                       0  TSEC1 uses GMII or RGMII
+    SW5-[1]                       0  TSEC2 uses GMII or RGMII
+    SW5-[3..2]                   11  TxClk uses CCB clk as source
+    SW5-[4]                       1  PCI/PCI-X in 32-bit
+    SW5-[5..8],SW4-[1..4]  11111111  Device ID of RIO host
+    SW4-[5]                       1  42 ohm I/O on LBC
+    SW4-[6]                       0  Internal PCI arbiter disabled
+    SW4-[7]                       1  PCI in normal mode (non-debug)
+    SW4-[8]                       1  PCI mode (non-PCI-X)
+    SW3-[1]                       0  LBC debug on MsrcID and MDVAL
+    SW3-[2]                       0  Debug info driver on ECC pins
+    SW3-[4..3]                   11  PCI 2 added buffer delay (2ns hold)
+    SW3-[6..5]                   11  LBC 1 added buffer delay
+    SW3-[8]                       X  0 for MPC8560, 1 for MPC8540
+
+    WR SBC 85XX Rev.2
+    Operating Mode Settings    Positions
+    --------------------------------------------------------------------
+    SW9-[4..1]                 0011  3:1 ratio for CCB:SYSCLK clock
+    SW9-[5..6]                   10  3:1 ratio for CCB:SYSCLK clock *NB
+    SW6-1,SW9-[8..7]            101  Local Bus GPCM - 8bit ROM
+    SW6-[3..2]                   11  CPU acts as host processor
+    SW6-[4]                       1  e500 core boots without waiting
+    SW6-[6..5]                   11  Boot sequencer disabled, no I2C ROM
+    SW6-[7]                       1  TSEC width standard
+    SW6-[8]                       0  TSEC1 uses GMII or RGMII
+    SW3-[1]                       0  TSEC2 uses GMII or RGMII
+    SW3-[3..2]                   10  TxClk uses RxClk as source
+    SW3-[4]                       1  PCI/PCI-X in 32-bit
+    SW3-[5..8],SW2-[1..4]  11111111  Device ID of RIO host
+    SW2-[5]                       1  42 ohm I/O on LBC
+    SW2-[6]                       0  Internal PCI arbiter disabled
+    SW2-[7]                       1  PCI in normal mode (non-debug)
+    SW2-[8]                       1  PCI mode (non-PCI-X)
+
+    SW5-[1]                       0  LBC debug on MsrcID and MDVAL
+    SW5-[2]                       0  Debug info driver on ECC pins
+    SW5-[3..4]                   11  PCI 2 added buffer delay (2ns hold)
+
+    SW5-[5..6]                   11  LBC 1 added buffer delay
+    SW5-[7]                       X  0 for Rev.2, 1 for Rev.1 silicon
+    SW5-[8]                       X  0 for MPC8560, 1 for MPC8540
+
+    *NB: [5..6] - The use of [5..6] instead of [6..5] is correct.
+                  Some switches have the MSB/LSB order reversed.
+
+\ce
+
+2. Creating bootrom_uncmp.hex image.  The board should be pre-programmed with
+   VxWorks bootrom.  Follow these steps to reprogram the bootrom.
+
+   2.1 Launch WindRiver Workbench 2.6, go to the "File->New" menu and choose the 
+       option "VxWorks Boot Loader Project".
+   2.2 The "New VxWorks Boot Loader Project" window pops up. In the 
+       "Board support package" column, choose "wrSbc85xx".  Choose the 
+       Tool chain as "diab/gnu". In the "Boot loader image", choose "Style" as  
+       "Uncompressed" and "Format" as "Hex". Click the "Finish" button.
+   2.3 In the "Project navigator" window, right click on the project name and
+       click on "Build Project"
+   2.4 After the build process completes successfully (You see "Build finished" 
+       in the "Build Console" without error), bootrom_uncmp.hex exists in the
+       $(WIND_HOME)/workspace/project name directory.
+
+3. Programming bootrom_uncmp to the SBC85xx FLASH:
+   If you are using visionCLICK please follow the instructions in section 3.1 
+   If you are using WindPowerIDE please follow the instructions in section 3.2
+   If you are using Workbench please follow the instructions in section 3.3
+   
+   3.1 Using visionCLICK (version 7.11 or above required):
+
+       3.1.1 Install the WindPowerICE.  Connect the JTAG interface cable
+             from the WindPowerICE to the SBC85xx board JTAG connector
+             and power it on.
+
+             Once all the connections have been made, power up the SBC85xx
+             board and start visionCLICK on the host.
+
+       3.1.2 Configure the visionCLICK project: 
+             The "Welcome To visionCLICK" window will appear .In this window 
+             press on the "Configure" button, This will invoke "PROJECTS/LOAD" 
+             window. In this window press on the '+' left to the 
+             "PowerPC_C_Demo.prj".This will show you the project configuration. 
+             Point with the mouse cursor on the "Microprocessors" option and 
+             press the right button and choose the type of CPU you have on your 
+             board. For example: "PowerPC->E500->MPC8540" for the MPC8540 or 
+             "PowerPC->E500->MPC8560" for the MPC8560. Verify that the 
+             "Target Control" option point to WindPowerICE for 
+             WindPowerICE.  Also switch to the "Communications" 
+             TAB and verify that the "Normal Port/Rate" & "Download Port/Rate" 
+             suite your connection.  Now press the "Save" button at the
+             bottom of the window and after it on the "Activate" button.
+
+       3.1.3 Program WindPowerICE with the proper register setting for
+             the SBC85xx board:
+
+             Go to the "Tools" menu and select the 
+             "Log Output/Playback Scripts" option. The "Record / Playback" 
+             dialog box will popup. In this dialog box go to the 
+             "Playback Commands From File" group and press on the "Browse" 
+             button. Navigate to the location of the register file for the 
+             wrSbc8540 or wrSbc8560.  The file is located in the 
+             visionCLICK installation. After choosing the register file press 
+             on the "Open" button to confirm the selected reg file. You will 
+             return back to the "Record / Playback" dialog box. Now press on 
+             the "Start" button located in the same group. In the "Terminal" 
+             window you can see that the visionCLICK is running the script. 
+             When visionCLICK will finish the playback you will get back the 
+             ">BKM>" or the ">ERR>".
+
+       3.1.4 Converting the bootrom_uncmp.hex to bootrom_uncmp.bin:
+
+              3.1.4.1 In visionCLICK, choose "Convert Object Modules" from the 
+                      "Tools" menu. The "CONVERT BINARY AND SYMBOL OBJs" dialog 
+                      box will pop up.Select "All Files" in the "Files of Type" 
+                      box. Go to the "Select Input Object Module To Convert" 
+                      group and navigate to the file "bootrom_uncmp.hex" 
+                      located in either of: 
+                      "$(WIND_BASE)/target/config/wrSbc8540/bootrom_uncmp.hex"
+                      "$(WIND_BASE)/target/config/wrSbc8560/bootrom_uncmp.hex"
+
+              3.1.4.2 In the group "Binary Downloadable Objects Modules" check 
+                      the "Create Flat BIN File For Flash Programming". 
+                      "In Range Of 0x" editbox, enter 0x0 for the start
+                      address, and in the "To 0x" editbox, enter "FFFFFFFF".
+                      Note that if the non-hex version bootrom_uncmp is used,
+                      the start address should be 0xd00000 instead.
+
+              3.1.4.3 Make sure that all the other check box are unchecked. 
+                      Press the "Convert" button. Close the terminal window 
+                      when the conversion completes.
+
+       3.1.5 Programming the SBC 85xx Flash:
+             In visionCLICK, select "Program Flash Devices" from the Tools 
+             pull-down menu. This will invoke the "TF FLASH PROGRAMMING" 
+             window. If you are not using visionCLICK, you can also invoke 
+             this window using the "WindPowerICE Utilities Panel" and follow the 
+             steps below:
+
+             3.1.5.1 Click the "Select" in the "Flash Card or PC Host File 
+                     Name and Path" group. The "CHOOSE A FILE FROM HOST PC" 
+                     dialog box will popup. In the edit box enter the full path 
+                     to the location of the "bootrom_uncmp.bin", or use the 
+                     "<--Browse" button to browse to the file location. Go to 
+                     the "+/- Bias" group and enter the number "FFF00000" in 
+                     the edit box. Now click the "OK" button, this will bring 
+                     you back to the "TF FLASH PROGRAMMING" dialog box.  If
+                     the non-hex version bootrom_uncmp is used, bias should
+                     be "FF200000" instead.
+
+             3.1.5.2 In the "Programming Algorithm" group in, the edit box 
+                     press on the "Select" button, and select one of the 
+                     following Flash devices:
+
+                     For the 8MB Flash: "INTEL V28F640Jx (8192 x 8) 1 Device"
+
+             3.1.5.3 Set the proper address of the Flash to "FF800000", check 
+                     the "Erase All" radio button,and set the 
+                     "Available RAM Workspace" setting to "00002000", set the 
+                     "Bytes Of Target RAM Required" to "60000".
+
+             3.1.5.4 Press the "Erase and Program" button.
+
+             3.1.5.5 Now the Flash memory is programmed with the new boot 
+                     program. 
+
+   3.2 Using WindPowerIDE (version 1.20 or above required):
+
+       3.2.1 Install the WindPowerICE and power it on.
+             Connect the JTAG interface cable from the WindPowerICE
+             into the SBC85xx board JTAG connector.
+
+             Once all the connections have been made, power up the SBC85xx
+             board and start the WindPowerIDE executable on the host.
+
+       3.2.2 Configure the WindPowerIDE project:
+             Follow the documentation on how to create a project in
+             WindPowerIDE.
+
+       3.2.3 Play the register file to initialize the SBC85xx board:
+             Navigate to the location of the register file for the wrSbc8540
+             or wrSbc8560.  The file is located in the WindPowerIDE
+             installation.  Click OK and play the register file.
+             In the "Terminal" window you can see the script being run.
+             When WindPowerIDE finishes with the playback you will get back
+             the prompt.
+
+       3.2.4 Converting the bootrom_uncmp.hex to bootrom_uncmp.bin:
+             Follow the documentation on how to convert a hex file to a bin
+             file in WindPowerIDE.  Use 0x0 to 0xffffffff as the range.
+             Note that if the non-hex version of bootrom_uncmp is used, the
+             range should be 0xd00000 to 0xffffffff instead.
+
+       3.2.5 Programming the SBC85xx Flash:
+             In WindPowerIDE, select "Program Flash Devices" from the
+             pull-down menu. This will invoke the "TF FLASH PROGRAMMING"
+             window. 
+
+             3.2.5.1 Specify the path and filename for the newly created
+                     "bootrom_uncmp.bin" file.  Set the bias to 0xFFF00000.
+                     If the non-hex version bootrom_uncmp is used, bias
+                     should be 0xFF200000 instead.
+
+             3.2.5.2 In the "Programming Algorithm" group in, the edit box
+                     press on the "Select" button, and select the 
+                     following Flash device:
+
+                     For the 8MB Flash: "INTEL V28F640Jx (8192 x 8) 1 Device"
+
+             3.2.5.3 Set the proper address of the Flash to "FF800000", check
+                     the "Erase All" radio button,and set the
+                     "Available RAM Workspace" setting to "00002000", set the
+                     "Bytes Of Target RAM Required" to "60000".
+
+             3.2.5.4 Press the "Erase and Program" button.
+
+             3.2.5.5 Now the Flash memory is programmed with the new boot
+                     program.
+                     
+   WARNING: The following instructions were written using Workbench 2.6. 
+            Directory names, menu selections and field names associated with   
+            Workbench may change in future versions.  
+            
+   3.3 Using Workbench:
+   
+       3.3.1 Install Wind Power Probe or Wind Power ICE and power it on.
+             Connect the JTAG interface cable from the Wind Power Probe or Wind 
+             Power ICE to the SBC85xx board's JTAG connector (JP15).
+             Once the connections have been made, power up the SBC85xx board 
+             and launch Workbench on the host.
+   
+       3.3.2 Configure the Wind Power Probe or Wind Power ICE connection.
+             In Workbench on the left pane, there is a "Target Manager" window. 
+             Click on the "New Connection". Select the "Connection type" as 
+	     "WindRiver OCD ICE Connection" for Wind Power ICE and "WindRiver 
+	     OCD Probe Connection" for Wind Power Probe. If the Wind Power ICE 
+	     is connected via serial port, specify the configuration else select
+	     "Specify all communication settings manually". 
+
+	     In the "Wind River ICE Settings" or "Wind River Probe Settings", 
+	     select the processor by clicking on the "Select" tab. For example: 
+	     "MPC85xx->MPC8560"/"MPC85xx->MPC8540". Enter the Boardfile 
+	     filename, the boardfiles are available at 
+	     "$(WIND_HOME)/workbench-2.6/dfw/0160c/host/boardfiles/PowerPC/85xx/
+	     Generic/*.brd". 
+	     Select "Auto-attach to connected designators". In the 
+	     "Communications" tab, Enter Hostname/IP address of ICE for Wind 
+	     River ICE or USB Device Name for Wind River Probe. Connect 
+	     Workbench OCD with the Wind Power Probe or Wind Power ICE 
+	     by clicking the "Next" and then "Finish" button. A New connection 
+	     appears in the "Target Manager" window.
+          	            	     
+       3.3.3 Program Wind Power Probe / Wind Power ICE with the proper register 
+             settings for the SBC85xx board.
+   	     
+   	     To view/modify the Wind Power ICE firmware setting, terminate the 
+   	     debug session for Wind Power ICE. In the Target Manager window, 
+   	     right click on the newly connected OCD connection. Select 
+   	     "OCD Utilities". To know about the current firmware information, 
+   	     select "Emulator firmware version information". To download the new
+   	      firmware, Select "Firmware Download" and select appropriate file 
+   	     from "$(WIND_HOME)/workbench-2.6/dfw/0160c/host/firmware/*.bin".
+   	     
+   	     Go to the "OCD Command Shell" and click on the "Settings" button. 
+   	     The OCD Command Shell Settings dialog appears, where you can 
+   	     select the appropriate register file. Navigate to the location of 
+   	     the appropriate register configuration files for the 
+   	     SBC85xx board. After choosing the register file, press the 
+   	     "OK" button. In the OCD Command Shell, click the "Playback file" 
+   	     button. The selected register file is downloaded to the target and 
+   	     the commands from the file appear in the OCD command shell. When 
+   	     playback is finished the ">BKM>" or the ">ERR>" prompt returns.
+                  
+       3.3.4 Get into Background Mode.
+   
+	     Execute the "IN" command to reset the board and initialize it with
+	     the register setting.
+   
+\cs
+	     IN
+\ce
+   
+                
+       3.3.5 Convert bootrom_uncmp.hex to bootrom_uncmp.bin.
+   
+	     In "Flash Programmer", choose "Programming" tab. Click 
+	     "Convert files" to open the "Choose file for Flash Download" 
+	     browser window. Navigate to the file "bootrom_uncmp.hex" located 
+	     in:"$(WIND_BASE)/target/config/wrSbc85xx/bootrom_uncmp.hex" and 
+	     press "OK". The "bootrom_uncmp.bin" is available in the same 
+	     location of "bootrom_uncmp.hex".
+                 
+               
+       3.3.6 Program the SBC85xx Flash.
+   
+             In WindRiver OCD, Select the "Flash Programmer". The 
+	     "Flash Programmer" view has three tabs: "Configuration", 
+             "Programming" and "Memory/Diagnostics".
+
+             3.3.6.1 Select the "Configuration" tab. In the "Device Selection' 
+		     field, select the "INTEL V28F640Jx (8192 x 8) 1 Device".  
+		     Select the "RAM Workspace" start address to be "0x00002000"
+		      and set the "size" to "60000".
+		     To set a program or erase timeout, use "Set/Edit Timeouts".
+		     The value can be entered in seconds.
+
+       	     3.3.6.2 Click on the "Programming" tab. Select the "Add File" 
+	             button to add the "bootrom_uncmp.bin". Select the 
+		     "Start Address" as "0xfff00000", "End Address" will be 
+		     selected automatically. The "Start Address" includes the 
+		     "Offset bias".
+		     Enable a file by clicking on the checkbox under the 
+		     "Enabled" heading.
+	     3.3.6.3 In the Erase Sector Selection pane, select addresses
+                     fff00000 through fffe0000.  Press the "Erase/Program" 
+                     button to erase the flash and then program the flash with 
+                     selected "bootrom_uncmp.bin" file. A window pops up to 
+                     show the progress of the Flash device programming.  When 
+                     it is complete, the Flash should contain the new boot 
+                     program.
+
+
+4. Running the VxWorks Boot ROM program:
+
+   4.1 Disconect the WindPowerICE if it is still connected to the
+       board, because if connected, it can stop the processor at 
+       the first instruction in some cases.
+
+   4.2 Connecting the Ethernet channel and the serial channel:
+
+       4.2.1 First, connect the supplied serial cable with the board. The 
+             cable should be connected to the mini-DB9 connector on the 
+             edge of the card.  Connect the other end of the cable with 
+             a standard DB9 connector directly to the host RS232 port.  
+             An optional DB25 adaptor may be needed.  The COM port should
+             be set to  data bits, 1 stop bit, hardware handshaking, and 
+             parity disabled.  The baud rate is 9600 bps.  
+
+       4.2.2 Second, connect an RJ45 ethernet cable to the first TSEC port
+             adjacent to the mini-DB9 serial port.
+             
+   4.3 Launch a terminal program on the host, and configures it according 
+       to 8 data bits, 1 stop bit, hardware handshaking, and parity 
+       disabled.  Again, the baud rate is 9600 bps.
+
+   4.4 If the board is not already powered off, turn it off momentarily.
+       Power on the board and in about 15 seconds,  you should see 
+       characters printed to the terminal window, counting down to boot.
+       Press any key to stop the count down. Now follow the instructions
+       in the "Getting Started" chapter of the "VxWorks Programmer's
+       Guide" for more detail on how to configure vxWorks.
+
+5. Running the VxWorks without a VxWorks Boot ROM:
+
+   VisionCLICK or WindPowerIDE can download a vxWorks image to the WR
+   SBC 8540 or SBC 8560 through the JTAG interface without using the
+   VxWorks bootrom.
+
+   The requirement to define NO_VX_BOOTROM (in earlier version of the
+   BSP) to run VxWorks without the VxWorks bootrom is no longer needed.
+   VisionCLICK or WindPowerIDE should now be able to download and boot
+   a standard vxWorks image.  For network to use the bootline correctly,
+   USE_ALT_BOOTLINE should be defined in config.h and have ALT_BOOT_LINE
+   set to the correct network parameters.
+
+\sh BOOT DEVICES
+The supported boot devices are:
+\cs
+	mottsec - 10/100/1000 Triple Speed Ethernet Controller
+	motfcc - 10/100 ethernet (on MPC8560 only, requires mezz card)
+\ce
+
+FEATURES
+This section describes the support and unsupported features of the wrSbc85xx
+
+\sh Supported Features
+
+The supported features of the SBC85xx board are:
+        MPC 8540/8560 processors
+	Board Initialization.
+	MMU support.
+	Cache support.
+	L2 Cache support.
+	L2 SRAM support.
+	Decrementer timer is used to implement a System Clock.
+	Timestamp clock.
+	MPC8560 10/100 FCC Ethernet Controller.
+        MPC8540/MPC8560 10/100/100 TSEC Ethernet Controller.
+	On-chip Programmable Interrupt Controller.
+	DDR SDRAM (up to 512 MB Memory SODIMM).
+	Local bus SDRAM (up to 128 MB Memory SODIMM).
+	FLASH (up to 64 MB SODIMM).
+	FLASH 8MB on board, also used by bootrom.
+	Saving boot parameters on the EEPROM when using vxWorks bootrom.
+
+The VxBus device drivers used for on-board devices include:
+	m85xxPci: PCI/PCI-X
+	tsecVxbEnd: On-chip 10/100/1000 Triple Speed Ethernet Controller.
+	fccVxbEnd: On-chip 10/100 Ethernet Controller.
+	vxbNs16550Sio: MPC8540 DUART
+	vxbNs16550Sio: SC16C2550 DUART
+	gei825xxVxbEnd: Intel PRO/1000 PCI Ethernet Controller (optional).
+
+\sh Unsupported Features
+
+The items not supported by the BSP of the wrSbc85xx are:
+	RapidIO
+	ATM channels
+	10/100 maintenance port (MPC8540 only)
+
+The standard uncompressed ROM and ROM-resident project configuration are not
+supplied because they will not fit in the bootrom.
+
+
+HARDWARE DETAILS
+This section documents the details of the device drivers and board
+hardware elements for the wrSbc85xx.
+
+\sh Devices
+The chip drivers included are:
+
+\ts
+sysNvRam.c|Generic non-volatile RAM library
+m85xxTimer.c|system clock,aux clock, and timestamp driver using PPC decrementer
+cfiscs.c|Flash access routines
+sysEpic.c|Motorola MPC107 PIC interrupt controller driver
+sysDuart.c|prepares serial driver
+sysL2Cache.c|L2 cache library
+m85xxCpmIntrCtl.c|CPM interrupt controller driver
+\te
+
+The BSP configures the on-chip or on-board DUART to implement a console
+device and the TSEC as an Ethernet.  The SCC device in the CPM on the MPC8560
+is not actually used by this BSP, although a sample file sysScc.c is included.
+On the MPC8560 board with CPM, the FCC 2 and 3 are configured for ethernet
+as well.
+
+VxBus support is standard in this BSP, therefore additional
+VxBus drivers can be used with this BSP.  This may be useful,
+for example, for PCI devices.
+
+\sh Support for L2 Cache
+L2 Cache is configured with callback function
+pointers for L2 cache Global Invalidation, L2 Cache Enable, L2 Cache
+Flush and L2 Cache Disable are intialized in sysHwInit().  By default, the
+256 KB L2 is configured to 128 KB of cache and 128 KB of SRAM.  If a
+different configuration is desired, a new bootrom image should be used
+to match the RAM image configuration of L2.
+
+\sh Support for Signal Processing Engine (SPE)
+MPC8540 and MPC8560 support an SPE APU that implements scalar and
+vector processing. Support for SPE is now available, but an
+SPE aware compiler must be used to create applications that
+use SPE instructions. The SPE support can be enabled by
+defining INCLUDE_SPE in config.h, set by default.
+
+\sh Operating Speed
+The processor has built-in PLL circuits to control the operating speed of 
+the Core Complex Bus (CCB) as well as the E500 core.  The board uses a 
+33.33 MHz crystal and doubles it to 66.66 MHz before feeding into the 
+processor.  This processor clock input is referred to as the system clock
+(SYSCLK).  SW7 or SW9 (depending on board revision) controls the PLL to
+provide different operating speed combinations.  This BSP supports a CCB
+speed of 200 MHz or 266 MHz.  At time of testing, a core speed of up to 
+666 MHz is officially supported by the hardware.  An earlier revision of 
+this file erroneously indicated DIP switch setting of speed of up to 
+933MHz.  Although overclocking may work in some cases, they are not 
+supported by the BSP and/or the hardware.  Please verify the processor 
+markings with its corresponding electrical specification.
+
+The serial console of the wrSbc8540 uses the DUART device of the MPC8540,
+whose clock is dependent on the CCB frequency.  This BSP can auto-sense 
+the CCB:SYSCLK ratio to configure for a baud rate of 9600 bps.  The wrSbc8560
+uses a dedicate clock on board and will also default to 9600 bps.
+
+All time base facilities of the MPC85xx, including the decrementer timer
+used by VxWorks, is also based on the CCB frequency.  If the auto-sense 
+fail to report a proper ratio, it will default to a preset value defined
+by PLAT_FREQ_DEFAULT in config.h.  To override the auto-sense feature,
+PLAT_FREQ_OVERRIDE should be defined.
+
+\sh Default Memory Map
+\cs
+Memory Map from CPU point of view
+
+Chip Select	Start               Size         Access to
+---------------------------------------------------------------------
+n/a             0xFE000000           1MB         CCSR (Ctrl/Config/Status)
+n/a             0x7FFC0000         256KB         L2SRAM
+MCS0            0x00000000         256MB         DDR SDRAM SODIMM
+MCS1            0x10000000         256MB         DDR SDRAM SODIMM
+CS0             0xFF800000           8MB         On Board FLASH
+CS1             0xE4000000          64MB         User FLASH SODIMM
+CS2             n/a                  n/a         Not used
+CS3             0x20000000          64MB         Local SDRAM SODIMM
+CS4             0x24000000          64MB         Local SDRAM SODIMM
+CS5             0x28000000           8KB         7-Segment Display
+                0x28100000           8KB         User Switches
+                0x28200000           8KB         Status Register 1
+                0x28300000           8KB         Status Register 2
+                0x28400000           8KB         Reset Control Register
+                0x28500000           8KB         Wind Power Port
+                0x28700000           8KB         DUART A COM1 (wrSbc8560)
+                0x28800000           8KB         DUART B COM2 (wrSbc8560)
+                0x28900000           8KB         Real Time Clock
+                0x28B00000           8KB         8KB EEPROM
+CS6             0xE0000000          64MB         User FLASH SODIMM
+CS7             0x80000000           8KB         ATM
+\ce
+
+\sh Booting
+Upon reset, the MPC85xx begins executing from 0xffff_fffc.  Only the last
+4KB of memory is mapped by the TLB.  The instruction at 0xffff_fffc branches
+to resetEntry() located at the last 2KB of memory to begin initialization
+and mapping of memory static TLB entries.  The DDR SDRAM is then mapped to
+0x0 where the vectors are setup to use and execution is then transfered
+to the RAM after copying and uncompressing if necessary.
+
+The bootrom for the wrSbc8560 allows loading with either the TSEC or the FCC
+ethernet channel.  In the boot dialog, they correspond to the "mottsec0" and
+the "motfcc0" devices.  To switch between the two boot devices after a load
+is attempted, a hard reset or power cycle is necessary in order for the 
+device to function properly.  After the reset, press a key to stop the 
+countdown, then use the "c" command to change the boot device to the desired 
+network device.
+
+The wrSbc8560 also allows the use of a mezzanine card that has the FCC 
+ethernet ports, and the second serial RS-232 port.  If a mezzanine card
+with a second serial RS-232 port is plugged in, INCLUDE_MEZZ_COM2 should
+be defined in config.h.
+
+If a different network setting (the bootline) is to be used after the
+vxWorks image gets loaded, the macro USE_ALT_BOOTLINE can be defined in 
+config.h.  The configuration defined by ALT_BOOT_LINE will be used in
+place of the value stored in the NVRAM.
+
+\sh DDR SDRAM Size
+Initial boards and bsp are supplied with a 512MB DDR SDRAM SODIMM.
+
+\sh Local Bus SDRAM Size
+Initial boards and bsp are supplied with a 64MB or 128MB SDRAM SODIMM.
+
+\sh Network Configuration
+The Ethernet uses an RJ45 (twisted pair) jack and can be used with either
+10baseT or 100baseTX. The TSEC port also allows 1000baseT.  The hardware
+will auto-negotiate and configures the port accordingly.
+
+The following END and corresponding END2 drivers are supported in this BSP.
+However, only END driver is enabled by default.
+
+\ts
+Driver | END                      | END2
+----------------------------------------
+TSEC   | INCLUDE_TSEC_VXB_END     | INCLUDE_TSEC_VXB_END2
+\te
+
+To enable the END2 driver, you should modify as follows:
+
+For command line build, add INCLUDE_END2 into config.h right after the
+definition of INCLUDE_END. Also replace the END driver name with corresponding
+END2 driver name, then rebuild the bootrom and vxWorks image.
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, add INCLUDE_END2 component and corresponding END2
+component, this will un-define END automatically. Then rebuild your project.
+
+\sh NVRAM Support 
+This BSP uses NvRam on the 8KB EEPROM device.  The bootline is stored
+at the beginning of the NvRam, and boot device MAC address is stored
+at offset 0x200.
+
+\sh ROM Considerations
+bootrom_uncmp.bin is provided with this BSP. The bootrom is configured to 
+a ROM base address of 0x0. When programing the bootrom to the FLASH an offset
+of 0xFFF00000 need to be given.
+
+\sh BOOT FLASH
+The BSP configures to use the 8MByte On Board Flash. There is also a 64/128MB
+SODIMM flash device supported on the board, but only the 8MB flash is supported
+for booting.
+
+\sh Serial Configuration
+The UART devices are configured with 8 data bits, 1 stop bit, hardware
+handshaking, and parity disabled.  They operate at 9600 bps.  Both the
+on-chip DUART on the MPC8540 or the on-board DUART with the MPC8560 are
+routed to the same ports.
+
+As described in the Operating Speed section, the serial console of the
+wrSbc8540 uses the DUART device of the MPC8540, whose clock is dependent 
+on the CCB frequency.  This BSP can auto-sense the CCB:SYSCLK ratio to 
+configure for a baud rate of 9600 bps.  The wrSbc8560 uses a dedicate clock 
+on board and will also default to 9600 bps.
+
+Also, be reminded that the wrSbc8560 also allows the use of a mezzanine 
+card that has a second serial RS-232 port.  If a mezzanine card with
+a second serial RS-232 port is plugged in, INCLUDE_MEZZ_COM2 should
+be defined in config.h.
+
+\sh Programable Interrupt Controller
+The PIC driver provided by this BSP supports all internal and external
+interrupt sources.  It can also be configured to route such sources to
+the critical interrupt pin, as well as acting as handling the critical
+interrupts.  However, since critical interrupts are routed directly to
+the interrupt source instead of being manager by the PIC with IACK or
+EOI, the Critical Interrupt Summary registers are used to check for the
+source.  The transient values in these registers causes spurious vector
+when indexing into the vector table.
+
+\sh TrueFFS
+TrueFFS is an optional product to use a flash device as a file system.
+To use TrueFFS, define INCLUDE_TFFS in config.h.  The soldered flash 
+is configured as drive 0, while the SODIMM flash is configured as drive 1.
+To use the SODIMM flash, INCLUDE_USR_FLASH should be defined in config.h.
+The Makefile defines cfiscs.o in MACH_EXTRA by default.
+
+\sh Flash Programming
+There are two flash devices on the wrSbc85xx board.  The 8MB flash 
+soldered on the board contains the bootrom for VxWorks.  Only the last 
+1 MB is used by the bootrom.  The 7 MB from the beginning is available 
+for use.  All 64MB in the SODIMM flash is available for use.
+
+To initialize and format the soldered flash for TFFS, make sure
+INCLUDE_TFFS_BOOTROM_OVERWRITE is not defined in config.h.  Otherwise, 
+the bootrom can be erased.  Run the following commands in the target shell:
+
+\cs
+    /@ warning: data in flash will be lost! @/
+    tffsRawio (0, 3, 0, 56);
+    sysTffsFormat (0);
+\ce
+
+To initialize and format the SODIMM flash for TFFS, run the following 
+commands in the target shell:
+
+\cs
+    /@ warning: data in flash will be lost! @/
+    tffsRawio (1, 3, 0, 128);
+    sysTffsFormat (1);
+\ce
+
+The above commands will take a few minutes to complete.  Do not
+interrupt the board during this time or risk damaging the flash.
+Properly formatted TFFS volumes can be mounted for use using the 
+following commands each time vxWorks boots:
+
+\cs
+    /@ for soldered flash @/
+    usrTffsConfig (0, 0, "/flash0");
+    /@ for SODIMM flash @/
+    usrTffsConfig (1, 0, "/flash1");
+\ce
+
+TrueFFS can also serve as a boot device.  Assuming the target
+is configured to access files on the host file system, the
+following command will copy vxWorks from the host to the TFFS
+volume on the target.  Substitute /flash1 for the SODIMM flash:
+
+\cs
+    copy ("vxWorks", "/flash0/vxWorks");
+\ce
+
+To boot with a vxWorks image in the TFFS volume, build a bootrom
+with INCLUDE_TFFS defined in config.h.  Program the new bootrom
+image into the boot flash and specify the following in the
+boot dialog:
+
+\cs
+    /@ for soldered flash @/
+    boot device: tffs=0,0
+    file name  : /tffs0/vxWorks
+    /@ for SODIMM flash @/
+    boot device: tffs=1,0
+    file name  : /tffs1/vxWorks
+\ce
+
+TrueFFS can also be used to program the bootrom.  Define INCLUDE_TFFS and 
+INCLUDE_TFFS_BOOTROM_OVERWRITE in config.h.  Include the target shell 
+component and networking.  Boot the target and run "ls" to test access 
+to the host.  Note that INCLUDE_DISK_UTIL may be needed for "ls" to work.
+On your development host, run "make bootrom_uncmp.bin" to build a binary 
+image of the bootrom.  Copy the bootrom image to the directory where "ls"
+lists.  Then, run this command from the target shell (without the single
+quotes): 'tffsBootImagePut 0, 0x700000, "bootrom_uncmp.bin"'  The second
+argument, 0x700000 in this example, specifies the offset in bytes from the
+flash base address.  Hence 0x700000 + 0xff800000 is 0xfff00000 which is the
+last 1MB of the soldered flash, exactly where the bootrom should be.  Note
+that it will report an error that the last sector erase has failed, when in
+fact, no such sector exists and the message can be safely ignored.
+Remember to undef INCLUDE_TFFS_BOOTROM_OVERWRITE afterwards or else 
+subsequent formatting of the SODIMM flash may erase the bootrom.
+
+\sh Debug LED
+Various LED indicators are available on board for debug and diagnostic
+purposes.  Among them is a 7-segment numeric display unit.  Here is an 
+example use of the LED in C code: 
+  *(unsigned char *)UTIL_LED7SEG = LED_DISP_0;
+See wrSbc85xx.h for related macros.
+
+\sh SCSI Configuration
+There is no SCSI interface on this board.
+
+\sh VME Access
+N/A
+
+\sh PCI Access
+PCI/PCI-X is supported by the BSP, but is off by default. To enable it,
+make sure INCLUDE_PCI_BUS is defined in config.h.
+
+Note that the Wind River SBC8540/SBC8560 board is available in two case
+styles. Originally, the board was shipped with a Wind River 64-bit
+development platform, which consists of a mini-ATX case with a Wind
+River 64-bit PCI backplane. This blackplane card includes four 64-bit
+PCI-X slots and one PMC slot. The reference design is shipped with the
+SBC8540/SBC8560 board plugged into the first 64-bit slot (which is the
+slot labeled J4, immediately adjacent to the PMC slot).
+
+The PCI interrupt swizzle table (sysPciIntRoute[]) in sysLib.c is
+configured specifically for the Wind River 64-bit PCI backplane and
+this particular slot assignment (SBC8540/SBC8560 in slot J4). The table
+must be updated if the SBC8540/SBC8560 board is moved to a different
+slot, or if the board is used with a different backplane.
+
+Newer boards are shipped in plastic enclosure which includes only a
+basic PCI carrier card with a single 32-bit/66Mhz PCI slot. Unlike the
+64-bit development platform, this enclosure is designed only to provide
+power and a reference clock signal to the board: it's not possible to
+connect additional PCI devices since there aren't any other slots.
+
+IMPORTANT: in either configuration, in order for PCI to work correctly,
+there must only be one arbiter on the bus. The MPC85xx has an internal
+arbiter, which can be enabled or disabled using switch SW2-6. The Wind
+River 64-bit PCI backplane has an on-board arbiter, which can be enabled
+or disabled using a jumper. Older boards that are shipped with the
+Wind River 64-bit development platform kit and the 64-bit backplane
+have the backplane arbiter off and the MPC85xx arbiter on. With these
+boards, PCI support works with the hardware out of the box. However,
+with newer boards, the 32-bit PCI carrier in the plastic case also
+appears to have its arbiter enabled, and switch SW2-6 is set to enable
+the MPC85xx internal arbiter as well. This is not a valid configuration
+(only one arbiter is permitted) and it results in a CPU hang the first
+time an attempt is made to peform a PCI configuration cycle over the bus
+(such as when the VxBus probes for PCI devices). Unfortunately, it is
+not possible to detect the backplane type from software, so to avoid
+hanging the CPU on these newer boards, the BSP defaults to leaving
+INCLUDE_PCI_BUS undefined.
+
+When PCI support is turned on, the driver for the Intel PRO/1000
+family of gigabit ethernet adapters is also enabled. (This card is
+not supplied with the SBC8540/SBC8560 kit.)
+
+NOTE: all of the clocks used on the SBC8540/SBC8560 board are derived
+from the PCI bus clock. The clock signal from the PCI bus is fed to a
+clock buffer, which in turn feeds the system clock for the MPC85XX CPU.
+The MPC85XX derives the Core Complex Bus (CCB) clock from the system
+clock, and the e500 core clock is derived from the CCB clock.
+
+The Wind River 64-bit PCI backplane normally runs at 66Mhz and is
+compatible with both 33Mhz and 66Mhz PCI devices. However, per the PCI
+spec, the bus can only run as fast as the slowest device, so if a 33Mhz
+device is plugged into one of the slots, the speed of the entire bus
+will be reduced to 33Mhz. This in turn will reduce the frequency of the
+e500 core and CCB clocks.
+
+The BSP defines OSCILLATOR_FREQ to 66Mhz by default, based on the
+assumption that the board will be supplied with a 66Mhz clock from the
+PCI backplane. The SBC8540/SBC8560 will still function if a 33Mhz device
+is plugged into the backplane, but only at half speed. Also, all of the
+VxWorks timers will run twice as slowly (e.g. taskDelay(sysClkRateGet())
+will delay for 2 seconds instead of 1).
+
+There are two ways to compensate for this:
+
+1) Change OSCILLATOR_FREQ to 33Mhz instead of 66Mhz and recompile the
+   VxWorks image and bootrom. This will only correct the timer values
+   within VxWorks: the board will still run at half speed.
+
+2) Change the CCB clock PLL ratio switch settings on the board to
+   select a ratio that is twice the current value. The board default
+   setting is typically 3:1 (a 66Mhz system clock yields a 199Mhz CCB
+   clock), so selecting a ration of 6:1 should make up for the the slower
+   PCI clock (a 33Mhz system could will again yield a 199Mhz CCB clock).
+
+(In a custom MPC85xx design, this issue can be avoided by using a
+different reference clock source.)
+
+\sh RapidIO Access
+RapidIO is not supported by this BSP, but is supported by the hardware.
+
+\sh Delivered Objects
+The following images are delivered with the wrSbc85xx BSP:
+
+\ml
+\m -
+
+bootrom_uncmp
+\m -
+
+bootrom_uncmp.hex
+\m -
+
+bootrom_uncmp.bin
+\m -
+
+bootrom
+\m -
+
+bootrom.hex
+\m -
+
+bootrom.bin
+\m -
+
+vxWorks
+\m -
+
+vxWorks.sym
+\m -
+
+vxWorks.st
+\me
+
+
+SPECIAL CONSIDERATIONS
+This section describes miscellaneous information that the user needs
+to know about the BSP.
+
+KNOWN PROBLEMS
+
+\sh Bootrom does not boot when build with GNU in Tornado 2.2.1
+Tornado 2.2.1 contains a GNU makefile with missing lines.  The file is
+$WIND_BASE/target/h/tool/gnu/make.PPC85XXgnu.  To verify the problem,
+run "objdumpppc --headers rom_image_name" and check the .reset section.
+If it does not end in 0xfffc, it is likely due to this problem.  (SPR#94153)
+
+To correct this problem, add the following lines just before "TOOLENV = ppc"
+near the end of make.PPC85XXgnu and rebuild the bootrom:
+LD_SCRIPT_RAM   = -defsym wrs_kernel_rom_size=0x0$(ROM_SIZE) \
+                  -T $(TGT_DIR)/h/tool/gnu/ldscripts/link.DOTBOOTRAM
+LD_SCRIPT_ROM   = -defsym wrs_kernel_rom_size=0x0$(ROM_SIZE) \
+                  -T $(TGT_DIR)/h/tool/gnu/ldscripts/link.DOTBOOTROM
+
+\sh motfcc on wrSbc8560 does not work in 10BaseT mode
+The SBC8560 includes a CPM expansion card with two Broadcom BCM5221
+10/100 PHYs. In some cases, these PHYs do not reliably establish a link
+unless the '10Mbps TX high power' bit in the auxiliary control and status
+register is set (bit 8, register 24). The bcm52xxPhy driver used with
+the BSP in VxWorks 6.6 and later sets this bit to work around this
+problem, so both FCC ports should be fully functional.
+
+\sh Data corruption in Local Bus SDRAM
+Data in the SDRAM on the Local Bus Controller sometimes get corrupted.  
+Note that values read by VxWorks or the application may appear different 
+than being read by the Wind Power ICE.  The local bus SDRAM should not 
+be used until this problem is fixed.  The DDR SDRAM is not affected.  
+(SPR#100516)
+
+\sh wrSbc8560 serial channel hangs occassionally during boot
+The serial channels on the wrSbc8560 use an on-board DUART device, instead
+of the on-chip DUART device on the MPC8540.  With the on-board DUART 
+device, if a key is pressed in the console terminal before the serial 
+interrupt handler is installed, the serial does not produce output and 
+the target appears to hang.  Pressing a key in the console terminal will 
+correct the problem.  The DUART driver polls out the string "[Enter]" to 
+the terminal as a hint when booting from ROM.  (SPR#91933)
+
+The same DUART device sometimes also fails to generate the first interrupt 
+during boot.  Polling out a few characters seems to correct the problem.  
+Hence, the reminder string "[Enter]" serves a second purpose.  Note that 
+"[Enter]" may not appear in a ROM resident image and booting may seem 
+failed when there is no output.  When in doubt, press "Enter" on the 
+console terminal.
+
+A complication of this behavior occurs when a mezzanine card which has a
+COM2 serial port is plugged onto the wrSbc8560.  An example is the card with
+the FCC ports and the serial channel connector.  Because the workaround of 
+polling out characters may be needed on COM2 in order for the COM1 to start
+printing out characters, INCLUDE_MEZZ_COM2 needs to be defined.  
+
+The workaround may confuse the BSP Validation Test Suite (VTS).  When VTS is
+rebooting the wrSbc8560, the output "[Enter]" may cause VTS to timeout when it
+failes to recognize the console output pattern after ^x or reboot() is issued.
+
+\sh Memory module supplied with the board doesn't support ECC
+If a bootrom built with INCLUDE_ECC is flashed onto a SBC8540/SBC8560,
+it will fail to start, leaving the board hung. While the CPI and BSP
+have support for ECC, the memory module included with the SBC8540/SBC8560
+doesn't have the required logic to support it. In order for the board
+to boot successfully when INCLUDE_ECC is defined, either the memory
+module must be replaced with one which has ECC support, or switch
+SW5-2 must be set _not_ to drive debug info onto the MPC85xx's ECC
+pins. Unfortunately, newer boards ship with the switch in the wrong
+position, enabling ECC signals even though they are not supported by
+the memory module. The BSP therefore has INCLUDE_ECC turned off by
+default to work around this issue.
+
+\sh Plugging a 33Mhz device into the PCI backplane will slow down the CPU
+The Wind River SBC8540/SBC8560 board uses the clock for the PCI backplane
+as a reference for the system clock. This clock in turn is used to derive
+the CCB clock and e500 core clock. By default, the bus runs at 66Mhz,
+and the BSP is configured to use 66Mhz as its OSCILLATOR_FREQ value.
+With older boards which were shipped with a Wind River 64-bit backplane,
+additional slots are available, which can be populated with other PCI
+devices. These slots can accomodate both 64-bit/66Mhz cards and 32-bit/33Mhz
+cards, however if a 33Mhz device is in fact present in one of the slots,
+the speed of the entire bus will be reduced to 33Mhz, which in turn will
+slow down the e500 core and CCB.
+
+If using a 33Mhz device is required, then the CCB clock PLL ratio switch
+settings should be changed so that a 6:1 ratio is used instead of a 3:1
+ratio. This can be done by setting switches SW9-4:1 to 0110 instead of
+the default of 0011. (Refer to the Wind River SBC8560/40 Engineering
+Reference Guide for details on the various switch settings.)
+
+\sh Initiating PCI configuration cycles can hang the CPU with newer boards
+As mentioned in the PCI/PCI-X section, the newest SBC8540/SBC8560 boards
+ship in a plastic enclosure with a single 32-bit PCI slot, which provides
+both power and a reference 66Mhz clock signal to the SBC8540/SBC8560 card.
+This carrier board has a PCI arbiter, but switch SW2-6 is set by default
+to enable the MPC85xx's internal PCI arbiter. Issuing a PCI configuration
+read or write request in this case (such as when probing for PCI devices)
+will hang the CPU. The BSP ships with INCLUDE_PCI_BUS turned off by
+default to work around this issue.
+
+Since the carrier card doesn't have any slots for additional cards, the
+PCI support is not needed for this particular hardware configuration. If
+support for PCI is desired, the SBC8540/SBC8560 will need to be moved to
+a different backplane. If the backplane has an on-board arbiter, switch
+SW2-6 should be switched off to disable the MPC85xx internal arbiter.
+(It will also be necessary to adjust the PCI interrupt swizzle table in
+ sysLib.c to match the new backplane.)
+
+The older SBC8540/SBC8560 boards which were shipped with a Wind River
+64-bit PCI backplane do not suffer from this issue.
+
+
+BOARD LAYOUT
+The diagram below shows the location of jumpers relevant to VxWorks:
+
+\bs
+
+WR SBC 85XX REV.1 (obsolete)
+ _______________________________________________________________________
+|                                                                       |
+|  +-----------+    +---------------------+                      XXXXXX |
+|  +~~~~~~~~~~~+    +~~~~~~~~~~~~~~~~~~~~~+         ++ ++ ++ ++   JTAG  |
+|    LBC Flash              LBC SDRAM               ++ ++ ++ ++         |
+|c <--- Reset   c <- SReset                       SW 4  5  8  7  %%     |
+|                            ++                                  %%     |
+|-+          X Mezz card     ++ SW2    +-------+       +-----+   7-SEG  |
+|o| TSEC2    X connector               |  MPC  |       |     ~   LED    |
+|-+          X               ++        | 8540/ |       |     ~          |
+|            X               ++ SW3    | 8560  |       | DDR ~          |
+|-+          X             ++          |       |       |SDRAM~          |
+|o| TSEC1    X             ++ SW6      +-------+       |     ~          |
+|-+          X       SW9 ++                            |     ~          |
+|            X ++        ++                            +-----+          |
+|-+          X ++           ++ ++                                  ++   |
+|-+ Serial   X SW10         ++ ++                                  ++   |
+|            X            SW12 SW13                               SW11  |
+|_______________________________________________________________________|
+   #  ||| |||||||||||||||||  ||||||||  ======  $$ $$ #
+   #  ||| |||||||||||||||||  ||||||||  ======  $$ $$ #
+
+
+WR SBC 85XX REV.2
+ _______________________________________________________________________
+|                                                                       |
+|    Mezz card  c <- SReset           XXXXXX    ++  ++     SW       %%  |
+|    connector                         JTAG     |;  ++        ++    %%  |
+|            |     +;;;;;;;;;;;;;;+             |; SW1      2 ++   LEDs |
+|c <- Reset  V     |              |    ++       |;      ++              |
+|                  |     DDR      |    ++ SW4   |;  ++  |;    ++   ++   |
+|-+          X     |    SDRAM     |  ++ SW7     |;  ++  |;  3 ++   ++   |
+|o| TSEC2    X     |              |  ++         |; SW5  |;         JP4  |
+|-+          X     +--------------+     ++ ++   |;      |;    ++        |
+|            X                          ++ ++   |;      |;  6 ++        |
+|-+          X       +-------+       SW 10 11   |;      |;              |
+|o| TSEC1    X       |  MPC  |                  |;      |;    ++        |
+|-+          X       | 8540/ |                  |;      |;  9 ++        |
+|            X       | 8560  |                  |;      ++        SW12  |
+|-+          X       |       |                  ++     LBC          ++  |
+|-+ Serial   X       +-------+                 LBC    FLASH         ++  |
+|            X                                SDRAM                     |
+|_______________________________________________________________________|
+   #  ||| |||||||||||||||||  ||||||||  ======  $$ $$ #
+   #  ||| |||||||||||||||||  ||||||||  ======  $$ $$ #
+
+
+\be
+    Key:
+    ## - alignment pin
+    || - PCI connector
+    == - RapidIO connector
+    $$ - RapidIO power connector
+    c  - push-in switch
+    ++ - dip switches
+    ~~ - SODIMM connector
+    ;; - SODIMM connector
+    XX - connector
+    %% - LED indicator
+
+BIBLIOGRAPHY
+\tb Motorola MPC8540 RISC Microprocessor User's Manual 
+\tb Motorola MPC8560 RISC Microprocessor User's Manual 
+\tb Motorola PowerPC Microprocessor Family: The Programming Environments 
+\tb Wind River SBC8560/40 Engineering Reference Guide 
+

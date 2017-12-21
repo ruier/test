@@ -1,0 +1,3 @@
+#ifdef DRV_TI_AM335X_SPI
+    tiAm335xSpiRegister();
+#endif /* DRV_TI_AM335X_SPI */

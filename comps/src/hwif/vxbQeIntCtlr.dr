@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTLR_QE
+    vxbQeIntCtlrRegister();
+#endif /* DRV_INTCTLR_QE */

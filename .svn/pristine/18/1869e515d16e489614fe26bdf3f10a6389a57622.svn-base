@@ -1,0 +1,1005 @@
+\" fsl_p2020_ds/target.ref - Freescale P2020DS target specific documentation
+\"
+\" Copyright (c) 2009, 2010, 2012 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01e,28feb12,c_l  Update the description of Security Engine.(WIND00331832)
+\" 01d,14dec10,syt  updated the description about how to flash bootrom.(WIND00231651)
+\" 01c,18nov10,pgh  Name change for USB file system boot device.
+\" 01b,22jul10,dhy  modify switch default configuration.
+\" 01a,02jun09,syt  written.
+\"
+\TITLE fsl_p2020_ds - Freescale P2020DS
+
+NAME
+`Freescale P2020DS'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks for the fsl_p2020_ds BSP. Please read the section "Getting the board
+running VxWorks" in order to configure the board to run VxWorks.
+
+\sh Switches
+
+There are nine switches in the bottom left corner of the P2020DS board.
+
+Default Switch Settings:
+
+\ts
+Switch Number   | Switch ON           | Switch OFF
+--------------------------------------------------
+SW1             | 1,4,5               | 2,3,6,7,8
+SW2             | 1,4,6,8             | 2,3,5,7
+SW3             | 2,4,5,6,8           | 1,3,7
+SW4             | 3,5,6,7             | 1,2,4,8
+SW5             | 1,2,3,4,5,6,7,8     |
+SW6             | 4,6,7,8             | 1,2,3,5
+SW7             | 5,6,7,8              | 1,2,3,4
+SW8             | 1,2,3,4,5,6,7,8     | 
+SW9             | 2,3,4,5,6           | 1,7,8
+\te
+
+\sh Getting the board running VxWorks (boot from VxWorks Bootrom)
+This section will guide you how to run VxWorks on the Freescale P2020DS board.
+
+1. Creating a bootrom.bin:
+
+    Open the VxWorks Development Shell, change directory to fsl_p2020_ds
+    BSP directory, and then build the VxWorks bootrom image.
+
+\cs
+    cd target/config/fsl_p2020_ds
+    make bootrom.bin
+\ce
+
+2. Flashing the VxWorks bootrom.
+   
+    There are two ways to flash the VxWorks bootrom, one is used with U-Boot, the other
+    with Workbench.
+
+    2.1 Flashing the VxWorks bootrom with U-Boot
+
+        This section will describe how to program VxWorks bootrom to the flash with
+        the pre-flashed U-Boot.
+
+        2.1.1 Set the Boot Flash Switch
+
+              Select start U-Boot starts: SW7#3=OFF   SW7#4=OFF
+
+              If P2020DS-REV A,
+              Select CCB speed = 400MHz:  SW2#5=OFF   SW2#6=OFF   SW2#7=OFF
+
+        2.1.2 Starting a TFTP server
+
+              Open a TFTP server on your host.  Make sure the root directory is
+              your fsl_p2020_ds BSP directory which contains the VxWorks bootrom
+              image you've just created.
+
+        2.1.3 Configuring the U-Boot environment
+
+              Power up the board, you'll see the U-Boot shell prompt, something like:
+
+\cs
+              U-Boot 2009.03-rc1-00005-gf59aa8d-dirty (Mar 06 2009 - 10:29:28)
+
+              CPU0:  P2020E, Version: 1.0, (0x80ea0010)
+              Core:  E500, Version: 4.0, (0x80211040)
+              Clock Configuration:
+                     CPU0:999.990 MHz, CPU1:999.990 MHz,
+                     CCB:499.995 MHz,
+                     DDR:333.330 MHz (666.660 MT/s data rate) (Asynchronous), LBC:31.250 MHz
+              L1:    D-cache 32 kB enabled
+                     I-cache 32 kB enabled
+              Board: P2020DS Sys ID: 0x16, Sys Ver: 0x02, FPGA Ver: 0x03
+              I2C:   ready
+              DRAM:  Initializing....    DDR:  1 GB
+              FLASH: 128 MB
+              L2:    512 KB enabled
+              NAND:  No NAND device found!!!
+              No NAND device found!!!
+              No NAND device found!!!
+              2048 MiB
+                  PCIE2: disabled
+
+                  PCIE3 connected to Slot 1 as Root Complex (base address ffe08000)
+                  PCIE3 on bus 00 - 00
+
+                  PCIE1 connected to Slot 2 as Root Complex (base address ffe0a000)
+                             Scanning PCI bus 02
+                      02  00  8086  105e  0200  00
+                      02  00  8086  105e  0200  00
+                  PCIE1 on bus 01 - 02
+              Video: No radeon video card found!
+              In:    serial
+              Out:   serial
+              Err:   serial
+              SCSI:  Error SCSI Controller (10B9,5288) not found
+              Net:   eTSEC1, eTSEC2, eTSEC3
+              Hit any key to stop autoboot:  0
+              =>
+
+\ce
+
+              Type the following commands to setup the U-Boot environment.
+
+\cs
+              setenv ipaddr 192.168.0.3
+              setenv netmask 255.255.255.0
+              setenv serverip 192.168.0.2
+              setenv gatewayip 192.168.0.1
+              saveenv
+\ce
+
+              Note: you must change the network parameters according to your
+              actual situation. 'ipaddr' is the target IP address while 'serverip'
+              is your host IP address.
+
+        2.1.4 Programming the Freescale P2020DS flash
+
+              Type the following commands in the U-Boot shell.
+
+\cs
+              tftp 3e000000 bootrom.bin
+              erase edf00000 +100000
+              cp.b 3e000000 edf00000 $filesize
+\ce
+
+        2.1.5 Reset the Boot Flash Switch
+
+              SW7#3=OFF
+              SW7#4=ON
+
+    2.2 Flashing the VxWorks bootrom with Workbench
+
+        Using Workbench, complete the following steps to flash your boot ROM image:
+        Notes: Support for P2020DS part is available with Workbench 3.1.1.
+
+        2.2.1 Install Wind River Probe or Wind River ICE and power it on.
+
+              Connect the JTAG interface cable from the Wind River Probe or Wind
+              River ICE to the Freescale P2020DS board's JTAG connector (U48).
+              Once the connections have been made, power up the target board and
+              launch Workbench on the host.
+
+        2.2.2 Configure the Wind River Probe or Wind River ICE connection.
+
+              In Workbench on the left pane, there is a "Remote Systems" window.
+              Click on the "Define a connection to remote system" button. In the popup
+              "New Connection" window, select the Connection type as
+              "Wind River OCD ICE Connection" for Wind River ICE and "Wind River
+              OCD Probe Connection" for Wind River Probe. If the Wind River ICE
+              is connected via serial port, specify the configuration else select
+              "Specify all communication settings manually".
+
+              In the "Wind River ICE Settings" or "Wind River Probe Settings",
+              select the Board file by clicking on the "Processor" radio button and
+              browse to the appropriate CPU type. For example: "P2020E".
+              Connect Workbench OCD with the Wind River Probe or Wind River ICE
+              by clicking the "Next" and then "Finish" button. A New connection
+              appears in the "Remote Systems" window.
+
+        2.2.3 Program Wind River Probe / Wind River ICE with the proper register
+              settings for the Freescale P2020DS board.
+
+              To view/modify the Wind River ICE firmware setting, terminate the
+              debug session for Wind River ICE. In the "Remote Systems" window,
+              right click on the newly connected OCD connection. Select
+              "OCD Utilities". To know about the current firmware information,
+              select "Emulator firmware version information". To download the new
+              firmware, Select "Firmware Download" and select appropriate file
+              from "$WIND_OCD_PATH/CommonHardwareFiles/*.bin".
+
+              Go to the "OCD Command Shell" and click on the "Settings" button.
+              The OCD Command Shell Settings dialog appears, where you can
+              select the appropriate register file, which is "Freescale_P2020E_DS.reg"
+              After choosing the register file, press the "OK" button. In the OCD
+              Command Shell, click the "Playback File" button. The selected register
+              file is downloaded to the target and the commands from the file appear
+              in the OCD command shell. When playback is finished the ">BKM>" or
+              the ">ERR>" prompt returns.
+
+        2.2.4 Get into Background Mode.
+
+              Execute the "IN" command to reset the board and initialize it with
+              the register setting.
+\cs
+              IN
+\ce
+
+        2.2.5 Program the P2020DS Flash.
+
+              In WindRiver OCD, Select the "Flash Programmer". The "Flash Programmer"
+              view has three tabs: "Configuration", "Programming" and "Memory/Diagnostics".
+
+              2.2.5.1 Select the "Configuration" tab. In the "Device Selection'
+                      field, select the "AMD--> S29GL01GP--> 65536 x 16--> 1 Device"
+
+                      In "Flash Bank Address" group for the "Base" enter "e8000000" .
+                      In the "RAM Workspace" group for the "Workspace Start at"
+                      enter "0x00005000" and for the "Workspace Size" enter "0xff9c".
+
+              2.2.5.2 Click on the "Programming" tab. Select the "Add File" button, in
+                      the popup window, select the newly generated
+                      "$(WIND_BASE)/target/config/fsl_p2020_ds/bootrom.bin", and click
+                      the "This is a raw binary file" checkbox then click "OK" to finish
+                      file adding. Click the "Start Address" and set it as "0xeff00000",
+                      the "End Address" will be fixed automatically. Please notice that
+                      the "Start Address" should include the "Offset bias".
+                      Enable a file by clicking on the checkbox under the "Enabled" heading.
+
+              2.2.5.3 In the "Erase Sector Selection" pane, select addresses eff00000
+                      through efffffff.  Press the "Erase/Program" button to erase the
+                      flash and then program the flash with selected "bootrom.bin" file.
+                      A window pops up to show the progress of the Flash device
+                      programming. When it is complete, the Flash should contain the
+                      new boot program.
+
+3. Running the VxWorks bootrom
+
+   Re-power on the board, then the VxWorks bootrom should run up.
+
+FEATURES
+
+This section describes all features of the board, supported or not.
+It documents all configurations of the board and the interaction between
+features and configuration items.
+
+\sh List of Hardware Features (Freescale P2020DS board)
+
+\ts
+Hardware Interface | Controller | Driver/Component    | Status
+--------------------------------------------------------------
+UART:0             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+UART:1             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+1GB-ETHERNET:0     | on-chip    | vxbEtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:1     | on-chip    | vxbEtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:0     | on-chip    | vxbEtsecEnd.c       | SUPPORTED
+NOR-FLASH          | S29GL01GP  | flashmem.c/TFFS     | SUPPORTED
+NAND-FLASH         | K9WBG08U1M | -                   | UNSUPPORTED
+TIMER              | on-chip    | vxbM85xxTimer.c     | SUPPORTED
+TIMER              | on-chip    | vxbOpenPicTimer.c   | SUPPORTED
+PCI Controller     | M1575      | -                   | UNSUPPORTED
+PCI-E-HOST:0       | on-chip    | m85xxPci.c          | SUPPORTED
+PCI-E-HOST:1       | on-chip    | m85xxPci.c          | UNSUPPORTED
+PCI-E-HOST:2       | on-chip    | m85xxPci.c          | SUPPORTED
+DMA:0              | on-chip    | vxbFslDma.c         | SUPPORTED
+DMA:1              | on-chip    | vxbFslDma.c         | SUPPORTED
+I2C                | on-chip    | sysMpc85xxI2c.c     | SUPPORTED
+SPI                | on-chip    | sysSpi.c            | SUPPORTED
+SPI_FLASH          | S25FL128P  | sysSpiFlash.c       | SUPPORTED
+RTC                | DS3232     | ds1339Rtc.c         | SUPPORTED
+USB-HOST:0         | on-chip    | EHCI                | SUPPORTED
+SD-CARD            | on-chip    | -                   | UNSUPPORTED
+GPIO               | on-chip    | sysGpio.c           | SUPPORTED
+ENCRYPTION         | on-chip    | ipfreescale         | SUPPORTED
+\te
+
+\sh Feature Interactions
+Refer to the board vendor's documentation.
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh DDR memory selection
+P2020DS supports DDR-III only, the bellows have been tested and confirmed are
+noted as such.
+
+\ts
+Mfg.   |Part Number        |Size |Ranks |ECC |Data Rate | Verified? | Notes
+-------------------------------------------------------------------------------------
+Elpida |EBJ21EE8BAFA-AE-E  |2GB  |2     | Y  |1066      | Yes       | Or later revs
+\te
+
+Four macros defined in p2020.h, they correspond to some kinds of DDRIII DRAM.
+\cs
+    MACRON_DDR_III_1G  -- Micron's MT9JSF12872AY-1G4D1 1GB DDRIII DRAM
+    DEFAULT_DDR_III_1G -- default 1GB DDRIII DRAM configuration, no tested for all
+    ELPIDA_DDR_III_2G  -- Elpida's EBJ21EE8BAFA-AE-E 2GB DDRIII DRAM
+    DEFAULT_DDR_III_2G -- default 2GB DDRIII DRAM configuration, no tested for all
+\ce
+It's recommend to use Elpida's EBJ21EE8BAFA-AE-E 2GB size DDRIII memory, these
+macros should be defined as below:
+\cs
+    #define MACRON_DDR_III_1G       FALSE
+    #define DEFAULT_DDR_III_1G      FALSE
+    #define ELPIDA_DDR_III_2G       TRUE
+    #define DEFAULT_DDR_III_2G      FALSE
+\ce
+Notes: We do not assure the "DEFAULT_DDR_III_2G" or "DEFAULT_DDR_III_1G" are
+available and stable for all the 1GB and 2GB size DDRIII memory. Only SAMSUNG's
+M378B5673DZ1-CH9 DDRII DRAM is tested.
+
+\sh Verified Hardware
+This BSP has been verified on Rev.D of Freescale P2020DS board.
+The default clock speed for P2020DS is 1GHz for core0 and core1, 500MHz for CCB.
+
+\sh Memory Maps
+The following table describes the default memory map of this BSP.
+
+\ts
+Start       | Size  | End         | Access to
+---------------------------------------------
+0x0000_0000 |  2GB  | 0x7FFF_FFFF | DDR3 SDRAM
+0x8000_0000 |  64MB | 0x83FF_FFFF | PCIe 1 Prefetchable Memory
+0x8400_0000 |  64MB | 0x87FF_FFFF | PCIe 1 Non-Prefetchable Memory
+0x8800_0000 |  64MB | 0x8BFF_FFFF | PCIe 1 IO
+0x9000_0000 |  64MB | 0x93FF_FFFF | PCIe 2 Prefetchable Memory
+0x9400_0000 |  64MB | 0x97FF_FFFF | PCIe 2 Non-Prefetchable Memory
+0x9800_0000 |  64MB | 0x9BFF_FFFF | PCIe 2 IO
+0xa000_0000 |  64MB | 0xa3FF_FFFF | PCIe 3 Prefetchable Memory
+0xa400_0000 |  64MB | 0xa7FF_FFFF | PCIe 3 Non-Prefetchable Memory
+0xa800_0000 |  64MB | 0xaBFF_FFFF | PCIe 3 IO
+0xEFE0_0000 |  32KB | 0xEFEF_FFFF | CCSR
+0xEFF8_0000 | 256KB | 0xEFFF_FFFF | L2_SRAM
+0xF000_0000 |   1MB | 0xF00F_FFFF | PIXIS FPGA
+0xF800_0000 | 128MB | 0xFFFF_FFFF | NOR FLASH
+\te
+
+\sh Serial Configuration
+No special configuration needed.
+Default configuration is:
+    Baud Rate: 115200
+    Data: 8 bit
+    Parity: None
+    Stop: 1 bit
+    Flow Control: None
+
+\sh Network Configuration
+The ETSEC ports allows 10/100/1000 connection. The driver will auto-negotiate
+and configure the port accordingly.  The BSP also supports Intel e100/e1000
+series NICs via PCIe.  See the gei825xxVxbEnd driver for the supported model \
+numbers.
+
+The following END and corresponding END2 drivers are supported in this BSP.
+However, only END driver is enabled by default.
+
+\ts
+Driver | END                   | END2
+-------------------------------------
+ETSEC  | INCLUDE_ETSEC_VXB_END | INCLUDE_ETSEC_VXB_END2
+\te
+
+To enable the END2 driver, you should modify as follows:
+
+For command line build, add INCLUDE_END2 into config.h right after the
+definition of INCLUDE_END.  Also replace the END driver name with corresponding
+END2 driver name, then rebuild the bootrom and vxWorks image.
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, add INCLUDE_END2 component and corresponding END2
+component, this will un-define END automatically.  Then rebuild your project.
+
+\sh Boot Devices
+The supported boot devices are:
+
+\ts
+    `motetsec0' | ETSEC1
+    `motetsec1' | ETSEC2
+    `motetsec2' | ETSEC3
+    `fs'        | USB
+    `tffs'      | TFFS
+\te
+
+\sh Boot Methods
+The boot methods are affected by the boot parameters.  If no password is
+specified, RSH (remote shell) protocol is used.  If a password is specified,
+FTP protocol is used, or, if the flag is set to 0x80, TFTP protocol is used.
+
+\sh PCIe Access
+There are two PCIe slots on the Freescale P2020DS board.
+The default PCIe settings are two PCIe x4 (PCIe 1 & 3) slots. NVidia M1575 is
+connected to PCI-EX2 interface On P2020DS, which is not supportted by
+fsl_p2020_ds bsp, so PCI-EX2 should be disabled on the board, the two switches
+(SW4 and SW6) should be set like bellows:
+\ts
+    'SW4#1' | OFF
+    'SW4#2' | ON
+    'SW4#3' | OFF
+    'SW4#4' | OFF
+    'SW6#4' | OFF
+    'SW6#5' | OFF
+\te
+In order to support PCIe devices in this BSP, please define following
+macro in config.h:
+
+\cs
+    #define INCLUDE_PCI_BUS
+\ce
+
+The Intel 8257x Gigabit Ethernet adapter is one of the tested PCIe device
+supported in this release.  Define INCLUDE_GEI825XX_VXB_END in config.h to
+enable this device.
+
+This BSP defaults to use PCIe legacy interrupts.  To enable PCIe MSI interrupt,
+please define following macro in config.h:
+
+\cs
+    #define INCLUDE_INTCTLR_DYNAMIC_LIB
+\ce
+
+\sh DMA
+Freescale DMA Controller is supported in this release. To enable DMA
+function, please define following macro in config.h:
+\cs
+    #define DRV_DMA_FSL
+\ce
+Note: The MAX transfer size of every slices on each DMA channel should not
+exceed (64M - 1) Bytes.
+
+\sh eSPI and SPI Flash
+Freescale eSPI Controller and SPI Flash S25F128 are supported (only poll mode)
+in this release. To enable this function, please define the following macro in
+config.h:
+\cs
+    #define INCLUDE_FSL_SPI
+\ce
+Before write data into SPI Flash, whole chip or some sectors should to be
+erased, the two erase function are:
+\cs
+spiFlashEraseSector
+    (
+    sectorAddr
+    )
+
+spiFlashEraseChip(void)
+\ce
+After Flash device erased, user data could be write in to Flash with Write
+data function:
+\cs
+STATUS spiFlashWrite
+    (
+    UINT32  destAddr,
+    UINT8 * pData,
+    UINT32  dataNum
+    )
+\ce
+To read out data from SPI Flash, function
+\cs
+STATUS spiFlashRead
+    (
+    UINT32  flashSrcAddr,
+    UINT8 * pData,
+    UINT32  dataNum
+    )
+\ce
+could be used.
+
+\sh USB Host
+The board has 1 USB ports, which is working in host mode and it is supported in
+this BSP. To enable USB host support, make sure the following components are
+included:
+
+\cs
+#define INCLUDE_USB
+\ce
+
+USB Mass storage device is verified on the target.
+
+For more information, please refer to
+\tb Wind River USB for VxWorks 6 PROGRAMMER'S GUIDE
+
+\sh Security Engine
+Freescale Security Engine (SEC) 3.3 is supported in this release.
+VxWorks MSP must be installed to enable security engine offload.
+
+The following steps describe how to enable SEC support of this BSP.
+
+1. Create a VSB (VxWorks Source Build)
+
+    1.1 Create a VSB in any directory. For instance, run the command:
+
+\cs
+       $WIND_BASE/target/proj/vxprj vsb create -bsp fsl_p2020_ds vsb_fsl_p2020_ds
+\ce
+
+        This command creates a VSB for the BSP fsl_p2020_ds, vsb_fsl_p2020_ds
+        is the name of this VSP.
+
+    1.2 Configure VSB
+
+        After run the command in step 1.1, you will be prompted to select the
+        configuration options of this new VSB. Below is a example of
+        configuration result:
+
+\cs
+        starting VSB configuration...
+        *
+        * VxWorks Source Build (VSB) Configuration
+        *
+        *
+        * VxWorks Global Configuration Options for BSP fsl_p2020_ds
+        *
+        Set advanced options  (ADVANCED_OPT) [N/y/?] (NEW) y
+        *
+        * fsl_p2020_ds_CPU = PPC32
+        *
+        Select the Floating Point configuration
+        > 1. e500v2 (FP_e500v2) (NEW)
+          2. soft (FP_soft) (NEW)
+        choice[1-2?]: 1
+        Select the ENDIAN configuration
+        > 1. big (ENDIAN_big) (NEW)
+        choice[1]: 1
+        Select the Primary Tool
+        > 1. diab (PRI_TOOL_ILP32_diab) (NEW)
+        choice[1]: 1
+        optional compiler flags for fsl_p2020_ds_TOOL [?]  (ADDEDCFLAGS) [] (NEW)
+        Enable use of Secondary TOOL to build kernel libraries.  (ENABLE_TOOL2_ILP32) [Y/n/?] (NEW) Y
+          Select the Secondary Tool
+          > 1. gnu (SEC_TOOL_ILP32_gnu) (NEW)
+          choice[1]: 1
+        optional compiler flags for fsl_p2020_ds_TOOL2 [?]  (ADDEDCFLAGS2) [] (NEW)
+        Select the Applications Tool
+        > 1. diab (APP_TOOL_ILP32_diab) (NEW)
+          2. gnu (APP_TOOL_ILP32_gnu) (NEW)
+        choice[1-2?]: 1
+        optional compiler flags for fsl_p2020_ds_APP_TOOL [?]  (ADDEDCFLAGS_APP) [] (NEW)
+        *
+        * ppc Architecture Options
+        *
+        Symmetric Multiprocessing (SMP)  (SMP) [N/y/?] (NEW) N
+        Low-level arch code need not support inconsistent cache modes  (PPC_CACHE_MODE_IS_CONSISTENT) [N/y/?] (NEW)
+        System Viewer Instrumentation  (SV_INSTRUMENTATION) [Y/n/?] (NEW) Y
+        Global Debug Flag  (DEBUG_FLAG) [N/y/?] (NEW)
+        Real-Time Process (RTP)  (RTP) [Y/n/?] (NEW) Y
+        *
+        * VxWorks Kernel Configuration Options
+        *
+        *
+        * VxWorks Kernel Component Configuration
+        *
+        WIND Object Management  (OBJECT_MANAGEMENT) [Y/n/?] (NEW) Y
+          WIND Object ID Validation  (OBJECT_VERIFICATION) [Y/n/?] (NEW) Y
+        Task Create Hooks  (TASK_CREATE_HOOKS_D) [Y/n/?] (NEW) Y
+        Task Switch Hooks  (TASK_SWITCH_HOOKS_D) [Y/n/?] (NEW) Y
+        CPU Power Management  (CPU_PWR_MGMT_D) [Y/n/?] (NEW) Y
+        *
+        * Multi-OS Support
+        *
+        MIPC  (COMPONENT_MIPC) [Y/n/?] (NEW) n
+        WRLOAD  (COMPONENT_WRLOAD) [Y/n/?] (NEW) n
+        *
+        * Optional Kernel Features
+        *
+        Enable Kernel Per-Task CWD  (PERTASK_CWD) [Y/n/?] (NEW)
+        *
+        * File System Configuration
+        *
+        Set Maximum Device Name Length  (MAX_DEVNAME) [10] (NEW)
+        Optimize NFS3 server read/write procedure  (NFS3_RWOPT) [N/y/?] (NEW)
+        Set factor for maximum block size transferred in NFS3 server  (NFS3_BLKSIZE_FACTOR) [1] (NEW)
+        Enable VXTESTV2  (COMPONENT_VXTESTV2_D) [Y/n/?] (NEW)
+        Enable BENCHMARK tests  (COMPONENT_BENCHMARK) [N/y/?] (NEW)
+        Enable Code Coverage Analyzer test instrumentation of VSB   (COMPONENT_COVERAGE) [N/y/?] (NEW)
+        *
+        * VxWorks Applications Configuration Options
+        *
+        Select networking code to be built
+        > 1. Build Networking IPNET Libraries (COMPONENT_IPNET) (NEW)
+          2. No Networking Libraries (NO_IP) (NEW)
+        choice[1-2]: 1
+        *
+        * Networking Build Options
+        *
+        Set the IPNET build mode
+        > 1. speed mode (BUILD_MODE_speed) (NEW)
+          2. debug mode (BUILD_MODE_debug) (NEW)
+        choice[1-2]: 1
+        Enable VERBOSE mode  (FEATURE_IPNET_VERBOSE) [N/y] (NEW) y
+        Generate IPNET Dependencies  (FEATURE_IPNET_GEN_DEPEND) [Y/n] (NEW) Y
+        Build basic IPNET support libraries  (BUILD_BASIC_IPNET) [Y/n/?] (NEW) Y
+        Choose the Networking Libraries to be built
+        > 1. Build libraries with IPV4 support (FEATURE_IPNET_INET4_ONLY) (NEW)
+          2. Build libraries with IPV4 and IPV6 support (FEATURE_IPNET_INET6) (NEW)
+          3. Build libraries with IPV6 support (FEATURE_IPNET_INET6_ONLY) (NEW)
+        choice[1-3]: 1
+        Select the default Build-time Syslog level for Networking Components
+          1. Emergency level (IPCOM_DEFAULT_SYSLOG_PRIORITY_EMERG) (NEW)
+          2. Critical level (IPCOM_DEFAULT_SYSLOG_PRIORITY_CRIT) (NEW)
+          3. Error level (IPCOM_DEFAULT_SYSLOG_PRIORITY_ERR) (NEW)
+        > 4. Warning level (IPCOM_DEFAULT_SYSLOG_PRIORITY_WARNING) (NEW)
+          5. Notice level (IPCOM_DEFAULT_SYSLOG_PRIORITY_NOTICE) (NEW)
+          6. Informational level (IPCOM_DEFAULT_SYSLOG_PRIORITY_INFO) (NEW)
+          7. Debug level (IPCOM_DEFAULT_SYSLOG_PRIORITY_DEBUG) (NEW)
+          8. Detailed debug level (IPCOM_DEFAULT_SYSLOG_PRIORITY_DEBUG2) (NEW)
+        choice[1-8?]: 4
+        Enable selection of Advanced Debugging Build Options for Networking Component   (IPCOM_DEBUG_ADVANCED) [N/y/?] (NEW)
+        Enable MSP Feature Set PAD  (MSP_FEATURE_PAD) [Y/n/?] (NEW) n
+        Enable MSP Feature Set PCD  (MSP_FEATURE_PCD) [Y/n/?] (NEW) n
+        Enable MSP Feature Set PID  (MSP_FEATURE_PID) [Y/n/?] (NEW) n
+        Enable MSP Feature Set PNE  (MSP_FEATURE_PNE) [Y/n/?] (NEW) Y
+        *
+        * VxWorks Networking Component Configuration
+        *
+        *
+        * Layer 2 (Link) Components
+        *
+        Enable L2TP  (COMPONENT_IPL2TP) [N/y/?] (NEW)
+        Enable MACsec  (COMPONENT_IPMACSEC) [N/y/?] (NEW)
+        Enable PPP  (COMPONENT_IPPPP) [Y/n/?] (NEW)
+        Enable 802.1ad VLAN stacking  (COMPONENT_VLAN_STACKING) [N/y/?] (NEW)
+        Enable WLAN  (COMPONENT_WLAN) [N/y/?] (NEW)
+        *
+        * Layer 3 (Network) Components
+        *
+        Enable FIREWALL  (COMPONENT_IPFIREWALL) [N/y/?] (NEW)
+        Enable IPSEC  (COMPONENT_IPIPSEC) [N/y/?] (NEW) y
+        Enable MPLS  (COMPONENT_IPMPLS) [N/y] (NEW)
+        Enable ROHC  (COMPONENT_IPROHC) [N/y/?] (NEW)
+        Enable IPNET Network Address Translation (NAT)  (COMPONENT_NAT) [Y/n/?] (NEW) n
+        Enable Quality of Service and Differentiated Services  (COMPONENT_DIFF_SERV) [Y/n/?] (NEW) n
+        Enable tunneling support  (COMPONENT_TUNNEL_SUPPORT) [Y/n/?] (NEW) n
+        *
+        * Layer 4 (Transport) Components
+        *
+        Enable SCTP  (COMPONENT_IPSCTP) [N/y/?] (NEW)
+        *
+        * Layer 5 (Applications) Components
+        *
+        Enable 802.1X Authenticator  (COMPONENT_DOT1X) [N/y/?] (NEW)
+        Enable 802.1X Supplicant  (COMPONENT_IP8021X) [N/y/?] (NEW)
+        Enable APPL  (COMPONENT_IPAPPL) [Y/n/?] (NEW) Y
+        Enable DHCPR  (COMPONENT_IPDHCPR) [N/y] (NEW)
+        Enable DHCPS  (COMPONENT_IPDHCPS) [N/y/?] (NEW)
+        *
+        * Diameter Components
+        *
+        Enable DIAMETER Client  (COMPONENT_IPDIAMETERC) [N/y/?] (NEW)
+        Enable DIAMETER Proxy  (COMPONENT_IPDIAMETERP) [N/y/?] (NEW)
+        Enable IKE  (COMPONENT_IPIKE) [N/y/?] (NEW)
+        Enable Multicast Proxy daemon  (COMPONENT_IPMCP) [N/y/?] (NEW)
+        Enable MIP  (COMPONENT_IPMIP) [N/y/?] (NEW)
+        Enable MIP4  (COMPONENT_IPMIP4) [N/y/?] (NEW)
+        Enable MIPFA  (COMPONENT_IPMIPFA) [N/y/?] (NEW)
+        Enable MIPHA  (COMPONENT_IPMIPHA) [N/y/?] (NEW)
+        Enable MIPMN  (COMPONENT_IPMIPMN) [N/y/?] (NEW)
+        Enable MIPPM  (COMPONENT_IPMIPPM) [N/y/?] (NEW)
+        Enable RADIUS  (COMPONENT_IPRADIUS) [Y/n/?] (NEW) n
+        Enable RIP  (COMPONENT_IPRIP) [N/y] (NEW)
+        Enable SNMP  (COMPONENT_SNMP) [Y/n/?] (NEW) n
+        Enable SNTP  (COMPONENT_IPSNTP) [Y/n/?] (NEW) n
+        Enable SSH  (COMPONENT_IPSSH) [N/y/?] (NEW) y
+        Enable SSL  (COMPONENT_IPSSL) [Y/n/?] (NEW) Y
+        *
+        * WPS requires COMPONENT_WLAN and COMPONENT_IPEAP and COMPONENT_IP8021X to be selected and COMPONENT_IPCRYPTO_USE_FIPS_140_2 to be deselected
+        *
+        *
+        * Cryptography Components
+        *
+        *
+        * Component CRYPTO preselected - required by  Component SSL
+        *
+        Enable CRYPTO  (COMPONENT_IPCRYPTO) [Y/?] (NEW) y
+          Enable FIPS 140-2 validated crypto libraries  (COMPONENT_IPCRYPTO_USE_FIPS_140_2) [N/y/?] (NEW)
+        Enable FREESCALE  (COMPONENT_IPFREESCALE) [N/y/?] (NEW) y
+        Enable HWCRYPTO  (COMPONENT_IPHWCRYPTO) [N/y/?] (NEW) y
+        *
+        * Networking Library Components
+        *
+        Enable EAP  (COMPONENT_IPEAP) [N/y/?] (NEW)
+        Enable VXCOMPAT  (COMPONENT_VXCOMPAT) [Y/n/?] (NEW) Y
+        *
+        * Networking Acceleration Platform Components
+        *
+        Enable IFPROXY  (COMPONENT_IFPROXY) [N/y/?] (NEW)
+        Enable WRNAD  (COMPONENT_WRNAD) [N/y/?] (NEW)
+        *
+        * Common Analysis Framework Components
+        *
+        *
+        * COMPONENT CAFE and COMPONENT_STACKTRACE are used by analysis tools
+        *
+        Enable CAFE framework  (COMPONENT_CAFE) [Y/n/?] (NEW) n
+        *
+        * Stacktrace Debug Component
+        *
+        Enable stacktrace debugging output  (COMPONENT_STACKTRACE_DEBUG) [N/y] (NEW)
+        Route stacktrace debugging output to a session logger  (COMPONENT_STACKTRACE_SESSION_LOGGER) [N/y] (NEW)
+        *
+        * Target Communication Framework (TCF) Agent Component
+        *
+        Enable TCF_AGENT  (COMPONENT_TCF_AGENT) [Y/n/?] (NEW) n
+        Enable WM  (COMPONENT_WM) [Y/n/?] (NEW) n
+        Enable XML  (COMPONENT_XML) [Y/n/?] (NEW) Y
+        *
+        * VxWorks User Library Configuration
+        *
+        Build User-side libraries  (FEATURE_USR) [Y/n/?] (NEW) Y
+          Choose the User Networking Libraries to be built
+          > 1. Build libraries with IPV4 support (USR_INET4_ONLY) (NEW)
+            2. Build libraries with IPV4 and IPV6 support (USR_INET6) (NEW)
+            3. Build libraries with IPV6 support (USR_INET6_ONLY) (NEW)
+          choice[1-3]: 1
+          Build User Networking Libraries  (COMPONENT_USR_IPNET) [Y/n/?] (NEW) Y
+          Build core USR APPS  (COMPONENT_USR_APPS) [Y/n/?] (NEW) Y
+            Build test USR APPS  (COMPONENT_USR_TEST) [Y/n/?] (NEW) n
+          Build USR libraries for DOT1X  (COMPONENT_USR_DOT1X) [N/y/?] (NEW)
+          Build USR libraries for SNMP  (COMPONENT_USR_SNMP) [N/y/?] (NEW)
+          Build USR libraries for WM  (COMPONENT_USR_WM) [N/y/?] (NEW)
+          Build USR libraries for XML  (COMPONENT_USR_XML) [Y/n/?] (NEW) Y
+          Build USR libraries for SNMP_V3  (COMPONENT_USR_SNMP_V3) [N/y/?] (NEW)
+          Build USR libraries for SNMP_AGENTX  (COMPONENT_USR_SNMP_AGENTX) [N/y/?] (NEW)
+          
+        This VSB supports the following BSPs: fsl_p2020_ds
+\ce
+
+        Note that 'Enable MSP Feature Set PNE' must be set to 'Yes' and other
+        'Enable MSP Feature Set' must be set to 'No'. And some options like
+        "Enable FREESCALE" are also required to test Freescale's SEC.
+
+    1.3 Build VSB
+
+        Run the following command to build the libraries based on the selected
+        options.
+
+\cs
+        cd vsb_fsl_p2020_ds
+        make
+\ce
+
+2. Create a VIP based on the new VSB
+
+    2.1 Create a VIP, in the step of "Project Setup", select new VSB which is
+        created above as the configuration of "A source build project", and
+        select the correct BSP.
+
+    2.2 Configure and build VIP
+
+        In the Kernel Configuration editor include INCLUDE_IPFREESCALE. For
+        Freescale P2020DS board set two parameters as follows:
+
+\cs
+        SEC2_CORE_VERSION = "3.3"
+        SEC2_DEVICE_FAMILY = "3"
+\ce
+
+        build this VIP.
+
+    2.3 Test the Security Engine
+
+        Download the image file, then issue the command 'freescale test all'
+        from the VxWorks target shell.
+
+        For Freescale P2020DS board you should see:
+
+\cs
+        -> ipcom_run_cmd "freescale test all"                                          
+        freescale :: testing md5 hash...success                                        
+        freescale :: testing md5 hmac...success                                        
+        freescale :: testing sha1 hash...success                                       
+        freescale :: testing sha1 hmac...success                                       
+        freescale :: testing des cbc cipher...success                                  
+        freescale :: testing des ecb cipher...success                                  
+        freescale :: testing 3des cbc cipher...success                                 
+        freescale :: testing 3des ecb cipher...success                                 
+        freescale :: testing aes cbc cipher...success                                  
+        freescale :: testing aes ecb cipher...success                                  
+        freescale :: testing rng oper...success                                        
+        freescale :: testing mod exp...success 
+\ce
+
+SPECIAL CONSIDERATIONS
+
+\sh TrueFFS (only supported on UP mode)
+The standard Wind River TrueFFS product is supported in this release.
+
+This BSP uses the Spansion S29GL01GP flash as the TrueFFS media.
+The FLASH address space is 0xf8000000 - 0xffffffff.
+
+Note:u-boot and VxWorks bootrom are stored in 0xfdf00000~0xfdffffff and
+0xfff00000~0xffffffff, 64 MBytes space(0xf8000000~0xfcffffff) used for TFFS,
+please don't extend the TFFS space before you carefully check the flash memory
+map, otherwise misusing of TFFS may damage the bootloader (bootrom or u-boot)
+would cause the board boot up failure.
+
+To use it, define INCLUDE_TFFS in config.h. When using TrueFFS on a new FLASH
+for the first time, you should format and configure the FLASH by using:
+
+\cs
+    sysTffsFormat ();
+    usrTffsConfig (0, 0, "/tffs0");
+\ce
+
+If you are using DOSFS, please use
+
+\cs
+    dosfsDiskFormat ("/tffs0");
+\ce
+
+Note: If you are running these commands in the VxWorks target shell, please use
+
+\cs
+    sp sysTffsFormat
+\ce
+
+to format the FLASH as it would take long time to complete.
+
+You should now be able to use VxWorks I/O and file system commands to access
+the FLASH device as if it were a disk.  For example, you can copy a vxWorks
+image from your host to TFFS by using file system 'copy'.  Of course, you should
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/tffs0/vxWorks");
+\ce
+
+If you want to use "/tffs0" as a boot device, you should follow the instructions:
+
+For command line mode, make sure INCLUDE_TFFS is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the flash chip.  Also make sure you have all the necessary file system
+components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_TFFS_MOUNT
+    INCLUDE_BOOT_FILESYSTEMS
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a vxWorks_romCompress.bin in the project directory, program
+it into the flash chip as a bootrom.
+
+Below is an example by using /tffs as a boot device:
+
+\cs
+    boot device          : tffs=0,0
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /tffs0/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : user
+    ftp password (pw)    : pass
+    flags (f)            : 0x0
+    target name (tn)     : p2020ds
+    other (o)            : motetsec0
+\ce
+
+\sh Ethernet Address
+The Freescale P2020DS board has three ethernet hardware addresses assigned
+to each board.  A unique address is absolutely necessary if the user wishes to
+connect the board to a network.  Thus, the user must provide a suitable
+6-byte Ethernet address for each on-board network interface.
+
+The definition of macro ETHERNET_MAC_HANDLER in config.h indicates the MAC
+address is stored in NVRAM and alterable via the 'M' bootrom command.  This
+option allows only the last three bytes to be changed. To use this option,
+open a console window and reset the hardware. When the bootrom banner appears
+and the countdown starts, press any key to get the "[VxWorks Boot]:" prompt.
+Type 'M' and follow the instructions.
+
+\sh Make Targets
+The make targets are listed as the names of object-format files. Append `.hex'
+to each to derive a hex-format file name. Other images not listed here may not
+be tested.
+
+\ts
+`bootrom'
+`bootrom.bin'
+`vxWorks' (with `vxWorks.sym')
+`vxWorks.st'
+\te
+
+\sh BSP Bootloaders and Bootroms
+
+\ts
+Bootloader/Bootrom   | status
+----------------------------------
+bootrom              | SUPPORTED
+vxWorks              | SUPPORTED
+vxWorks_rom          | UNSUPPORTED
+vxWorks_romCompress  | SUPPORTED
+vxWorks_romResident  | UNSUPPORTED
+\te
+
+\sh BSP Validated Tools
+
+\ts
+Tool                         | Connection/Type | Status
+-------------------------------------------------------
+Workbench Debugger           | ETHERNET/WDB    | SUPPORTED
+Workbench System Viewer      | ETHERNET/WDB    | SUPPORTED
+Workbench MemScope           | ETHERNET/WDB    | SUPPORTED
+Workbench ProfileScope       | ETHERNET/WDB    | SUPPORTED
+Workbench StethoScope        | ETHERNET/WDB    | SUPPORTED
+Workbench CoverageScope      | ETHERNET/WDB    | SUPPORTED
+Workbench Core File Analysis | ETHERNET/WDB    | UNVALIDATED
+Workbench Sensor Points      | ETHERNET/WDB    | UNVALIDATED
+Workbench OCD Debugger       | JTAG            | SUPPORTED
+Workbench OCD Flash          | JTAG            | SUPPORTED
+\te
+
+\sh Known Problems
+The size of default vxWorks_rom image is grater than 1 MB, which is bigger than
+the default ROM_SIZE.  ROM_SIZE and the corresponding link addresses can be
+adjusted to make vxWorks_rom work, however it is an unsupported configuration.
+
+This vxWorks_romResident image is unsupported in this release, as it will take
+several minutes to boot up.  For more details, or to check if a workaround has
+been posted since the writing of this document, see WIND00136433.
+
+When rebooting a vxWorks romCompress image using Ctrl+X, it will take several
+minutes to boot up.  For more details, or to check if a workaround has been
+posted since the writing of this document, see WIND00149773.
+
+When trying to run scopeRTPDemo with StethoScope, the target will throw an
+exception.  For more details, or to check if a workaround has been posted since
+the writing of this document, see WIND00147799.
+
+BOARD LAYOUT
+
+\bs
++------------------------------------------------------------------------------+
+|                  |SD/MMC| |ETSEC1(bot)|  |ETSEC2|  |COM0(bot)|    |USB0|     |
+|                  +------+ |ETSEC0(top)|  +------+  |COM1(top)|    +----+     |
+|                           +-----------+            +---------+               |
+|                                                                              |
+| +---+ +---+ +---+ +---+                                                      |
+| |   | |   | |   | |   |                                                      |
+| |   | | S | | P | | P |                                      +---+           |
+| | P | | G | | C | | C |                  +-----------+       |   |           |
+| | C | | M | | I | | I |                  |           |       |   |           |
+| | I | | I | | E | | E |                  |   QorIQ   |       | D |           |
+| |   | | I | | 2 | | 1 |                  |   P2020E  |       | D |           |
+| |   | |   | |   | |   |                  |           |       | R |           |
+| +---| +---| +---| +---|                  +-----------+       |   |           |
+|                                                              |   |           |
+|                                                              +---+           |
+|                 +--------+                                                   |
+|                 |  FPGA  |                                             +---+ |
+|                 +--------+                                             |   | |
+|                                                +-------+  +--------+   |   | |
+| SW1 SW2                                        |  NOR  |  |  NAND  |   | A | |
+| SW4 SW3                                        +-------+  +--------+   | T | |
+| SW5 SW6                                                                | X | |
+| SW7 SW8         +--------+       +----------+                          |   | |
+| SW9             |  JTAG  |       |  SD/MMC  |               oBattery   |   | |
+|                 +--------+       +----------+                          +---+ |
++------------------------------------------------------------------------------+
+\be
+
+SEE ALSO
+
+\tb Workbench User's Guide: Introduction
+
+\tb VxWorks Programmer's Guide: Configuration
+
+\tb VxWorks Programmer's Guide: Architecture Appendix
+
+BIBLIOGRAPHY
+
+\tb QorIQ P2020E Integrated Processor Reference Manual
+
+\tb P2020DS Development Platform Reference Manual
+
+\tb PowerPC E500 Core Reference Manual
+
+\tb Motorola PowerPC Microprocessor Family: The Programming Environments

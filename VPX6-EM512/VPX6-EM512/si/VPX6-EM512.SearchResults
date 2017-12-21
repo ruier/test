@@ -1,0 +1,18 @@
+---- uiStartFrame Matches (21 in 4 files) ----
+fsApi.h (d:\windriver\vxworks-6.8\target\config\vpx6-em512\vpx6-em512):    UINT32 uiStartFrame;
+fsApi.h (d:\windriver\vxworks-6.8\target\config\vpx6-em512\vpx6-em512):  UINT32     uiStartFrame;
+Fsfdt.c (d:\windriver\vxworks-6.8\target\config\vpx6-em512\vpx6-em512\fs):             printf(" start 0x%x end 0x%x hash %d key %d parent %d\n",pstFDT->uiStartFrame,
+Fsinc.h (d:\windriver\vxworks-6.8\target\config\vpx6-em512\vpx6-em512\fs):    UINT32          uiStartFrame;       
+Fsusr.c (d:\windriver\vxworks-6.8\target\config\vpx6-em512\vpx6-em512\fs):	 vpstFd->uiStartFrame = vpstFDTInfo->stFDT.uiStartFrame;
+Fsusr.c (d:\windriver\vxworks-6.8\target\config\vpx6-em512\vpx6-em512\fs):    stFDT.uiStartFrame = vpstFd->uiStartFrame;
+Fsusr.c (d:\windriver\vxworks-6.8\target\config\vpx6-em512\vpx6-em512\fs):			   (vpstFd->ullFileSize.lo == vpstFd->uiStartFrame))
+Fsusr.c (d:\windriver\vxworks-6.8\target\config\vpx6-em512\vpx6-em512\fs):                vpstFd->uiStartFrame = 0;
+Fsusr.c (d:\windriver\vxworks-6.8\target\config\vpx6-em512\vpx6-em512\fs):            ullFileSize.lo = vpstFd->uiStartFrame;
+Fsusr.c (d:\windriver\vxworks-6.8\target\config\vpx6-em512\vpx6-em512\fs):			vpstFd->uiStartFrame = ullFileSize.lo;
+Fsusr.c (d:\windriver\vxworks-6.8\target\config\vpx6-em512\vpx6-em512\fs):            ullFileSize.lo = vpstFd->uiStartFrame;
+Fsusr.c (d:\windriver\vxworks-6.8\target\config\vpx6-em512\vpx6-em512\fs):			vpstFd->uiStartFrame = ullFileSize.lo;
+Fsusr.c (d:\windriver\vxworks-6.8\target\config\vpx6-em512\vpx6-em512\fs):    /*vpstFd->uiStartFrame = pstAttr->uiStartFrame;
+Fsusr.c (d:\windriver\vxworks-6.8\target\config\vpx6-em512\vpx6-em512\fs):    pstAttr->uiStartFrame = vpstFd->uiStartFrame;
+Fsusr.c (d:\windriver\vxworks-6.8\target\config\vpx6-em512\vpx6-em512\fs):	vpstFd->uiStartFrame = viArg->lo;
+Fsusr.c (d:\windriver\vxworks-6.8\target\config\vpx6-em512\vpx6-em512\fs):    viArg->lo = vpstFd->uiStartFrame;
+Fsusr.c (d:\windriver\vxworks-6.8\target\config\vpx6-em512\vpx6-em512\fs):	vpstFd->uiStartFrame = 0;

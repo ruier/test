@@ -1,0 +1,3 @@
+#ifdef DRV_SIO_COLDFIRE
+    coldFireSioRegister();
+#endif

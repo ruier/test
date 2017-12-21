@@ -1,0 +1,108 @@
+
+            README: WindRiver SBC P4080 (wrSbcP4080)
+
+This file contains board-specific information for the WindRiver SBC P4080
+target board.  This file documents BSP interface changes from previous software
+or hardware versions, and notifies the user of serious caveats that must be
+noted before using this BSP.  Additionally, the target board's reference entry
+(i.e. wrSbcP4080/target.ref) provides board-specific information necessary
+to run VxWorks and should be read fully before this BSP is used.
+
+--------------------------------------------------------------------------------
+RELEASE 6.9/7
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    Fixed time base enable issue on non-zero CPUs. (WIND00403567)
+
+RELEASE 6.9/6
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Fixed wrong bank offset passed to SRDS_BK_SETBIT(). (WIND00348932)
+    Updated Freescale FMAN microcode. (WIND00349107)
+    Added workaround for Freescale A-004529. (WIND00350649)
+    Fixed potential memory corruption caused by sysNvRamGet(). (WIND00101057)
+    Added Errata implementation A-004510(CCF) and A-004511(CCF).
+    (WIND00352077) (WIND00349563)
+    Add related define for romInit.s (WIND00360538)
+
+RELEASE 6.9/5
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Removed RESERVED_ATOMICS functionality, which is introduced in
+    VxWorks 6.9.2 UP2, from BSP and PPC arch-specific libraries.
+
+    Fixed reboot failure on non-primary OS in AMP. (WIND00344093)
+
+    Restricted enabling and disabling L3 cache only on physical Core0 for
+    multi-core solutions. (WIND00341977)
+
+    Added missing L2 cache flush on non-primary core at reboot in SMP.
+    (WIND00341662)
+
+    Removed optional components, redundant definitions and undefinitions from
+    config.h. (WIND00334904)
+
+    Removed the TBEN bit operation for HID0 register. (WIND00282419)
+
+    Added workaround for Freescale A-004529. (WIND00350649)
+
+RELEASE 6.9/4
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2 UP3
+
+    Added Errata implementation A-003474(DDR) and A-003999(FPU) (WIND00331187).
+    Added vxBus I2C support. (WIND00243089)
+    
+RELEASE 6.9/3
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2 UP2
+
+    Updates to L3 cache to support access by multiple cores (WIND00297094).
+
+    SYSTEM_GLOBALS have been removed. They are replaced with the 
+        RESERVED_ATOMICS functionality which is implemented in the PPC arch-
+        specific libraries (WIND00329621).
+
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+    update.
+
+    Replaced INCLUDE_DYNAMIC_WRLOAD with an architecture independant wrload
+    initialization and memory mapping/unmapping.  Added bootrom and BSP
+    support to execute secondary uAMP images with a physical bias on any
+    64MB boundary.
+    Reorganized romInit to make it common across QorIQ targets and to 
+    functionalize the TLB and cache initialization. 
+    Added I2C page write and sequential read support. (WIND00290411)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.1
+
+    Modified tgec MAC address offset. (WIND00285088)
+    Modified typo of flash macro in sysLib.c.
+    Switch to use PCIe legacy interrupt by default.
+    Fix build warnings for BOOTAPP. (WIND00292325)
+    Improve I2C performance. (WIND00290411)
+    SerDes code fixed to not disturb Aurora lanes. Move code from 
+    sysLib.c into the separate file p4080SerdesErrata.c. (WIND00298017)
+    Fixed PCIe EHCI USB card not working on P4080. (WIND00264966)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+    Add PTEs for QMAN & BMAN's private memory buffers. (WIND00247891) 
+    Modify sysToMonitor SMP shutdown sequence so each CPU flushes
+    its data cache before resetting. (WIND00242091)
+    Add AMP and SMP mode support.
+
+Version 2.0/0
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8.2
+
+    Initial release.

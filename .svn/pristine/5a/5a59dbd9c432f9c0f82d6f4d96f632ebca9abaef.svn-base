@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND_VIARHINE
+    vrRegister();
+#endif /* DRV_VXBEND_VIARHINE */

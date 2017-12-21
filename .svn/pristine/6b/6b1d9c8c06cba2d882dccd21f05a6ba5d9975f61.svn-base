@@ -1,0 +1,3 @@
+#ifdef INCLUDE_AM79C97X_VXB_END
+    lnPciRegister();
+#endif

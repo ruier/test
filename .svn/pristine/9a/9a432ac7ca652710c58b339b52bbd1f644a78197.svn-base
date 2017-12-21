@@ -1,0 +1,4 @@
+#ifdef DRV_INTCTLR_QE
+#include <hwif/intCtlr/vxbQeIntCtlr.h>
+#endif /* DRV_INTCTLR_QE */
+

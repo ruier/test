@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTLR_MPIC
+IMPORT void mpicIntCtlrRegister (void);
+#endif /* DRV_INTCTLR_MPIC */

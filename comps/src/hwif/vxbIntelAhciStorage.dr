@@ -1,0 +1,7 @@
+#ifdef INCLUDE_DRV_STORAGE_INTEL_AHCI
+    vxbIntelAhciStorageRegister ();
+#endif
+
+#ifdef INCLUDE_DRV_STORAGE_INTEL_AHCI_SHOW
+    ahciShowInit ();
+#endif

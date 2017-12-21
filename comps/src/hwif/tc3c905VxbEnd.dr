@@ -1,0 +1,3 @@
+#ifdef INCLUDE_TC3C905_VXB_END
+    elPciRegister();
+#endif /* INCLUDE_TC3C905_VXB_END */

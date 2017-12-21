@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND_INTELTOPCLIFF
+    vxbIntelTopcliffEndRegister();
+#endif /* DRV_VXBEND_INTELTOPCLIFF */

@@ -1,0 +1,1274 @@
+\" fsl_ads5121e/target.ref - Freescale ADS5121e target specific documentation
+\"
+\" Copyright (c) 2007-2009, 2011-2013 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01o,08may13,d_l  add INCLUDE_I2C requirement for INCLUDE_RTC. (WIND00415725)
+\" 01n,26sep12,lnu  clarify the supported hardware. (WIND00375705)
+\" 01m,26jan11,kxb  remove obsolete TFFS component
+\" 01l,09oct09,x_f  add NAND via datalight description.
+\" 01k,17sep09,w_x  update USB description.
+\" 01j,22jun09,b_m  update AXE description.
+\" 01i,26mar09,b_m  added AXE description.
+\" 01h,20mar09,w_x  added USB device description.
+\" 01g,06feb09,x_f  added RTC support.
+\" 01f,04feb09,w_x  added USB host support.
+\" 01e,31dec08,x_f  added PCI support for PCB rev 4 hardware.
+\" 01d,30dec08,x_f  added bootrom and CAN support description.
+\" 01c,23oct08,x_f  added ATA support description.
+\" 01b,25aug08,b_m  completely rewritten using new template.
+\" 01a,18oct07,b_m  written.
+\"
+\TITLE fsl_ads5121e - Freescale ADS5121e
+
+NAME
+`Freescale ADS5121e'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks for the fsl_ads5121e BSP. Please read the section "Running
+VxWorks" in order to configure the board to run VxWorks.
+
+RUNNING VXWORKS
+
+This section provides guidelines for running VxWorks on the ADS5121e board.
+
+This release supports Freescale ADS5121e PCB rev 4.1 or rev 4.0 board with
+either Elpida or Micron DDR memory chip with CPLD rev 5 (or higher version).
+The ADS5121e PCB rev 2 board is also supported without PCI.
+
+\sh Jumpers & Switches
+
+For PCB rev 2:
+The board has 4 switches named SW3/SW4/SW5/SW6.
+
+For PCB rev 4:
+The board has 1 switch named SW3.
+
+This is set from the factory and should not be changed. The BSP will only work with the factory
+configuration.
+
+Note: When PCB rev 4 board uses an external 5 volt power, jumper P1
+must be installed. And jumper P1 must be removed to use an ATX power supply.
+
+\sh Running VxWorks
+This section will guide you how to run VxWorks on the Freescale ADS5121e board.
+
+Please note that the BSP should be configured correctly according to your PCB rev.
+If your board is PCB rev 4 or later, note that there are two types of DDR SDRAM
+used, which are Micron DDR SDRAM or Elpida DDR SDRAM.
+
+When booting from VxWorks bootrom, in fsl_ads5121e.h, the DDR SDRAM type should
+be specified correctly.
+
+\cs
+    #define INCLUDE_DDR_MICRON  /@ for Micron DDR SDRAM @/
+\ce
+    or
+\cs
+    #define INCLUDE_DDR_ELPIDA  /@ for Elpida DDR SDRAM @/
+\ce
+
+There are 3 parts in this section.
+
+'Part A' is for PCB rev 2, the other is for PCB rev 4.x.
+
+'Part B' is used to get PCB rev 4.x boot from U-boot.
+
+'Part C' is used to get PCB rev 4.x boot from VxWorks bootrom.
+
+You can choose the right part to continue and skip the others.
+
+\sh Part A (For PCB rev 2)
+
+A.1. Creating a bootrom.bin:
+    A.1.1 Check BSP configuration
+
+        For PCB rev 2:
+        Make sure 'ADS5121E_REV2' is 'defined' in fsl_ads5121e.h.
+        Make sure 'BOOT_FROM_UBOOT' is 'defined' in config.h.
+        Open Makefile, make sure the settings for booting from
+        VxWorks bootrom are commented out.
+\cs
+        # boot from vxWorks bootrom
+        #ROM_TEXT_ADRS  = fff00100 # ROM entry address
+        #ROM_WARM_ADRS  = fff00108 # ROM warm entry address
+        #ROM_LINK_ADRS  = fff00000
+
+        # boot from U-Boot
+        ROM_TEXT_ADRS   = ffe00100 # ROM entry address
+        ROM_WARM_ADRS   = ffe00108 # ROM warm entry address
+        ROM_LINK_ADRS   = ffe00000
+\ce
+
+    A.1.2 Creating a VxWorks bootrom image
+
+        Open the VxWorks Development Shell, change directory to fsl_ads5121e
+        BSP directory, and then build the VxWorks bootrom image.
+
+\cs
+        cd target/config/fsl_ads5121e
+        make bootrom.bin
+\ce
+
+A.2. Flashing the VxWorks bootrom image
+
+    This section will describe how to program VxWorks bootrom onto a flash
+    by using the on-board U-Boot.
+
+
+    A.2.2 Starting a TFTP server
+
+        Open a TFTP server on your host. Make sure the root directory is
+        your fsl_ads5121e BSP directory which contains the VxWorks bootrom
+        image you've just created.
+
+    A.2.3 Configuring the U-Boot environment
+
+        For PCB rev 2:
+
+        Power up the board, you'll see the U-Boot shell prompt, something like:
+
+\cs
+        U-Boot 1.3.3 (May 28 2008 - 15:00:42) MPC512X
+
+        CPU:   MPC5121e rev. 2.0, Core e300c4 at 399.999 MHz, CSB at 199 MHz
+        Board: ADS5121 rev. 0x0301 (CPLD rev. 0x09)
+        I2C:   ready
+        DRAM:  512 MB
+        FLASH: 64 MB
+        PCI:   Bus Dev VenId DevId Class Int
+        In:    serial
+        Out:   serial
+        Err:   serial
+        Net:   FEC ETHERNET
+
+        Type "run jffs2boot" to boot Linux
+        Hit any key to stop autoboot:  0
+\ce
+
+        Type the following commands to setup the U-Boot environment.
+
+\cs
+        setenv ipaddr 192.168.0.3
+        setenv netmask 255.255.255.0
+        setenv serverip 192.168.0.2
+        setenv gatewayip 192.168.0.1
+\ce
+
+        Note: you must change the network parameters according to your
+        actual situation. 'ipaddr' is the target IP address while 'serverip'
+        is your host IP address.
+
+    A.2.4 Programming the Freescale ADS5121e flash
+
+        For PCB rev 2:
+        Programming the bootrom booting from U-Boot.
+        Type the following commands in the U-Boot shell.
+
+\cs
+        tftp 200000 bootrom.bin
+        erase ffe00000 ffe7ffff
+        cp.b 200000 ffe00000 $filesize
+\ce
+
+        Note: If the bootrom size exceeds 0x80000 bytes (512KB), you should
+        erase one or more sectors, for example:
+
+\cs
+        erase ffe00000 ffefffff
+\ce
+
+A.3. Running the VxWorks bootrom
+
+    For PCB rev 2:
+    In the U-Boot shell prompt, type the following command:
+
+\cs
+    go ffe00100
+\ce
+
+
+For PCB rev 4.x, you can choose the way VxWorks boots from U-boot or
+VxWorks bootrom.
+
+\sh Part B (For PCB rev 4.x boards booting from U-boot)
+
+The process of booting from U-boot is very similar to rev 2's.
+
+B.1. Creating a bootrom.bin:
+    B.1.1 Check BSP configuration
+
+        For PCB rev 4:
+        Make sure 'ADS5121E_REV2' is 'undefined' in fsl_ads5121e.h.
+        Make sure 'BOOT_FROM_UBOOT' is 'defined' in config.h.
+        Open Makefile, make sure the settings is for booting from U-Boot.
+\cs
+        # boot from vxWorks bootrom
+        #ROM_TEXT_ADRS  = fff00100 # ROM entry address
+        #ROM_WARM_ADRS  = fff00108 # ROM warm entry address
+        #ROM_LINK_ADRS  = fff00000
+
+        # boot from U-Boot
+        ROM_TEXT_ADRS   = ffe00100 # ROM entry address
+        ROM_WARM_ADRS   = ffe00108 # ROM warm entry address
+        ROM_LINK_ADRS   = ffe00000
+\ce
+
+    B.1.2 Creating a VxWorks bootrom image
+
+        Open the VxWorks Development Shell, change directory to fsl_ads5121e
+        BSP directory, and then build the VxWorks bootrom image.
+
+\cs
+        cd target/config/fsl_ads5121e
+        make bootrom.bin
+\ce
+
+B.2. Flashing the VxWorks bootrom image
+
+    This section will describe how to program VxWorks bootrom onto a flash
+    by using the on-board U-Boot.
+
+
+    B.2.2 Starting a TFTP server
+
+        Open a TFTP server on your host. Make sure the root directory is
+        your fsl_ads5121e BSP directory which contains the VxWorks bootrom
+        image you've just created.
+
+    B.2.3 Configuring the U-Boot environment
+
+        For PCB rev 4:
+
+        'Put off' the backup jumper on 'P4' and power up the board,
+        you'll see the normal U-Boot shell prompt, something like:
+
+\cs
+        U-Boot 2008.10-rc2-00019-g599192b (Oct  7 2008 - 23:47:39) MPC512X
+
+        CPU:   MPC5121e rev. 3.0, Core e300c4 at 399.999 MHz, CSB at 199 MHz
+        Board: ADS5121 rev. 0x0400 (CPLD rev. 0x05)
+        I2C:   ready
+        DRAM:  512 MB
+        FLASH: 64 MB
+        PCI:   Bus Dev VenId DevId Class Int
+        In:    serial
+        Out:   serial
+        Err:   serial
+        Net:   FEC ETHERNET
+
+        Hit any key to stop autoboot:  0
+\ce
+
+        Type the following commands to setup the U-Boot environment.
+
+\cs
+        setenv ipaddr 192.168.0.3
+        setenv netmask 255.255.255.0
+        setenv serverip 192.168.0.2
+        setenv gatewayip 192.168.0.1
+\ce
+
+        Note: you must change the network parameters according to your
+        actual situation. 'ipaddr' is the target IP address while 'serverip'
+        is your host IP address.
+
+    B.2.4 Programming the Freescale ADS5121e flash
+
+        For PCB rev 4:
+        Programming the bootrom booting from U-boot.
+        Make sure the backup jumper on 'P4' is 'put off'.
+        Your U-Boot should boot from Normal Flash.
+
+        Type the following commands in the U-Boot shell.
+
+\cs
+        tftp 200000 bootrom.bin
+        erase ffe00000 ffe7ffff
+        cp.b 200000 ffe00000 $filesize
+\ce
+
+        Note: If the bootrom size exceeds 0x80000 bytes (512KB), you should
+        erase one or more sectors, for example:
+
+\cs
+        erase ffe00000 ffefffff
+\ce
+
+B.3. Running the VxWorks bootrom
+
+    For PCB rev 4:
+    In the normal U-Boot shell prompt, type the following command:
+
+\cs
+    go ffe00100
+\ce
+
+    Now you will get VxWorks bootrom running.
+
+
+\sh Part C (For PCB rev 4.x boards booting from VxWorks bootrom)
+
+C.1. Creating a bootrom.bin:
+    C.1.1 Check BSP configuration
+
+        For PCB rev 4:
+        Make sure 'ADS5121E_REV2' is 'undefined' in fsl_ads5121e.h.
+        Make sure 'BOOT_FROM_UBOOT' is 'undefined' in config.h.
+        Open Makefile, make sure the settings is for booting from
+        VxWorks bootrom.
+\cs
+        # boot from vxWorks bootrom
+        ROM_TEXT_ADRS  = fff00100 # ROM entry address
+        ROM_WARM_ADRS  = fff00108 # ROM warm entry address
+        ROM_LINK_ADRS  = fff00000
+
+        # boot from U-Boot
+        #ROM_TEXT_ADRS   = ffe00100 # ROM entry address
+        #ROM_WARM_ADRS   = ffe00108 # ROM warm entry address
+        #ROM_LINK_ADRS   = ffe00000
+\ce
+
+    C.1.2 Creating a VxWorks bootrom image
+
+        Open the VxWorks Development Shell, change directory to fsl_ads5121e
+        BSP directory, and then build the VxWorks bootrom image.
+
+\cs
+        cd target/config/fsl_ads5121e
+        make bootrom.bin
+\ce
+
+C.2. Flashing the VxWorks bootrom image
+
+    This section will describe how to program VxWorks bootrom onto a flash
+    by using the on-board U-Boot.
+
+
+    C.2.2 Starting a TFTP server
+
+        Open a TFTP server on your host. Make sure the root directory is
+        your fsl_ads5121e BSP directory which contains the VxWorks bootrom
+        image you've just created.
+
+    C.2.3 Configuring the U-Boot environment
+
+        For PCB rev 4:
+
+        'Put on' the backup jumper on 'P4' and power up the board,
+        you'll see the backup U-Boot shell prompt, something like:
+
+\cs
+        U-Boot 2008.10-rc2-00019-g599192b (Oct  7 2008 - 23:47:39) MPC512X
+
+        CPU:   MPC5121e rev. 3.0, Core e300c4 at 399.999 MHz, CSB at 199 MHz
+        Board: ADS5121 rev. 0x0400 (CPLD rev. 0x05)
+        I2C:   ready
+        DRAM:  512 MB
+        FLASH: 64 MB
+        PCI:   Bus Dev VenId DevId Class Int
+        In:    serial
+        Out:   serial
+        Err:   serial
+        Net:   FEC ETHERNET
+
+        BOOTING FROM BACKUP FLASH
+        RECOVERY MODE PROCESS STARTING AT AUTOBOOT...
+        Hit any key to stop autoboot:  0
+\ce
+
+        Type the following commands to setup the U-Boot environment.
+
+\cs
+        setenv ipaddr 192.168.0.3
+        setenv netmask 255.255.255.0
+        setenv serverip 192.168.0.2
+        setenv gatewayip 192.168.0.1
+\ce
+
+        Note: you must change the network parameters according to your
+        actual situation. 'ipaddr' is the target IP address while 'serverip'
+        is your host IP address.
+
+    C.2.4 Programming the Freescale ADS5121e flash
+
+        For PCB rev 4:
+        Programming the bootrom booting from VxWorks bootrom (Only rev 4)
+        Make sure the backup jumper on P4 is put on.
+        Your U-Boot should boot from Backup Flash.
+
+        Type the following commands in the U-Boot shell.
+
+\cs
+        tftp 200000 bootrom.bin
+        mw.b 0x82000002 0xAA 1
+        mw.b 0x82000008 0xCD 1
+        protect off all
+        erase fff00000 fff7ffff
+        cp.b 200000 fff00000 $filesize
+\ce
+
+        Note: If the bootrom size exceeds 0x80000 bytes (512KB), you should
+        erase one or more sectors, for example:
+
+\cs
+        erase fff00000 ffffffff
+\ce
+
+C.3. Running the VxWorks bootrom
+
+    For PCB rev 4:
+    'Put off' the backup jumper on 'P4' and power up the board.
+    VxWorks will boot from Normal Flash.
+
+    Now you will get VxWorks bootrom running.
+
+FEATURES
+
+This section describes all features of the board, supported or not.
+It documents all configurations of the board and the interaction between
+features and configuration items.
+
+\sh List of Hardware Features (Freescale ADS5121e board)
+
+\ts
+Hardware Interface | Controller   | Driver/Component  | Status
+--------------------------------------------------------------
+UART:0             | on-chip      | vxbM5xxxPscSio.c  | SUPPORTED
+UART:1             | on-chip      | vxbM5xxxPscSio.c  | SUPPORTED
+100MBIT-ETHERNET   | on-chip      | vxbM512xFecEnd.c  | SUPPORTED
+NOR-FLASH          | S29GL256N    | flashmem.c/TFFS   | SUPPORTED
+NAND-FLASH         | HY27UG088G5M | datalight         | SUPPORTED
+TIMER              | on-chip      | vxbPpcDecTimer.c  | SUPPORTED
+TIMER              | on-chip      | vxbM5xxxGPTimer.c | SUPPORTED
+DMA                | on-chip      | vxbM512xDma.c     | SUPPORTED
+PATA               | on-chip      | ataDrv.c          | SUPPORTED
+I2C                | on-chip      | sysMpc512xI2c.c   | SUPPORTED
+RTC                | M41T00       | m41t00Rtc.c       | SUPPORTED
+CAN:0              | on-chip      | mpc5121eCan.c     | SUPPORTED
+CAN:1              | on-chip      | mpc5121eCan.c     | SUPPORTED
+PCI-MASTER         | on-chip      | m83xxPci.c        | SUPPORTED(Only rev 4)
+USB2-HOST          | on-chip      | usbPciStub.c      | SUPPORTED
+USB2-DEVICE        | on-chip      | usbPciStub.c      | SUPPORTED
+AUDIO              | on-chip      | m512xAc97         | SUPPORTED
+AXE                | on-chip      | vxbFslAxe.c       | SUPPORTED
+SD-CARD            | on-chip      | -                 | UNSUPPORTED
+SATA               | on-chip      | -                 | UNSUPPORTED
+DIU                | on-chip      | -                 | UNSUPPORTED
+MBX                | on-chip      | -                 | UNSUPPORTED
+\te
+
+The RTC chip on PCB rev 2 board is M41T00 while on rev 4 is M41T62.
+
+\sh Feature Interactions
+Refer to the board vendor's documentation.
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Verified Hardware
+This BSP has been verified on PCB rev 2, rev 4 and rev 4.1 of Freescale ADS5121e
+board. The default clock speed for PCB Rev.2 board is 396MHz core, 198MHz CSB
+and 99MHz IPS. The PCB rev 4 board's has the same core and CSB clock but its IPS
+clock is 66MHz.
+
+\sh Memory Maps
+The following table describes the default memory map of this BSP.
+
+\ts
+Start       | Size  | End         | Access to
+---------------------------------------------
+0x0000_0000 | 512MB | 0x1FFF_FFFF | DDR SDRAM
+0x2000_0000 |  16MB | 0x20FF_FFFF | MBX (graphics)
+0x3000_0000 | 128KB | 0x3001_FFFF | SRAM
+0x4000_0000 |   1MB | 0x400F_FFFF | NAND Flash Controller
+0x8000_0000 |   4MB | 0x803F_FFFF | IMMR
+0x8200_0000 |   1MB | 0x820F_FFFF | CPLD
+0x9000_0000 | 128MB | 0x98FF_FFFF | PCI Prefetchable Memory
+0x9800_0000 |  64MB | 0x9BFF_FFFF | PCI Non-Prefetchable Memory
+0x9C00_0000 |  64MB | 0x9FFF_FFFF | PCI IO
+0xFC00_0000 |  64MB | 0xFFFF_FFFF | NOR Flash
+\te
+
+Note that the size of DDR SDRAM on PCB rev 2 board is 256MB.
+
+\sh Serial Configuration
+No special configuration needed.
+Default configuration is:
+    Baud Rate: 115200
+    Data: 8 bit
+    Parity: None
+    Stop: 1 bit
+    Flow Control: None
+
+\sh Network Configuration
+The on-chip fast Ethernet controller is supported by the BSP.
+The driver will auto-negotiate and configure the port accordingly.
+
+\sh Boot Devices
+The default supported boot device is:
+
+\ts
+    motfec - MPC5121e on-chip fast Ethernet controller
+\te
+
+\sh Boot Methods
+The boot methods are affected by the boot parameters.  If no password is
+specified, RSH (remote shell) protocol is used.  If a password is specified,
+FTP protocol is used, or, if the flag is set to 0x80, TFTP protocol is used.
+
+SPECIAL CONSIDERATIONS
+
+\sh TrueFFS
+The standard Wind River TrueFFS product is supported in this release.
+
+This BSP uses the Spansion S29GL256N flash as the TrueFFS media.
+The FLASH address space that is used as TrueFFS is 0xfc000000 - 0xfdffffff.
+
+Note: Bootloader and TFFS are sharing the same flash part, so please be very
+careful because misusing of TFFS may damage the bootloader and cause the
+board failure to boot up.
+
+To use it, define INCLUDE_TFFS in config.h.  If you want to use TFFS with DOSFS
+file system, please define the following macros in config.h.
+
+\cs
+    #define INCLUDE_DOSFS
+    #define INCLUDE_DOSFS_MAIN
+    #define INCLUDE_DOSFS_FAT
+    #define INCLUDE_DOSFS_FMT
+    #define INCLUDE_DOSFS_DIR_VFAT
+    #define INCLUDE_DOSFS_DIR_FIXED
+    #define INCLUDE_ERF
+    #define INCLUDE_XBD
+    #define INCLUDE_XBD_TRANS
+    #define INCLUDE_XBD_BLK_DEV
+    #define INCLUDE_DEVICE_MANAGER
+    #define INCLUDE_FS_MONITOR
+    #define INCLUDE_FS_EVENT_UTIL
+\ce
+
+When using TrueFFS on a new FLASH for the first time, you should format and
+configure the FLASH by using:
+
+\cs
+    sysTffsFormat ();
+    usrTffsConfig (0, 0, "/tffs0");
+\ce
+
+If you are using DOSFS, please use
+
+\cs
+    dosfsDiskFormat ("/tffs0");     /@ For VxWorks 6.6 and later version @/
+\ce
+
+Note: If you are running these commands in the VxWorks target shell, please use
+
+\cs
+    sp sysTffsFormat
+\ce
+
+to format the FLASH as it would take long time to complete.
+
+You should now be able to use VxWorks I/O and file system commands to access
+the FLASH device as if it were a disk.  For example, you can copy a vxWorks
+image from your host to TFFS by using file system 'copy'.  Of course, you should
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/tffs0/vxWorks");
+\ce
+
+If you want to use "/tffs0" as a boot device, you should follow the instructions:
+
+For command line mode, make sure INCLUDE_TFFS is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the flash chip.  Also make sure you have all the necessary file system
+components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_ERF
+    INCLUDE_XBD
+    INCLUDE_XBD_TRANS
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_MONITOR
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_TFFS_MOUNT
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a default_romCompress.bin in the project directory, program
+it into the flash chip as a bootrom.
+
+Below is an example by using /tffs as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /tffs0/vxWorks
+    inet on ethernet (e) : 128.224.163.75:fffff000
+    host inet (h)        : 128.224.162.146
+    gateway inet (g)     : 128.224.162.1
+    user (u)             : user
+    ftp password (pw)    : pass
+    flags (f)            : 0x0
+    target name (tn)     : ads5121e
+    other (o)            : motfec0
+\ce
+
+\sh ATA Support
+
+ATA driver has been integrated into this BSP.
+Please note that ATA driver has been only verified on Freescale ADS5121e 
+rev 2 and rev 4 board.
+
+For PCB rev 2:
+Jumper P21 are opened as default.
+To use ATA, jumper P21 should be set appropriately according to your device.
+Please choose the appropriate power setting as follows.
+
+\ts
+Jumper Number | Description         | Setting
+---------------------------------------------
+JP21          | +3.3V               | 1-2
+              | +5.0V               | 2-3
+\te
+
+For PCB rev 4:
+Jumper P11 are opened as default.
+To use ATA, jumper P11 should be set appropriately according to your device.
+Please choose the appropriate power setting as follows.
+
+\ts
+Jumper Number | Description         | Setting
+---------------------------------------------
+JP11          | +3.3V               | 1-2
+              | +5.0V               | 2-3
+\te
+
+To use this driver, the INCLUDE_ATA directive must be enabled in config.h and
+the following components should be included:
+
+\cs
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_DOSFS_CHKDSK
+    INCLUDE_DOSFS_FMT
+    INCLUDE_FS_MONITOR
+    INCLUDE_ERF
+    INCLUDE_XBD
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_XBD_PART_LIB
+\ce
+
+Load the generated vxWorks image into the target and from the target shell,
+enter the command:
+
+\cs
+    -> devs
+    drv name
+      0 /null
+      2 /tyCo/0
+      2 /tyCo/1
+      4 /ata0a
+      host:
+      5 /vio
+\ce
+
+You will see a device is shown as "/ata0a".
+
+From the target shell prompt, enter the command:
+
+\cs
+    -> xbdCreatePartition  "/ata0a", 4, 33, 33, 33
+\ce
+
+Note: Any bootable hard disk partition should not exceed 2 GB. The
+     parameters "4, 33, 33, 33" specifies that there should be 4
+     partitions, part0, part1, part2, part3. The partitions part1, 2,
+     and 3 are created with "33 percent" of the disk capacity and the
+     rest would be allocated to part0. The command does not specify the
+     amount of the first partition size.
+
+     With a 80GB drive. The above command creates 4 partitions, the
+     last of partitions with sizes of  33%, 33%, 33% respectively. The
+     bootable partition gets 1% (i.e. 100 minus 33 minus 33 minus 33 = 1%),
+     which is less than 2GB on a 80 GB hard disk.
+
+From the target shell prompt, enter the command:
+
+\cs
+    ->devs
+    drv name
+      0 /null
+      2 /tyCo/0
+      2 /tyCo/1
+      4 /ata0a
+      5 /ata00:2
+      5 /ata00:3
+      5 /ata00:4
+      host:
+      10 /vio
+\ce
+
+Each of the partitions that begin with "/ataXXX", execute the command
+"dosFsVolFormat" command:
+
+\cs
+    -> dosFsVolFormat "/ata0a"
+    -> dosFsVolFormat "/ata00:2"
+    -> dosFsVolFormat "/ata00:3"
+    -> dosFsVolFormat "/ata00:4"
+\ce
+
+Now you can use command to read and write files with file system.
+\cs
+    -> cp "vxWorks","/ata0a"
+\ce
+
+\sh NAND flash and datalight
+
+A 8Gb NAND flash is integrated in rev 4 and rev 4.1 board. This chip can be
+supported through datalight. Please refer to datalight's manual for more details
+about how to use datalight's file system and flashfx technic.
+
+A project has been created in datalight to use the NAND in ADS5121E board.
+You can find this project in folder:
+
+\cs
+$WIND_BASE\datalight\flashfx\projects\vxworks\ads5121e\
+\ce
+
+Below are steps of how to create a VxWorks Image Project(VIP) to support NAND
+flash via datalight:
+
+1.  Run prjbuild.bat in $WIND_BASE\datalight\flashfx\projects\vxworks\ads5121e\
+    to build the library. Then the library file(flashfxPPC32diab.a or other name
+    like this) will be copied to $WIND_BASE\target\lib.
+2.  We use the xbdBlkDevCreate(...) in $WIND_BASE\target\src\fs\softxbd\xbdBlkDev.c.
+    According to datalight's suggestion, you should change the stack size of
+    taskSpawn ("tXbdService",...) from 4096 to 8192.
+    Then run "make CPU=PPC32 TOOL=diab" in this directory to build the new
+    library file.
+3.  Define INCLUDE_NAND_FLASH in config.h in fsl_ads5121e folder, i.e, change
+    "#undef INCLUDE_NAND_FLASH" to "#define INCLUDE_NAND_FLASH".
+4.  Create a VIP in workbench based on this BSP.
+5.  Add "Your VxWorks Install directory/vxworks-6.8/datalight/flashfx/include" in
+    VIP's Properties\Build Properties\Build Paths
+6.  Modify "LIBS" definition in VIP's Properties\Build Properties\Build Macros to
+    $(VX_OS_LIBS) $(TGT_DIR)\lib\flashfxPPC32diab.a
+7.  Build VIP, then download and run it, the NAND chip will be treated as a
+    device in the system, and you can perform read and write files with it.
+\cs
+    -> cp "vxWorks","/d0"
+\ce
+
+Please be noted that NAND support and datalight tools only work in rev 4.1 board,
+though rev4 board is also integrated with a NAND flash chip.
+
+\sh AXE audio off-load engine
+The AXE system features a 200 MHz RISC microprocessor with two computation units:
+a scalar integer unit implementing a general 32-bit instruction set and a 48-bit
+fixed-point processing unit. The AXE is intended to off-load the main system CPU
+on compute and data-flow intensive operations (for example: digital signal
+processing and compressed audio encode/decode).
+
+To use the AXE, macro DRV_FW_FSL_AXE must be defined in config.h.
+
+AXE needs one scheduler running on the RISC core, with dynamically loaded codec
+tasks together to off-load the PowerPC processor. Wind River does not ship the
+AXE images with the BSP. Please contact Freescale for the AXE scheduler binary
+and various codec task images.
+
+This BSP supplies three helper functions to initialize the AXE device and run a
+sample application.
+
+The following example shows that AXE is used to first decode a wma file to a wav
+file, then encode the wave file to an mp3 file and finally decode the mp3 file
+back to a wave file. Three AXE codec task images are needed, as well as the
+scheduler binary. Those four images are put in the root directory of the host
+file system.
+
+First make sure the scheduler image path is correct in hwconf.c.
+
+\cs
+    { "schedulerPath", HCF_RES_STRING, { (void *)"scheduler.bin" } },
+\ce
+
+Rebuild the vxWorks image and load it into the target. In the vxWorks kernel
+shell, type the following command:
+
+\cs
+    -> sysAxeInit
+    value = 0 = 0x0
+\ce
+
+This will initialize the AXE device, load the scheduler binary to the memory,
+and activate the AXE RISC core.
+
+Now we can run a sample application using a task image debug_wmadec.bin to
+decode a wma file <sample.wma> to a wav file <test.wav>.
+
+\cs
+    -> sysAxeDecode 3,"debug_wmadec.bin","sample.wma","test.wav"
+    value = 0 = 0x0
+    -> SEEK TYPE = 0, SEEK INDEX = 0
+    loading axe binary from debug_wmadec.bin
+    Global symbol with symbol table index 551 found with NULL name
+    AXELoadTask returned status code 1
+    HOST: AXE codec test completed successfully
+\ce
+
+Several seconds later, the generated <sample.wav> file is put in the same
+directory of your host file system. You can play the file using one of your
+favorite music players.
+
+Then we encode the wave file to an mp3 file <test.mp3>.
+\cs
+    -> sysAxeEncode 0,"debug_mp3enc.bin","test.wav","test.mp3"
+    value = 0 = 0x0
+    -> SEEK TYPE = 0, SEEK INDEX = 0
+    loading axe binary from debug_mp3enc.bin
+    AXELoadTask returned status code 1
+    HOST: AXE codec test completed successfully
+\ce
+
+Finally we decode the mp3 file back to a wave file <sample.wav>.
+\cs
+    -> sysAxeDecode 0,"debug_mp3dec.bin","test.mp3","sample.wav"
+    value = 0 = 0x0
+    -> SEEK TYPE = 0, SEEK INDEX = 0
+    loading axe binary from debug_mp3dec.bin
+    AXELoadTask returned status code 1
+    HOST: AXE codec test completed successfully
+\ce
+
+Note: only MP3 encoder, WMA and MP3 decoder are tested. Other AXE codecs should
+work with the above helper functions, however they are not tested.
+
+\sh Ethernet Address
+The Freescale ADS5121e board has unique Ethernet hardware addresses assigned to
+each board.  A unique address is absolutely necessary if the user wishes to
+connect the board to a network.  Thus, the user must provide a suitable
+6-byte Ethernet address for each on-board network interface.
+
+The definition of macro ETHERNET_MAC_HANDLER in config.h indicates the MAC
+address is stored in NVRAM and alterable via the 'M' bootrom command.  This
+option allows only the last three bytes to be changed. To use this option,
+open a console window and reset the hardware. When the bootrom banner appears
+and the countdown starts, press any key to get the "[VxWorks Boot]:" prompt.
+Type 'M' and follow the instructions.
+
+\sh CAN support
+This BSP supports the integrated CAN. To use the integrated CAN, please
+check wr_can_vxworks_6_programmers_guide_1.5.pdf for reference.
+
+Create CAN project
+Create VxWorks Image Project based on fsl_ads5121e BSP. In Kernel Configuration,
+include network component/CAN network devices components (INCLUDE_MPC5121E_WNCAN,
+INCLUDE_CAN_NETWORK_INIT, INCLUDE_WNCAN_DEVIO).
+
+Create CAN test project
+Create a CAN project. Then pull target\src\demo\can\sample_mpc5121e.c to the
+project. This demo gives a simple example about how to use MPC5121E CAN driver.
+
+There are two CAN ports on ADS5121e board.
+
+Example
+In VxWorks Development Shell
+\cs
+     -> wn_mpc5121eCan_init /@ init MPC5121E CAN @/
+     -> setupNode 0         /@ setup CAN port 0 @/
+     -> setupNode 1         /@ setup CAN port 1 @/
+     -> startNode 0         /@ start CAN port 0 @/
+     -> startNode 1         /@ start CAN port 1 @/
+     -> transmitMsg 0       /@ send message to CAN port 1 @/
+     -> printRxMsg 1        /@ show the message received in CAN port 1 @/
+\ce
+
+This CAN works on 10, 20, 50, 125, 250, 500, 800, 1000 kbps. Only 250 kbps
+has been tested.
+
+Reference board manual to get pin information of CAN connector.
+
+\sh RTC support
+
+This BSP supports the RTC timer. The time and date you set should be
+in the range of 0:0:0 1/1/2000 and 23:59:59 12/31/2099.
+
+To use the RTC, macro INCLUDE_RTC and INCLUDE_I2C must be defined in config.h.
+
+\sh PCI Support
+
+Note that this feature is only for PCB rev 4 hardware which CPLD rev should
+be 0x05 or later.
+
+There are one PCI host controller on the PCB rev 4 ADS5121e board with three
+PCI slots, one is normal PCI slot and the other two are mini PCI slots.
+
+To use the PCI, macro DRV_PCIBUS_M83XX must be defined in config.h.
+
+\sh USB Support
+
+The MPC5121e implements two USB modules (USB0 and USB1), both are dual-role (DR)
+or On-The-Go (OTG) capable. The modules can work in 3 modes: host, device or
+OTG. We currently only support either host or device mode. Please also be noted
+that the ADS5121E board only routed the USB0 port to a mini-USB connector P17.
+So this BSP will only support USB0, we can either configure the USB0 to either
+host mode or device mode.
+
+For more information on configuring and using USB, please refer to the USB
+programmers guide : wr_usb_vxworks_6_programmers_guide_2.4.pdf
+
+\sh USB Host Support
+
+To use the USB module in host mode, macro INCLUDE_FSL_USB_HOST must be defined
+in config.h. This will by default enable the following components:
+
+\cs
+    INCLUDE_USB
+    INCLUDE_USB_INIT
+    INCLUDE_EHCI
+    INCLUDE_EHCI_INIT
+    INCLUDE_USB_MS_BULKONLY
+    INCLUDE_USB_MS_BULKONLY_INIT
+    INCLUDE_DOSFS
+\ce
+
+If you are working with Wind River Workbench to configure the project, then
+you can manually select INCLUDE_EHCI and INCLUDE_EHCI_INIT to enable USB
+host support. You may need to add the class drivers you want to work with too.
+
+\sh USB Device Support
+
+To use the USB module in device mode, please define INCLUDE_FSL_TCD in config.h
+
+NOTE: Please refer to the USB programmers guide for further information
+about the configuration parameters.
+
+\cs
+    /@ USB device support @/
+
+    #define INCLUDE_FSL_TCD
+
+    #ifdef INCLUDE_FSL_TCD
+    #   define INCLUDE_USB_TARG
+    #   ifndef _ASMLANGUAGE
+    IMPORT void fslUsbDrDeviceHwInit (void);
+    #   endif
+    #   define FSL_USB_DR_DEVICE_IO_BASE        USB0_BA
+    #   define FSL_USB_DR_DEVICE_INT_NUM        INUM_USB_UTMI
+    #   define FSL_USB_DR_DEVICE_HW_INIT        fslUsbDrDeviceHwInit
+    #   define FSL_USB_DR_DEVICE_BE_REG         TRUE
+    #   define FSL_USB_DR_DEVICE_BE_DESC        TRUE
+    #   define FSL_USB_DR_DEVICE_BE_SETUP       FALSE
+    #   define FSL_USB_DR_DEVICE_SYS_CONF       FALSE
+    #   define FSL_USB_DR_DEVICE_BUFFER_ES      TRUE
+    #   define FSL_USB_DR_DEVICE_PHY_MODE       FSL_USB_DR_PHY_UTMI16
+    #   define INCLUDE_MS_EMULATOR
+    #   define INCLUDE_MS_EMULATOR_INIT
+
+    #   undef  INCLUDE_USB_CDC_SERIAL
+    #   ifdef INCLUDE_USB_CDC_SERIAL
+    #       define INCLUDE_SER_EMULATOR
+    #       define INCLUDE_SER_EMULATOR_INIT
+    #       undef  INCLUDE_MS_EMULATOR
+    #       undef  INCLUDE_MS_EMULATOR_INIT
+    #   endif /@ INCLUDE_USB_CDC_SERIAL @/
+    #endif /@ INCLUDE_FSL_TCD @/
+\ce
+
+This will add support for Target Controller Driver (TCD) for the
+Freescale dual-role USB controller, and the Mass Storage device emulator which
+sits on top of the TCD. The Mass Storage emulator will use a RAM disk on target
+to emulate a storage disk, and when the device is attached to a USB host, it can
+work like a USB flash disk, and user can try to copy data to and from the disk
+or perform a disk format operation. Since it is emulation using RAM disk, the
+actual storage content will be lost once power is turned off. This is
+an example for users to verify that the USB device drivers are
+working, and users can refer to the source code as a baseline for new
+product development.
+
+This BSP also adds support for USB CDC serial emulator which also sits on top
+of the TCD. To use it define INCLUDE_USB_CDC_SERIAL in config.h.
+This will disable the support for Mass Storage emulator and enable USB CDC
+serial emulator support. The USB CDC serial emulator can be used as a serial
+port to communicate with other hosts, provided that the host has host side
+USB CDC serial support. Please consult the host system configuration manuals
+to get more information. The following steps use Windows XP as an example:
+
+1) The USB CDC serial emulator, when used as a serial port emulator, can work
+   either as target serial console, or as a normal serial port. When it is
+   enabled, it will add a serial channel into the system. Since this BSP has
+   already two native serial channels (0 and 1), the USB CDC serial emulator
+   will typically be assigned as channel 2. So there will be 3 serial channels:
+   "/tyCo/0", "/tyCo/1", "/tyCo/2". By default, this BSP will use channel 0 as
+   the console TTY; If you want to use the USB CDC serial emulator as the
+   console TTY, then you need to change the CONSOLE_TTY definition from 0 to 2
+   in config.h. Please note that when you want to roll back to use channel 0 as
+   console TTY, you need to change CONSOLE_TTY back to 0.
+
+2) Windows XP can support USB CDC serial by its usbser.sys driver, but some
+   steps must be taken to make it load the driver. This is not like the way it
+   supports USB mass storage class by using automatic driver loading, the
+   usbser.sys must be loaded to support a new device by using a customized
+   driver INF file. It is beyond the scope of this documentation to describe
+   how that works, but Wind River has made one example INF file that can work
+   with this USB CDC serial emulator. The INF file can be found under
+   $WIND_BASE/src/drv/usb/target/wrs_usb_cdc_serial.inf. When you compile
+   vxWorks with USB CDC serial emulator support, and connect the USB cable
+   to the Windows host USB port (for the first time), Windows will pop up a
+   dialog that guides you to install the driver for this device. Please locate
+   the provided INF file following the steps of the dialog. If
+   everything works fine, Windows will find the usbser.sys driver that matches
+   the USB CDC serial emulator device. It may prompt a warning dialog, just
+   accept it and Windows will load the usbser.sys to work with the serial
+   emulator. When the driver is loaded for the first time, it will not prompt
+   again when the device is attached later, unless there is VID/PID change
+   in the device driver. In such a case, you may need to modify the VID/PID pair
+   in the INF file accordingly, please refer to Windows documentation on how to
+   write INF file.
+
+3) When the driver is loaded, Windows automatically adds a new serial port to
+   the system. The exact serial port added may vary depending on the specific
+   system configuration, but it is easy to find out: Start the Windows
+   "Device Manager", check the "Ports (COM&LPT)" section, you will see a new
+   COM port, such as "Wind River USB CDC Serial Emulator (COM9)". So it is
+   obvious that it added the COM9.
+
+4) Now the new COM port is ready to be opened. Start a serial port terminal
+   software such as the Windows HyperTerminal. Choose the new COM port found in
+   the last step, choose a serial port configuration such as "115200,N,8,1".
+   The baudrate doesn't really matter, because it is using USB to emulate serial
+   port.
+
+5) Because the COM port is dynamically created and opened, it should be closed
+   before you unplug the USB cable (or reset board), otherwise Windows may
+   behave strangely (the terminal software may hang a while if you do not close
+   the port before detaching it). This seems to be a known limitation to use the
+   CDC serial emulator on Windows. You need to re-open the port next time it is
+   attached and created.
+
+6) The above steps are using the USB CDC serial emulator as target serial
+   console. If you do not use it that way, it can be used as a normal serial
+   port channel. You can open "/tyCo/2", and then do read and write to it.
+
+\sh WindML Support
+
+WindML supports the onboard Display Interface Unit (DIU) or a graphics card in
+the standard PCI slot. The MBX Graphics Controller is not supported. WindML 
+also supports the onboard AC97 controller and USB mice and keyboards. 
+
+To use WindML, build the WindML libraries according to the directions in the
+WindML User's Guide. After the WindML libraries have been built, use the 
+kernel configuration tool to include the necessary kernel drivers for your
+WindML library configuration.
+
+Using the kernel configuration tool, include the "Include Kernel Drivers" 
+component. This will define the following macros by default:
+
+\cs
+    INCLUDE_WINDML
+	INCLUDE_WINDML_NECESSARY
+	INCLUDE_WINDML_GRAPHICS_SHARED_DATA
+\ce 
+
+Depending on the driver being used, application link method, device memory
+mapping, etc, you may choose to use the following components instead:
+
+\cs
+    INCLUDE_WINDML_GRAPHICS_NO_SHARED_DATA
+	INCLUDE_WINDML_ALL
+\ce  
+
+The INCLUDE_WINDML_GRAPHICS_NO_SHARED_DATA option is typically used when the 
+application runs only in kernel mode and you have taken care of the device
+memory mapping through other means. The WindML DIU driver falls into this
+category when the application is running in kernel mode. 
+
+If INCLUDE_WINDML_GRAPHICS_SHARED_DATA is used, INCLUDE_SHARED_DATA is
+required.
+
+The INCLUDE_WINDML_ALL option will force the entire WindML 2D library, 
+windowing, input service, and drivers to be linked into the kernel. This
+option allows a kernel application which has not been linked to the WindML 
+libraries to be dynamically downloaded through the shell after the target
+is running. When INCLUDE_WINDML_NECESSARY is defined, only the necessary
+kernel drivers are linked into the kernel image, unless the application is
+directly linked to the kernel at compile time.
+
+If a PCI graphics device is used, follow the directions in the PCI Support 
+section of this document. Additionally, define the following:
+
+\cs
+    INCLUDE_PCI_BUS_AUTOCONF
+	INCLUDE_PCI_OLD_CONFIG_ROUTINES
+\ce 
+
+Support for audio is configured in the WindML configuration tool. No further
+configuration is required in the BSP for audio other than to insure that 
+INCLUDE_WINDML is defined.
+
+To use USB mice and keyboards with WindML, define the appropriate USB macros
+as described in the USB section, including the appropriate peripherals.
+   
+\sh Make Targets
+The make targets are listed as the names of object-format files. Append `.hex'
+to each to derive a hex-format file name. Other images not listed here may not
+be tested.
+
+\ts
+`bootrom'
+`bootrom.bin'
+`bootrom.hex'
+`vxWorks' (with `vxWorks.sym')
+`vxWorks.st'
+\te
+
+\sh BSP Bootloaders and Bootroms
+
+\ts
+Bootloader/Bootrom   | Status
+-----------------------------
+U-Boot (pre-flashed) | SUPPORTED
+bootrom              | SUPPORTED
+bootrom_uncmp        | UNVALIDATED
+vxWorks              | SUPPORTED
+vxWorks_rom          | SUPPORTED
+vxWorks_romCompress  | SUPPORTED
+vxWorks_romResident  | SUPPORTED
+\te
+
+\sh BSP Validated Tools
+
+\ts
+Tool                         | Connection/Type | Status
+-------------------------------------------------------
+Workbench Debugger           | ETHERNET/WDB    | SUPPORTED
+Workbench System Viewer      | ETHERNET/WDB    | SUPPORTED
+Workbench MemScope           | ETHERNET/WDB    | SUPPORTED
+Workbench ProfileScope       | ETHERNET/WDB    | SUPPORTED
+Workbench StethoScope        | ETHERNET/WDB    | SUPPORTED
+Workbench CoverageScope      | ETHERNET/WDB    | SUPPORTED
+Workbench Core File Analysis | ETHERNET/WDB    | UNVALIDATED
+Workbench Sensor Points      | ETHERNET/WDB    | UNVALIDATED
+Workbench OCD Debugger       | JTAG            | SUPPORTED
+Workbench OCD Flash          | JTAG            | SUPPORTED
+\te
+
+\sh Known Problems
+Sometimes after power up, the ethernet PHY of PCB rev 2 board does not get linked
+successfully. This is a known issue of the PCB rev 2 hardware. When you run into
+this issue, reset the target to have another try. Note, this bug has been fixed
+in PCB rev 3 or later boards.
+
+When trying to run scopeRTPDemo with StethoScope, the target will throw an
+exception. For more details, or to check if a workaround has been posted since
+the writing of this document, see WIND00147799.
+
+BOARD LAYOUT
+
+ADS5121e (PCB rev 2)
+\bs
+                                                                      +--SD--+
++------------------------------------------------------------------------------+
+|       O 5V     +--------------------+                   |          |      o  |
+|---+            |      P A T A       |                   | Mini PCI |     LED |
+|   |   +---+    +--------------------+                   |          |         |
+| A |   | S |                                             +----------+         |
+| T |   | A |                                                                  |
+| X |   | T |                             +---------+                   +---+  |
+|   |   | A |                             |         |                   |   |  |
+|---+   +---+      SW3 SW4 SW5 SW6        |  M P C  |                   |   |  |
+|                                         |  5121e  |                   | P |  |
+|                                         |         |                   |   |  |
+|    +----+                               +---------+                   | C |  |
+|    | CP |                                                             |   |  |
+|    | LD |                                                             | I |  |
+|    +----+  +---+                                                      |   |  |
+|            | F |                                                      |   |  |
+|            | L |                                                      +---+  |
+|            | A |                                                             |
+| +-------+  | S |                                                             |
+| |  DDR  |  | H |                      +-------------+                        |
+| +-------+  +---+                      |    CAN 1    |          XXXXXX        |
+|                                       +-------------+           CAN2         |
+| +-----+ +-------+ +-----+ +-----+     +-------------+                        |
+| | DVI | | Audio | | USB | | FEC |     | UART1(PSC3) |          XXXXXX        |
+| +-----+ +-------+ +-----+ +-----+     +-------------+        UART2(PSC4)     |
++------------------------------------------------------------------------------+
+\be
+
+ADS5121e (PCB rev 4)
+\bs
+ _________________________________________ _ __________________________________
+|    __________      _______________      | |                  :.....:    ___  |
+|   | CPU JTAG |    | . . . . . . . |     |_|                  mini SD   |   | |
+|    ----------     | . . . . . . . |    POWER                (Bottom    | P | |
+|          ...       ---------------                           Layout)   |   | |
+|            .          ATX POWER                                        | A | |
+|  ___       .                        ______________                     |   | |
+| |   |      .                       |              |                    | T | |
+| |   |      . mini PCI SLOT1        |    M P C     |                    |   | |
+| |   |      . (Bottom Layout)       |              |                    | A | |
+| | P |      .                       |    5121E     |         ______     |___| |
+| | C |    ...                       |              |        |      |       _  |
+| | I |                              |______________|        | CPLD |      | | |
+| |   |    ...                                       _       |______|      | | |
+| |   |      .                                      | |                _   |E| |
+| | S |      . mini PCI SLOT2                  SATA | |           P4  |S|  |M| |
+| | L |      . (Bottom Layout)                      |_|               |W|  |B| |
+| | O |      .                                                    P25 |3|  | | |
+| | T |      .                                        P1               -   | | |
+| |   |      .                                                             |_| |
+| |___|    ...                                                                 |
+|                                                                   POWER ON o |
+|                                                                  HIBERNATE o |
+|         CAN1                                         AUDIO                   |
+| mini                                                   __         COM1     L |
+| USB  __________       ______       _____________      |  |     __________  E |
+|  _  |   CAN0   |     | RJ45 |     |    DVI      |     |  |    |   COM0   | D |
+|_|_|_|__________|_____|______|_____|_____________|_____|__|____|__________|___|
+\be
+
+SEE ALSO
+
+\tb Workbench User's Guide: Introduction
+
+\tb VxWorks Programmer's Guide: Configuration
+
+\tb VxWorks Programmer's Guide: Architecture Appendix
+
+BIBLIOGRAPHY
+
+\tb MPC5121e Microcontroller Reference Manual (Rev.3)
+
+\tb ADS5121e Board Schematic
+
+\tb ADS512101 Advanced Development System User's Manual (Rev.1.2)
+
+\tb Motorola PowerPC Microprocessor Family: The Programming Environments
+

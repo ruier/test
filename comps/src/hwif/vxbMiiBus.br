@@ -1,0 +1,3 @@
+#ifdef INCLUDE_MII_BUS
+    miiBusRegister();
+#endif

@@ -1,0 +1,41 @@
+# common.vxconfig - VSB configuration flags and options for wrVbP4080 BSP
+
+# Copyright (c) 2009-2010 Wind River Systems, Inc.
+#
+# The right to copy, distribute, modify or otherwise make use
+# of this software may be licensed only pursuant to the terms
+# of an applicable Wind River license agreement.
+
+#
+# modification history
+# --------------------
+# 01d,06may11,uol  Disable forwarding capabilities, not supported in this
+#                  branch.
+# 01c,08nov10,uol  Add forwarding capabilities.
+# 01b,12jun10,rab  Add smp guest support
+# 01a,13nov09,to   created
+#
+
+#
+# DESCRIPTION
+# 
+# This file defines the VxWorks Source Build configuration options that apply
+# only to the wrVbP4080 BSP.
+#
+################################################################################
+
+config  SUPPORTS_WRHV_GUEST
+        bool
+        default y
+
+config  REQUIRES_WRHV_GUEST
+        bool
+        default y
+
+config  SUPPORTS_SMP
+        bool
+        default y
+
+config  VBI_PPC_E500MC
+        bool
+        default y

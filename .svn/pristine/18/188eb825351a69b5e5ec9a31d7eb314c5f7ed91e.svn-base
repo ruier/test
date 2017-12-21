@@ -1,0 +1,3 @@
+#ifdef DRV_TIMER_PXA3XX
+    vxbPxa3xxTimerRegister ();
+#endif /* DRV_TIMER_PXA3XX */

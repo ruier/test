@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTLR_OMAP35XX
+    vxbOmap35xxIntCtlrRegister ();
+#endif /* DRV_INTCTLR_OMAP35XX */

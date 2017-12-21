@@ -1,0 +1,58 @@
+
+                 README: Freescale MPC8323 RDB (fsl_rdb8323)
+
+This file contains board-specific information for the Freescale MPC8323
+RDB target board.  Specifically, this file contains information on any BSP
+interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+Additionally, the target board's reference entry (i.e., 'man fsl_rdb8323')
+provides board-specific information necessary to run VxWorks, and
+should be read before this BSP is used.
+
+------------------------------------------------------------------------------
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+    Renamed BSP from rdb8323.
+    Correct wrong flash size in sysBatDesc[]. (WIND00241512)
+
+RELEASE 2.0/4
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+    
+    Remove INCLUDE_I2C by default.
+    Remove QE IO port pin mux codes.
+    Remove qeCpcrReset().
+    Move vxSvrGet() from sysALib.s to vxALib.s.
+    Remove unused INCLUDE_PPC_FPU. (WIND00153695)
+    Update quiccEngine configuration.
+    Add auxiliary clock support. (WIND00183633)
+    
+RELEASE 2.0/3
+
+    Re-Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Change timer and interrupt legacy driver to vxBus driver.
+    Support net device in BootApp. (WIND00139815)
+    RAM_LOW_ADRS definition error. (WIND00150786)
+
+RELEASE 2.0/2
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Fix PCI issue. (WIND00142426)
+
+RELEASE 2.0/1 
+
+    Released from Wind River for General Purpose Platform 3.6, VxWorks 6.6
+
+RELEASE 2.0/0 EAR:
+
+    This early release of the BSP supports the MPC8323 Reference Development 
+    Board(RDB).
+    Quicc Engine is supported for FCC (UCC) only and is configured to function
+    up to 100BaseT speeds. 
+    PCI has been tested with the gei82543End Driver and USB.
+    USB has been tested with mass-storage.
+

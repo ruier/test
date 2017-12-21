@@ -1,0 +1,103 @@
+README: Freescale HPC-NET 8641(D)
+
+This file contains information on any BSP interface changes from previous
+software or hardware versions, and contains caveats that the user must be
+aware of before using this BSP. Additionally, the target board's manual
+page entry (for example, hpcNet8641/target.ref) provides board-specific
+information necessary to run VxWorks, and should be read before this 
+BSP is used.
+ 
+------------------------------------------------------------------------------
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+    add _WRS_VX_AMP for compile error. (WIND00192173)
+	
+	flush L2 cache when reboot.(WIND00213444)
+
+    Increase BOOTAPP space size.(WIND00192157)
+
+    change vxIpiEmit to vxIpiPhysEmit. (WIND00248208)
+
+RELEASE 2.0/4
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+    
+    Fix program the flash command error in target.ref.(WIND00139261) 
+    Update openPicTimer support.
+    
+    Remove gnu compiler warning from sysNet.c and sysLib.c.(WIND00098576)
+
+    Replace sysSvrGet() with vxSvrGet() of vxALib.s.
+
+RELEASE 2.0/3
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Support END2 versions of ETSEC drivers
+
+    Support for wrload/MIPC added and preconfigured into 
+    hpcNet8641_AMP_core0/1 BSPs.
+    LEGACY_AMP support is still available in hpcNet8641 BSP.
+    Remove definition of RAM_LOW_ADRS and RAM_HIGH_ADRS in config.h, added
+    REQUIRES of Bsp hpcNet8641 in 20bsp.cdf.(WIND00107919) 
+    Fix auxclk bspvts issue. (WIND001363349)
+
+RELEASE 2.0/2
+
+    Miscellaneous smallish updates for VxWorks SMP EAR.
+    Driver changes from rev1 pulled into vxWorks 6.6 code base. 
+
+RELEASE 2.0/1
+
+    !!!! WARNING BSP install will include non-BSP specific files.
+    !!!! WARNING The installation of this BSP will break some PCI support for 
+    other BSPs which use vxBus PCI drivers (eg wrSbc8560/ixdp4xx). It is meant 
+    primarily for vxWorks 6.4. Look for an update for other versions of vxWorks 
+    greater than 6.4. A new PCI library will be installed to support multiple 
+    PCI/PCI Express controllers and Message Signal Interrupts. It is advised you 
+    use a seperate install of Workbench for this BSP.
+
+    Due to defect 88168  GEI HEnd driver will be installed without transmit 
+    checksum enabled by default.  
+
+    Added support for the PCI Express bus controllers. 
+
+    PPC DEC timer now uses vxBus infrastructure.
+
+    BUILD INSTRUCTIONS for non-BSP files
+    ------------------------------------
+
+    A build of the drivers installed is necessary.
+    In the vxWorks Development Shell, go to target/src/hwif.
+    make CPU=PPC32 TOOL=sfdiab
+    The gei driver installed should build.
+
+RELEASE 2.0/0
+
+    Released by Wind River for Workbench 2.6, vxWorks 6.4
+
+    Provide project build support for TIPC and shared memory configuration in 
+    config.h. Tested basic TIPC BSP support.
+
+    Supported DDR Freq is 400Mhz
+    Supported OSCILLATOR_FREQ are 40Mhz and 50MhZ.
+    Default board settings out the box should work.
+
+    Dual Core could only be tested on the ArgoNavis V1 board due to hardware 
+    availability. No changes should be required to this software for the later 
+    versions of the board. Single core was tested.
+
+    Changed BSP name.
+    Fixed issue with connecting to 100BaseT/10BaseT.
+    Support dual core with dual vxWorks image.
+    Must provide MACH address via bootline 'M' command before trying to use 
+    network.
+    Now use vxBus abstraction layer for ETSEC/MII/DUART.
+
+    Early Access Version(EAR)
+
+    All 4 TSECS validated.
+    Standard 7448 core is supported which includes the L2 cache.
+

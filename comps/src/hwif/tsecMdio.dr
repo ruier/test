@@ -1,0 +1,4 @@
+#ifdef INCLUDE_TSEC_MDIO
+    tmRegister();
+#endif /* mdioRegister */
+

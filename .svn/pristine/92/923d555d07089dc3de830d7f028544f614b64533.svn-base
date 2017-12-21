@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTLR_PPC
+extern void ppcIntCtlrRegister (void);
+#endif /* DRV_INTCTLR_PPC */

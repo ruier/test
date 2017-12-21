@@ -1,0 +1,4 @@
+#ifdef DRV_PCIBUS_XLS_PCIEX
+IMPORT void xlsPciExRegister(void); 
+#endif /* DRV_PCIBUS_XLS_PCIEX */
+

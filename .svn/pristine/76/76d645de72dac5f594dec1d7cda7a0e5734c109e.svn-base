@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND_COMCERTO_GEMAC
+    comcertoGemacRegister ();
+#endif /* DRV_VXBEND_COMCERTO_GEMAC */

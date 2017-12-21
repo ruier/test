@@ -1,0 +1,1885 @@
+\" target.ref - Freescale QorIQ T4240 target specific documentation
+\"
+\" Copyright (c) 2012, 2013 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 02e,25jun13,j_z  enalbe RapidIO port 1. (WIND00418128)
+\" 02d,17apr13,j_z  add RapidIO support.
+\" 02c,01apr13,h_k  2nd round clean-up.
+\" 02b,21mar13,h_k  cleaned up.
+\"                  corrected the referenced errata revision.
+\" 02a,20mar13,syt  added description of a workaround for Simics.
+\" 01z,09mar13,syt  added description of errata DDR A004390 and updated
+\"                  the description of DDR3 Controller.
+\" 01y,08mar13,h_k  updated comment about MMU Hardware Tablewalk.
+\" 01x,01mar13,h_k  updated description for errata CPU A004806.
+\"                  added description for errata CPU A006198.
+\" 01w,18feb13,syt  added description for DDR controller.
+\" 01v,25feb13,h_k  cleaned up some spell mistakes.
+\" 01u,06feb13,wyt  updated Simics section.
+\" 01t,05feb13,wyt  added description for SATA.
+\" 01s,27jan13,y_y  added description for SPI.
+\" 01r,21jan13,x_z  added description for INCLUDE_TFFS_STUB_VXBFLASH.
+\" 01q,18jan13,h_k  added FSL_ERRATA_CPU_A004792 and 4809.
+\" 01p,18jan13,zl   improved SMT section.
+\" 01o,18jan13,wap  Update SGMII ethernet functionality documentation.
+\" 01n,17jan13,wap  Describe alternate SERDES1/SERDES2 layout.
+\" 01m,17jan13,zl   added SMT section.
+\" 01l,16jan13,wap  Document SGMII and XAUI support.
+\" 01k,08jan13,x_s  added a note for USB chapter.
+\" 01j,14dec12,h_k  swapped the ENET1 and ENET2.
+\" 01i,11dec12,h_k  added FSL_ERRATA_DDR_A004934.
+\"                  added a GNU tool known issue.
+\"                  removed branch prediction feature from known issues.
+\"                  added bank 0 U-Boot info to flash bootrom.
+\" 01h,06dec12,h_k  added SMP section, some minor updates and corrections.
+\" 01g,06dec12,h_k  updated to match to the latest status.
+\"                  added missing sections.
+\" 01f,23nov12,syt  added hardware features list and memory maps tables.
+\" 01e,13nov12,syt  added I2C section.
+\" 01d,07nov12,syt  added TrueFFS section.
+\" 01c,23oct12,syt  added sections of DMA and USB.
+\" 01b,18oct12,syt  added sections of PCIEX and SDHC.
+\" 01a,24jul12,h_k  created to avoid a doc build.
+\"
+\TITLE fsl_t4240_qds - Freescale QorIQ T4240 QDS
+
+\sh NAME
+`Freescale QorIQ T4240 QDS'  
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks for the fsl_t4240_qds BSP.  Please read the section "Getting 
+the board running VxWorks" in order to configure the board to run VxWorks.
+
+\sh Getting the board running VxWorks (hardware)
+This section will guide you on how to run VxWorks on the Freescale T4240QDS
+board.
+
+1. Configure switches
+
+There are nine DIP-switches on the T4240QDS board. Please make sure all
+these switches are set properly before using the VxWorks BSP.
+
+Default DIP-Switch Settings for T4240QDS:
+
+\ts
+Switch Number | Switch ON       | Switch OFF
+-------------------------------------------------
+SW1           | 3,6             | 1,2,4,5,7,8
+SW2           | 1,2,3,4,5,6,7   | 8
+SW3           |                 | 1,2,3,4,5,6,7,8
+SW4           |                 | 1,2,3,4,5,6,7,8
+SW5           | 1,2,3,7         | 4,5,6,8
+SW6           | 2,4,5,6,7,8     | 1,3
+SW7           | 3,4,5           | 1,2,6,7,8
+SW8           | 1,2,3,6         | 4,5,7,8
+SW9           | 4,5,6,7,8       | 1,2,3
+\te
+
+2. Create a bootrom.bin
+
+    Open the VxWorks Development Shell, change directory to the fsl_4240_qds
+    BSP directory, and then build the VxWorks bootrom image.
+
+\cs
+    cd target/config/fsl_4240_qds
+    make bootrom.bin
+\ce
+
+3. Program the VxWorks bootrom into flash
+
+    This section will describe how to program a VxWorks bootrom into the flash
+    using the pre-flashed U-Boot.
+
+        The T4240QDS reference board is shipped with two copies of
+        U-Boot and an eDINK testing utility in flash. The copy of
+        U-Boot in bank 0 is considered the 'golden' or master copy,
+        which should be preserved. The second copy of U-Boot in bank
+        4 is usually identical to the golden copy. This copy can be
+        upgraded using the golden copy from bank 0. The eDINK utility
+        is in bank 1.
+
+\ts
+SW6 (1:4) | E8 | E9 | EA | EB | EC | ED | EE | EF  <- flash adrs[0:7]
+----------+----+----+----+----+----+----+----+-----------------------
+ 0000     |  7 |  6 |  5 |  4 |  3 |  2 |  1 |  0   (U-Boot bank 0)
+ 0001     |  6 |  7 |  4 |  5 |  2 |  3 |  0 |  1   (eDINK bank 1)
+ 0010     |  5 |  4 |  7 |  6 |  1 |  0 |  3 |  2
+ 0011     |  4 |  5 |  6 |  7 |  0 |  1 |  2 |  3
+ 0100     |  3 |  2 |  1 |  0 |  7 |  6 |  5 |  4   (U-Boot bank 4)
+ 0101     |  2 |  3 |  0 |  1 |  6 |  7 |  4 |  5   (VxWorks bank 5)
+ 0110     |  1 |  0 |  3 |  2 |  5 |  4 |  7 |  6
+ 0111     |  0 |  1 |  2 |  3 |  4 |  5 |  6 |  7
+\te
+
+        The factory-programmed U-Boot boot loader is capable of downloading a
+        Boot ROM image using its tftp client and programming it in an
+        alternate flash bank. SW6[1:4] are used to switch between flash
+        banks. Set baud rate to 115200 for U-Boot. A tftp server is required.
+
+        The following instructions explain how to flash bootrom by using
+        the U-Boot image from flash bank 4.
+
+    3.1 Set the boot flash switch
+
+        Make sure U-Boot boot bank (bank#4) is selected by checking:
+        SW#6[1,2,3,4] = [OFF,ON,OFF,OFF]
+        (If U-Boot is not present on bank#4, use the one on bank#0:
+         SW#6[1,2,3,4] = [OFF,OFF,OFF,OFF]
+         as an alternative option.
+         Change the address to program to, as noted in section 3.5.)
+
+    3.2 Start a TFTP server
+
+        Open a TFTP server on your host.  Make sure the root directory is
+        your fsl_t4240_qds BSP directory that contains the VxWorks
+        bootrom image you've just created.
+
+    3.3 Ensure that your host serial port's configuration is:
+
+        Baud Rate: 115200
+        Data: 8 bit
+        Parity: None
+        Stop: 1 bit
+        Flow Control: None
+
+    3.4 Configure the U-Boot environment
+
+        Power up the board; you'll see the U-Boot shell prompt, which will 
+        be something like:
+
+\cs
+U-Boot 2012.07-00142-g4279304-dirty (Sep 20 2012 - 09:35:15)
+
+CPU0:  T4240E, Version: 1.0, (0x82480010)
+Core:  E6500, Version: 1.0, (0x80400010)
+Clock Configuration:
+       CPU0:1666.667 MHz, CPU1:1666.667 MHz, CPU2:1666.667 MHz, CPU3:1666.667 MHz, 
+       CPU4:1666.667 MHz, CPU5:1666.667 MHz, CPU6:1666.667 MHz, CPU7:1666.667 MHz, 
+       CPU8:1666.667 MHz, CPU9:1666.667 MHz, CPU10:1666.667 MHz, CPU11:1666.667 MHz, 
+       CCB:600  MHz,
+       DDR:800  MHz (1600 MT/s data rate) (Asynchronous), IFC:150  MHz
+       FMAN1: 833.333 MHz
+       FMAN2: 800 MHz
+       QMAN:  300 MHz
+       PME:   300 MHz
+L1:    D-cache 32 kB enabled
+       I-cache 32 kB enabled
+Board: T4240QDS, Sys ID: 0x1e, Sys Ver: 0x22, FPGA Ver: 0x01, vBank: 4
+36-bit Addressing
+Reset Configuration Word (RCW):
+       00000000: 12180019 1919190c 00000000 00000000
+       00000010: 70383030 00554a00 1c020000 09000000
+       00000020: 00000000 ee0000ee 00000000 000287fc
+       00000030: 00000000 00000000 00000000 00000008
+SERDES Reference Clocks: SERDES1=100MHz SERDES2=100MHz SERDES3=100MHz SERDES4=100MHz 
+I2C:   ready
+SPI:   ready
+DRAM:  Initializing....using SPD
+starting at step 1 (STEP_GET_SPD)
+DDR: failed to read SPD from address 82
+DDR: failed to read SPD from address 84
+DDR: failed to read SPD from address 86
+Warning: compute_dimm_parameters non-zero return value for memctl=0 dimm=1
+Warning: compute_dimm_parameters non-zero return value for memctl=1 dimm=1
+Warning: compute_dimm_parameters non-zero return value for memctl=2 dimm=1
+Computing lowest common DIMM parameters for memctl=0
+Detected UDIMM 9JSF25672AZ-2G1KZ 
+Computing lowest common DIMM parameters for memctl=1
+Detected UDIMM 9JSF25672AZ-2G1KZ 
+Computing lowest common DIMM parameters for memctl=2
+Detected UDIMM 9JSF25672AZ-2G1KZ 
+Reloading memory controller configuration options for memctl=0
+hwconfig has unrecognized parameter for ctlr_intlv.
+hwconfig has unrecognized parameter for bank_intlv.
+Reloading memory controller configuration options for memctl=1
+hwconfig has unrecognized parameter for ctlr_intlv.
+hwconfig has unrecognized parameter for bank_intlv.
+Reloading memory controller configuration options for memctl=2
+hwconfig has unrecognized parameter for ctlr_intlv.
+hwconfig has unrecognized parameter for bank_intlv.
+Not all controllers have compatible interleaving mode. All disabled.
+dbw_cap_adj[0]=0
+dbw_cap_adj[1]=0
+dbw_cap_adj[2]=0
+ctrl 0 dimm 0 base 0x0
+ctrl 0 dimm 1 base 0x80000000
+ctrl 0 total 0x80000000
+ctrl 1 dimm 0 base 0x80000000
+ctrl 1 dimm 1 base 0x100000000
+ctrl 1 total 0x80000000
+ctrl 2 dimm 0 base 0x100000000
+ctrl 2 dimm 1 base 0x180000000
+ctrl 2 total 0x80000000
+Total mem by step_assign_addresses is 0x180000000
+FSL Memory ctrl register computation
+Programming controller 0
+total 2 GB
+Programming controller 1
+total 2 GB
+Programming controller 2
+total 2 GB
+total_memory by fsl_ddr_sdram = 6442450944
+4 GiB left unmapped
+    DDR: 6 GiB (DDR3, 64-bit, CL=11, ECC on)
+Flash: 128 MiB
+L2:    2048 KB enabled
+enable l2 for cluster 1 fec60000
+enable l2 for cluster 2 feca0000
+Corenet Platform Cache: 1536 KB enabled
+Using SERDES1 Protocol: 0x1c
+Using SERDES2 Protocol: 0x1c
+Using SERDES3 Protocol: 0x6
+Using SERDES4 Protocol: 0x6
+SRIO1: enabled
+SRIO2: enabled
+NAND:  No NAND device found!!!
+0 MiB
+MMC:  voltage not supported by controller
+
+EEPROM: NXID v1
+PCIe1: Root Complex, no link, regs @ 0xfe240000
+PCIe1: Bus 00 - 00
+PCIe2: disabled
+PCIe3: Root Complex, no link, regs @ 0xfe260000
+PCIe3: Bus 01 - 01
+PCIe4: disabled
+In:    serial
+Out:   serial
+Err:   serial
+Warning: SERDES2 expects reference clock 125MHz, but actual is 100MHz
+Net:   Fman1: Uploading microcode version 101.8.0
+Fman2: Uploading microcode version 101.8.0
+FM1@DTSEC5, FM2@DTSEC5
+Hit any key to stop autoboot:  0 
+=> 
+\ce
+        Type the following commands to set up the U-Boot environment:
+
+\cs
+        setenv ipaddr 192.168.0.3
+        setenv netmask 255.255.255.0
+        setenv serverip 192.168.0.2
+        setenv gatewayip 192.168.0.1
+        saveenv
+\ce
+
+        Note: This is just an example, you should change the network parameters
+        according to your actual environment. 'ipaddr' is the target IP address,
+        while 'serverip' is your host IP address.
+
+    3.5 Program the Freescale T4240QDS flash
+
+        VxWorks bootrom is stored on bank#5 of the on-board NOR flash.
+        Type the following commands in the U-Boot shell.
+	(Note: If you use U-Boot on bank#0, replace eef00000 with eaf00000.)
+
+\cs
+        tftp 1000000 bootrom.bin
+        protect off eef00000 +100000
+        erase eef00000 +100000
+        cp.b 1000000 eef00000 100000
+        protect on eef00000 +100000
+        cmp.b 1000000 eef00000 100000
+\ce
+
+    3.6 Change SW#6 to choose the VxWorks bootrom bank (bank#5)
+\cs
+        SW#6[1,2,3,4] = [OFF,ON,OFF,ON]
+\ce
+
+4. Run the VxWorks bootrom
+        Power the target back on. After a few seconds, the VxWorks bootrom
+        banner should appear.
+
+        If this is the first time a VxWorks bootrom has been loaded onto this
+        board, use the 'M' command from the [VxWorks Boot]: prompt to set the
+        MAC addresses for all of the network ports. These will be stored in
+        flash.
+
+\sh Boot Devices
+The supported boot devices are:
+\is
+\i memac - 10/100/1000 Triple Speed Ethernet Controller
+\ie
+
+The RJ45 ENET2 is connected to 'memac4' and the RJ45 ENET1 is connected to
+'memac12'.
+
+\sh SMP
+
+VxWorks SMP(Symmetric Multiprocessing) kernels can be configured for use on
+the multiprocessor target hardware supported by this BSP. Please refer to
+the chapter "VxWorks SMP" in "VxWorks Kernel Programmer's Guide" for 
+details about the SMP-specific features in the operating system.
+
+For convenience, some key features for using SMP with this BSP are highlighted
+below.
+
+1. SMP build
+
+   VxWorks SMP can be configured and built using the standard Wind River
+   Workbench and vxprj facilities. However, VxWorks SMP images cannot be
+   created from the legacy BSP-directory configuration and build methods 
+   (using config.h and the local Makefile).
+   
+   Workbench provides a VxWorks Image Project (VIP) option for creating VxWorks
+   SMP projects. vxprj uses the '-smp' option to specify configuration of
+   VxWorks SMP from the command line. For example:
+\cs   
+   vxprj create -smp fsl_t4240_qds diab mySmpProject
+\ce
+
+2. Bootloader
+
+   The 'bootrom' images for VxWorks cannot be built with the SMP configuration
+   option. As such, the 'bootrom' image may still be built using the legacy
+   BSP directory and Makefile method. With Workbench, build the 'bootrom' using
+   the same steps as for a UP system,
+
+   Finally, while the 'bootrom' itself cannot be configured for SMP, it will
+   support loading UP, SMP and AMP enabled images.
+
+3. MMU
+
+   VxWorks SMP does not support MMU-less configuration.
+   
+4. Cache and bus snoop
+
+   Snoop logic is specific to the hardware architecture. Usually it is
+   supported by multiprocessor hardware. When hardware support is present,
+   CACHE_SNOOP_ENABLE should be specified in the BSP to maintain system 
+   coherency. Please refer to the config.h for this BSP to find how 
+   CACHE_SNOOP_ENABLE is used.
+   
+   Note: CACHE_SNOOP_ENABLE is required for PowerPC.
+   
+   Cache cannot be disabled in a VxWorks SMP system. Direct calls to the 
+   function cacheDisable() will do nothing.
+   
+   Also, only copy-back mode is tested and supported for VxWorks SMP kernels.
+   This will be the default configuration set by the BSP. Changing the cache 
+   mode to write-through may result in unpredictable behavior. Some 
+   architectures place additional restrictions on write-through mode.
+   For example, write-through is not allowed at all by VxWorks for PowerPC 
+   processors because the atomic instructions stwcx and lwarx are used by 
+   the kernel and would generate machine check exceptions if the cache were 
+   in write-through mode. Similarly, ARM does not allow write-through with SMP.
+   
+5. Interrupt CPU affinity 
+
+   Hardware resources can be allocated statically via VxWorks configuration.
+   Here we focus on the interrupt to show how it's implemented. SMP hardware 
+   usually requires a programmable interrupt controller. VxWorks SMP makes use 
+   of this hardware to allow you to assign interrupts to a specific CPU.
+   By default, interrupts are routed to the VxWorks instance's logical CPU 0. 
+   Interrupt CPU affinity can be useful for load balancing, for example, if 
+   there is too much total interrupt traffic for one CPU to handle.
+
+   This BSP currently does not have an example interrupt CPU affinity table.
+   Please refer to other BSPs, such as fsl_p5020_ds.
+
+6. CPU number
+
+   The project parameter VX_SMP_NUM_CPUS is used to specify the number of CPUs
+   assigned to the SMP kernel. The CPU number we are discussing here includes
+   all the hardware units that have the same behavior as the CPU, for example,
+   the thread, hyper-thread, etc. VxWorks supports having less than all of the 
+   CPUs in a multiprocessor system participate in the SMP kernel. This allows 
+   some CPUs to be used for other purposes, such as dedicated "bare-iron" tasks 
+   or additional asymmetric operating systems. CPUs not assigned to the SMP 
+   kernel are left in the default, power-on reset state.
+
+   The maximum CPU number for this BSP is 24 (twelve physical cores with two
+   threads per physical core).
+
+7. Simultaneous Multithreading (SMT)
+
+   Thread support on the T4240 processors enables two logical CPUs per physical
+   core. Each thread acts as a unique CPU with its own register set and
+   execution unit. This means that the two threads on a core can simultaneously
+   execute two VxWorks tasks. Note, however, that some CPU resources are 
+   shared by the two threads. As a result, one thread can impact execution
+   performance and determinism of its sibling thread.
+   
+   Thread support for a VxWorks SMP kernel configuration (VIP) can be enabled
+   or disabled by adding or removing the INCLUDE_SMT component. 
+   The number of CPUs configured and enabled for an SMP image is automatically
+   adjusted depending upon the configuration. For example, for a system with 12 
+   cores with SMT support enabled, the value of VX_SMP_NUM_CPUS is 24. Without 
+   SMT support it is 12 (one thread per core).
+
+   The VxWorks SMP scheduler optimization for SMT systems is enabled by 
+   including the INCLUDE_SMP_SCHED_SMT_POLICY component. This optimization 
+   provides load balancing across physical cores, so that whenever possible, 
+   only one of the sibling threads executes a task, while the other remains 
+   idle. This is only possible when the system is not fully loaded (i.e. 
+   when there are fewer ready tasks than the number of enabled threads). 
+
+   INCLUDE_SMP_SCHED_SMT_POLICY requires INCLUDE_SMT. While this is not 
+   enforced by the configuration editor, a build error will notify the user
+   about the incorrect configuration. On the other hand, INCLUDE_SMT can be
+   enabled without INCLUDE_SMP_SCHED_SMT_POLICY (using the default SMP 
+   scheduling policy, INCLUDE_SMP_SCHED_DEFAULT_POLICY, instead).
+   To switch between the default scheduling policy and the SMT scheduling 
+   policy, add the desired component without explicitly removing the other one.
+
+   For additional information please see the VxWorks Kernel Programmer's Guide,
+   section 22.16 SMP Scheduler Policy for SMT - Simultaneous Multi-Threading.
+
+   Currently, INCLUDE_SMT and INCLUDE_SMP_SCHED_SMT_POLICY components are added
+   when a VIP is created in SMP mode by default.
+
+   Various AMP configurations can be used with mixed SMT support. In other 
+   words, an AMP system can run multiple VxWorks SMP instances, some with 
+   SMT support enabled, and some with SMT support disabled. However, there   
+   are rules that must be followed:
+    - a VxWorks SMP instance must always include both threads of a core,
+      when both threads are enabled.
+    - the physical index of the first CPU in a VxWorks SMP instance must
+      match its identification by the APIC WHOAMI register. This is the
+      CPU number to be used for the wrload() argument.
+
+   Following is an example configuration for three VxWorks SMP instances, 
+   two with SMT enabled and one with SMT disabled:
+
+\cs
+     SMP instance   SMT   APIC ID     PHYS CPU   LOGICAL CPU (PIR)
+     -------------------------------------------------------------
+                             0           0	       0
+                             1           1	       1
+                             2           2	       2
+      VxWorks0      Yes      3           3	       3
+                             4           4	       4
+                             5           5	       5
+                             6           6	       6
+                             7           7	       7
+     -------------------------------------------------------------
+                             8           8	       0
+                             9           -	       -
+                            10           9	       1
+      VxWorks8      No      11           -	       -
+                            12          10	       2
+                            13           -	       -
+                            14          11	       3
+                            15           -	       -
+      ------------------------------------------------------------
+                            16          16	       0
+                            17          17	       1
+                            18          18	       2
+      VxWorks16     Yes     19          19	       3
+                            20          20	       4
+                            21          21	       5
+                            22          22	       6
+                            23          23	       7
+      ------------------------------------------------------------
+\ce
+
+FEATURES
+
+This section describes all features of the board, supported or not.
+It documents all configurations of the board and the interaction between
+features and configuration items.
+
+\sh List of Hardware Features (Freescale T4240QDS board)
+
+\ts
+Hardware Interface | Controller | Driver/Component          | Status
+-----------------------------------------------------------------------
+UART:0             | on-chip    | DRV_SIO_NS16550           | SUPPORTED
+UART:1             | on-chip    | DRV_SIO_NS16550           | SUPPORTED
+UART:2             | on-chip    | DRV_SIO_NS16550           | SUPPORTED
+UART:3             | on-chip    | DRV_SIO_NS16550           | SUPPORTED
+1GB-ETHERNET:0     | on-chip    | DRV_VXBEND_QORIQMEMAC     | SUPPORTED
+1GB-ETHERNET:1     | on-chip    | DRV_VXBEND_QORIQMEMAC     | SUPPORTED
+1GB-ETHERNET:2     | on-chip    | DRV_VXBEND_QORIQMEMAC     | SUPPORTED
+1GB-ETHERNET:3     | on-chip    | DRV_VXBEND_QORIQMEMAC     | SUPPORTED
+1GB-ETHERNET:4     | on-chip    | DRV_VXBEND_QORIQMEMAC     | SUPPORTED
+1GB-ETHERNET:5     | on-chip    | DRV_VXBEND_QORIQMEMAC     | SUPPORTED
+1GB-ETHERNET:6     | on-chip    | DRV_VXBEND_QORIQMEMAC     | SUPPORTED
+1GB-ETHERNET:7     | on-chip    | DRV_VXBEND_QORIQMEMAC     | SUPPORTED
+1GB-ETHERNET:8     | on-chip    | DRV_VXBEND_QORIQMEMAC     | SUPPORTED
+1GB-ETHERNET:9     | on-chip    | DRV_VXBEND_QORIQMEMAC     | SUPPORTED
+1GB-ETHERNET:10    | on-chip    | DRV_VXBEND_QORIQMEMAC     | SUPPORTED
+1GB-ETHERNET:11    | on-chip    | DRV_VXBEND_QORIQMEMAC     | SUPPORTED
+1GB-ETHERNET:12    | on-chip    | DRV_VXBEND_QORIQMEMAC     | SUPPORTED
+1GB-ETHERNET:13    | on-chip    | DRV_VXBEND_QORIQMEMAC     | SUPPORTED
+1GB-ETHERNET:14    | on-chip    | DRV_VXBEND_QORIQMEMAC     | SUPPORTED
+1GB-ETHERNET:15    | on-chip    | DRV_VXBEND_QORIQMEMAC     | SUPPORTED
+DDR:0              | on-chip    | fslDdrCtlr.c              | SUPPORTED
+DDR:1              | on-chip    | fslDdrCtlr.c              | SUPPORTED
+DDR:2              | on-chip    | fslDdrCtlr.c              | SUPPORTED
+NOR-FLASH          | S29GL128P  | DRV_VXB_NORFLASH          | SUPPORTED
+NAND-FLASH         | MT29F4G08A |                           | UNSUPPORTED
+TIMER              | on-chip    | DRV_TIMER_M85XX           | SUPPORTED
+TIMER              | on-chip    | DRV_TIMER_OPENPIC         | SUPPORTED
+TIMER              | on-chip    | DRV_TIMER_OPENPIC         | SUPPORTED
+PCI-E-HOST:0       | on-chip    | DRV_PCIBUS_QORIQ_PCIEX    | SUPPORTED
+PCI-E-HOST:1       | on-chip    | DRV_PCIBUS_QORIQ_PCIEX    | SUPPORTED
+PCI-E-HOST:2       | on-chip    | DRV_PCIBUS_QORIQ_PCIEX    | SUPPORTED
+PCI-E-HOST:3       | on-chip    | DRV_PCIBUS_QORIQ_PCIEX    | SUPPORTED
+RapidIO:0          | on-chip    | vxbFslSRio.c              | SUPPORTED
+RapidIO:1          | on-chip    | vxbFslSRIo.c              | SUPPORTED
+SATA:0             | on-chip    | DRV_STORAGE_FSLSATA       | SUPPORTED
+SATA 1             | on-chip    | DRV_STORAGE_FSLSATA       | SUPPORTED
+DMA:0              | on-chip    | DRV_DMA_FSL               | SUPPORTED
+DMA:1              | on-chip    | DRV_DMA_FSL               | SUPPORTED
+I2C:0              | on-chip    | DRV_I2CBUS_FSL            | SUPPORTED
+I2C:1              | on-chip    |                           | UNSUPPORTED
+I2C:2              | on-chip    |                           | UNSUPPORTED
+I2C:3              | on-chip    |                           | UNSUPPORTED
+I2C_RTC            | DS3232     | DRV_I2C_RTC               | SUPPORTED
+I2C_EEPROM         | AT24C02    | DRV_I2C_EEPROM            | SUPPORTED
+I2C_MUX_SWITCH     | PCA9547    | DRV_I2C_GENERIC_DEV       | SUPPORTED
+I2C_MUX_SWITCH     | PCA9547    | DRV_I2C_GENERIC_DEV       | SUPPORTED
+SPI                | on-chip    | DRV_ESPI_FSL              | SUPPORTED
+SPI-FLASH          | SST25WF040 | DRV_SPIFLASH_SP25         | SUPPORTED
+USB-HOST:0         | on-chip    | INCLUDE_USB               | SUPPORTED
+USB-TARGET:0       | on-chip    |                           | UNSUPPORTED
+USB-HOST:1         | on-chip    | INCLUDE_USB               | SUPPORTED
+USB-TARGET:1       | on-chip    |                           | UNSUPPORTED
+SD-CARD            | on-chip    | DRV_STORAGE_SDHC          | SUPPORTED
+MMC-CARD           | on-chip    |                           | UNSUPPORTED
+GPIO               | on-chip    |                           | UNSUPPORTED
+SEC & ENCRYPTION   | on-chip    |                           | UNSUPPORTED
+TMU                | on-chip    |                           | UNSUPPORTED
+\te
+
+\sh Feature Interactions
+Refer to the board vendor's documentation.
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and board hardware
+elements.
+
+\sh Verified Hardware
+This BSP has been verified on REV B of the Freescale T4240QDS board.
+
+\sh Memory Maps
+The default hardware memory map of the T4240QDS BSP is as follows:
+
+\ts
+Start          | Size  | End            | Access to
+----------------------------------------------------
+0x0000_0000    |  2GB  | 0x7FFF_FFFF    | DDR3 SDRAM
+0x7F40_0000    |  8MB  | 0x7FBF_FFFF    | 8MB reserved memory for QMAN hardware
+0x7FC0_0000    |  4MB  | 0x7FFF_FFFF    | 4MB reserved memory for BMAN hardware
+0x8000_0000    |  64MB | 0x83FF_FFFF    | PCIe 1 Prefetchable Memory
+0x8400_0000    |  64MB | 0x87FF_FFFF    | PCIe 1 Non-Prefetchable Memory
+0x8800_0000    |  64MB | 0x8BFF_FFFF    | PCIe 1 IO
+0x8C00_0000    |  64MB | 0x8FFF_FFFF    | PCIe 1 IO32
+0xA000_0000    |  64MB | 0xA3FF_FFFF    | PCIe 2 Prefetchable Memory
+0xA400_0000    |  64MB | 0xA7FF_FFFF    | PCIe 2 Non-Prefetchable Memory
+0xA800_0000    |  64MB | 0xABFF_FFFF    | PCIe 2 IO
+0xAC00_0000    |  64MB | 0xAFFF_FFFF    | PCIe 2 IO32
+0xC000_0000    |  64MB | 0xC3FF_FFFF    | PCIe 3 Prefetchable Memory
+0xC400_0000    |  64MB | 0xC7FF_FFFF    | PCIe 3 Non-Prefetchable Memory
+0xC800_0000    |  64MB | 0xCBFF_FFFF    | PCIe 3 IO
+0xCC00_0000    |  64MB | 0xCFFF_FFFF    | PCIe 3 IO32
+0xD000_0000    |  64MB | 0xD3FF_FFFF    | PCIe 4 Prefetchable Memory
+0xD400_0000    |  64MB | 0xD7FF_FFFF    | PCIe 4 Non-Prefetchable Memory
+0xD800_0000    |  64MB | 0xDBFF_FFFF    | PCIe 4 IO
+0xDC00_0000    |  64MB | 0xDFFF_FFFF    | PCIe 4 IO32
+0xC000_0000    | 128MB | 0xC7FF_FFFF    | SRIO 1 Memory
+0xC800_0000    | 128MB | 0xCFFF_FFFF    | SRIO 2 Memory
+0xF400_0000    |  32MB | 0xF5FF_FFFF    | BMAN
+0xF600_0000    |  32MB | 0xF7FF_FFFF    | QMAN
+0xFD00_0000    |  4MB  | 0xFD3F_FFFF    | DCSR
+0xFE00_0000    |  16MB | 0xFEFF_FFFF    | CCSBAR
+0xFFDF_0000    |  4KB  | 0xFFDF_0FFF    | QIXIS
+0xFF00_0000    |  16MB | 0xFFFF_FFFF    | NOR FLASH
+0x01_0000_0000 |  2GB  | 0x01_7FFF_FFFF | DDR3 SDRAM
+0x02_0000_0000 |  2GB  | 0x02_7FFF_FFFF | DDR3 SDRAM
+\te
+
+\sh Serial Configuration
+
+UART1 as default console. If UART2, UART3, or UART4 will be used, CONSOLE_TTY
+should be changed to 1, 2, or 3 in config.h.
+
+Note: To evaluate UART3 and/or UART4 on T4240QDS, a custom DB9 interface
+cable must be used on actual HW and the Reset Configuration Word (RCW)
+needs to be changed.  The UART3 and the UART4 are tested only on Simics.
+
+Default configuration is:
+    Baud Rate: 115200
+    Data: 8 bit
+    Parity: None
+    Stop: 1 bit
+    Flow Control: None
+
+\sh Boot Process
+
+Upon reset, the e6500 begins executing from 0xFFFF_FFFC (on thread0 on the 
+physical core when it is released). Only the last 4 KB of memory is mapped 
+by the TLB. The instruction at 0xFFFF_FFFC branches to resetEntry( ) 
+(which is located at the last 2 KB of memory) to begin initialization and 
+mapping of memory static TLB entries. The DDR SDRAM is then mapped to 0x0 
+where the vectors are set up for use, and execution is then transferred to 
+RAM after copying and uncompressing (if necessary).
+
+The thread1 on all the physical cores begins executing from sysThreadReset()
+on the VxWorks image in SMP.
+All the mappings are done by thread0, TLBs are shared between the two threads
+on the same physical core.
+
+\sh Boot Process and VxWorks Images
+
+To include AMP support in an image, add the INCLUDE_AMP component.
+
+AMP is supported in a VxWorks / VxWorks combination.
+The VxWorks AMP images are loaded and run on the secondary CPUs using wrLoad.
+
+The following configurations are suggested as baselines:
+
+\ts
+Image Type | Components
+------------------------------
+AMP primary | INCLUDE_MSD INCLUDE_WDB_PROXY_MIPC INCLUDE_WRLOAD INCLUDE_AMP INCLUDE_AMP_CPU_00
+AMP secondary | INCLUDE_MSD INCLUDE_WDB_COMM_MIPC INCLUDE_WRLOAD_IMAGE_BUILD INCLUDE_AMP INCLUDE_AMP_CPU_0x *
+
+\te
+* Substitute x with 1 - 11 to match the physical core for which this 
+image is targeted.
+
+\sh VxWorks - VxWorks AMP with wrload and MIPC
+
+You must use Workbench or vxprj to build the BSPs.  You can build any 
+image for CPU0 from the fsl_t4240_qds BSP. This image is configured for 
+AMP, wrload and MSD (MIPC serial device).  For CPUs 1-11 you can build a 
+RAM-based image (vxWorks) that is also configured to be loaded by wrload 
+and to route the console to CPU0.  See documentation on MIPC/wrload and 
+MIPC Serial Device for details.
+
+This the latest approach to loading VxWorks images to additional CPUs.
+It is configured by default.
+
+Boot using an image created from fsl_t4240_qds BSP using vxprj or Workbench; 
+the default bootrom provided from the fsl_t4240_qds BSP may be used to boot 
+this image.
+
+Call wrload either by adding as part of the usrAppInit or by calling 
+from a shell such as the target shell. For Example:
+
+\cs
+-> wrload "-file <image_dir01>/vxWorks -cpu 2"
+-> wrload "-file <image_dir02>/vxWorks -cpu 4"
+-> wrload "-file <image_dir03>/vxWorks -cpu 6"
+-> wrload "-file <image_dir04>/vxWorks -cpu 8"
+-> wrload "-file <image_dir05>/vxWorks -cpu 10"
+-> wrload "-file <image_dir06>/vxWorks -cpu 12"
+-> wrload "-file <image_dir07>/vxWorks -cpu 14"
+-> wrload "-file <image_dir08>/vxWorks -cpu 16"
+-> wrload "-file <image_dir09>/vxWorks -cpu 18"
+-> wrload "-file <image_dir10>/vxWorks -cpu 20"
+-> wrload "-file <image_dir11>/vxWorks -cpu 22"
+\ce
+
+The number specified by -cpu option must be the identification number assigned
+to thread0 on the physical core, such as 2, 4, 6, 8, 10, 12, 14, 16, 18, 20 or
+22.
+Thread1 cannot be assigned as the primary core.  That is because
+thread0 must be enabled earlier than thread1 and also a VxWorks SMP instance
+must always include both threads of a physical core when both threads are
+enabled.
+
+wrload supports modifying the bootline using "-tsym", which is highly
+recommended for setting the network device and CPU index correctly.  
+See wrload documentation for details.
+The image you load should be built from the fsl_t4240_qds BSP using vxprj or
+Workbench.
+
+\sh wrload and Memory Management.
+
+wrload, executed from the primary CPU, calls the function usrWrloadMap() to
+dynamically allocate virtual memory pages in the primary CPU's context for
+the purpose of placing the secondary image into physical memory.  The argument 
+to usrWrloadMap() is 'pAddr' which is set based upon the ELF file's load memory
+address (LMA) plus a physical bias.
+
+The physical bias is compiled into the loaded image via the CDF parameter
+WRLOAD_IMAGE_BUILD_PHYS_BIAS.  The value of the parameter is stored across two
+32-bit variables as (_wrload_bias_high_32 | _wrload_bias_low_32). wrload, on
+the primary CPU, reads these symbols directly from the ELF file prior to
+loading.
+
+The -loadbias argument is currently unsupported.  If the -loadbias
+argument is used, the primary CPU will load the image to the physical
+bias specified by -loadbias; however the secondary CPU cannot execute the
+image because the sysPhysMemDesc table and sysVirtToPhys routines use the
+WRLOAD_IMAGE_BUILD_PHYS_BIAS macro defined at compile-time.
+
+There are a few additional limitations when using WRLOAD_IMAGE_BUILD_PHYS_BIAS.  
+If a load bias is used, the MMU no longer uses a 1-to-1 physical-to-virtual 
+mapping.  The ICE may require a 1-to-1 mapping (with a physical bias of 0) 
+to properly debug an image.  Finally, the bootrom supports the bias, but 
+constrains it to lie on a 256MB boundary.
+
+For secondary images the bootrom (romInit) reads a shared-memory area,
+starting at CPUn_SPACE to get the image's stack pointer, starting address,
+and MMU data.  The primary image sets up CPUn_SPACE from sysAmpCpuEnable().
+The usrWrload functions usrWrloadBiasHighGet() and usrWrloadBiasLowGet()
+are provided for sysAmpCpuEnable() to get the _wrload_bias value and put it
+into CPUn_LOCAL_MEM_ERPN and CPUn_LOCAL_MEM_RPN.  The bootrom uses RPN and
+ERPN to specify the (40-bit) physical address for a 256MB mapping that the
+secondary image starts running in.  The corresponding virtual address is
+derived from the CPUn_FUNC_START_ADR.  Later, as the image boots and runs
+sysHwInit() this initial 256MB mapping is overwritten by sysStaticTlbDesc[].
+This allows the entries in sysStaticTlbDesc[] to expand (or reduce) the
+image's footprint to any workable size.
+
+The primary image's MMU does not include a mapping for the physical area
+used by the secondary image(s).  This protects the secondary image(s)
+from the primary.  The primary image uses usrWrloadMap() to map a virtual
+scratchpad area, created just to load the image.  This area must be outside
+the primary's current virtual space and is typically the lower 32 bits of
+the image physical address.  However, if these lower 32 bits overlap the
+primary's current virtual space, an error is returned and wrload will abort.
+Consequently, a fixed offset, wrloadPriScratchMemOffset, based on the CDF
+parameter WRLOAD_PRI_SCRATCH_OFFSET, is added to the lower 32 bits to 
+generate the virtual address.
+
+As indicated above, the image virtual address is derived from the start
+address and should be RAM_LOW_ADRS.  The physical address is equal to
+the virtual address added to the WRLOAD_IMAGE_BUILD_PHYS_BIAS.  Virtual
+(RAM_LOW_ADRS) and physical (RAM_LOW_ADRS + WRLOAD_IMAGE_BUILD_PHYS_BIAS)
+address tables are shown below for an even division of memory to the 12
+physical cores for 3 cases of memory: 3GB and 6GB.
+
+For example: If the core 0 primary loads physical core 4 on an 8GB
+configuration, then for physical core 4 (logical core 8):
+
+RAM_LOW_ADRS                 = 00_0010_0000
+WRLOAD_IMAGE_BUILD_PHYS_BIAS = 01_0000_0000
+
+Since, by default, usrWrloadMap() would load physical core 4 right over 
+the top of core 0, we need to use a scratchpad area outside core 0's memory 
+region.  Since core 0 uses memory from 0 to 0x4000_0000 for the 8GB example, 
+let's use 0x4000_0000 and above as the virtual scratchpad area.  So, for 
+core 0:
+
+WRLOAD_PRI_SCRATCH_OFFSET    = 0x4000_0000
+
+Remember, this is a virtual address for core 0; the corresponding physical
+address is where the image is actually loaded, so we don't have to worry 
+about using the same virtual scratchpad to load all physical cores.
+
+Here are the tables:
+\cs
+VirtualAddr CORE  Physical Addr
+B000_0000    11   01_3000_0000
+A000_0000    10   01_2000_0000
+9000_0000    9    01_1000_0000
+8000_0000    8    01_0000_0000
+7000_0000    7    00_7000_0000
+6000_0000    6    00_6000_0000
+5000_0000    5    00_5000_0000
+4000_0000    4    00_4000_0000
+3000_0000    3    00_3000_0000
+2000_0000    2    00_2000_0000
+1000_0000    1    00_1000_0000
+0000_0000    0    00_0000_0000
+
+VirtualAddr CORE Physical Addr  CORE  Physical Addr  CORE  Physical Addr
+6000_0000    3    00_6000_0000    7    01_6000_0000    11   02_6000_0000
+4000_0000    2    00_4000_0000    6    01_4000_0000    10   02_4000_0000
+2000_0000    1    00_2000_0000    5    01_2000_0000    9    02_2000_0000
+0000_0000    0    00_0000_0000    4    01_0000_0000    8    02_0000_0000
+\ce
+
+
+Note: These are just examples and the current default local memories are not
+configured like the above example.  The AMP bundles that this BSP supports are
+configured as below.
+
+This BSP supports BUNDLE_AMP_PRI_OF_12, BUNDLE_AMP_SEC_OF_12,
+BUNDLE_AMP_TER_OF_12, BUNDLE_AMP_QUA_OF_12, BUNDLE_AMP_QUI_OF_12,
+BUNDLE_AMP_SEN_OF_12, BUNDLE_AMP_SEP_OF_12, BUNDLE_AMP_OCT_OF_12,
+BUNDLE_AMP_NON_OF_12, BUNDLE_AMP_DEN_OF_12, BUNDLE_AMP_ELE_OF_12,
+BUNDLE_AMP_DUO_OF_12 for twelve AMP configurations.
+The LOCAL_MEM_SIZE is configured 0x10000000 by default.
+
+\cs
+VirtualAddr CORE Physical Addr  CORE  Physical Addr  CORE  Physical Addr
+4000_0000                         4    01_4000_0000    8    02_4000_0000
+3000_0000    3    00_3000_0000    7    01_3000_0000    11   02_3000_0000
+2000_0000    2    00_2000_0000    6    01_2000_0000    10   02_2000_0000
+1000_0000    1    00_1000_0000    5    01_1000_0000    9    02_1000_0000
+0000_0000    0    00_0000_0000
+\ce
+
+This BSP supports BUNDLE_AMP_PRI_OF_06, BUNDLE_AMP_SEC_OF_06,
+BUNDLE_AMP_TER_OF_06, BUNDLE_AMP_QUA_OF_06, BUNDLE_AMP_QUI_OF_06 and
+BUNDLE_AMP_SEN_OF_06 bundles for six AMP configurations.
+The LOCAL_MEM_SIZE is configured 0x20000000 by default.
+
+\cs
+VirtualAddr CORE Physical Addr  CORE  Physical Addr  CORE  Physical Addr
+4000_0000                         4    01_4000_0000    8    02_4000_0000
+2000_0000    2    00_2000_0000    6    01_2000_0000    10   02_2000_0000
+0000_0000    0    00_0000_0000
+\ce
+
+This BSP supports BUNDLE_AMP_PRI, BUNDLE_AMP_SEC, and BUNDLE_AMP_TER bundles
+for three AMP configurations. 
+The LOCAL_MEM_SIZE is configured 0x40000000 by default.
+
+\cs
+VirtualAddr CORE Physical Addr  CORE  Physical Addr  CORE  Physical Addr
+4000_0000                         4    01_4000_0000    8    02_4000_0000
+0000_0000    0    00_0000_0000
+\ce
+
+\sh DDR RAM Size
+
+This BSP can support up to 2GB DDR memory as local memory.  By default,
+LOCAL_MEM_SIZE is configured
+PHYS_MEM_SIZE(0x80000000) - (QMAN_MEM_SIZE(0x800000) + BMAN_MEM_SIZE(0x400000)).
+
+Two additional 2GB DDR memories, (the physical addresses are
+0x01_0000_0000-0x01_7FFF_FFFF and 0x02_0000_0000-0x02_7FFF_FFFF) are also
+available for shared memory, RTP, AMP, and so on.
+
+Auto memory size detect is not implemented.
+
+\sh 40-bit Physical Addressing
+This BSP supports configuring a portion of RAM with a 40-bit physical address.
+This allows for loading VxWorks AMP images at 40-bit addresses.  By default,
+the BSP divides physical memory into thirds.  The 1st third is used for local
+memory for UP, SMP, and AMP on CPU0, as well as shared memory.  AMP images
+configured with LOCAL_MEM_ERPN set to 00 will also use this third.  The 2nd 
+and the last third can be configured to have a non-zero upper 8 bits (the ERPN) 
+for their physical addresses.  By default, the value for the 2nd is 01 and
+the value for the last one is 02; the 2nd and the last thirds will be mapped
+to 0x01'0000'0000 and 0x02'0000'0000.  These are configurable by setting the 
+DDR_SDRAM_LOCAL_ADRS1_H and DDR_SDRAM_LOCAL_ADRS2_H macros in config.h.
+
+To use 40-bit addressing in VxWorks-VxWorks AMP:
+
+1. Build a new bootrom with the default BSP configuration.
+
+2. Create projects for CPU0 and any other CPUs you want to use.
+
+3. In the non-CPU0 projects, set LOCAL_MEM_ERPN to 1 to load into the top
+   half of RAM, or 0 to load into the bottom half.  Also, set the upper 8 bits
+   of the WRLOAD_IMAGE_BUILD_PHYS_BIAS (to 0x0100000000, 0x0200000000 or 0) to
+   keep it in sync with the LOCAL_MEM_ERPN value.
+
+4. wrload the images normally.
+
+\sh Virtual Shared Memory
+This BSP contains enhanced support for AMP, allowing SMP images to participate
+in AMP, and allowing SMP images to be loaded above the 32-bit boundary.  To
+accommodate these features, one shared memory component has been added.
+
+1. Virtual Shared Memory - the INCLUDE_VIRTUAL_SM component is optional, but it
+must be added to any image built for loading above the 32-bit boundary, which
+utilizes SMP or MIPC.  This component sets up a virtual-to-physical mapping
+above the 1GB (default) page mapping SDRAM for accessing the shared MIPC data
+region.
+
+There are three configurable parameters for INCLUDE_VIRTUAL_SM: VIRTUAL_SM_BASE,
+VIRTUAL_SM_BASE_PHYS, and VIRTUAL_SM_SIZE.  These specify the virtual address,
+physical address, and size of the region, respectively.  These default to
+0x40000000, 0x20000000, and 0x01000000.  The BSP only supports 16MB for the
+size.
+
+Note: MIPC is located in this shared memory region by default.  For this
+reason, a new configuration parameter is added for the MIPC SM physical address:
+MIPC_SM_SYSTEM_POOL_BASE_PHYS.  When designing a system, this physical address
+should be matched with other images in the system (Linux, VxWorks, etc.).
+
+\sh Network Configuration
+The T4240 has two DPAA Frame Managers (Fman) each with 8 MEMAC controllers,
+for a total of 16 internal ethernet controllers. These controllers may be
+configured for 10Mbps, 100Mbps, or 1Gbps in either RGMII or SGMII mode, or
+10Gbps operation in XAUI mode, depending on the Reset Configuration Word
+(RCW) used with the system.
+
+By default, the T4240 QDS board ships with two on-board 10/100/1000 ports,
+configured for RGMII mode. These are defined as memac4 and memac12 in VxWorks.
+Additional ports can be added by installing SGMII or XAUI riser cards in
+slots 1, 2, 3, or 4. The exact configuration of cards that can be used depends
+on the RCW. The currently-tested configurations allow for two XAUI riser cards,
+for a total of two 10Gbps ethernet ports, and two SGMII riser cards, for a total
+of 7 1Gbps ports. (One 1Gbps port on one SGMII riser is typically not available,
+as it overlaps with an on-board port, which is set for RGMII. The RGMII
+configuration in the RCW takes precedence over the SerDes configuration.)
+
+Note that the SGMII and XAUI riser cards must be purchased separately from
+Freescale. The SGMII riser supports four 1000baseT ports, while the XAUI
+riser provides a single 10GBaseT port. The XAUI riser also has an SFP+ slot to
+accomodate a 10GbaseSR fiber module, but this is not provided with the card.
+
+The T4240 has four SERDES modules, which can be configured for several
+different protocols, each allowing for different peripheral configurations.
+The SERDES1 and SERDES2 modules can be configured to provide up to 8 lanes
+each for SGMII or XAUI use. It is possible to configure either module for
+SGMII (protocol 28) or XAUI (protocol 1). There can be one of each, or both
+can be set the same. Currently available boards come with one module set
+for SGMII and one for XAUI, allowing both 1Gbps and 10Gbps configurations
+to be evaluated.
+
+The current VxWorks BSP can be configured to support either configuration
+by editing two macros in the config.h file. The current default configuration
+is:
+
+\cs
+#define SERDES1_XAUI
+#define SERDES2_SGMII
+\ce
+
+This matches the rcw_1_28_6_12_1666MHz.bin configuration file included with
+the Freescale QorIQ SDK version 1.3.1 (which is the latest as of this
+writing). With this configuration, the following ports are available:
+
+\cs
+memac4 -- 10/100/1000 (RGMII)
+memac6 -- 10Gbps (XAUI)
+memac7 -- 10Gbps (XAUI)
+memac8 -- 10/100/1000 (SGMII)
+memac9 -- 10/100/1000 (SGMII)
+memac10 - 10/100/1000 (SGMII)
+memac11 - 10/100/1000 (SGMII)
+memac12 - 10/100/1000 (RGMII)
+memac13 - 10/100/1000 (SGMII)
+memac14 - 10/100/1000 (SGMII)
+memac15 - 10/100/1000 (SGMII)
+\ce
+
+The reverse configuration is also supported:
+
+\cs
+#define SERDES1_SGMII
+#define SERDES2_XAUI
+\ce
+
+With this configuration, the port layout is as follows:
+
+\cs
+memac0 -- 10/100/1000 (SGMII)
+memac1 -- 10/100/1000 (SGMII)
+memac2 -- 10/100/1000 (SGMII)
+memac3 -- 10/100/1000 (SGMII)
+memac4 -- 10/100/1000 (RGMII)
+memac5 -- 10/100/1000 (SGMII)
+memac6 -- 10/100/1000 (SGMII)
+memac7 -- 10/100/1000 (SGMII)
+memac12 - 10/100/1000 (RGMII)
+memac14 - 10Gbps (XAUI)
+memac15 - 10Gbps (XAUI)
+\ce
+
+Note that memac4 and memac12 are always in RGMII mode.
+
+It is also possible to define both SERDES1 and SERDES2 as either SGMII or
+XAUI. For example, the following matches the rcw_1_1_6_6_1666MHz.bin RCW file,
+also included with the SDK:
+
+\cs
+#define SERDES1_XAUI
+#define SERDES2_XAUI
+\ce
+
+The port layout for this configuration would be:
+
+\cs
+memac4 -- 10/100/1000 (RGMII)
+memac6 -- 10Gbps (XAUI)
+memac7 -- 10Gbps (XAUI)
+memac12 - 10/100/1000 (RGMII)
+memac14 - 10Gbps (XAUI)
+memac15 - 10Gbps (XAUI)
+\ce
+
+ 
+Unlike earlier QorIQ processors, which had two different types of MACs for
+10/100/1000 and 10Gbps (DTSEC and TGEC, respectively), the T4240 has only
+one universal controller, called the MEMAC. While each Fman has 8 total MEMACs,
+only two of them may be configured for 10Gbps support. In VxWorks,
+the 1Gbps-only ports are memac0, memac1, memac2, memac3, memac4, memac5 and
+memac8, memac9, memac10, memac11, memac12 and memac13. The memac6, memac7 and
+memac14 and memac15 ports may be used for either 10/100/1000 or 10Gbps,
+depending on the RCW configuration.
+
+All ports are supported by the vxbQorIQMemac driver. The driver will
+auto-negotiate and configure the port accordingly. The correct media type
+for a given port must be specified in the hwconf.c file (RGMII, SGMII or
+XAUI).
+
+Note that depending on the selected SERDES protocols, some board switches
+may need to be changed, as described in the "Known Issues" section.
+
+Each MEMAC unit is assigned to a logical CPU like the following table, in AMP
+configuration. (That is set in ampCpuTable[] and the "coreNum" attribute in
+memac0Resources[], memac1Resources[], ... and memac15Resources[] arrays.)
+
+\ts
+unit num | assigned logical CPU
+------------------------------
+0        | 2
+1        | 4
+2        | 6
+3        | 10
+4        | 0
+5        | 12
+6        | 0
+7        | 0
+8        | 14
+9        | 16
+10       | 18
+11       | 20
+12       | 8
+13       | 22
+14       | 0
+15       | 0
+\te
+
+When using Simics with a network driver, INCLUDE_DUMMY_MDIO should be included.
+
+\sh DPAA
+In addition to the standard MEMAC END driver, support is also
+provided for Qman, Bman, and Fman DPAA components. The vxbQorIQQman,
+vxbQorIQBman, and vxbQorIQFman modules support the following functionality:
+
+\is
+\i User creation of Qman frame queues
+\i Interrupt driven and polled Qman event handling
+\i Management of Bman buffer pools
+\i Use of Fman hard parser for RX checksum offload in the MEMAC driver
+\i APIs provided to program the keygen, parser, coarse classifier and policer in the Fman
+\ie
+
+Documentation for these APIs can be found in the following files:
+
+\is
+\i target/src/hwif/resource/vxbQorIQBmanPortal.c -- Bman API
+\i target/src/hwif/resource/vxbQorIQQmanPortal.c -- Qman API
+\i target/src/hwif/resource/vxbQorIQQmanFman.c -- Fman API
+\ie
+
+Also, several example Fman applications can be found in the
+target/src/demo/p4080 directory.
+
+\sh DDR3 Controller
+
+The T4240 has 3 DDR3 controllers, supporting DDR3 DRAM devices. The T4240QDS
+supports them with two industry-standard JEDEC DDR3 DIMM connectors (240 pin)
+per controller. If quad-rank DIMMs are used, only one DIMM per controller is
+permitted to be installed in DIMM #1 slot.
+
+There are two ways to initialize the T4240's DDR3 controllers, fixed parameter
+mode and SPD (Serial Presence Detect) mode. Initializing the DDR3 controller
+with the calculated parameters in the BSP is called fixed parameter mode.
+Calculating the initial values on the basis of the gotten SDRAM parameters from
+the serial EEPROM on DRAM module and setting the DDR3 controller registers with
+the values is called SPD mode. The benefit of using SPD mode is that bootrom
+will not fail to boot up when the DRAM Modules are changed.
+Note, not all DDR3 DIMMs are supported by the SPD mode. SPD mode is enabled
+in fsl_t4240_qds BSP by default. If the fixed parameter mode is desired, please 
+add the following definition:
+
+\cs
+#define  DDR_FIX_PARAMS_CFG      DDR_FIX_PARAMS_DISABLE
+\ce
+
+in sysDdrConf.c in the BSP.
+
+Note:
+   A 16KB internal SRAM is needed by the DDR Controller Driver.
+   For fsl_t4240_qds, half of the T4240 L1 D-cache lines are locked as
+   a temporary SRAM.
+   The base address of the SRAM must be aligned on the 4KB size.
+   The DDR controller driver couldn't report the system valid memory size. 
+   The SPD mode has only been verified on Freescale T4240QDS proto3 and proto4
+   versions.
+   For fixed parameter mode, only the DRAM Module below has been tested and
+   confirmed:
+
+\cs
+Mfg.   |Part Number            |Size |Ranks |ECC |Data Rate | Verified? | Notes
+-------------------------------------------------------------------------------------
+Micron |MT9JSF25672AZ-2G1      |2GB  |1     | Y  |1600      | Yes       | Or later revs
+\ce
+
+\sh Serial RapidIO Support
+
+There are 2 RapidIO ports on this board, which share the interfaces with PCIe ports. To
+enable RapidIO ports, the RCW needs to be reconfigured by the tool - pbl_image_tool.html
+or qoriqconfig tool. Please contact Freescale to get such configure tools.
+
+To enable RapidIO support, make sure the following components are defined
+in config.h, or add it into your VIP dynamically, the following components only enable
+basic RapidIO share memory application between host and slave.
+
+\cs
+   #define INCLUDE_RAPIDIO_BUS
+   #define DRV_SRIO_FSL
+   #define DRV_SRIO_CPU_EP
+\ce
+
+To enable the message END driver based on RapidIO, the following components should
+be added.
+
+\cs
+   #define DRV_RESOURCE_QORIQRMAN
+   #define INCLUDE_MSG_NET
+\ce
+
+Note:
+   1. This message END driver needs a MAC address, use message net driver resource "msgNetHwAdr"
+      in hwconf.c to set different MAC address for different port/board.
+   2. RapidIO share the interfaces with PCIe ports, so please confirm RapidIO memeory base
+      (FSL_RIO_MEM_ADRS) doesn't overlap with PCIe memory base address.
+   3. RapidIO share memory net is unsupported in this bsp.
+
+\sh PCI Express Support
+
+The T4240 processor has a total of 4 PCI Express controllers. Its PCIEX1 and 
+PCIEX3 are enabled by the QDS board factory default settings, which are wired 
+to I/O slot 5 and 7. Use of the PCIe slots requires the DRV_PCIBUS_QORIQ_PCIEX 
+driver component. Adding INCLUDE_PCI_BUS with vxprj or from Workbench will 
+automatically add that component, as well as INCLUDE_PCI_BUS_AUTOCONF, which 
+is also required.  INCLUDE_PCI_BUS_SHOW component can optionally be included 
+to add the PCI show routines.  Any supported VxBus PCI driver should work once 
+the QorIQ PCI bus controller driver is present. Tests have been done with the 
+INCLUDE_GEI825XX_VXB_END.
+
+The PCIe controllers are supported in root complex mode only.
+
+This BSP defaults to use PCIe legacy interrupts. To enable PCIe MSI interrupts,
+define the following macro in config.h, or add it to your project using
+the vxprj tool or Workbench:
+
+\cs
+    #define INCLUDE_INTCTLR_DYNAMIC_LIB
+\ce
+
+\sh I2C
+The DS3232 RTC, Atmel EEPROM AT24C02 (address is 0x57 on channel 0) and
+multiplexer device PCA9547 are supported via the I2C bus in this release. 
+Some board-specific data, including MAC addresses, serial number/errata, are
+stored in the EEPROM AT24C02 (address is 0x57). Other EEPROM connected to the
+I2C bus 0 also stores some very important board information. Please save
+the data before overwriting it if necessary.
+For details, please refer to
+\tb T4240QDS QorIQ Development System Reference Manual.
+The QDS board also has Vitesse VSC3316 crossbar switch chips, which must be
+configured via I2C in order to enable expansion slots 1, 2, 3, and 4, which are
+connected to the SERDES1 and SERDES2 blocks in the T4240. A driver for this
+chip is provided for this purpose.
+
+The primary I2C controller currently uses polled mode by default.
+ 
+To enable I2C functionality, please define the corresponding macros in config.h:
+  
+\cs
+    #define INCLUDE_I2C_BUS
+    #define DRV_I2CBUS_FSL
+\ce
+		   
+To use the DS3232 RTC device, please define the following macros in config.h:
+
+\cs
+    #define DRV_I2C_RTC
+    #define INCLUDE_TIMER_RTC
+\ce
+
+Then you can use the routine sysRtcSet(), which is a command-line utility for 
+setting the RTC from the VxWorks kernel prompt. The user will be prompted for 
+the appropriate input. To read the date and the time, the sysRtcGet() routine 
+can be called. 
+
+To use the EEPROM, define the following macros in config.h
+
+\cs
+    #define DRV_I2C_EEPROM
+    #define INCLUDE_EEPROMDRV
+    #define INCLUDE_TIMER_STUB
+\ce
+
+INCLUDE_TIMER_STUB is used to optimize delay time when writing EEPROM.
+
+The EEPROM will be used as an I/O device, which can be listed with "devs"
+command:
+
+\cs
+-> devs
+drv name                
+  0 /null               
+  1 /tyCo/0             
+  1 /tyCo/1
+  1 /tyCo/2
+  1 /tyCo/3
+  5 /eeprom/0                      
+value = 25 = 0x19
+-> 
+\ce
+
+To use the Vitesse VSC3316 driver, define the following macros in config.h:
+
+\cs
+    #define DRV_I2C_VSC3316
+    #define DRV_I2C_GENERIC_DEV
+\ce
+
+The generic device is required in order to enable access to the PCA9547 mux
+devices. (The Vitesse 3316 chips' I2C lines are connected to one of the
+muxes.) The VSC3316 driver is included automatically if MEMAC support is
+enabled, as it is required in order to use SGMII or XAUI riser cards.
+
+The standard I/O routines, such as open(), read(), write(), ioctl(), close()...,
+can be used to access them.
+
+Note: The I2C devices are only supported in UP mode. It is not SMP-awareness.
+
+\sh DMA
+Freescale DMA Controller 0 is supported in this release.
+To enable DMA controller support, please define the following macro in config.h:
+\cs
+    #define DRV_DMA_FSL
+\ce
+The maximum transfer size of a single transaction is (64M - 1) bytes.
+Note that the chain mode is not supported in the current version.
+
+\sh eSPI controller and SPI Flash
+The Freescale eSPI Controller and SPI Flash SST25WF040(512KB) are supported in
+this release. The eSPI controller uses interrupt mode, by default. To enable
+this functionality, please define the following macro in config.h:
+\cs
+    #define DRV_SPIFLASH_SP25
+\ce
+
+\sh SD memory card controller (eSDHC)
+On the T4240QDS board, there is an eMMC device on board. Both eMMC and the SD
+card slot (J55) are connected to the on-chip enhanced SD host controller
+(eSDHC).
+Switching between the eMMC and the SD card slot is controlled via a QIXIS
+register. Please refer to section 2.1.1 of the 
+\tb T4240QDS QorIQ Development System Reference Manual.
+
+The current eSDHC driver only supports the SD card. Supporting eMMC is an 
+enhancement for future work. Thus, the BSP sets the switch to select the 
+SD card slot by default.  SDHC_CD and SDHC_WP pins were added to T4240 for 
+rev 2 silicon. They are not functional on rev 1.x silicon.
+
+To enable eSDHC support, make sure the following component is defined
+in config.h before you create the VIP, or add it to your VIP dynamically.
+
+\cs
+    #define DRV_STORAGE_SDHC
+\ce
+
+Use of the internal DMA engine, and selection of interrupt vs. polled mode,
+are configured by setting the values of 'dmaMode' and 'polling' in hwconf.c.
+For example, to select interrupt mode and enable use of the internal DMA engine:
+\cs
+    /@ hwconf.c @/
+    ...
+    struct hcfResource sdhciResources[] = {
+    ...
+        { "dmaMode",             HCF_RES_INT,    { (void *)1 } },
+        { "polling",             HCF_RES_INT,    { (void *)0 } },
+    ...
+    };
+    ...
+\ce
+
+To use SD, file system configuration is usually required. Please refer to
+the "Block Device File System Configuration" chapter below for more details
+about how to use SD on a VxWorks file system.
+
+\sh USB
+USB host mode is supported on T4240QDS.
+
+\sh Host Mode
+To enable USB host support, make sure the following component is included
+in config.h or your VIP:
+
+\cs
+#define INCLUDE_USB
+\ce
+
+Note: The macro definition INCLUDE_USB_PCI_STUB_CUSTOM must be defined
+if INCLUDE_USB is enabled, by default it would be defined if the INCLUDE_USB 
+is enabled in config.h. The reason is that the local BSP directory file 
+"usbPciStub.c" has been removed and uses, instead, the public file 
+"config/comps/src/usbPciStub.c" as a replacement.
+
+Host mode has only been validated using mass storage target devices.
+
+For more information, please refer to the
+\tb Wind River USB for VxWorks 6 PROGRAMMER'S GUIDE.
+
+To use USB, file system configuration is usually required. Please refer
+to the "Block Device File System Configuration" chapter below for details
+about how to use SATA on a VxWorks file system.
+
+\sh SATA
+There are 2 SATA interfaces on the T4240QDS board. To enable the SATA
+interfaces, make sure the following component is defined in config.h before you
+create the VIP, or add it to your VIP dynamically.
+
+\cs
+    #define DRV_STORAGE_FSLSATA
+\ce
+
+To use SATA, file system configuration is usually required. Please refer 
+to the "Block Device File System Configuration" chapter below for details
+about how to use SATA on VxWorks file system.
+
+\sh TrueFFS
+The standard Wind River TrueFFS product is supported in this release.
+
+This BSP uses the 128MB Spansion S29GL01P flash as the TrueFFS media.
+VxWorks maps 16 MB of FLASH address space at 0xFF800000 - 0xFFFFFFFF.
+
+Note: A VxWorks bootrom is stored in 0xFFF00000~0xFFFFFFFF, 8 MBytes of space
+(FF000000~0xFF7FFFFF) is used for TrueFFS; please don't extend the TFFS space
+before you carefully check the flash memory map, otherwise misuse of TFFS may
+damage the bootrom; it would cause the board boot failure.
+
+\ts
+Start       | Size     | End         | Comment
+------------------------------------------------
+0xFF00_0000 | 8MB      | 0xFF7F_FFFF | TrueFFS
+0xFF80_0000 |          | 0xFFED_FFFF | unused
+0xFFEE_0000 | 128KB    | 0xFFEF_FFFF | NVRAM
+0xFFF0_0000 | 1MB      | 0xFFFF_FFFF | VxWorks bootrom or rom_Compress image
+\te
+
+Additionally, this BSP also supports use of the 512KB SST25WF040 SPI flash as
+the TrueFFS media 1.
+
+\ts
+Start       | Size     | End          | Comment
+------------------------------------------------
+0           | 512KB     | 0x7_FFFF    | TrueFFS
+\te
+
+To use TrueFFS, define INCLUDE_TFFS in config.h. To configure the SPI flash as
+another TrueFFS, component DRV_SPIFLASH_SP25 also needs to be defined in
+config.h.
+
+Note that INCLUDE_TFFS_STUB_VXBFLASH will be added automatically if
+INCLUDE_TFFS is defined in config.h or added to the project because the VxBus
+Flash driver is used in this BSP.
+
+When using TrueFFS on a new FLASH for the first time, you should format and 
+configure the FLASH by using the following examples.
+
+Config the nor Flash as "/tffs0":
+
+\cs
+    sysTffsFormat (0);
+    usrTffsConfig (0, 0, "/tffs0/");
+\ce
+If you are using DOSFS, please use:
+
+\cs
+    dosfsDiskFormat ("/tffs0");
+\ce
+
+Config the spi Flash as "/tffs1":
+
+\cs
+    sysTffsFormat (1);
+    usrTffsConfig (1, 0, "/tffs1/");
+\ce
+If you are using DOSFS, please use:
+
+\cs
+    dosfsDiskFormat ("/tffs1");
+\ce
+
+Note: If you are running these commands in the VxWorks kernel shell, you may
+prefer to run the format operations as separate tasks, e.g.
+\cs
+    sp sysTffsFormat, 0      /@ for Nor flash @/
+    sp sysTffsFormat, 1      /@ for SPI flash @/
+\ce
+since they can take a long time to complete.
+
+You should now be able to use VxWorks I/O and file system commands to access
+the FLASH device as if it were a disk.  For example, you can copy a VxWorks
+image from your host to TFFS by using file system 'copy'.  Of course, you 
+should define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/tffs0/vxWorks");
+    or
+    copy ("vxWorks", "/tffs1/vxWorks");
+\ce
+
+Note: There is not enough space for "/tffs1". The SST25WF040 chip only has
+512KB.
+
+If you want to use "/tffs0" as a boot device, you should follow these
+instructions:
+
+For command-line mode, make sure INCLUDE_TFFS is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the flash chip.  Also make sure that you have all the necessary file 
+system components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_TFFS_MOUNT
+    INCLUDE_BOOT_FILESYSTEMS
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see
+"vxWorks.bin(default_romCompress)" item listed in the project; right click it
+and select "Build Target", which generates a default_romCompress.bin in
+the project directory; program it into the flash chip as a bootrom.
+
+Below is an example of using /tffs as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /tffs0/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : user
+    ftp password (pw)    : passwd
+    flags (f)            : 0x0
+    target name (tn)     : T4240QDS
+    other (o)            : memac4
+\ce
+
+\sh Block Device File System Configuration
+
+Block devices such as SD/USB/SATA are usually used based on the file system.
+VxWorks supports 2 kinds of file systems: dosFs and HRFS. Below are some 
+sample component definitions that can be added in VIP to use dosFs:
+
+\cs
+    #define INCLUDE_DOSFS
+    #define INCLUDE_DOSFS_MAIN
+    #define INCLUDE_DOSFS_CHKDSK
+    #define INCLUDE_DOSFS_FMT
+    #define INCLUDE_DOSFS_FAT
+    #define INCLUDE_DOSFS_SHOW
+    #define INCLUDE_DOSFS_DIR_VFAT
+    #define INCLUDE_DOSFS_DIR_FIXED
+    #define INCLUDE_FS_MONITOR
+    #define INCLUDE_FS_EVENT_UTIL
+    #define INCLUDE_ERF
+    #define INCLUDE_XBD
+    #define INCLUDE_XBD_BLKDEV
+    #define INCLUDE_XBD_TRANS
+    #define INCLUDE_DEVICE_MANAGER
+    #define INCLUDE_XBD_BLK_DEV
+    #define INCLUDE_XBD_PART_LIB
+    #define INCLUDE_DISK_UTIL
+\ce
+
+When using a VxWorks block device for the first time, you should format it as 
+a FAT file system by using
+\cs
+    dosFsVolFormat ("NameOfTheBlockDevice", 0x20, 0);    /@ FAT32 format @/
+\ce
+or
+\cs
+    dosFsVolFormat ("NameOfTheBlockDevice", 0x10, 0);    /@ FAT16 format @/
+\ce
+
+Then, you can use VxWorks I/O and file system commands to access the block
+device as if it were a disk.  For example, you can copy a VxWorks image from
+your host to the SD card by using file system copy.
+
+\cs
+    copy ("vxWorks", "NameOfTheBlockDevice/vxWorks");
+\ce
+
+NOTE. According to the current design, SD/USB/SATA may be shown with different
+names in VxWorks, although all of them are block devices from the perspective
+of the application. To get the correct device name, use the "devs" command in
+the target shell:
+
+\cs
+    devs
+\ce
+
+All available devices will then be displayed with concrete names. Below are
+some typical names of block devices:
+
+\ts
+/sd0:1
+/s0p0:1
+/ata0:1
+/bd0
+/tffs0
+\te
+
+Block devices can also be used as the boot device in the bootloader. Below is   
+an example, using USB disk "/bd0" as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /bd0/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : user
+    ftp password (pw)    : passwd
+    flags (f)            : 0x0
+    target name (tn)     : T4240QDS
+    other (o)            : memac4
+\ce
+
+Below is another example, using TrueFFS device as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /tffs0/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : user
+    ftp password (pw)    : passwd
+    flags (f)            : 0x0
+    target name (tn)     : T4240QDS
+    other (o)            : memac4
+\ce
+
+\sh SPECIAL CONSIDERATIONS
+This section describes miscellaneous information that you need to know before
+using this BSP.
+
+The fsl_t4240_ds BSP has two regions of reserved memory, the locations of which
+must be consistent between the ROM kernels (vxWorks_rom, vxWorks_romCompress,
+bootrom, BOOTAPP profiles, etc.) and the downloadable kernels (vxWorks UP, SMP,
+and various AMP cores). One region is used for private memory for the QMAN's
+and BMAN's internal buffer managers. The other region is used for the multicore
+reset synchronization, where the primary core passes the program start addresses
+to the secondary cores. Each of these regions can be freely modified in the BSP,
+either relocated or resized or both. However, the boot flash must be
+reprogrammed for the changes to take effect.
+
+The QMAN and BMAN private reserved memory spaces are 8MB and 4MB respectively.
+They are assigned once, and only once, when the software performs system
+initialization of the hardware. Whatever location is assigned will be
+permanent until the next hardware reset. A pair of macros, QMAN_MEM_BASE
+and BMAN_MEM_BASE, in config.h, are used to locate the reserved space.
+Further details for selecting the addresses for the macros are in the
+comments of config.h.
+
+The multicore synchronization block is a set of reserved addresses that
+the secondary cores poll to get their program start address. Each core
+has a unique address that it polls. After the primary core has placed
+the application into memory, the secondary core should execute, be it either
+another OS or a stand-alone "bare iron" program; the primary core will
+write to the memory address corresponding to the secondary core, which
+is to execute the application.  This is completely a software design
+implemented in the assembly code of romInit and the c-source of sysLib.c. 
+A set of macros "CPUn_SPACE..." in config.h are used to locate and configure 
+the reserved memory. The default implementation places the polled addresses
+64KB apart, counting down from the typical RAM_LOW_ADRS of 0x0010_0000.
+Note, 64KB was chosen for future expandability; currently only 16 bytes
+are used. Users experiencing memory constraints should feel free to chose
+values appropriate for their application.
+
+\sh Simics
+
+Limited by the power of the host machine on which Simics runs, the simulation
+speed can also slow down as more cores are enabled on the target. The VxWorks 
+delay APIs, like taskDelay(), are affected a lot by the slowdown; and if an 
+application demo that makes a lot of calls to taskDelay() in a 24-core enabled 
+SMP VxWorks image (eg: SMP rawPerfDemo), the simulation speed is extremely slow.
+
+There is a hack (shown below) that you can use in the Simics script to get 
+faster and more acceptable performance from a demo running with 24-cores in 
+Simics:
+
+\cs
+$core_freq = 5000000
+foreach $core_idx in (range $cpu_cores) {
+    foreach $thread_idx in (range $core_threads) {
+        $system.soc.cpu[$core_idx][$thread_idx]->frequency = [$core_freq,1]
+    }
+}
+\ce
+
+Note: Not all peripheral drivers are validated under Simics. Only some basic
+validation is done with Simics. To use Simics with a network device driver,
+include the INCLUDE_DUMMY_MDIO component in the VIP project.
+
+\sh Known Issues
+
+1. The light power management component, INCLUDE_CPU_LIGHT_PWR_MGR, has not been
+   tested and is disabled by default.
+
+2. The vmPageLock(), vmPageUnlock() APIs and the 'Program Text into TLB'
+   component, INCLUDE_LOCK_TEXT_SECTION, are not supported on the e6500 CPU
+   variant.
+
+   The current plan is to support MMU Hardware Tablewalk feature, that is not
+   available on the Rev 1.x silicon (T4240 errata CPU A-005337) and tested only
+   on Simics. The MMU Hardware Tablewalk feature is currently disabled.
+   (If you would like to try this feature for Rev 2.0 silicon or later,
+   define the macro, E6500MMU_HW_TLB_WALK, in target/h/arch/ppc/mmuE500Lib.h
+   and re-build e6500 specific libraries for SMP under target/src/arch
+   directory.)
+
+3. The GNU compiler does not support the e6500 CPU type; so the VxWorks Image 
+   Project (VIP) and BSP builds cannot use `gnu' or `sfgnu' as the TOOL type.
+
+4. The USB-HOST:1 has not been tested on actual HW due to lack of the USB
+   device that has a Micro-AB connector.
+
+5. The T4240 errata CPU A-004779:
+   Misaligned bank collisions in the L1 Data Cache may cause a hang.
+   To be fixed in Rev 2.0 silicon.
+   Workaround - Follow all of these steps.
+   1. Set bit 32 of SPR978 to 1.
+   2. Set bits 33:39 of SPR978 to 0b0000011.
+   3. Set bits 41:47 of SPR978 to 0b0000011.
+   The FSL_ERRATA_CPU_A004779 macro definition will apply the workaround
+   only on the Rev 1.x silicon and that is defined in config.h by default.
+
+6. The T4240 errata CPU A-004786:
+   Speculative lbarx, lharx, lwarx, ldarx are not supported on e6500 Rev1.
+   To be fixed in Rev 2.0 silicon.
+   Workaround - Set bit 32 of SPR631 to 1.
+   The FSL_ERRATA_CPU_A004786 macro definition will apply the workaround
+   only on the Rev 1.x silicon and that is defined in config.h by default.
+
+7. The T4240 errata CPU A-004792:
+   Lightweight memory barriers may not perform the intended synchronization.
+   To be fixed in Rev 2.0 silicon.
+   Workaround - Set bit 49 of SPR 976 to 1.
+   The FSL_ERRATA_CPU_A004792 macro definition will apply the workaround
+   only on the Rev 1.x silicon and that is defined in config.h by default.
+
+8. The T4240 errata CPU A-004806:
+   Load data returned from the system may be observed in a different order by
+   threads on the same core.
+   To be fixed in Rev 2.0 silicon.
+   Workaround - Set bit 34 of SPR631 to 1.
+   The FSL_ERRATA_CPU_A004806 macro definition will apply the workaround
+   only on the Rev 1.x silicon and that is defined in config.h in SMT
+   configuration.
+
+9. The T4240 errata CPU A-004809:
+   The Fetch unit may prefetch or fetch from the speculative path using an
+   old context when aliasing one Effective Address (EA) to multiple Real
+   Addresses (RAs)
+   To be fixed in Rev 2.0 silicon.
+   Workaround - Follow all of these steps.
+   1. Set bit 39 of SPR 976 to 1. This will disable instruction prefetch.
+   2. Set bit 48 of SPR 976 to 1. This will prevent new fetches from
+      overwriting a canceled instruction Line Fill Buffer entry until
+      the previous entry has been loaded into the Instruction Cache.
+   The FSL_ERRATA_CPU_A004809 macro definition will apply the workaround
+   only on the Rev 1.x silicon and that is defined in config.h by default.
+
+10. The T4240 errata CPU A-004857:
+   Shared L2 cache may drop a reload to the core when certain snoops hit on
+   a victim castout.
+   To be fixed in Rev 2.0 silicon.
+   Workaround - Set bits 40:41 of L2 cache register offset 0xf04 to 0b01.
+                This workaround option may have a performance impact.
+   The FSL_ERRATA_CPU_A004857 macro definition will apply the workaround
+   only on the Rev 1.x silicon and that is defined in config.h in SMP or AMP
+   configuration with L2 cache enabled.
+
+11. The T4240 errata CPU A-005553:
+   A non-stcx store from one core on a cluster to the same coherency granule
+   used as a reservation by a different core on the same cluster may not kill
+   the reservation.
+   To be fixed in Rev 2.0 silicon.
+   Workaround - Follow all of these steps.
+   1. Set the L2 cache register offset 0xf04 bit 54 to 1'b1 to disable CoreNet
+      reordering from different sources.
+   2. Set the L2 cache register offset 0xf00 bit 41 to 1'b1 to disable
+      the cluster-level store merging.
+   The FSL_ERRATA_CPU_A005553 macro definition will apply the workaround
+   only on the Rev 1.x silicon and that is defined in config.h in SMP or AMP
+   configuration with L2 cache enabled.
+
+12. The T4240 errata DDR A-004390:
+   DDR violates tXPR for higher density DRAMs.
+   To be fixed in Rev 2.0 silicon.
+   Workaround - The following should be written before setting
+                DDR_SDRAM_CFG[MEM_EN] and after writing all other DDR
+                configuration registers.
+        1. Write DDR_SDRAM_MD_CNTL[CKE_CNTL] to a value of 2'b10.
+        2. Wait at least tXPR for the memory used. Set DDR_SDRAM_CFG[MEM_EN].
+        3. DDR_SDRAM_MD_CNTL[CKE_CNTL] may be cleared to allow hardware
+                   to automatically control the MCKE pins.
+    The FSL_ERRATA_DDR_A004390 macro definition will apply the workaround to
+    VxWorks bootrom on the Rev 1.x silicon that is defined in config.h by
+    default.
+    If a user want to disable the workaround, the macro FSL_ERRATA_DDR_A004390
+    should be undefined in config.h and re-create a bootrom. Before you
+    re-create the bootrom, must ensure there is no romExtras.a existed in the
+    BSP directory. If it existed, you need to manually do an "rm romExtras.a".
+
+13. The T4240 errata DDR A-004934:
+   The DDR controller may calibrate to a non-optimal operating point.
+   To be fixed in Rev 2.0 silicon.
+   Workaround - Before enabling the DDR controller, set the DDR memory mapped
+                register space at offset 0xF70 to a value of 0x30003000.
+   The FSL_ERRATA_DDR_A004934 macro definition will apply the workaround to
+   VxWorks bootrom on the Rev 1.x silicon that is defined in config.h by
+   default.
+   If a user want to disable the workaround, the macro FSL_ERRATA_DDR_A004934
+   should be undefined in config.h and re-create a bootrom. Before you
+   re-create the bootrom, must ensure there is no romExtras.a existed in the BSP
+   directory.
+   If it existed, you need to manually do an "rm romExtras.a".
+
+14. The T4240 errata CPU A-004801:
+   Software-thread synchronization is required for MMU register accesses. 
+   Simultaneous MMU register accesses from both threads may result in incorrect
+   operation.
+   Two threads simultaneously accessing MMU registers without synchronization 
+   may result in corrupt MMU state.
+   To be fixed in Rev 2.0 silicon.
+   Workaround provided by Freescale -
+   Protect tlbre, tlbwe, tlbsx, tlbilx and mt mmucsr0 instructions within
+   a mutual exclusion before performing these instructions. Avoid use of
+   tlbivax and tlbsync instructions.
+   Our workaround is to protect the code that accesses MMU registers within
+   a mutual exclusion block. There is no code use tlbivax and tlbsync
+   instructions in the e6500 architecture kernel libraries.
+   This workaround is always applied in SMP.
+   (If you would like to disable this workaround for Rev 2.0 silicon or later,
+   undefine the macro T4_ERRATUM_CPU4801 in file target/h/arch/ppc/ppc85xx.h
+   and re-build entire libraries)
+
+15. The T4240 errata CPU A-006198:
+   Core may hang if a mtmsr[EE,CE,DE] or wrtee/wrteei is coincident with an
+   asynchronous interrupt and the mtmsr[EE,CE,DE] or wrtee/wrteei is
+   delayed by activity on the other thread.
+   To be fixed in Rev 2.0 silicon.
+   Workaround -
+   Each instance of a mtmsr which disables any interrupt enables (i.e. EE, CE,
+   or DE transitions from 1 to 0 as a result of the mtmsr) and must be replaced
+   by a sequence which uses MCSRR0/1 and rfmci to perform the MSR manipulation.
+   Also, any wrtee or wrteei which sets MSR[EE] to 0 must be replaced with the
+   same sequence.
+   This workaround is always applied in SMP.
+   (It requires undefining the T4_ERRATUM_CPU6198 macro in
+    target/h/arch/ppc/ppc85xx.h (and target/src/hwif/intCtlr/vxbEpicIntCtlr.c,
+    which is optional) and re-build entire libraries if you'd like to disable
+    this workaround for Rev 2.0 silicon or later.)
+
+16. Booting a VxWorks image directly from U-Boot is not supported.
+    (There is no plan to support it.)
+
+17. When using SGMII or XAUI riser cards in slots 1, 2, 3, or 4, it may be
+    necessary to change the settings of switches in SW#4. The default on
+    some boards seems to be to have all switches off, however this sets
+    the reference clocks both for SERDES1 and SERDES2 to 100Mhz. Testing has
+    shown that for proper operation, they will need to be changed, depending
+    on the chosen SERDES protocol configuration. The following are valid
+    settings for configurations that have been tested:
+
+\ts
+    SERDES1_SGMII + SERDES2_XAUI      SERDES1_XAUI + SERDES2_SGMII
+    ------------------------------    -----------------------------
+    SW#4[1,2,3,4]=[OFF,OFF,OFF,ON]    SW#4[1,2,3,4]=[OFF,ON,OFF,ON]
+\te
+
+    The SERDES1_SGMII/SERDES2_XAUI configuration requires SERDES1 to be
+    set for 100Mhz and SERDES2 to be set for 125Mhz. For the
+    SERDES1_XAUI/SERDES2_SGMII configuration, both SERDES1 and SERDES2
+    must be set for 125Mhz.
+
+18. Right now the bootrom size is limited to 1MB, but if it's made larger
+    than that, ROM_SIZE needs to be changed. ROM TLB size (4KB, 8KB, ..., 1MB,
+    2MB, 4MB, ..., 64MB, 128MB, ..., 4GB, ... supported on e6500) defines
+    the page size of the ROM TLB entry. ROM_BASE_ADRS must be aligned on
+    the ROM TLB size.
+
+19. In the early boot stage, half of the L1 D-cache lines are locked as a
+    temporary internal SRAM, a part of which is used to store some global data
+    and the rest is used as the stack for the DDR initialization C code.
+    But the cache line locking function could not be simulated on Simics.
+    Workaround - use the FMAN 2 registers as the temporary SRAM's physical
+    space.
+
+\sh Delivered Objects
+\is
+\i bootrom
+\i bootrom.hex
+\i bootrom.bin
+\i vxWorks
+\i vxWorks.sym
+\i vxWorks.st
+\ie
+
+\sh BSP Bootloaders and Bootroms
+
+\ts
+Bootloader/Bootrom   | status
+----------------------------------
+bootrom              | SUPPORTED
+bootrom_uncmp        | SUPPORTED
+bootrom_res          | UNSUPPORTED
+vxWorks              | SUPPORTED
+vxWorks_rom          | UNSUPPORTED
+vxWorks_romCompress  | SUPPORTED
+vxWorks_romResident  | UNSUPPORTED
+\te
+
+The default size of the vxWorks_rom and vxWorks_romResident images are larger
+than the default ROM_SIZE of 1MB. ROM_SIZE and the corresponding link addresses
+can be adjusted to fit these images, however it is an unsupported configuration.
+
+BIBLIOGRAPHY
+For further information on the fsl_4240_qds, refer to the following
+documents:
+
+\tb T4240 QorIQ Advanced Multiprocessing Processor Reference Manual Rev. D, 09/2012
+
+\tb e6500 Core Reference Manual Rev G 6/2012
+
+\tb T4240QDS QorIQ Development System Reference Manual Rev. 6 2012
+
+\tb T4240 and T4160 Chip Errata Rev. C 01/2013
+
+SEE ALSO
+
+\tb Workbench User's Guide: Introduction
+
+\tb VxWorks Programmer's Guide: Configuration
+
+\tb VxWorks Programmer's Guide: Architecture Appendix
+

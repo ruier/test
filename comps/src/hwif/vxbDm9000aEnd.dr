@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND_DM9000A
+    dm9000aRegister ();
+#endif /* DRV_VXBEND_DM9000A */

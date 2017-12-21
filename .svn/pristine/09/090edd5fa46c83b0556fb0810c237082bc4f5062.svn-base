@@ -1,0 +1,3 @@
+#ifdef DRV_SIO_NS16550
+    ns16550SioRegister();
+#endif /* DRV_SIO_NS16550 */

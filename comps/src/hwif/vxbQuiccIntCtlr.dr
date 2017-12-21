@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTLR_QUICC
+    vxbQuiccIntCtlrRegister();
+#endif /* DRV_INTCTLR_QUICC  */

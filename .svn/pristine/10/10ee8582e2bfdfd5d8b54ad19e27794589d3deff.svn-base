@@ -1,0 +1,3 @@
+#ifdef INCLUDE_TSEC_MDIO
+#include "../src/hwif/h/mii/tsecMdio.h"
+#endif /* INCLUDE_MDIO */

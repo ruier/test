@@ -1,0 +1,49 @@
+                 README: simpc BSP for Windows VxSim
+
+This file contains board-specific information for Windows VxSim. Specifically,
+this file contains information on any BSP interface changes from previous
+software or hardware versions, and contains caveats that the usermust be aware
+of before using this BSP. Additionally, the target board's manual page entry
+(for example, simpc/target.nr) provides board-specific information necessary to
+run VxSim, and should be read before this BSP is used.
+
+-------------------------------------------------------------------------------
+RELEASE 6.9/0
+
+	Released from Wind River for General Purpose Platform 3.9, VxWorks 6.9
+  
+RELEASE 2.0/4: 
+	
+	Released by Wind River for VxWorks 6.6.
+	Added SMP support.
+
+RELEASE 2.0/3: 
+	
+	Released by Wind River for VxWorks 6.0.
+	Changed VxSim physical memory base address to 0x10000000.
+	Updated for new network support.
+	Added shared memory support.
+	Added shared memory end driver support.
+	Added VxMP Address space definitions.
+	Added basic MMU support by default.
+	Added virtual disk.
+	Added host SIO support.
+	Added non volatile RAM (NVRAM).
+	Disabled Windview support.
+	Removed PECOFF support, Windows VxSim now supports ELF OMF.
+
+RELEASE 1.2/2: 
+	
+	Release for Tornado 2.2 CP1
+	Added timestamp driver.
+	Added multiple network interface support.
+
+RELEASE 1.2/1:  
+	
+	Release for Tornado 2.2 FCS
+	Updated memory settings.
+	Updated Bootline parameter definition.
+	Added nullNvRam driver.
+	Enabled system mode debugging.
+	Added hardware floating point support by default.
+	Added Windows simulator interrupt vectors table definition.

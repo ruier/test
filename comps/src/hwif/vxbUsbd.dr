@@ -1,0 +1,17 @@
+#ifdef INCLUDE_USB
+    usbHcdInstantiate ();
+#endif
+
+#ifdef INCLUDE_USB_INIT
+    vxbUsbHciRegister ();
+#endif
+
+#ifdef INCLUDE_USB_TGT
+    vxbUsbTcdRegister ();
+#endif
+
+#ifdef INCLUDE_USBTGT_FUNC_BUS
+    usrUsbTgtFuncVxbRegister ();
+#endif
+
+

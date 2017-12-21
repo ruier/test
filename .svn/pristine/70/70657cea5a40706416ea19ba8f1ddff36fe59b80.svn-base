@@ -1,0 +1,3 @@
+#ifdef INCLUDE_EMAC_VXB_END
+    vxbEmacRegister();
+#endif /* INCLUDE_EMAC_VXB_END */

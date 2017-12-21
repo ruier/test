@@ -1,0 +1,72 @@
+
+                 README: Freescale MPC85XX CDS (cds8555/cds8541)
+
+This file contains board-specific information for the Freescale MPC8555/8541
+CDS target board.  Specifically, this file contains information on any BSP
+interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+
+------------------------------------------------------------------------------
+RELEASE 6.9.2.x:
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2.x
+
+    Correct SIMR_BIT_L description according to the MPC8560 reference manual. 
+    (WIND00071941)  
+
+RELEASE 6.9/x
+    TODO:
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.x
+
+    Fixed potential memory corruption caused by sysNvRamGet(). (WIND00101057)
+
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Remove the component INCLUDE_AIM_MMU_SHOW for footprint. (WIND00334904)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Moved L1 cache parity error handling to the arch library.  L1 cache parity
+    checking is now enabled by default. L1 parity errors now generate
+    (in many cases recoverable) machine check exceptions.  (WIND00309426)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+        
+    Add vxprj support for DDR sizing and fix SDRAM setup.
+    Update switches description. (WIND00246676)
+    Modify CCSBAR mmu table size. (WIND00247711)
+
+Version 2.0/3
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+    
+    add M command support.(WIND00046372)
+    Remove unused INCLUDE_PPC_FPU. (WIND00153695)
+    
+RELEASE 2.0/2
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Support END2 versions of TSEC drivers
+
+RELEASE 2.0/1
+
+    Released from Wind River for VxWorks 6.6
+
+    Add AUX_CLK_RATE related 3 macros to config.h and cds85xx.h to pass 
+    the BSPVTS auxClock test. (WIND00061620)
+    Change sysModel() function to use SYS_MODEL macro defined in config.h
+
+RELEASE 1.2/0 - September 15, 2004, EAR release.
+    Support: 512MB DDR, L1/L2 CACHE, LBC SDRAM, NVRAM, DUART, and TSEC.
+
+RELEASE 1.2/0 - December 1 2004, FCS release.
+    Support: 512MB DDR, L1/L2 CACHE, LBC SDRAM, NVRAM, DUART, TSEC,
+             PCI 1, PCI 2, TFFS (flash), L2SRAM, Security Engine, 
+             Intel 8254x Ethernet controller.

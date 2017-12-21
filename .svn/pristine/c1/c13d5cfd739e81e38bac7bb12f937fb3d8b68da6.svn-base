@@ -1,0 +1,3 @@
+#ifdef DRV_SIO_M5XXX_PSC
+    m5xxxPscSioRegister();
+#endif /* DRV_SIO_M5XXX_PSC */

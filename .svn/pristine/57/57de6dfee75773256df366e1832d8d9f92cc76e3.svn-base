@@ -1,0 +1,3 @@
+#ifdef	DRV_SIO_PRIMECELL
+    extern void vxbPrimeCellSioRegister (void);
+#endif	/* DRV_SIO_PRIMECELL */

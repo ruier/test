@@ -1,0 +1,98 @@
+
+        README: vxWorks BSP for Freescale MPC8313ERDB
+
+This file contains board-specific information for the MPC8313ERDB
+board. This file documents BSP interface changes from previous
+software or hardware versions, and notifies the user of serious
+caveats that must be noted before using this BSP.  Additionally, the
+target board's reference entry (i.e. fsl_rdb8313/target.ref) provides
+board-specific information necessary to run VxWorks and should be read
+fully before this BSP is used.
+
+------------------------------------------------------------------------
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    Added 64bit GTM timer feature support. (WIND00392055)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+    Update the description of Security Engine. (WIND00331832)
+    Correct building instruction for native boot. (WIND00256035)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+    
+    Delete _MMU_UBAT_VP attribute. (WIND00162540)
+    Add macro to control cache enable. (WIND00124248)
+    Clear mot83xxPci.h. (WIND00212294)
+
+RELEASE 2.0/8
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Fixed WIND00139815 - Support net device in BootApp.
+    Fixed WIND00157835 - Correct RGMII mode selection on Marvell PHY
+    Fixed WIND00154422 - Support Rev B board with Rev 2.x MPC8313E silicon
+    Fixed WIND00163075 - Remove the sharedMem variable from struct mdio0Resources.
+    vxSvrGet() support - Move vxSvrGet() from sysALib.s to vxALib.s.
+    Code integration   - Integrate the USB target support by INCLUDE_FSL_TCD
+
+Version 2.0/7
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+Version 2.0/6:
+
+    Fixed the defect WIND00125838.
+
+Version 2.0/5:
+
+    Replaced TFFS driver with completely new implementation. This also fixes
+    the defect WIND00118715.
+
+RELEASE 2.0/4:
+
+    Released from Wind River for General Purpose Platform 3.6, VxWorks 6.6
+
+    The following drivers are ported to vxBus:
+    interrupt controller
+    system clock
+    aux clock and timestamp
+    UART
+    etsec1 & 2
+    PCI
+    USB EHCI
+
+    Add NAND flash driver, provides routines of read and write page/block.
+
+Version 2.0/3
+
+    Re-released for VxWorks 6.5.
+
+    Replaced TSEC driver with completely new implementation. This also fixes
+    the defect WIND00086325.
+
+Version 2.0/2
+
+    Re-released for VxWorks 6.5.
+
+    Added support for freescale security engine 2.2. Please read target.ref
+    for security engine driver installation and usage.
+
+Version 2.0/1
+
+    Released from Wind River for General Purpose Platform 3.5, VxWorks 6.5
+
+    Added support for REV A3 board, NAND boot, VSC7385 switch and USB target.
+
+Version 2.0/0
+
+    Released from Wind River for General Purpose Platform 3.5, VxWorks 6.5
+
+    Support Freescale MPC8313ERDB board.
+
+    Initial release.

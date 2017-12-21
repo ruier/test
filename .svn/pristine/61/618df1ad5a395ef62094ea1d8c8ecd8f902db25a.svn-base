@@ -1,0 +1,3 @@
+#ifdef VXB_M8641_DMA 
+    m8641DmaDrvRegister();
+#endif /* VXB_M8641_DMA */

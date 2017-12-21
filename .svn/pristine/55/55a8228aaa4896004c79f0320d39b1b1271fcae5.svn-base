@@ -1,0 +1,3 @@
+#ifdef DRV_SPI_EEPROM
+    vxbSpiEepromRegister();
+#endif /* DRV_SPI_EEPROM */

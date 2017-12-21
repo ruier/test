@@ -1,0 +1,3 @@
+#ifdef INCLUDE_INTCTLR_DYNAMIC_LIB
+	vxbIntDynaCtlrInit();
+#endif /* INCLUDE_INTCTLR_DYNAMIC_LIB */

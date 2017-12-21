@@ -1,0 +1,1 @@
+IMPORT void quiccTimer64DrvRegister (void);

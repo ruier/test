@@ -1,0 +1,4 @@
+#ifdef DRV_SIO_SB1
+    vxbSb1DuartSioRegister();
+#endif /* DRV_SIO_SB1 */
+    

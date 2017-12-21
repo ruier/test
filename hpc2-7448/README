@@ -1,0 +1,46 @@
+
+                 README: Freescale HPC-II 7448 BSP
+
+This file contains board-specific information for the Freescale HPC-II
+target board.  This file documents BSP interface changes from previous
+software or hardware versions, and informs the user of serious caveats
+that must be noted before using this BSP.  Additionally, the target
+board's reference entry (e.g., man HPC2-7448) provides board-specific
+information necessary to run VxWorks.  The target reference entry should be
+read fully before this BSP is used.
+
+-------------------------------------------------------------------------------
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+    
+    Delete _MMU_UBAT_VP attribute(WIND00162540)
+
+RELEASE 2.0/3
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Remove RAM_LOW_ADRS and RAM_HIGH_ADRS defines in config.h (WIND00185815)
+
+RELEASE 2.0/2
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Add vxBus system clock support.
+    
+RELEASE 2.0/1
+
+    Updated to NOR IP stack
+
+RELEASE 2.0/0
+
+    This is the first release validated by Wind River for the Freescale 
+    HPC-II BSP and is for vxWorks6.2. BSP was initially written by Tundra.
+
+RELEASE 1.1/0
+
+    This is the first release of the Freescale HPC-II 7448 BSP.
+
+    KNOWN PROBLEMS:
+
+    No AUX clock or timestamp driver has been implemented.

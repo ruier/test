@@ -1,0 +1,62 @@
+
+                 README: Freescale MPC8544 ADS (Intrepid)
+
+This file contains board-specific information for the Freescale MPC8544
+ADS target board.  Specifically, this file contains information on any BSP
+interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+
+------------------------------------------------------------------------------
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Fix annotation error for sysL2Cache.c. (WIND00284066)
+    Remove the component INCLUDE_AIM_MMU_SHOW for footprint. (WIND00334904)
+
+RELEASE 6.9/1
+    
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Moved L1 cache parity error handling to the arch library.  L1 cache parity
+       checking is now enabled by default. L1 parity errors now generate
+       (in many cases recoverable) machine check exceptions.  (WIND00309426)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+    Modify CCSBAR mmu table size. (WIND00247711)
+
+RELEASE 2.0/3
+
+    Released from Wind River for General Purpose Platfrom 3.8, VxWorks 6.8
+
+    Update openPicTimer support.
+    Fix BSPVTS sysModel test failed. (WIND00174714).
+    Remove unused INCLUDE_PPC_FPU. (WIND00153695)
+    Update the description of connection between PEXs and slots/ULI. 
+    (WIND00155480)
+
+RELEASE 2.0/2
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+	
+    Update UART1 interrupt vector.
+    Update PCIe legacy interrupt vectors.
+    Support hardware float build with TOOL=e500v2diab/gnu
+
+RELEASE 2.0/1
+
+    Released from Wind River for General Purpose Platform 3.6, VxWorks 6.6
+    
+    Fixed sysTimerClkFreq and sysStaticTlbDesc error, modify sysModel().
+    Fixed wrong value of AUX_CLK_RATE_MAX, FREQ_66_MHZ, FREQ_100_MHZ.
+    Added tlb for PIXIS, added bootApp support.
+    Fixed the delay period when boot from bootrom resident.
+    Changed timestamp clock to M85XX timer instead of openPIC timer.
+    Changed default serial port baud rate to 115200 to match U-boot port.
+   
+RELEASE 2.0/0
+
+    Released from Wind River for Workbench 2.6, vxWorks 6.4  

@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND_XLPGMAC
+IMPORT void xlpGmacRegister(void);
+#endif

@@ -1,0 +1,4 @@
+#ifdef INCLUDE_XLR_GMAC_VXB_END
+IMPORT void xlrGmacRegister(void);
+#endif
+

@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTLR_IOAPIC
+extern void vxbIoApicIntrDrvRegister (void);
+#endif /* DRV_INTCTLR_IOAPIC */

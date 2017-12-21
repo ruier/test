@@ -1,0 +1,436 @@
+\" wrSbc834x/target.ref - Wind River SBC834x target specific documentation
+\"
+\" Copyright (c) 2005-2009, 2011, 2013 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\" 
+\" modification history
+\" --------------------
+\" 01h,14jun13,d_l  remove default priority description. (WIND00414331)
+\" 01g,14sep11,y_c  Correct the name of TSEC Ethernet END driver.(WIND00248986)
+\" 01f,07aug09,my_  Add tffsBootImagePut() description
+\" 01e,14jul08,l_z  update IPNET native driver description
+\" 01d,05sep07,jrp  APIGEN update
+\" 01c,22mar07,rec  WIND00091184 update workbench instructions
+\" 01b,15mar06,kds  Updated supported features USB and PCI autoconfig.
+\" 01a,01jun05,kds  Modified from ads834x (rev 01a).
+\"
+\TITLE wrSbc834x - Wind River SBC834x
+
+NAME `Wind River SBC834x'
+
+INTRODUCTION
+This reference entry provides board-specific information necessary to run
+VxWorks for the wrSbc834x BSP.
+
+\sh Board Jumper & Switch Settings
+
+The board's default jumper and switch configurations should have been
+set correctly by the factory to allow vxWorks to run.  See the
+"Wind River SBC8349E/47E Engineering Reference Guide" for details.
+
+\sh Boot ROM
+Images 'bootrom.hex' and 'bootrom_uncmp.hex' are provided with this BSP and
+are configured to a ROM base address of 0x0. When programming the bootrom to the
+FLASH, an offset of 0xFFF00100 (the location of the reset exception) needs to be
+given.  The bootrom images provided are configured to execute from the Flash ROM
+on a Wind River SBC8349E/47E target using an onboard 10/100/1000BaseT TSEC
+Ethernet port as the default boot device and the COM1 (top) serial port as the
+default console device.
+
+\sh Programming a bootrom image using Wind River Workbench:
+
+Connect a terminal or terminal emulator to the board using the top 9 pin mini
+connector.  The terminal parameters should be set to 9600 baud, 8 bit data,
+no parity, 1 stop bit.
+
+\ml
+\m 1.
+Establish communications between Workbench and a Wind River ICE or Probe by
+following the instructions given in the associated Workbench guide
+"Wind River ICE for Wind River Workbench Hardware Reference Guide" or
+"Wind River Probe for Wind River Workbench Hardware Reference Guide".
+
+Select the appropriate processor (MPC8347 or MPC8349) when defining a launch
+configuration.
+
+When communications have been successfully established, the Background Mode
+(>BKM>) prompt should appear in the OCD Command Shell view.
+
+Following the instructions in the "Wind River Workbench On-Chip Debugging Guide"
+section, "Programming a VxWorks Boot ROM into Flash Memory":
+
+\m 2.
+Enter the board's register file, provided with the board
+(ex., WRS_SBC8349_PCT00328001.reg or WRS_SBC8347_PCT00328002.reg),
+in the 'Playback File' field of the 'Command View Settings' dialog.
+
+\m 3.
+Under the 'Configuration View' tab of the 'Flash Programming View', select the
+Flash device configuration for Intel 28F640Jx, (4096 x 16), 1 Device.
+
+Enter 0xFF800000 in the 'Base' field of the 'Flash Bank Addresses' section and
+the list of sectors will be displayed.
+
+Enter 0 in the 'Start' field of the 'RAM Workspace' section, and 10000 for size.
+
+Select sectors starting at 0xFFF00000 to the end of the sector list.  These
+define the area of Flash to erase and program.
+
+\m 4.
+A bootrom.hex image will need to be converted into a .bin file to program Flash.
+Under the 'File View' tab of the 'Flash Programming View', select the
+'Convert file' button.
+
+Find the bootrom.hex file to convert and click the 'Convert and Add File' button
+in the File Conversion Utility dialog.  The default 'Start' and 'End' addresses
+of 0x0 and 0xFFFFFFFF are correct for this file.
+
+\m 5.
+Now that bootrom.bin has been added to the 'File View' tab, change the
+'Start Address' field to 0xFFF00100.  Remember to click on the 'Enabled'
+checkbox to enable the file.
+
+\m 6.
+Verify that the data in the 'Flash Settings' and 'Erase Sectors' area of the
+'Programming View' tab are set to the correct values and click the
+'Erase/Program' button.
+
+\m 7.
+Reset the board or set the program counter at 0xFFF00100 in the Workbench
+On-Chip Debugger and execute the bootrom image.
+\me
+
+
+FEATURES
+
+\sh Supported Features
+
+    MPC8349E/47E PowerQUICC II Pro Processors, including
+    - Instruction and Data caches
+    - MMU
+    - Interrupt Controller
+    - PowerPC decrementer timer, used to implement a System Clock.
+    - UART1 as the default console channel
+    - UART2
+    - General Purpose Timers 1 and 2 cascaded as a 32-bit Auxiliary clock
+    - General Purpose Timers 3 and 4 cascaded as a 32-bit Timestamp clock
+    - TSEC1 & 2 as Ethernet devices supporting 10BaseT/100BaseT/1000BaseT protocol
+    256MB DDR SDRAM
+    128MB Local Bus SDRAM
+    8MB Intel 28F640J3A StrataFlash (16-bit)
+    8KB EEPROM/Non-volatile memory as boot parameter and MAC address storage
+    PCI Bus Interface (with auto configuration)
+    USB Host
+    Security Engine (SEC) - verified with test code but not using IPSEC.
+    7 segment display
+    User DIP switch bank
+
+
+\sh Unsupported Features
+
+    Inter-IC Interfaces (I2C)
+    Serial Peripheral Interface (SPI)
+    DMA Controller/Messaging Unit
+
+HARDWARE DETAILS
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Devices
+The device drivers included are:
+
+    ns16550Sio.c - serial driver
+    quiccIntrCtl.c - interrupt controller driver
+    quiccTimer.c - timer driver
+    eeprom.c - EEPROM access routines
+    tsecVxbEnd.c - TSEC Ethernet END driver
+    mot83xxPci.c - PowerQUICC II Pro PCI Bridge driver
+    cfiscs.c - Flash memory access routines for TFFS
+
+\sh Memory Maps
+
+The memory map is described in the SBC8349 Engineering Reference Guide. The
+memory map is completely configurable by the bsp, however we have
+kept the map as described.
+
+The following table describes the SBC8349 default memory map:
+\ts
+
+Start | Size | End | Access to
+------------------------------
+0x0000_0000 | 256MB | 0x0FFF_FFFF | DDR SDRAM
+0x1000_0000 | 64MB  | 0x17FF_FFFF | LBC SDRAM
+0x8000_0000 | 512MB | 0x9fff_FFFF | PCI1
+0xF800_0000 | 8KB   | 0xF800_1FFF | EEPROM
+0xFF80_0000 | 8MB   | 0xFFFF_FFFF | Flash
+\te
+
+\sh NVRAM Support
+
+This BSP implements Nonvolatile RAM via an EEPROM device.  There are a few
+macros associated with this device. The macros are located in the config.h file
+and are:
+\cs
+    #define INCLUDE_EEPROM_LOCKING
+    #define SMART_EEPROM_WRITE
+\ce
+The INCLUDE_EEPROM_LOCKING parameter is typically #define'd.  When defined, the
+EEPROM is software locked between accesses.
+
+The SMART_EEPROM_WRITE parameter is typically #define'd. When defined, the
+EEPROM write code first checks to see if a cell is the desired value.  If the
+memory location already contains the desired value, the write is skipped.  This
+was implemented to increase the life of the EEPROM device.
+
+\sh Shared Memory
+NA
+
+\sh Interrupts
+
+The external interrupt sources are:
+\ts
+External Interrupt | Interrupt Source
+-------------------------------------
+IRQ0 | PCI INT A
+IRQ1 | PCI INT B
+IRQ2 | PCI INT C
+IRQ3 | PCI INT D
+IRQ4 | Gigabit PHY A
+IRQ5 | Gigabit PHY B
+IRQ6 | Not Connected
+IRQ7 | Not Connected
+\te
+
+\sh Serial Configuration
+
+UART1 and UART2 are configured as serial devices with 8 data bits, 1 stop bit,
+hardware handshaking, and parity disabled.  UART1 is the default console
+channel, accessed by the COM1 port.  UART2 is accessible by the COM2 port.
+The default console port is determined by CONSOLE_TTY in config.h, where
+a value of 0 configures COM1 and 1 configures COM2.
+
+\sh SCSI Configuration
+There is no SCSI interface on this board.
+
+\sh Network Configuration
+
+The supported boot devices are:
+    mottsec - Three speed 10/100/1000BaseT Ethernet controller
+        - unit 0 is channel TSEC1, unit 1 is TSEC2
+    gei - Intel Pro1000 Ethernet PCI adaptor with a 8254x controller,
+	          when the PCI bus is enabled
+        - unit 0 is the only unit available, since there is only 1 PCI slot
+
+The "mottsec" boot device corresponds to the on-board TSEC network interfaces.
+The "gei" boot device is for use with PCI Ethernet adapters with an Intel 8254x
+Gigabit Ethernet controller.  The "gei" network interface can only be used when
+the PCI bus is supported and INCLUDE_GEI_END is defined in config.h.  See the
+"PCI Access" and "PCI Support" sections for more information about PCI bus
+support.
+
+The following END and corresponding END2 drivers are supported in this BSP.
+However, only END driver is enabled by default.
+
+\ts
+Driver | END                      | END2
+----------------------------------------
+TSEC   | INCLUDE_TSEC_VXB_END     | INCLUDE_TSEC_VXB_END2
+GEI    | INCLUDE_GEI825XX_VXB_END | INCLUDE_GEI825XX_VXB_END2
+\te
+
+To enable the END2 driver, you should modify as follows:
+
+For command line build, add INCLUDE_END2 into config.h right after the
+definition of INCLUDE_END. Also replace the END driver name with corresponding
+END2 driver name, then rebuild the bootrom and vxWorks image.
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, add INCLUDE_END2 component and corresponding END2
+component, this will un-define END automatically. Then rebuild your project.
+
+\sh Setting the Ethernet Address
+
+The SBC834x boards are assigned unique Ethernet hardware or MAC addresses at the
+factory.  These MAC addresses should be listed on label affixed to the board.
+A unique 6 byte address is absolutely necessary if the board will be connected
+to a network. The first 3 bytes are a Wind River-specific prefix. The last 3
+bytes are unique.
+
+The MAC addresses can be set by writing them directly to NVRAM using the
+'M' command from the boot ROM prompt.  This option allows only the last three
+bytes to be changed.  To use this option, open a console window and reset the
+hardware.  When the bootrom banner appears and the countdown starts, press any
+key to get the "[VxWorks Boot]:" prompt.  Type 'M' and follow the instructions.
+
+The BSP supports storage of 2 MAC addresses in NVRAM, one for each on-board
+Ethernet device.  Ethernet Addresses are assigned and stored by END device
+number:
+\ts
+END device # | Boot Device | Physical Channel
+---------------------------------------------
+0 | mottsec0 | TSEC1
+1 | mottsec1 | TSEC2
+\te
+
+\sh VME Access
+NA
+
+\sh PCI Access
+
+Support is included for the MPC8349E/7E PCI controller that enables access to
+a single 66Mhz, 64-bit PCI slot.  However, the BSP is configured to disable PCI
+access by default due to MPC8349E/7E Errata.  This errata causes:
+    - PCI Autoconfiguration to fail; and
+    - An unpopulated PCI slot accessed via a configuration cycle will cause
+      the board to hang.
+
+PCI interrupts are configured using IRQ0 as a maskable external interrupt.
+
+PCI support is enabled by defining INCLUDE_PCI in config.h.
+
+The Intel PRO/1000 T Ethernet PCI card (GEI) was tested in the PCI slot.
+
+Note that the default reset configuration sets the default PCI clock frequency
+to 66 MHz.  If a 33 MHz PCI card is installed in the PCI slot, the reset
+configuration word may need to be changed.
+
+PCI addresses are accessed via a 1 to 1 memory map with LOCAL and PCI memory
+space:
+\cs
+CPU Addr                                         PCI Addr
+PCI_LOCAL_MEM_BUS     --------0x00000000-------- PCI_MSTR_MEM_BUS
+                      -                        -
+                      -                        -
+PCI_LOCAL_MEM_BUS +   --------0x10000000-------- PCI_MSTR_MEM_BUS +
+PCI_LOCAL_MEM_SIZE    -                        - PCI_MSTR_MEM_SIZE
+                      -                        -
+                      -                        -
+                      -                        -
+                      -                        -
+CPU_PCI_MEM_ADRS      --------0x80000000-------- PCI_MEM_ADRS
+                      -                        -
+                      -                        -
+CPU_PCI_MEMIO_ADRS    --------0x90000000-------- PCI_MEMIO_ADRS
+                      -                        -
+                      -                        -
+CPU_PCI_IO_ADRS       --------0xA0000000-------- PCI_IO_BASE
+                      -                        -
+                      -                        -
+CPU_PCI_IO_ADRS +     --------0xB0000000-------- PCI_IO_BASE +
+CPU_PCI_IO_SIZE       -                        - PCI_IO_SIZE
+                      -                        -
+                      -                        -
+                      -                        -
+                      -------------------------- 4GBytes
+\ce
+
+\sh TrueFFS support
+
+This BSP supports TrueFFS for the on-board Flash. To include TrueFFS support in
+the BSP, the INCLUDE_TFFS macro must be defined in config.h.  TrueFFS support is
+not built into the default BSP.  In sysTffs.c, TrueFFS is configured to use the
+upper 4MB of Flash, protecting the Hard Reset Configuration Word and bootrom
+image from being overwritten. And tffsBootImagePut() is not supported by default.
+
+\sh Delivered Objects
+The following images are delivered with the wrSbcPowerQuiccII BSP:
+    bootrom_uncmp
+    bootrom_uncmp.hex
+    bootrom
+    bootrom.hex
+    vxWorks
+    vxWorks.st
+
+
+\sh Make Targets
+Only bootrom, bootrom_uncmp, vxWorks and vxWorks.st have been tested.
+
+\sh Special Routines
+None
+
+
+SPECIAL CONSIDERATIONS
+This section describes miscellaneous information that the user needs
+to know about the BSP.
+
+\sh Serial Connections
+Most VxWorks BSPs do not use hardware handshaking in the serial
+interface, and thus a simple 3 wire connection is commonly used.
+
+\sh Ethernet Addresses
+Use the bootrom 'M' command to initialize the MAC addresses for the TSEC
+devices. The MAC addresses are provided on a label behind the JTAG port.
+If the MAC addresses are not initialized, the following message may result:
+\cs
+        Attaching interface lo0 done
+        muxDevLoad failed for device entry 0!
+        muxDevLoad failed for device entry 1!
+        Failed to attach to device (null) Can't load boot file.
+\ce
+
+\sh Hard Reset Configuration Words
+If a Wind River ICE or Probe cannot enter background mode (BKM) when attempting
+to connect to the board, the Hardware Reset Configuration Words (HRCWs) in Flash
+memory may have been corrupted.  To get into BKM, set the HRCWs in the processor
+by entering "cf rcw 0x04230000 0xf460a000" at the >ERR> prompt.  Once in BKM,
+the HRCWs can be re-programmed into Flash using the SBC834x Reset Configuration
+Word Image (i.e., SBC8349_rstconf_clkin66_core400_ddr266.bin) provided with the
+board.
+
+\sh Known Problems
+
+CPU Errata
+
+Due to MPC8349E Family Errata, the following limitations should be noted:
+    - Bootrom doesn't always execute after power-on reset or when the reset button
+      is pressed (this was fixed with rev 1.1 CPUs);
+    - Machine Check Exception is not supported and will cause the board to hang if
+      triggered; and
+    - If INCLUDE_PCI is defined, an access to an unpopulated PCI slot (via
+      a configuration cycle) will cause the board to hang. (this was fixed with
+      rev 1.1 CPUs).
+
+Hardware Limitations
+
+The following limitations of the Wind River SBC834x board should be noted:
+    - To avoid mechanical interferences with the Plexiglas enclosure, the PCI slot
+      should only be used in the stand-alone configuration;
+    - Note that the default reset configuration sets the default PCI clock frequency
+      to 66 MHz.  If a 33 MHz PCI card is installed in the PCI slot, the reset
+      configuration word may need to be changed; and
+    - I2C interface circuitry is untested.
+
+TSEC Link Speed Changes
+
+The TSEC driver does not properly sense changes in link speed.  Therefore, an
+increase or decrease in the speed of the link (ex., 100bps -> 1000bps or
+1000bps -> 100bps) will cause a loss of communication with a TSEC connection.
+The TSEC driver will need to be re-started (ex., reboot vxWorks) in order for
+the TSEC to communicate at the new link speed.
+
+BOARD LAYOUT
+
+See the "Wind River SBC8349E/47E Engineering Reference Guide" for drawings of
+the board.
+
+BIBLIOGRAPHY
+
+\tb Wind River SBC8349E/47E Engineering Reference Guide, ERG-00328-001
+\tb Wind River SBC8349E/47E Reference Design Schematics, SCH-00328-001
+\tb MPC8349 PowerQUICC II Pro Integrated Host Processor Reference Manual, MPC8349ERM
+\tb MPC8349E PowerQUICC II Pro Family Device Errata, MPC8349ECE
+\tb e300 PowerPC Core Reference Maunual, e300coreRM
+\tb PowerPC Microprocessor Family: The Programming Environments for 32-bit Microprocessors MPCFPE32B/AD
+
+WEB RESOURCES
+
+Much of the Freescale documentation can be found on line. The following
+URL was correct at the time of writing for semiconductor area. Please search
+the documentation using processor name for specific documentation.
+
+http://www.freescale.com/
+
+

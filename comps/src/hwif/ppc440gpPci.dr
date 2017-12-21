@@ -1,0 +1,3 @@
+#ifdef INCLUDE_PPC440GP_PCI
+    ppc440gpPciRegister();              /* PowerPC 440GP PCI host controller */
+#endif /* INCLUDE_PPC440GP_PCI */

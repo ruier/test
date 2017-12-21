@@ -1,0 +1,3 @@
+#ifdef DRV_SDMA_IMX
+    imxSdmaRegister ();
+#endif /* DRV_SDMA_IMX */

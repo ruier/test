@@ -1,0 +1,3 @@
+#ifdef DRV_TIMER_COLDFIRE
+    m54x5TimerDrvRegister ();
+#endif

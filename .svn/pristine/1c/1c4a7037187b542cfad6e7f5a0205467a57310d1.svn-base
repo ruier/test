@@ -1,0 +1,19 @@
+
+         README: Freescale fsl_mpc830x_mitx BSP
+
+This file contains board-specific information for the Freescale MPC830x_mitx
+target boards. This file documents BSP interface changes from previous
+software or hardware versions, and notifies the user of serious caveats
+that must be noted before using this BSP. Additionally, the target board's
+reference entry (fsl_mpc830x_mitx/target.ref) provides board-specific
+information necessary to run VxWorks and should be read fully before
+this BSP is used.
+
+
+------------------------------------------------------------------------
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.1
+	
+    Initial release.    

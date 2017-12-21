@@ -1,0 +1,3 @@
+#ifdef DRV_PCIBUS_APM_PCIEX
+    apmPciExRegister ();
+#endif /* DRV_PCIBUS_APM_PCIEX */

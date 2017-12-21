@@ -1,0 +1,4 @@
+#ifdef DRV_INTCTLR_QUICC
+#include <hwif/intCtlr/vxbQuiccIntCtlr.h>
+#endif /* DRV_INTCTLR_QUICC */
+

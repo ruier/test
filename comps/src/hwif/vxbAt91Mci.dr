@@ -1,0 +1,3 @@
+#ifdef DRV_STORAGE_AT91_MCI
+    at91MciRegister ();
+#endif /* DRV_STORAGE_AT91_MCI */

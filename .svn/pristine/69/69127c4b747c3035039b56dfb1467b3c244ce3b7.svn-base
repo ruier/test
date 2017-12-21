@@ -1,0 +1,891 @@
+\" ads834x/target.ref - Motorola MPC834XADS target specific documentation
+\"
+\" Copyright (c) 2004-2009 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01i,09sep09,s_z  Integrate the USB TCD support by INCLUDE_FSL_TCD(WIND00180575)
+\" 01h,16dec08,z_l  Support USB host and target. (WIND00118187)
+\" 01g,23jul08,z_l  Updated for MDS8349EA.
+\" 01f,30jan07,rec  add workbench instructions
+\" 01e,12oct06,dtr  Support for Rev3 silicon on RevA board.
+\" 01d,02may06,dtr  Mention changes to switches and BMS_HIGH boot option.
+\" 01c,27jan05,agf  Correct erroneous instruction for setting SW4-8 when
+\"                  programming flash (SPR 117000)
+\" 01b,02aug05,dtr  Added clock configuration info.
+\" 01a,18dec04,dtr  Adapted from ADS827x BSP target.nr.
+\"
+\TITLE ads834x - Motorola MPC834XADS
+
+NAME
+`Motorola ADS834X'
+
+EXTERNAL DEPENDENCIES
+None
+
+INTRODUCTION
+This section includes getting-started information, including subsections
+detailing ROM installation, boot ROM flash instructions, and jumper 
+settings for VxWorks operation.
+
+The BSP will work with the rev PROTOTYPE and REVA of the ADS8349 board. 
+Rev1.0 and Rev1.1 silicon was tested. USB and PCI auto configuration are only 
+supported on rev1.1.  However support is now only for rev1.1 silicon and 
+rev1.0 silicon is considered obsolete as is the PROTOTYPE board. 
+This BSP now supports Rev3 silicon in the REVA board using DDR1. 
+Rev2 silicon was never tested.
+The BSP which has version 2.0/7 supports both ADS8349 and  MDS8349EA, macro 
+MPC8349EA_MDS is used in config.h to build different bootloader and vxWorks image.
+
+\sh Jumpers & Switches
+
+The board must have the switch and jumpers set to appropriate values before
+software can be loaded into the memory, or before flash memory can be 
+programmed as described below.
+The latest revs of the board including rev0.7 and rev 0.9 moved SW5 -> Sw6 
+and SW6 -> SW7.
+
+In order to get the board running with the default configuration, the
+switches need to be set as follows:
+
+\ts
+    Switch Number | Switch ON           | Switch OFF
+    ------------------------------------------------
+    SW3           | 1,2,3,4,5,7         | 6,8
+    SW4           | 2,4,6,7             | 1,3,5,8
+                  |                     |
+    SW5 now SW6   |                     |
+    on rev0.7 and | 1,2,5,6,7,8         | 3,4
+    above         |                     |
+                  |                     |
+    SW6 now SW7   |                     |
+    on rev0.7 and | 1,2,3,4,5,7,8       | 6
+    above         |                     |
+\te    
+
+\sh Getting the board running VxWorks
+   This section will guide you how to run VxWorks on the ADS8349 board.
+
+1. Creating a bootrom.bin:
+    1.1 Launch Workbench 3.1, go to the "File" menu and choose the option
+        "New" -> "VxWorks Boot Loader / BSP Project".
+
+    1.2 The "New VxWorks Boot Loader / BSP Project" window will popup, input a
+        project name then click "Next" button. In the next window, choose the BSP
+        as "ads834x", "Tool chain" could be set as "Diab", in the 
+        "Boot loader / BSP image" part, choose the style as "Compressed (default)",
+        "Format" as "Bin", then press the "Finish" button to finish the project
+        creation.
+
+    1.3 Once the build process finish successfully (You will see "Build Finished"
+        in the "Build Console" window without error), you will find the file
+        "bootrom.bin" in the BSP directory "$(WIND_BASE)/target/config/ads834x".
+
+2. Programming bootrom.bin to the ads834x FLASH:
+   Support for MPC8349 part is available with Workbench 3.1.
+
+   Using Workbench, complete the following steps to flash your boot ROM image:
+
+    2.1 Install Wind River Probe or Wind River ICE and power it on.
+
+        Connect the JTAG interface cable from the Wind River Probe or Wind 
+        River ICE to the ADS8349 board's JTAG connector (P9).
+        Once the connections have been made, power up the ADS8349 
+        board and launch Workbench on the host.
+        
+    2.2 Configure the Wind River Probe or Wind River ICE connection.
+
+        In Workbench on the left pane, there is a "Remote Systems" window. 
+        Click on the "Define a connection to remote system" button. In the popup
+        "New Connection" window, select the Connection type as 
+        "Wind River OCD ICE Connection" for Wind River ICE and "Wind River 
+        OCD Probe Connection" for Wind River Probe. If the Wind River ICE 
+        is connected via serial port, specify the configuration else select
+        "Specify all communication settings manually". 
+
+        In the "Wind River ICE Settings" or "Wind River Probe Settings", 
+        select the Board file by clicking on the "Board file" radio button and
+        browse to the appropriate board file. For example:
+        "$WIND_OCD_PATH/BoardFiles/PowerPC/83xx/Freescale/Freescale_MDS8349.brd"
+        Select "Auto-attach to connected designators" checkbox. In the 
+        "Communications" tab, "Emulator Hostname / IP address" of ICE for Wind 
+        River ICE or "USB Device Name" for Wind River Probe. Connect 
+        Workbench OCD with the Wind River Probe or Wind River ICE 
+        by clicking the "Next" and then "Finish" button. A New connection 
+        appears in the "Remote Systems" window.
+
+    2.3 Program Wind River Probe / Wind River ICE with the proper register 
+        settings for the ADS8349 board.
+
+        To view/modify the Wind River ICE firmware setting, terminate the
+        debug session for Wind River ICE. In the "Remote Systems" window,
+        right click on the newly connected OCD connection. Select 
+        "OCD Utilities". To know about the current firmware information, 
+        select "Emulator firmware version information". To download the new
+        firmware, Select "Firmware Download" and select appropriate file 
+        from "$WIND_OCD_PATH/CommonHardwareFiles/*.bin".
+
+        Go to the "OCD Command Shell" and click on the "Settings" button.
+        The OCD Command Shell Settings dialog appears, where you can 
+        select the appropriate register file. Navigate to the location of
+        the appropriate register configuration file. The register file of
+        ADS8349 board is '\INSTALLDIR\workbench-3.1\ocd\0127\RegisterFiles\PowerPC\83xx\Freescale\MDS8349.reg', 
+        and register file of MDS8349EA board is MDS8349_Rev3.reg in BSP directory. 
+        After choosing the register file, press the "OK" button. In the OCD Command
+        Shell, click the "Playback File" button. The selected register file is
+        downloaded to the target and the commands from the file appear in the
+        OCD command shell. When playback is finished the ">BKM>" or the ">ERR>"
+        prompt returns.
+        
+    2.4 Get into Background Mode.
+
+        Execute the "IN" command to reset the board and initialize it with
+        the register setting.
+\cs
+            IN
+\ce
+
+        You may need unlock the flash write protection, refer to section 'Flash Protection' 
+        below for more details.
+
+    2.5 Program the ADS8349 Flash.
+
+        In WindRiver OCD, Select the "Flash Programmer". The 
+        "Flash Programmer" view has three tabs: "Configuration", 
+        "Programming" and "Memory/Diagnostics".
+
+        2.5.1 Select the "Configuration" tab. In the "Device Selection' 
+            field, select the "INTEL 28F640Jx (4096x16) 1 Device"
+
+            In "Flash Bank Address" group for the "Base" enter "FF800000" . 
+            In the "RAM Workspace" group for the "Workspace Start at"
+            enter "0x00000000" and for the "Workspace Size" enter 
+            "0x8000".
+
+        2.5.2 Click on the "Programming" tab. Select the "Add File" 
+            button, in the popup window, select the newly generated
+            "$(WIND_BASE)/target/config/ads834x/bootrom.bin", and click
+            the "This is a raw binary file" checkbox then click "OK" to finish
+            file adding. Click the "Start Address" and set it as "0xff800000",
+            the "End Address" will be fixed automatically. Please notice that
+            the "Start Address" should include the "Offset bias".
+            Enable a file by clicking on the checkbox under the "Enabled" heading.
+
+        2.5.3 In the "Erase Sector Selection" pane, select addresses
+            ff800000 through ff8fffff.  Press the "Erase/Program" 
+            button to erase the flash and then program the flash with selected
+            "bootrom.bin" file. A window pops up to show the progress of the
+            Flash device programming. When it is complete, the Flash should
+            contain the new boot program.
+
+    2.6 Program the MDS8349EA Flash.
+
+        In WindRiver OCD, Select the "Flash Programmer". The 
+        "Flash Programmer" view has three tabs: "Configuration", 
+        "Programming" and "Memory/Diagnostics".
+
+        2.5.1 Select the "Configuration" tab. In the "Device Selection' 
+            field, select the "AMD S29GL256N (16384 x 16) 1 Device"
+
+            In "Flash Bank Address" group for the "Base" enter "FE000000" . 
+            In the "RAM Workspace" group for the "Workspace Start at"
+            enter "0x00000000" and for the "Workspace Size" enter 
+            "0x8000".
+
+        2.5.2 Click on the "Programming" tab. Select the "Add File" 
+            button, in the popup window, select the newly generated
+            "$(WIND_BASE)/target/config/ads834x/bootrom.bin", and click
+            the "This is a raw binary file" checkbox then click "OK" to finish
+            file adding. Click the "Start Address" and set it as "0xfe000000",
+            the "End Address" will be fixed automatically. Please notice that
+            the "Start Address" should include the "Offset bias".
+            Enable a file by clicking on the checkbox under the "Enabled" heading.
+
+        2.5.3 In the "Erase Sector Selection" pane, select addresses
+            fe000000 through fe0fffff.  Press the "Erase/Program" 
+            button to erase the flash and then program the flash with selected
+            "bootrom.bin" file. A window pops up to show the progress of the
+            Flash device programming. When it is complete, the Flash should
+            contain the new boot program. 
+
+3. Hardware configuration settings.
+
+Once the flash has been programmed the following switch settings should be used to execute the bootrom. 
+Note that for MDS8349EA board, you should not modify the setting of switchs here.
+
+\ts
+    Switch Number | Switch ON           | Switch OFF
+    ------------------------------------------------
+    SW3           | 1,2,3,4,5,7         | 6,8
+    SW4           | 2,4,6,7,8           | 1,3,5
+                  |                     |
+    SW5 now SW6   |                     |
+    on rev0.7 and | 1,2,5,6,7,8         | 3,4
+    above         |                     |
+                  |                     |
+    SW6 now SW7   |                     |
+    on rev0.7 and | 1,2,3,4,5,7,8       | 6
+    above         |                     |
+\te
+
+    Now you will get VxWorks bootrom running. If you are programming VxWorks bootrom 
+    for the first time, it's strongly recommended that you should use the 'M' command 
+    provided by VxWorks bootrom to check and configure the ethernet MAC address, see 
+    the section "Ethernet Address" below for more details.
+
+FEATURES
+
+\sh Supported Features (REVA board revisions)
+
+\sh List of Hardware Features
+
+\ts
+Hardware Interface   | Controller  | Driver/Component        | Status
+---------------------------------------------------------------------
+UART:0               | on-chip     | vxbNs16550Sio.c         | SUPPORTED
+UART:1               | on-chip     | vxbNs16550Sio.c         | SUPPORTED
+NOR-FLASH            | S29GL256N   | flashMem.c/sysMtd.c     | SUPPORTED
+1GB-ETHERNET:1       | on-chip     | vxbTsecEnd.c            | SUPPORTED
+1GB-ETHERNET:2       | on-chip     | vxbTsecEnd.c            | SUPPORTED
+TIMER                | on-chip     | vxbPpcDecTimer.c        | SUPPORTED
+TIMER                | on-chip     | vxbPpcQuiccTimer.c      | SUPPORTED
+I2C                  | on-chip     | sysMotI2c.c             | SUPPORTED
+PCI1                 | on-chip     | m83xxPci.c              | SUPPORTED
+USB2-HOST            | on-chip     | INCLUDE_EHCI            | SUPPORTED
+SEC                  | on-chip     | INCLUDE_SECURITY_ENGINE | SUPPORTED
+PCI2                 | on-chip     | m83xxPci.c              | UNSUPPORTED
+\te
+
+\sh Feature Interactions
+Refer to the board vendor's documentation.
+
+HARDWARE DETAILS
+This section discusses memory maps for each bus and lists of interrupt levels 
+and/or vector numbers for each interrupting source.
+
+\sh Verified Hardware
+This BSP has been verified on the following board and silicon:
+
+\cs
+    MPC8349-ADS REVA with MPC8349 REV1.0/1.1/3.0
+    MPC8349EA-MDS REVA with MPC8349EA REV3.1
+\ce
+
+\sh Memory Maps
+
+The memory map is described in the Motorola board documentation.  The
+memory map is completely configurable by the bsp, however we have
+kept the map as described.  However there is a remapping of the IMMR
+(internal memory map register) provided.  During debugging it can be
+desirable to leave the internal memory map as defined by the hard
+reset configuration word.  This makes using a visionICE or visionPROBE
+simpler because the emulator always knows where the internal map is.
+
+The following table describes the ADS8349 default memory map:
+\ts
+
+Start | Size | End | Access to
+------------------------------
+0x0000_0000 | 256MB | 0x0FFF_FFFF | DDR SDRAM
+0x1000_0000 | 64MB  | 0x13FF_FFFF | LBC SDRAM 
+0x8000_0000 | 256MB | 0x8FFF_FFFF | PCI1
+0x9000_0000 | 256MB | 0x9FFF_FFFF | PCI2
+0xF800_0000 | 64KB  | 0xF800_FFFF | BCSR
+0xFF40_0000 | 1MB   | 0xFF4F_FFFF | Configuration Registers 
+0xFF80_0000 | 8MB   | 0xFFFF_FFFF | NOR Flash
+
+\te
+
+The following table describes the MDS8349EA default memory map:
+\ts
+
+Start | Size | End | Access to
+------------------------------
+0x0000_0000 | 256MB | 0x0FFF_FFFF | DDR SDRAM
+0x1000_0000 | 64MB  | 0x13FF_FFFF | LBC SDRAM 
+0x8000_0000 | 256MB | 0x8FFF_FFFF | PCI1
+0x9000_0000 | 256MB | 0x9FFF_FFFF | PCI2
+0xF800_0000 | 64KB  | 0xF800_FFFF | BCSR
+0xE000_0000 | 1MB   | 0xE00F_FFFF | Configuration Registers 
+0xFE00_0000 | 32MB  | 0xFFFF_FFFF | NOR Flash
+
+\te
+
+\sh Serial Configuration
+Default configuration is:
+
+\ts
+    Baud Rate   : 9600
+    Data        : 8 bit
+    Parity      : None
+    Stop        : 1 bit
+    Flow Control: None
+\te
+
+\sh Network Configuration
+The TSEC1 and TSEC2 ports allow 10/100/1000T connection. The driver will auto-negotiate 
+and configure the port accordingly. Intel FEI8255x(PCI) ethernet card are tested 
+successfully with this BSP.
+
+The IPNET native driver of ETSEC is tested on this BSP. However, it is disabled
+by defaut. To enable the IPNET native driver of ETSEC, you should modify as
+follows:
+
+For commmand line build, modify following lines of config.h
+
+\cs
+    #define INCLUDE_END
+    #define INCLUDE_ETSEC_VXB_END
+\ce
+
+to:
+
+\cs
+    #define INCLUDE_END2
+    #define INCLUDE_ETSEC_VXB_END2
+\ce
+
+Then rebuild the bootrom or VxWorks image.
+
+For project build under Workbench, in the Kernel Configuration tab of your
+created VxWorks Image Project:
+
+    Exclude INCLUDE_ETSEC_VXB_END and INCLUDE_END
+    Include INCLUDE_ETSEC_VXB_END2 and INCLUDE_END2
+
+Then rebuild your project.
+
+\sh Boot Devices
+The supported boot devices are:
+
+\ts
+    `mottsec0'   | - Primary Ethernet (10baseT, 100baseTX, or 1000baseT)
+    `mottsec1'   | - Secondary Ethernet (10baseT, 100baseTX, or 1000baseT)
+    `tffs'       | - TFFS
+\te
+
+\sh Boot Methods
+The boot methods are affected by the boot parameters.  If no password is
+specified, RSH (remote shell) protocol is used.  If a password is specified,
+FTP protocol is used, or, if the flag is set, TFTP protocol is used.
+
+SPECIAL CONSIDERATIONS
+This section identifies the unique characteristics of the board. It includes
+all information needed by the user that does not fit in any other section. 
+
+\sh TrueFFS
+The standard Wind River TrueFFS product is supported in this release, to use it, 
+change "#undef INCLUDE_TFFS" to "#define INCLUDE_TFFS" then the relative macros 
+will be defined automatically.
+
+This BSP uses the Spansion S29GL256 flash as the TrueFFS media. 
+The flash address space that is used as TFFS is 0xff000000 - 0xffffffff. 
+When using TrueFFS on a new flash for the first time, you should format and 
+configure the FLASH by using:
+\cs
+    sysTffsFormat ();
+    usrTffsConfig (0, 0, "/tffs0");
+    dosfsDiskFormat ("/tffs0");     /@ For VxWorks 6.6 and later version @/
+\ce
+
+Note: If you are running these commands in the VxWorks target shell, please
+use
+\cs
+    sp sysTffsFormat
+\ce
+to format the flash as it would take long time to complete.
+
+You should now be able to use VxWorks I/O and file system commands to access
+the FLASH device as if it were a disk. If you put a VxWorks image in your FTP
+home directory, then it could be tested by using following commands:
+\cs
+    devs
+    copy ("vxWorks", "/tffs0/vxWorks");
+\ce
+
+For ads834x board, TrueFFS requires a custom cfi scs driver. Add in to MACH_EXTRA 
+in Makefile when including TFFS support.
+
+\sh PCI
+PCI1 is supported in this BSP. INCLUDE_PCI must be defined in config.h(change "#undef INCLUDE_PCI" 
+to "#define INCLUDE_PCI" then the relative macros will be defined automatically)if you want to use 
+the devices populated in PCI slot. In addition, because only Intel fei82557/9 is tested, definition 
+INCLUDE_FEI8255X_VXB_END is also required in config.h.
+PCI1 supported 64bit/66Mhz
+PCI2 interface is partially tested and therefore unsupported.
+
+\sh USB Host
+A standard UBS EHCI controller is supported in this BSP. INCLUDE_MPC8349_USB must be defined in 
+config.h(change "#undef INCLUDE_MPC8349_USB" to "#define INCLUDE_MPC8349_USB" and then 
+the relative macros will be defined automatically) to support USB host.
+
+\sh USB target
+USB 2.x Target Controller Driver (TCD) for the Freescale MPC8349E-MDS, USB 
+peripheral mass storage emulation, and DMA support have been added and 
+integrated to the standard ads834x BSP. This feature is only verified on MPC8349E-MDS board.
+
+1. USB Target Controller Setup
+
+   NOTE: Only one of the USB host controller or USB target controller should be enabled.
+
+    The following USB target controller related modifications should be 
+    done if you want to include it.
+
+   1.1 Define INCLUDE_FSL_TCD in BSP's config.h(change "#undef INCLUDE_FSL_TCD" 
+       to "define INCLUDE_FSL_TCD" and then the related macros will be defined 
+       automatically) to support USB target.
+
+   1.2 Add USB TCD and mass storage emulation feature definition in config.h:
+
+    NOTE: Please refer to the USB programmers guide for further information
+    about the configuration parameters.
+\cs
+
+        /@ Defines for USB Device support @/
+
+        #define INCLUDE_FSL_TCD
+
+        #ifdef INCLUDE_FSL_TCD
+        #   ifndef _ASMLANGUAGE
+        IMPORT void fslUsbDrDeviceHwInit (void);
+        #   endif
+        #   define FSL_USB_DR_DEVICE_IO_BASE      M834X_DR_USB_BASE
+        #   define FSL_USB_DR_DEVICE_INT_NUM      INUM_USB2_DR
+        #   define FSL_USB_DR_DEVICE_HW_INIT      fslUsbDrDeviceHwInit 
+        #   define FSL_USB_DR_DEVICE_BE_REG       FALSE
+        #   define FSL_USB_DR_DEVICE_BE_DESC      FALSE
+        #   define FSL_USB_DR_DEVICE_BE_SETUP     TRUE
+        #   define FSL_USB_DR_DEVICE_SYS_CONF     TRUE
+        #   define FSL_USB_DR_DEVICE_BUFFER_ES    FALSE
+        #   define FSL_USB_DR_DEVICE_PHY_MODE     FSL_USB_DR_PHY_ULPI
+        #   define INCLUDE_USB_TARG
+        #   define INCLUDE_MS_EMULATOR
+        #   define INCLUDE_MS_EMULATOR_INIT
+        #endif /@ INCLUDE_FSL_TCD @/
+
+        #ifdef INCLUDE_MS_EMULATOR
+        #   define INCLUDE_DOSFS
+        #   define INCLUDE_XBD_RAMDRV
+        #endif /@ INCLUDE_MS_EMULATOR @/
+
+
+        /@  Define for FS @/
+
+        #ifdef INCLUDE_DOSFS
+        #   define INCLUDE_DOSFS_MAIN
+        #   define INCLUDE_DOSFS_CHKDSK
+        #   define INCLUDE_DOSFS_FMT
+        #   define INCLUDE_FS_MONITOR
+        #   define INCLUDE_ERF
+        #   define INCLUDE_XBD
+        #   define INCLUDE_DEVICE_MANAGER
+        #   define INCLUDE_XBD_PART_LIB
+        #   define INCLUDE_DOSFS_FAT
+        #   define INCLUDE_DOSFS_DIR_VFAT
+        #   define INCLUDE_XBD_BLKDEV
+        #endif
+
+\ce
+
+   1.3 Compiling the BSP
+
+        If you are planning to compile the BSP from Windows, in the VxWorks
+        Development Shell, please execute the following commands in fsl_imx31lite
+        BSP directory:
+
+\cs
+        make clean
+        make vxWorks.st
+\ce
+
+2. USB Command Verifier Compliance Test
+
+   The MPC8349 TCD and mass storage emulation driver has been tested against 
+   USB Implementers Forum, Inc.'s (http://www.usb.org) USB Command Verifier 
+   (USBCV) available at http://www.usb.org/developers/tools/.
+
+   2.1 Test Setup
+
+       2.1.1 Install USB Command Verifier (USBCV) from www.usb.org on Windows 
+             XP PC to perform Chapter 9 and Mass Storage Class Compliance Tests. 
+             Only a beta version, version R1.3 beta 3 (USBCVr13Beta3.msi), was 
+             available at the time of testing.
+
+       2.1.2 Attach USB cable from target to Windows PC EHCI controller.
+
+       2.1.3 Execute "usbTargMsInit" on the VxWorks target to start the MPC8349 
+             TCD and mass storage emulation drivers.             
+
+   2.2 Chapter 9 Compliance Test
+
+       2.2.1 Start USB Command Verifier.
+
+       2.2.2 Select Test Mode: Compliance Test.
+
+       2.2.3 Select Test Suite: Chapter 9 Tests.
+
+       2.2.4 Click "Run".
+
+       2.2.5 Window pops up. Select Device Address: VID=0781,PID=0000. Click "OK".
+
+       2.2.6 Click "Launch Report Viewer" to see results.
+
+   2.3 Mass Storage Class Compliance Test
+
+       2.3.1 Start USB Command Verifier.
+
+       2.3.2 Select Test Mode: Compliance Test.
+
+       2.3.3 Select Test Suite: MSC Tests.
+
+       2.3.4 Click "Run".
+
+       2.3.5 Window pops up saying "This USB Mass Storage Tests is for INFORMATIONAL
+             purposes only." Click "OK".
+
+       2.3.6 Window pops up. Select Device Address: VID=0781,PID=0000. Click "OK".
+
+       2.3.7 Window pops up saying "WARNING: The following test might destroy ALL 
+             data on this disk. To continue with all tests, click OK. To abort this 
+             test, click ABORT." Click "OK".
+
+       2.3.8 A series of windows pops up and disappears.
+
+       2.3.9 When window saying "Disconnect and power off MSC device, then click OK. 
+             To abort this test, click ABORT." pops up, disconnect USB cable from target 
+             and power off target. Then, click "OK".
+
+       2.3.10 When window saying "Please plug device into the original port and turn on 
+              power to the device." pops up, Reconnect USB cable to target, power on 
+              target, and start MPC8349 TCD and mass storage emulation drivers.
+
+       2.3.11 Click "Launch Report Viewer" to see results.
+
+\sh BMS
+A boot option is available where the bootrom is executed from 0xfff00100
+instead of 0x100 which maps to 0xff800100. This can be enabled by defining
+BMS_HIGH_ENABLE in config.h and modifying the Makefile ROM_BASE_ADRS etc.
+The hardware reset configuration word still needs to be programmed at 
+0xff800000 or use switch configuration(unsupported). You can program this 
+bootrom at the low address as well as high address which works and is tested.
+A binary with just HRCW can be made and programmed at low address but not 
+supported/tested. This feature isn't tested in MDS8349EA board.
+
+\sh Make Targets
+The make targets are listed as the names of object-format files. Append `.hex' to each to derive a 
+hex-format file name. Other images not listed here may not be tested.
+
+\ts
+`bootrom'
+'bootrom.bin'
+'bootrom.hex'
+`vxWorks' (with `vxWorks.sym')
+`vxWorks.st'
+\te
+
+\sh BSP Bootloaders and Bootroms
+
+\ts
+Bootloader/Bootrom    | Status
+------------------------------
+Uboot (pre-flashed)   | UNSUPPORTED
+bootrom               | SUPPORTED
+bootrom_uncmp         | SUPPORTED
+vxWorks               | SUPPORTED
+vxWorks_rom           | SUPPORTED
+vxWorks_romCompress   | SUPPORTED
+vxWorks_romResident   | SUPPORTED
+\te
+
+\sh BSP Validated Tools
+
+\ts
+Tool                          | Connection/Type   | Status
+----------------------------------------------------------
+Workbench Debugger            | ETHERNET/WDB      | SUPPORTED
+Workbench System Viewer       | ETHERNET/WDB      | SUPPORTED
+Workbench MemScope            | ETHERNET/WDB      | SUPPORTED
+Workbench ProfileScope        | ETHERNET/WDB      | SUPPORTED
+Workbench StethoScope         | ETHERNET/WDB      | SUPPORTED
+Workbench CoverageScope       | ETHERNET/WDB      | SUPPORTED
+Workbench Core File Analysis  | ETHERNET/WDB      | UNVALIDATED
+Workbench Sensor Points       | ETHERNET/WDB      | UNVALIDATED
+Workbench OCD Debugger        | JTAG              | SUPPORTED
+Workbench OCD Flash           | JTAG              | SUPPORTED
+\te
+
+\sh Special Routines
+None
+
+\sh Ethernet Address
+The MPC8349 ADS board does not have a unique Ethernet hardware
+address assigned to each board.  A unique address is absolutely necessary 
+if the user wishes to connect the board to a network. Thus, the user
+must provide a suitable 6 byte Ethernet address for each board used
+on a network.
+
+The definition of macro ETHERNET_MAC_HANDLER in config.h indicates the MAC
+address is stored in NVRAM and alterable via the "M" bootrom command. This
+option allows only the last three bytes to be changed. To use this option,
+open a console window and reset the hardware. When the bootrom banner appears
+and the countdown starts, press any key to get the "[VxWorks Boot]:" prompt.
+Type 'M' and follow the instructions.
+
+\sh Known Problems
+PCI auto config will not work on rev1.0 silicon.
+TFFS requires a custom cfi scs driver. Add in to MACH_EXTRA in Makefile when
+including TFFS support in ADS8349 board.
+USB2.0 EHCI support is only for rev1.1 silicon and above.
+Rev3 silicon is now supported on the revA board with DDR1 only. 
+
+\sh Power-on Reset Initialization
+The state of the chip post reset is controlled via the HRCW.
+The hardware reset configuration word(HRCW) is set via programming a bootrom.
+The definitions are in ads834x.h and are set in config.h. To change this 
+setting you must modify config.h and rebuild and replace the bootrom.
+The default configuration is to use 64bit PCI unless secondary pci is enabled,
+then both PCI1/PCI2 arbiters are enabled.
+SYSCLK is assumed to be 66MHz in the board and CLKDIV is HIGH.
+TSECs default is GMII. 16bit flash is assumed. For more details see the board 
+manual and also MPC8349E Reference manual.
+
+\sh Hard Reset Configuration Words
+If a Wind River ICE or Probe cannot enter background mode (BKM) when attempting
+to connect to the board, the Hardware Reset Configuration Words (HRCWs) in Flash
+memory may have been corrupted.  To get into BKM, set the HRCWs in the processor
+by entering "cf rcw 0X04040006 0XB0600000" for ADS8349 and "cf rcw 0X05040000 0XE060A000" 
+for MDS8349EA at the >ERR> prompt.  
+
+\sh Flash Protection
+If when attempting to erase the flash, an algorithm timeout occurs, verify that
+the flash protection bit is not set.  The following instructions for reenabling
+the flash are valid for version 1.2 of the BCSR chip. 
+
+First, power-cycle the board. 
+In the OCD command shell window, examine the configuration word as show below.
+
+>ERR> IN
+>BKM>dmb 0xf8000001
+ F8000001: 0D 50 04 84 AF 07 33 FF 
+ 
+The flash protection bit is the least significant bit of the first byte.  In
+this example, it is shown as cleared.  In order to write to flash, this bit must
+be set.
+ 
+>BKM>mmb 0xf8000001 0x0c
+
+\sh CPU support
+MPC8349 is default for HRCW and 64bit DDR.
+MPC8343/47 was not tested although 8347 should work the 8343 may not due to 
+32 bit DDR was untested configuration and essential for this device.
+An attempt to support this was made, to implement undef MPC8349 and define 
+MPC8343 in config.h. Will require the bootrom to be rebuilt.
+
+\sh SYSCLK Frequency
+66MHz is supported
+
+\sh CSB Frequency Options
+\ts
+ | | | Input| Clock | Freq | Mhz
+DIV   | SPMF  | csb:sysclk | 16.67  | 25 | 33.33 | 66.67
+Low  | 0010  | 2 : 1  |  | | | 133 
+Low  | 0011  | 3 : 1  | | | 100  | 200
+Low | 0100  | 4 : 1  |  | 100  | 133  | 266
+Low  | 0101  | 5 : 1  |  | 125  | 166  | 333
+Low  | 0110  | 6 : 1  |  100  | 150  | 200 |
+Low  | 0111  | 7 : 1  |  116  | 175  | 233 | 
+Low  | 1000  | 8 : 1  |  133  | 200  | 266 |
+Low  | 1001  | 9 : 1  |  150  | 225  | 300 |
+Low  | 1010  | 10 : 1 |  166  | 250  | 333 |
+Low  | 1011  | 11 : 1  |  183  | 275 | |
+Low  | 1100  | 12 : 1  |  200  | 300 | | 
+Low  | 1101  | 13 : 1  |  216  | 325 | |
+Low  | 1110  | 14 : 1  |  233 | | | 
+Low  | 1111  | 15 : 1  |  250 | | |
+Low  | 0000  | 16 : 1  |  266 | | |
+High  | 0010 | 2 : 1   |  |  |  | 133
+High  | 0011 | 3 : 1   |  |  | 100 | 200
+High  | 0100 | 4 : 1   |  |  | 133 | 266
+High  | 0101 | 5 : 1   |  |  | 166 | 333
+High  | 0110 | 6 : 1   |  |  | 200 | 
+High  | 0111 | 7 : 1   |  |  | 233 |
+\te
+
+\sh Suggested PLL Configurations
+
+Table shows suggested PLL configurations for 33 MHz and 66 MHz input clocks from freescale.
+BSP only supports 66Mhz input clock.
+
+Supported key:
+1 : 667Mhz rated
+2 : 533Mhz or above
+3 : 400Mhz or above
+T : Tested for BSP.
+
+Note for 667Mhz you need silicon which has correct spec:
+MPC
+Product Code
+KMPC = 2 Piece Sample Pack
+MPC = Full Qual
+
+8349
+8349 Family Device Number
+Device Available speeds
+8349, 8347, 8343
+
+E
+Encryption Acceleration
+Blank = Not included
+
+C
+Temp. Range
+(Junction)
+Blank = 0 to 105C
+C = -40 to 105C
+
+ZU
+Package
+ZU = 672 TBGA (8349 or 8347)
+VV = 672 PB Free TBGA
+ZQ = 620 PBGA (8347 or 8343)
+
+AJ
+e300 Frequency AJ -- 533Mhz
+
+F
+DDR Frequency F -- 333Mhz
+
+\ts
+CPU/DDR
+ADD 266/266
+AGD 400/266
+AJF 533/333
+ALF 667/333 
+\te
+
+A
+Die Revision
+X = Die Mask Revision
+
+Example tested for silicon 1.1:
+\ts
+PPC8349EZUAJF
+\te
+
+Here HRCW are the bit settings for corepll and spmf required for low byte0/1.
+
+\ts
+HRCW | SPMF  | corePLL | sysclk | csb(Mhz) | core | Supported
+902  | 1001  | 0000010 | 33  | 300 | 300 | 3
+922  | 1001  | 0100010 | 33  | 300  | 300 | 3
+A02  | 1010  | 0000010 | 33  | 333  | 333 | 3
+A22  | 1010  | 0100010 | 33  | 333  | 333 | 3
+703  | 0111  | 0000011 | 33  | 233  | 350 | 3
+723  | 0111  | 0100011 | 33  | 233  | 350 | 3
+604  | 0110  | 0000100 | 33  | 200  | 400 | 3
+624  | 0110  | 0100100 | 33  | 200  | 400 | 3
+803  | 1000  | 0000011 | 33  | 266  | 400 | 3
+823  | 1000  | 0100011 | 33  | 266  | 400 | 3
+903  | 1001  | 0000011 | 33  | 300  | 450 | 2
+923  | 1001  | 0100011 | 33  | 300  | 450 | 2
+704  | 0111  | 0000011 | 33  | 233  | 466 | 2
+724  | 0111  | 0100011 | 33  | 233  | 466 | 2
+A03  | 1010  | 0000011 | 33  | 333  | 500 | 2
+A23  | 1010  | 0100011 | 33  | 333  | 500 | 2
+804  | 1000  | 0000100 | 33  | 266  | 533 | 2
+705  | 0111  | 0000101 | 33  | 233  | 583 | 1
+606  | 0110  | 0000110 | 33  | 200  | 600 | 1
+904  | 1001  | 0000100 | 33  | 300  | 600 | 1
+805  | 1000  | 0000101 | 33  | 266  | 667 | 1
+A04  | 1010  | 0000100 | 33  | 333  | 667 | 1
+\te
+
+\sh 66 MHz CLKIN/PCI_CLK Options
+
+\ts
+HRCW | SPMF | corePLL | sysclk | csb(Mhz) | core | Supported
+502  | 0101  | 0000010 | 66  | 333  | 333 | 3
+522  | 0101  | 0100010 | 66  | 333  | 333 | 3
+304  | 0011  | 0000100 | 66  | 200  | 400 | 3
+324  | 0011  | 0100100 | 66  | 200  | 400 | 3
+403  | 0100  | 0000011 | 66  | 266  | 400 | 3T
+423  | 0100  | 0100011 | 66  | 266  | 400 | 3
+503  | 0101  | 0000011 | 66  | 333  | 500 | 2T
+523  | 0101  | 0100011 | 66  | 333  | 500 | 2
+305  | 0011  | 0000101 | 66  | 200  | 500 | 2
+404  | 0100  | 0000100 | 66  | 266  | 533 | 2
+306  | 0011  | 0000100 | 66  | 200  | 600 | 1
+405  | 0100  | 0000101 | 66  | 266  | 667 | 1
+504  | 0101  | 0000100 | 66  | 333  | 667 | 1T
+\te
+
+BOARD LAYOUT
+
+The diagram below shows top view of MPC834X-ADS board.
+
+
+         +----------------+
+   +-----|----------------|---------------------------------------------------+ 
+   |     |     COP        |                                                   | 
+   |     +----------------+                                           +-------+ 
+   |                                                                  |       | 
+   |                                                                  | UART  | 
+   |                                                                  |       | 
+   |                                                  +--------+      +-------+ 
+   |                                                  |        |              | 
+   |                                   +--------+     |        |              | 
+   |                                   |        |     | MPC8349|              | 
+   |                                   |        |     |        |              | 
+   |                      +---------+  |  FLASH |     |        |              | 
+   |                      |         |  |        |     +--------+              | 
+   |                      |         |  |        |                             | 
+   |                      |  BCSR   |  +--------+                             | 
+   |                      |         |                                         | 
+   |                      |         |                                         | 
+   |                      +---------+                                 +-------+ 
+   |                                                                  |       | 
+   |       SW7          SW4                                           | GETH2 | 
+   |   +----------+ +----------+                                      |       | 
+   |   |----------| |----------|                                      +-------+ 
+   |   +----------+ +----------+                                              | 
+   |       SW6          SW3                                           +-------+ 
+   |   +----------+ +----------+                                      |       | 
+   |   |----------| |----------|                                      | GETH1 | 
+   |   +----------+ +----------+                                      |       | 
+   |                                                                  +-------+ 
+   |                                                                          | 
+   |                                                                          | 
+   +--------------------------------------------------------------------------+ 
+
+
+BIBLIOGRAPHY
+
+\tb MPC8349 Reference Manual 
+
+\tb MPC8349ADS Board Manual 
+
+\tb MPC8349EAMDS Board Manual
+
+\tb E300 Core Reference Manual 
+
+\tb PowerPC Microprocessor Family: The Programming Environments for 32-bit Microprocessors MPCFPE32B/AD 
+
+WEB RESOURCES
+
+Much of the Freescale documentation can be found on line. The following
+URL was correct at the time of writing for semiconductor area. You'll have to 
+search the documentation using processor name for specific documentation.
+
+http://www.freescale.com/
+
+SEE ALSO
+
+\tb Workbench User's Guide: Getting Started, 
+
+\tb VxWorks Programmer's Guide: Configuration, 
+
+\tb VxWorks Programmer's Guide: Architecture Supplement 

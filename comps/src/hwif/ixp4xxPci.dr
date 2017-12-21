@@ -1,0 +1,6 @@
+#ifdef DRV_PCIBUS_IXP4XX
+    ixPciRegister ();		/* IXP4xx PCI host controller */
+#ifdef INCLUDE_END2
+    vxbDmaEnd2BufIxp4xxPciInit ();
+#endif
+#endif /* DRV_PCIBUS_IXP4XX */

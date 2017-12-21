@@ -1,0 +1,1 @@
+IMPORT void m512xFifocRegister (void);

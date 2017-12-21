@@ -1,0 +1,4 @@
+#ifdef DRV_INTCTLR_MIPS_MT_IPI
+    vxbMipsMtIntCtlrRegister ();
+#endif /* DRV_INTCTLR_MIPS_MT_IPI */
+    

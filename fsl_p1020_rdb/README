@@ -1,0 +1,60 @@
+
+           README: Freescale P1020RDB (fsl_p1020_rdb)
+
+This file contains board-specific information for the Freescale P1020RDB
+target board.  This file documents BSP interface changes from previous software
+or hardware versions, and notifies the user of serious caveats that must be
+noted before using this BSP.  Additionally, the target board's reference entry
+(i.e. fsl_p1020_rdb/target.ref) provides board-specific information necessary
+to run VxWorks and should be read fully before this BSP is used.
+
+--------------------------------------------------------------------------------
+RELEASE 6.9/4
+    TODO:
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.x
+
+    Added support for VxBus SPI driver.
+    Fix the AMP device filter. (WIND00387606)
+    Added back the macro FLASH_SECTOR_SIZE. (WIND00377897)
+
+RELEASE 6.9/3
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Update the description of Security Engine. (WIND00331832)
+    Remove the component INCLUDE_AIM_MMU_SHOW for footprint. (WIND00334904)
+    Added support for P1020RDB-PC Rev B board with DDR3. 
+    Added support for VxBus I2C and NorFlash driver.
+    Flush cache in sysCpu1ShutdownLoop.
+    Reset PIR before non-CPU0 reset when AMP.
+    Update SPI driver.
+
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Moved L1 cache parity error handling to the arch library.  L1 cache parity
+       checking is now enabled by default. L1 parity errors now generate
+       (in many cases recoverable) machine check exceptions.  (WIND00309426)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.1
+
+    Improve flash performance and reduce boot time.
+    Change DRV_STORAGE_FSL_SDHC to DRV_STORAGE_SDHC.
+    Remove DMA2 in hwconf.c. (WIND00291499)
+    This release supports UP, SMP and AMP.
+    Set ETSECx_CORE_NUM as coreNum parameters for etsec. (WIND00260801)
+    Fix document error. (WIND00306096)
+    Fix Timer rate settings. (WIND00307247)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+Version 2.0/0
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Initial release.

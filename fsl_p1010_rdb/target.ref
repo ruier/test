@@ -1,0 +1,699 @@
+\" fsl_p1010_rdb/target.ref - Freescale P1010RDB target specific documentation
+\"
+\" Copyright (c) 2011, 2012 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01d,18apr12,fao  correct section number.(WIND00336512)
+\" 01c,19mar12,y_y  add vxBus I2C support. 
+\" 01b,24feb12,fao  Fixed sequence number for bootrom burning. (WIND00333309)
+\"                  Fixed description for eSDHC and mutually-exclusive device issue. 
+\" 01a,02may11,fao  written.
+\"
+\TITLE fsl_p1010_rdb - Freescale P1010RDB
+
+NAME
+`Freescale P1010RDB'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks for the fsl_p1010_rdb BSP. Please read the section "Getting the board
+running VxWorks" in order to configure the board to run VxWorks.
+
+Note: This BSP supports Freescale P1014RDB board as well. For how to configure
+ the P1010RDB to work in P1014RDB mode, please refer to section 
+'P1014 mode on P1010RDB' below.
+
+\sh Switches
+
+There are five switches on the P1010RDB board.
+
+Default Switch Settings:
+
+\ts
+Switch Number   | Switch ON           | Switch OFF
+--------------------------------------------------
+SW1             | 4,7                 | 1,2,3,5,6,8
+SW2             | 1,2,4,5             | 3,6,7,8
+SW3             | 2,3,4               | 1
+SW4             | 1                   | 2,3,4
+SW6             | 1,4                 | 2,3
+
+\te
+
+\sh Getting the board running VxWorks (boot from VxWorks Bootrom)
+This section will guide you how to run VxWorks on the Freescale P1010RDB board.
+
+1. Creating a bootrom:
+
+    Open the VxWorks Development Shell, change directory to fsl_p1010_rdb
+    BSP directory, and then build the VxWorks bootrom image.
+
+\cs
+    cd target/config/fsl_p1010_rdb
+    make bootrom.bin
+\ce
+
+2. Flashing the VxWorks bootrom with U-boot
+
+    This section will describe how to program a VxWorks bootrom into the flash
+    using the pre-flashed U-Boot.
+
+    2.1 Starting a TFTP server
+
+        Open a TFTP server on your host.  Make sure the root directory is
+        your fsl_p1010_rdb BSP directory which contains the VxWorks bootrom
+        image you've just created.
+
+    2.2 Make sure your host serial port's configuration is:
+
+        Baud Rate: 115200
+        Data: 8 bit
+        Parity: None
+        Stop: 1 bit
+        Flow Control: None
+
+    2.3 Configuring the U-Boot environment
+
+        Power up the board, you'll see the U-Boot shell prompt, something like:
+
+\cs
+        NAND boot...                                                                                                         
+                                                                                                                             
+        U-Boot 2010.12-00063-g8669298-dirty (Jul 09 2011 - 12:42:30)                                                         
+                                                                                                                                 
+        CPU:   P1010E, Version: 1.0, (0x80f90010)                                                                            
+        Core:  E500, Version: 5.1, (0x80212151)                                                                              
+        Clock Configuration:                                                                                                 
+               CPU0:800  MHz,                                                                                                
+               CCB:400  MHz,                                                                                                 
+               DDR:333.333 MHz (666.667 MT/s data rate) (Asynchronous), IFC:100  MHz                                         
+        L1:    D-cache 32 kB enabled                                                                                         
+               I-cache 32 kB enabled
+        Board: P1010RDB 
+        I2C:   ready
+        SPI:   ready
+        DRAM:  Detected UDIMM(s)
+        1 GiB (DDR3, 32-bit, CL=5, ECC off)
+        FLASH: 32 MiB
+        L2:    256 KB enabled
+        NAND:  NAND_ECC_NONE selected by board driver. This is not recommended !!
+        32 MiB
+        Bad block table not found for chip 0
+        Bad block table found at page 65472, version 0x01
+        Bad block table written to 0x000001ffc000, version 0x01
+        PCIe1: Root Complex of mini PCIe Slot, no link, regs @ 0xffe0a000
+        PCIe1: Bus 00 - 00
+        PCIe2: Root Complex of PCIe Slot, no link, regs @ 0xffe09000
+        PCIe2: Bus 01 - 01
+        In:    serial
+        Out:   serial
+        Err:   serial
+        Net:   eTSEC1, eTSEC2, eTSEC3
+        Hit any key to stop autoboot:  0
+        => 
+
+\ce
+
+        Type the following commands to setup the U-Boot environment.
+
+\cs
+        setenv ethaddr 00:04:9f:ef:01:01
+        setenv eth1addr 00:04:9f:ef:01:02
+        setenv eth2addr 00:04:9f:ef:01:03
+        setenv ipaddr 192.168.0.3
+        setenv netmask 255.255.255.0
+        setenv serverip 192.168.0.2
+        setenv gatewayip 192.168.0.1
+        saveenv
+\ce
+
+        Note: This is just an example, you must change the network parameters
+        according to your actual situation and provide a suitable 6 byte
+        Ethernet addresses ('ethaddr') for each port used on the network.
+        'ipaddr' is the target IP address while 'serverip' is your host IP address.
+
+    2.4 Programming the Freescale P1010RDB flash
+
+        Type the following commands in the U-Boot shell.
+
+\cs
+        tftp 1000000 bootrom.bin
+        protect off all
+        erase efe00000 efffffff
+        cp.b 1000000 efe00000 200000
+\ce
+
+    2.5 Set the boot from NOR flash switch
+\cs
+        Switch Number   | Switch ON           | Switch OFF
+        --------------------------------------------------
+        SW4             | 1,2,3,4             | 
+        SW6             | 1                   | 2,3,4    
+\ce
+
+3. Running the VxWorks bootrom
+
+   Re-power on the board, then the VxWorks bootrom should run up.
+
+FEATURES
+
+This section describes all features of the board, supported or not.
+It documents all configurations of the board and the interaction between
+features and configuration items.
+
+\sh List of Hardware Features (Freescale P1010RDB board)
+
+\ts
+Hardware Interface | Controller | Driver/Component    | Status
+--------------------------------------------------------------
+UART:0             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+UART:1             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+1GB-ETHERNET:0     | on-chip    | vxbEtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:1     | on-chip    | vxbEtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:2     | on-chip    | vxbEtsecEnd.c       | SUPPORTED
+NOR-FLASH          | JS28F256M29| 'flashmem.c/TFFS'   | SUPPORTED
+NAND-FLASH         | K9F5608U0D |                     | UNSUPPORTED
+TIMER              | on-chip    | vxbM85xxTimer.c     | SUPPORTED
+TIMER              | on-chip    | vxbOpenPicTimer.c   | SUPPORTED
+PCI-E-HOST:0       | on-chip    |                     | UNSUPPORTED
+PCI-E-HOST:1       | on-chip    | vxbQorIQPciEx.c     | SUPPORTED
+DMA                | on-chip    | vxbFslDma.c         | SUPPORTED
+I2C:0              | on-chip    | vxbFslI2c.c         | SUPPORTED
+I2C:1              | on-chip    | vxbFslI2c.c         | SUPPORTED
+SPI                | on-chip    | sysSpi.c            | SUPPORTED
+SPI-FLASH          | S25FL128P  | spS25flxxSpiFlash.c | SUPPORTED
+RTC                | DS1339     | vxbI2cRtc.c         | SUPPORTED
+GPIO               | PAC9557    | vxbI2cDevGeneric.c  | SUPPORTED
+EEPROM             | on-chip    | vxbI2cEeprom.c      | SUPPORTED
+USB-HOST:1         | on-chip    |                     | SUPPORTED
+USB-HOST:2         | on-chip    | INCLUDE_USB         | SUPPORTED
+USB-TARGET         | on-chip    | INCLUDE_FSL_TCD     | SUPPORTED
+SD-CARD            | on-chip    | DRV_STORAGE_SDHC    | SUPPORTED
+SATA               | on-chip    | vxbFslSataStorage.c | SUPPORTED
+ESATA              | on-chip    | vxbFslSataStorage.c | UNVALIDATED
+GPIO               | on-chip    | sysGpio.c           | SUPPORTED
+\te
+
+\sh Feature Interactions
+Refer to the board vendor's documentation.
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Verified Hardware
+This BSP has been verified on Rev A of Freescale P1010RDB-PA board.
+The default clock speed for P1010RDB is 800MHz for core, 400MHz for CCB.
+
+\sh Memory Maps
+The default memory map of this BSP is as bellows:
+
+\ts
+Start       | Size  | End         | Access to
+---------------------------------------------
+0x0000_0000 | 1G    | 0x3FFF_FFFF | DDR3 SDRAM
+0xa000_0000 | 64MB  | 0xa3FF_FFFF | PCIe-2 Memory
+0xa400_0000 | 64MB  | 0xa7FF_FFFF | PCIe 2 Non-Prefetchable Memory
+0xa800_0000 | 64MB  | 0xaBFF_FFFF | PCIe 2 I/O Memory
+0xEE00_0000 | 32MB  | 0xEFFF_FFFF | NOR Flash
+0xFFE0_0000 | 1MB   | 0xFFEF_FFFF | CCSBAR
+\te
+
+\sh Serial Connections
+Most VxWorks BSPs do not use hardware handshaking in the serial interface,
+and thus a simple 3 wire connection is commonly used.
+
+The P1010RDB board has two RS-232 standard UART ports.
+\sh Serial Configuration
+No special configuration needed.
+Default configuration is:
+    Baud Rate: 115200
+    Data: 8 bit
+    Parity: None
+    Stop: 1 bit
+    Flow Control: None
+
+\sh Ethernet Address
+The P1010RDB boards do not have unique Ethernet hardware addresses assigned
+to each eTSEC port. A unique address is absolutely necessary if the user wishes
+to connect the board to a network. Thus, the user must provide suitable
+6 byte Ethernet addresses for each eTSEC port used on a network. An address is now
+stored in flash with the bootline. Use the 'M' command to modify for a distinct
+MAC address.
+
+\sh Network Configuration
+Each ETSEC port allows 10/100/1000 connection. The driver will auto-negotiate
+and configure the port accordingly. The BSP also supports Intel e100/e1000
+series NICs via PCIe. See the gei825xxVxbEnd driver for the supported model
+numbers.
+
+The following END and corresponding END2 drivers are supported in this BSP.
+However, only the END driver is enabled by default.
+
+\ts
+Driver | END                     | END2
+---------------------------------------
+ETSEC  | INCLUDE_ETSEC_VXB_END   | INCLUDE_ETSEC_VXB_END2
+\te
+
+To enable the END2 driver, you should modify as follows:
+
+In config.h, INCLUDE_END should be commented out when defining INCLUDE_END2
+for a command line build. Also replace the END driver name with corresponding
+END2 driver name, then rebuild the bootrom and vxWorks image.
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, include INCLUDE_END2 and corresponding END2
+driver, exclude INCLUDE_END and END driver, then rebuild your project.
+
+\sh Boot Devices
+The supported boot devices are:
+
+\ts
+    `motetsec0' | ETSEC1
+    `motetsec1' | ETSEC2
+    `motetsec2' | ETSEC3
+    `fs'        | USB/SATA/TFFS
+\te
+
+\sh Boot Methods
+The boot methods are affected by the boot parameters. If no password is
+specified, RSH (remote shell) protocol is used. If a password is specified,
+FTP protocol is used, or, if the flag is set to 0x80, TFTP protocol is used.
+
+\sh PCIe Access
+There are one PCIe slot (P5) and one Mini PCIe slot (P6) on the Freescale
+P1010RDB board. The PCIe settings is PCIe x1 slots, Mini PCIe slot is
+unsupported. In order to support PCIe devices in this BSP, please define
+following macro in config.h:
+
+\cs
+    #define INCLUDE_PCI_BUS
+\ce
+
+The Intel 8257x PCIe Gigabit Ethernet adapter is supported in this release.
+Define INCLUDE_GEI825XX_VXB_END in config.h to enable this device.
+
+This BSP defaults to use PCIe legacy interrupts. To enable PCIe MSI interrupts,
+define following macro in config.h, or add it to your project using the vxprj
+tool or Workbench:
+
+\cs
+    #define INCLUDE_INTCTLR_DYNAMIC_LIB
+\ce
+
+\sh DMA
+Freescale DMA Controller is supported in this release.
+To enable DMA controller support, please define the following macro in config.h:
+\cs
+    #define DRV_DMA_FSL
+\ce
+The maximum transfer size of a single transaction is (64M - 1) bytes.
+
+\sh eSPI and SPI Flash
+The Freescale eSPI Controller and Spansion SPI Flash S25FLXX are supported 
+(only in polled mode) in this release.
+
+To enable this function, please define the following macro in config.h:
+
+\cs
+    #define DRV_SPI_S25FLXX
+\ce
+
+\sh I2C
+The pt7c4338 RTC, Atmel EEPROM, pca9557 GPIO, I2C controller are supported 
+in this release. The I2C controllers use the interrupt mode as default.
+
+To enable this function, please define the corresponding macro in config.h:
+
+\cs
+    #define INCLUDE_I2C_BUS
+\ce
+
+To use the pt7c4338 RTC device, which can use the routine sysRtcSet() that is a 
+command-line utility for setting the RTC from the VxWorks kernel prompt. The 
+user will be prompted for the appropriate input. To read the date and the time, 
+the sysRtcGet() routine have to be called. Use of the EEPROM requires the 
+DRV_I2C_EEPROM and INCLUDE_EEPROMDRV driver component. Once the INCLUDE_EEPROMDRV 
+was defined, the EEPROM will be used as I/O device, which can use the standard 
+I/O routine open(), read(), write(), ioctl(), close()...to access it.
+
+To access pca9557 GPIO, the DRV_I2C_GENERIC_DEV driver component is required.
+The routine vxbI2cByNameWrite() and vxbI2cByNameRead() can be easily used to 
+access the pca9557 GPIO device.
+
+\sh USB
+P1010E has one high-speed USB controllers, but have two USB PHY USB1 and USB2. 
+This BSP supports either USB host mode or USB target mode on USB1 and USB2.
+The two modes can't be enabled at the same time.
+
+\sh 
+
+1. Host mode
+To enable USB1 host support, make sure the following components are included
+in config.h:
+
+\cs
+#define INCLUDE_USB1
+\ce
+
+To enable USB2 host support, make sure the following components are included
+in config.h:
+
+\cs
+#define INCLUDE_USB2
+\ce
+
+Host mode has only been validated using mass storage target devices.
+
+For more information, please refer to
+\tb Wind River USB for VxWorks 6 PROGRAMMER'S GUIDE
+
+\sh 
+
+2. Target mode
+To enable the board to operate as a USB mass storage target, perform the
+following steps:
+
+2.1 Define INCLUDE_USB1 or INCLUDE_USB2 and INCLUDE_FSL_TCD in the BSP's 
+config.h file. This will cause other related macros to be defined automatically
+
+2.2 Adjust the USB TCD and mass storage parameter definitions as needed:
+
+\cs
+
+    /@ Defines for USB Device support @/
+
+    #define INCLUDE_FSL_TCD
+
+    #ifdef INCLUDE_FSL_TCD
+    #   define FSL_USB_DR_PHY_UTMI            0
+    #   define FSL_USB_DR_DEVICE_IO_BASE      USB_BASE
+    #   define FSL_USB_DR_DEVICE_INT_NUM      EPIC_USB_INT_VEC
+    #   define FSL_USB_DR_DEVICE_BE_REG       FALSE
+    #   define FSL_USB_DR_DEVICE_BE_DESC      FALSE
+    #   define FSL_USB_DR_DEVICE_BE_SETUP     TRUE
+    #   define FSL_USB_DR_DEVICE_SYS_CONF     TRUE
+    #   define FSL_USB_DR_DEVICE_BUFFER_ES    FALSE
+    #   define FSL_USB_DR_DEVICE_PHY_MODE     FSL_USB_DR_PHY_UTMI
+    #   define INCLUDE_USB_TARG
+    #   define INCLUDE_MS_EMULATOR
+    #   define INCLUDE_MS_EMULATOR_INIT
+    #endif /@ INCLUDE_FSL_TCD @/
+
+    #ifdef INCLUDE_MS_EMULATOR
+    #   define INCLUDE_DOSFS
+    #   define INCLUDE_XBD_RAMDRV
+    #endif /@ INCLUDE_MS_EMULATOR @/
+\ce
+
+\sh TrueFFS
+The standard Wind River TrueFFS product is supported in this release.
+
+This BSP uses the lowest 7 MBytes of the Spansion S29GL128P flash as the
+TrueFFS media. The overall FLASH address space is 0xff000000 ~ 0xffffffff,
+subdivided as:
+
+\ts
+Start       | Size     | End         | Comment
+------------------------------------------------
+0xEE00_0000 | 1MB      | 0xEE0F_FFFF | NVRAM
+0xEE10_0000 | 8MB      | 0xEE8F_FFFF | TrueFFS
+0xEF90_0000 | 21M      | 0xEFEF_FFFF | unused
+0xEFE0_0000 | 2MB      | 0xEFFF_FFFF | VxWorks bootrom or rom_Compress image
+
+\te
+
+Note that the TFFS space cannot be extended beyond 0xff77ffff without
+corrupting the bootloader (bootrom or u-boot) and VSC7385 firmware, which
+would cause problems in booting the board or loading a VxWorks image.
+
+To use TrueFFS, define INCLUDE_TFFS in config.h. When using TrueFFS on a new FLASH
+for the first time, you should format and configure the FLASH by using:
+
+\cs
+    sysTffsFormat ();
+    usrTffsConfig (0, 0, "/tffs0");
+\ce
+
+If you are using DOSFS, please use
+
+\cs
+    dosfsDiskFormat ("/tffs0");
+\ce
+
+Note: If you are running these commands in the VxWorks kernel shell, you may
+prefer to run the format operations as separate tasks, e.g.
+\cs
+    sp sysTffsFormat
+\ce
+since they can take a long time to complete.
+
+You should now be able to use VxWorks I/O and file system commands to access
+the FLASH device as if it were a disk.  For example, you can copy a vxWorks
+image from your host to TFFS by using file system 'copy'.  Of course, you should
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/tffs0/vxWorks");
+\ce
+
+If you want to use "/tffs0" as a boot device, you should follow the instructions:
+
+For command line mode, make sure INCLUDE_TFFS is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the flash chip.  Also make sure you have all the necessary file system
+components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_TFFS_MOUNT
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a default_romCompress.bin in the project directory, program
+it into the flash chip as a bootrom.
+
+Below is an example of using /tffs as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /tffs0/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : user
+    ftp password (pw)    : pass
+    flags (f)            : 0x0
+    target name (tn)     : p1010rdb
+    other (o)            : motetsec0
+\ce
+
+\sh SD memory card controller (eSDHC)
+The P1010E's on chip enhanced SD host controller (eSDHC), connected to socket
+J22 on the board, is supported for standard capacity SD memory cards. 
+
+To enable eSDHC support, make sure the following feature definitions are
+added in config.h:
+
+\cs
+    #define DRV_STORAGE_SDHC
+    #define INCLUDE_DOSFS
+    #define INCLUDE_ERF
+    #define INCLUDE_DEVICE_MANAGER
+    #define INCLUDE_FS_EVENT_UTIL
+    #define INCLUDE_FS_MONITOR
+    #define INCLUDE_XBD
+    #define INCLUDE_XBD_BLK_DEV
+    #define INCLUDE_XBD_TRANS
+    #define INCLUDE_DOSFS_DIR_FIXED
+    #define INCLUDE_DOSFS_DIR_VFAT
+    #define INCLUDE_DOSFS_FAT
+    #define INCLUDE_DOSFS_FMT
+    #define INCLUDE_DOSFS_CHKDSK
+    #define INCLUDE_DOSFS_MAIN
+\ce
+
+Use of the internal DMA engine, and selection of interrupt vs. polled mode,
+are configured by setting the values of 'dmaMode' and 'polling' in hwconf.c.
+For example, to select interrupt mode and enable use of the internal DMA engine:
+\cs
+    /@ hwconf.c @/
+    ...
+    struct hcfResource fslSdhcResources[] = {
+    ...
+        { "dmaMode",             HCF_RES_INT,    { (void *)1 } },
+        { "polling",             HCF_RES_INT,    { (void *)0 } },
+    ...
+    };
+    ...
+\ce
+
+When using an SD card for the first time, you should format it as a FAT file
+system by using
+\cs
+    dosFsVolFormat ("/sd0:1", 0x20, 0);    /@ FAT32 format @/
+\ce
+or
+\cs
+    dosFsVolFormat ("/sd0:1", 0x10, 0);    /@ FAT16 format @/
+\ce
+
+Now, you can use VxWorks I/O and file system commands to access the SD card
+device as if it were a disk.  For example, you can copy a vxWorks image from
+your host to the SD card by using file system copy. Of course, you should
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/sd0:1/vxWorks");
+\ce
+
+\sh SATA Support
+
+To use the SATA interfaces, the macro DRV_STORAGE_FSLSATA must
+be defined in config.h.
+
+SPECIAL CONSIDERATIONS
+
+\sh Ethernet Address
+The definition of macro ETHERNET_MAC_HANDLER in config.h indicates the MAC
+address is stored in NVRAM and alterable via the 'M' bootrom command.  This
+option allows only the last three bytes to be changed. To use this option,
+open a console window and reset the hardware. When the bootrom banner appears
+and the countdown starts, press any key to get the "[VxWorks Boot]:" prompt.
+Type 'M' and follow the instructions.
+
+\sh Make Targets
+The make targets are listed as the names of object-format files.
+Other images not listed here have not been validated.
+
+\ts
+`bootrom'
+`bootrom.bin'
+`bootrom_uncmp'
+`bootrom_uncmp.bin'
+`vxWorks' (with `vxWorks.sym')
+`vxWorks.st'
+\te
+
+\sh BSP Bootloaders and Bootroms
+
+\ts
+Bootloader/Bootrom   | status
+----------------------------------
+bootrom              | SUPPORTED
+bootrom_uncmp        | SUPPORTED
+vxWorks_rom          | SUPPORTED
+vxWorks_romCompress  | SUPPORTED
+vxWorks_romResident  | UNSUPPORTED
+\te
+
+\sh BSP Validated Tools
+
+\ts
+Tool                         | Connection/Type | Status
+-------------------------------------------------------
+Workbench Debugger           | ETHERNET/WDB    | SUPPORTED
+Workbench System Viewer      | ETHERNET/WDB    | SUPPORTED
+Workbench MemScope           | ETHERNET/WDB    | SUPPORTED
+Workbench ProfileScope       | ETHERNET/WDB    | SUPPORTED
+Workbench StethoScope        | ETHERNET/WDB    | SUPPORTED
+Workbench CoverageScope      | ETHERNET/WDB    | SUPPORTED
+Workbench Core File Analysis | ETHERNET/WDB    | UNVALIDATED
+Workbench Sensor Points      | ETHERNET/WDB    | UNVALIDATED
+Workbench OCD Debugger       | JTAG            | UNVALIDATED
+Workbench OCD Flash          | JTAG            | UNVALIDATED
+\te
+
+\sh P1014 mode on P1010RDB
+
+    1. Make sure the board is off.
+    2. Change SW2[8] to ON.
+    3. Switch on the board.
+    Please note there is no specific software build required for P1014 personality. 
+    Everything will be taken care by the software dynamically.
+
+\sh Known Problems
+The NOR FLASH and USB1 and ESDHC are multiplexed, so the bsp only supports one 
+of these features at the same time, and CTRL+X still can be used to reboot 
+system even though define USB1 and ESDHC, the software will dynamically set to
+NOR FLASH when press CTRL+X, but reset button can't be supported, since the
+NOR FLASH will not be accessed on that time.
+
+The vxWorks_romResident image is unsupported in this release, as it will take
+several minutes to boot up.  For more details, or to check if a workaround has
+been posted since the writing of this document, see WIND00136433.
+
+BOARD LAYOUT
+
+\bs
++---+----+----+----+------+------+-------------+--------+--------+--------++---+
+|   |RJ11|    |COM0|      |SD/MMC|             |ESTAT|  |e2-RGMII|e1-RGMII|    |
+|   +----+    +----+    +------------+         +-----+  +--------+--------+    |
+|             |COM1|    |USB2|  |USB1|                  |e3-RGMII|             |
+|             +----+    +----+  +----+          -----+  +--------+             |
+|     +---+                                     |SATA|                         |
+|     |   |                                     +----+                         |
+|     |   |    SW6                                                             |
+|     | P |                                     SW2                            |
+|     | C |                                     SW1                            |
+|     | I |                                     SW3                            |
+|     | E |                                                                    |
+|     |   |                                                                    |
+|     +---|                                                                    |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|          +-----------+                      SW4                              |
+|          |           |                                                       |
+|          |   QorIQ   |                                                       |
+|          |   P1010E  |                                                       |
+|          |           |                                                       |
+|          +-----------+                                                       |
++------------------------------------------------------------------------------+
+\be
+
+SEE ALSO
+
+\tb Workbench User's Guide: Introduction
+
+\tb VxWorks Programmer's Guide: Configuration
+
+\tb VxWorks Programmer's Guide: Architecture Appendix
+
+BIBLIOGRAPHY
+
+\tb P1010-RDB User Guide
+
+\tb P1010 QorIQ Integrated Processor Reference Manual
+
+\tb PowerPC E500 Core Reference Manual
+
+\tb Motorola PowerPC Microprocessor Family: The Programming Environments

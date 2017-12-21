@@ -1,0 +1,63 @@
+
+README: wrSbc8641d BSP for Wind River SBC8641D Board
+
+This file contains information on any BSP interface changes from previous
+software or hardware versions, and contains caveats that the user must be
+aware of before using this BSP. Additionally, the target board's manual
+page entry (wrSbc8641d/target.ref) provides board-specific information 
+necessary to run VxWorks, and should be read before this BSP is used.
+
+------------------------------------------------------------------------------
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    Fix high impact coverity errors. (WIND00423743)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+    add _WRS_VX_AMP for compile error. (WIND00192173)
+	
+    flush L2 cache when reboot.(WIND00218322)
+	
+    allow to conditionnaly power management support. (WIND00185423)
+	
+    change vxIpiEmit to vxIpiPhysEmit. (WIND00226567)
+
+Version 2.0/3
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Update openPicTimer support.
+    Fix compile error when add SM component. (WIND00163180)
+    Add 20comp_tipcsm.cdf to support SM for TIPC. (WIND00171104)
+    Replace sysSvrGet() with vxSvrGet() of vxALib.s.
+    Change the default switches settings. (WIND00174333)
+
+Version 2.0/2
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Support END2 versions of ETSEC drivers
+
+    Support for wrload/MIPC added and preconfigured into 
+    wrSbc8641d_AMP_core0/1 BSPs.
+    LEGACY_AMP support is still available in wrSbc8641d BSP but not 
+    preconfigured.
+    Fix auxclk bspvts issue. (WIND00136349)
+
+Version 2.0/1
+
+    Released from Wind River for General Purpose Platform 3.6, VxWorks 6.6
+
+    Added support for VxBus ETSEC, PCIe, and other drivers.
+    Added support for assigning ETSEC interfaces to different cores
+    in AMP mode
+
+Version 2.0/0
+
+    Released from Wind River for General Purpose Platform 3.5, VxWorks 6.5
+  
+    Initial release.

@@ -1,0 +1,3 @@
+#ifdef INCLUDE_M85XX_RAPIDIO
+extern void m85xxRioRegister(void);
+#endif /* INCLUDE_M85XX_RAPIDIO */

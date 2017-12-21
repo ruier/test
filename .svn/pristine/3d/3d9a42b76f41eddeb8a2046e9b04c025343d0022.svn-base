@@ -1,0 +1,3 @@
+#ifdef DRV_RESOURCE_ZYNQ7K_DEVC
+    zynq7kDevCfgRegister ();
+#endif /* DRV_RESOURCE_ZYNQ7K_DEVC */

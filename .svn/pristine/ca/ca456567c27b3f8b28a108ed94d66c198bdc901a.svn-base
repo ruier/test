@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND_OCTEON_MGMT
+    vxbOcteonMgmtEndRegister();
+#endif /* DRV_VXBEND_OCTEON_MGMT */

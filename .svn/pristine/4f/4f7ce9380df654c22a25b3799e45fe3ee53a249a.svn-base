@@ -1,0 +1,4 @@
+#ifdef DRV_INTCTLR_MIPS_XLR
+    vxbMipsXlrIntCtlrRegister ();
+#endif /* DRV_INTCTLR_MIPS_XLR */
+    

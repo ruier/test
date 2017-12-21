@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND_TEI82598
+    teiRegister();
+#endif

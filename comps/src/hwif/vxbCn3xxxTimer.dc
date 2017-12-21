@@ -1,0 +1,4 @@
+#ifdef DRV_TIMER_CN3XXX
+IMPORT void  vxbCn3xxxTimerDrvRegister (void);
+#endif
+

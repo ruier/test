@@ -1,0 +1,4 @@
+#ifdef DRV_NVRAM_FILE
+    vxbFileNvRamRegister();
+#endif /* DRV_NVRAM_FILE */
+

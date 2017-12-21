@@ -1,0 +1,1103 @@
+\" mds837x/target.ref - Freescale MPC837XMDS target specific documentation
+\"
+\" Copyright (c) 2004, 2007-2008, 2010-2012 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01n,21mar12,syt  corrected a typo in the Default Switch Settings section. (WIND00337239)
+\" 01m,28feb12,c_l  update the description of Security Engine. (WIND00331832)
+\" 01l,26jan11,kxb  remove obsolete TFFS component
+\" 01k,18nov10,pgh  Name change for USB file system boot device.
+\" 01j,18jan10,x_z  add support for vxWorks bootrom and code clean.
+\" 01i,16oct08,x_z  add USB defect (WIND00138738) to known issue. 
+\" 01h,03sep08,x_s  added SEC test instructions.
+\" 01g,20aug08,x_s  added TFFS description and cleaned. (WIND00128950)
+\" 01f,08jul08,x_s  update IPNET native driver description
+\" 01e,21feb08,x_s  added support for SATA and SEC based vxWorks 6.6. 
+\" 01d,15feb08,x_s  added support for PCI feature and PIB board. (WIND00113447)
+\" 01c,23jan08,x_s  added support for freescale security engine 3.0. 
+\" 01b,20oct07,x_s  modified for mds837x.
+\" 01a,18dec04,dtr  Adapted from ADS834x BSP target.ref/01e.
+\"
+\TITLE mds837x - Freescale MDS837x
+
+\sh NAME
+'Freescale MDS837X - PQ2PRO'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks for the MDS837x BSP. Please read the section "Getting the board running
+VxWorks" in order to configure the board to run VxWorks.
+
+\sh Jumpers & Switches
+There is 8 jumpers and 6 switches on the board.
+
+Default Jumper Settings:
+
+\ts
+Jumper Number | Description                         | Setting
+---------------------------------------------------------------------------
+JP2           | 1588 Input Clock Source Selection   | 3-2: Onboard clock
+JP3           | TSEC LVDD1 Voltage                  | 3-2: 2.5V
+JP6           | TSEC LVDD1 Voltage                  | 3-2: 2.5V
+JP7 & JP8     | Board Model Selection (MPC8377/8/9) | all removed : MPC8377
+JP9           | Main Clock (CLKIN) Source Selection | 3-2: Onboard clock
+JP10          | CS0 Selection (NOR or NAND FLASH)   | removed: NOR FLASH
+JP11          | FCFG RCW source Selection           | mounted: DIP-switches
+\te
+
+Note: JP7 and JP8 are used to select the board model.
+
+\ts
+JP7     | JP8       | Board Model   | Specific Features
+---------------------------------------------------------------------------
+removed | removed   | MPC8377/E     | 2 SATA  + PCIe
+mounted | removed   | MPC8378/E     | 2 SGMII + PCIe
+removed | mounted   | MPC8379/E     | 4 SATA
+\te
+
+Default Switch Settings:
+
+\ts
+Switch Number | Switch ON       | Switch OFF
+---------------------------------------------
+SW2           |                 | 1,2,3,4,5,6,7,8
+SW3           | 1,2,5,6,7,8     | 3,4
+SW4           | 1,2,3,4,5,8     | 6,7
+SW5           | 2,3,6,7,8       | 1,4,5
+SW6           | 1,2,3,4,6,7,8   | 5
+SW7           | 1,4,7           | 2,3,5,6,8
+\te
+
+Note: please change SW5[7] from ON to OFF and modify "#undfe BMS_HIGH_ENABLE"
+to "#define  BMS_HIGH_ENABLE", then modify Makefile if you want to boot from
+0xfff00100 when the target boots from vxWorks bootrom.
+
+\sh Getting the board running VxWorks
+This section will guide you how to run VxWorks on the Freescale MDS837X
+board.
+
+1. Creating a bootrom.bin:
+
+    1.1 Boot from UBOOT
+
+        1.1.1 Define BOOT_FROM_UBOOT in
+            "$(WIND_BASE)/target/config/mds837x/config.h".
+
+        1.1.2 Modify $(WIND_BASE)/target/config/mds837x/Makefile to enable
+            the configuration of ROM_TEXT_ADRS for bootup from UBOOT.
+
+        1.1.3 Launch VxWorks Development Shell, go to the BSP directory
+            "$(WIND_BASE)/target/config/mds837x".
+
+        1.1.4 Type "make bootrom.bin" and press ENTER.
+
+        1.1.5 Once the make process finish successfully, you will find
+            the file "bootrom.bin" in the BSP directory
+            "$(WIND_BASE)/target/config/mds837x".
+
+    1.2 Boot from VxWorks bootrom
+
+        1.2.1 Launch VxWorks Development Shell, go to the BSP directory
+            "$(WIND_BASE)/target/config/mds837x".
+
+        1.2.2 Type "make bootrom.bin" and press ENTER.
+
+        1.2.3 Once the make process finish successfully, you will find
+            the file "bootrom.bin" in the BSP directory
+            "$(WIND_BASE)/target/config/mds837x".
+
+2.Flashing the VxWorks bootrom image
+
+    This section will describe how to program VxWorks bootrom onto a flash.
+
+    2.1 Using UBOOT Command:
+
+
+    2.2 Configuring the U-Boot environment
+
+        2.1.1 Starting a TFTP server
+
+            Open a TFTP server on your host.  Make sure the root directory is
+            your mds837x BSP directory which contains the VxWorks bootrom
+            image you've just created.
+
+        2.1.2 Configuring the U-Boot environment
+
+            Connect the PORT1 on your MDS837X board to the designated
+            serial port of your host, start the terminal program, and power
+            up your board. You should see messages like this:
+
+\cs
+            U-Boot 1.2.0 (Sep  7 2007 - 19:19:43) MPC83XX
+
+            Reset Status:
+
+            CPU:   e300c4, MPC8377E, Rev: 10 at 594 MHz, CSB:  396 MHz
+            Board: Freescale MPC837xEMDS
+            I2C:   ready
+            DRAM:
+            DDR DIMM: data bus width is 64 bit with ECC
+            DDRC ECC mode: OFF
+            DDR RAM: 512 MB
+            FLASH: 32 MB
+            In:    serial
+            Out:   serial
+            Err:   serial
+            Net:   TSEC0, TSEC1
+            Hit any key to stop autoboot:
+            =>
+\ce
+            Note: In some cases, you may see the item in the message below
+            because the environment variables has not been initialized or been
+            destroyed. It will go away as soon as you have initialized and saved
+            the environment variables.
+
+\cs
+            *** Warning - bad CRC, using default environment
+\ce
+
+            Type the following commands to setup the U-Boot environment.
+
+\cs
+            setenv ipaddr 192.168.0.3
+            setenv netmask 255.255.255.0
+            setenv serverip 192.168.0.2
+            setenv gatewayip 192.168.0.1
+\ce
+
+            Note: you must change the network parameters according to your
+            actual situation. 'ipaddr' is the target IP address while 'serverip'
+            is your host IP address.
+
+        2.1.3 Programming the flash
+
+            Type the following commands in the U-Boot shell.
+
+\cs
+            tftp 4000000 bootrom.bin
+            erase fe100000 fe17ffff
+            cp.b 4000000 fe100000 $filesize
+\ce
+
+            Note: if the bootrom size exceeds 0x80000 (512KB), you should erase
+            one or more sectors, for example:
+
+\cs
+            erase fe100000 fe1fffff
+\ce
+
+        2.1.4 Running the VxWorks bootrom
+
+            In the U-Boot shell prompt, type the following command:
+
+\cs
+            go fe100100
+\ce
+
+            Now you will get VxWorks bootrom running.
+
+            Note: If you are programming VxWorks bootrom for the first time,
+            it's strongly recommended that you should use the 'M' command
+            provided by VxWorks bootrom to check and configure the ethernet MAC
+            address, see the section "Ethernet Address" below for more details.
+
+        2.1.5 Running the VxWorks bootrom automatically after power up/reset
+
+            In the U-Boot shell prompt, type the following commands to enable
+            the VxWorks bootrom to execute automatically after power up/reset:
+
+\cs
+            setenv bootcmd go fe100100
+            saveenv
+\ce
+
+            To prevent the VxWorks bootrom from executing automatically, hit any
+            key to stop counting down.
+
+    2.2 Using workbench:
+
+        2.2.1 Install Wind River Probe or Wind River ICE and power it on.
+
+            Connect the JTAG interface cable from the Wind River Probe or Wind
+            River ICE to the MDS837X board's JTAG connector (J9).Once the
+            connections have been made, power up the MDS837X board and
+            launch Workbench on the host.
+
+        2.2.2 Configure the Wind River Probe or Wind River ICE connection.
+
+            In Workbench on the left pane, there is a "Remote Systems" window.
+            Click on the "Define a connection to remote system" button. In the
+            popup "New Connection" window, select the Connection type as
+            "Wind River OCD ICE Connection" for Wind River ICE and "Wind River
+            OCD Probe Connection" for Wind River Probe. If the Wind River ICE
+            is connected via serial port, specify the configuration else select
+            "Specify all communication settings manually".
+
+            In the "Wind River ICE Settings" or "Wind River Probe Settings",
+            click on the "Processor" radio button and select the appropriate
+            processor type by JP7 and JP8.
+
+            Note: You should check JP7 and JP8 to decide what processor type
+            should be selected. For example, MPC83XX/MPC8377E should be selected
+            if both JP7 and JP8 are removed.
+
+            Then connect Workbench OCD with the Wind River Probe or Wind River
+            ICE by clicking the "Next" and then "Finish" button. A New
+            connection appears in the "Remote Systems" window.
+
+        2.2.3 Program Wind River Probe / Wind River ICE with the proper register
+            settings for the MDS837X board.
+
+            Go to the "OCD Command Shell" and click on the "Settings" button.
+            The OCD Command Shell Settings dialog appears, where you can select
+            the appropriate register file by JP7 and JP8 in
+            "$WIND_OCD_PATH\RegisterFiles\PowerPC\83xx\Freescale".
+
+            Note: You should check JP7 and JP8 to decide which register file
+            should be selected. For example, "FRE_MPC8377E_MPC837xMDS.reg"
+            should be selected if both JP7 and JP8 are removed.
+
+            After choosing the register file, press the "OK" button. In the OCD
+            Command Shell, click the "Playback File" button. The selected
+            register file is downloaded to the target and the commands from the
+            file appear in the OCD command shell. When playback is finished the
+            ">BKM>" or the ">ERR>" prompt returns.
+
+        2.2.4 Get into Background Mode.
+
+            Execute the "IN" command to reset the board and initialize it with
+            the register setting.
+
+\cs
+            IN
+\ce
+
+        2.2.5 Program the Flash.
+
+            In WindRiver OCD, Select the "Flash Programmer". The
+            "Flash Programmer" view has three tabs: "Configuration",
+            "Programming" and "Memory/Diagnostics".
+
+            2.2.5.1 Select the "Configuration" tab. In the "Device Selection'
+                field, select the "AMD -> S29GL256N -> 16384 x 16 -> 1 Device".
+
+                In "Flash Bank Address" group for the "Base" enter "0xfe000000".
+                In the "RAM Workspace" group for the "Workspace Start at" enter
+                "0x00000000" and for the "Workspace Size" enter "0xffff".
+
+            2.2.5.2 Click on the "Programming" tab. Select the "Add File"
+                button, in the popup window, select the newly generated
+                "$(WIND_BASE)/target/config/mds837x/bootrom.bin", and click
+                the "This is a raw binary file" checkbox then click "OK" to
+                finish file adding. Click the "Start Address" and set it as
+                "0xfe000000", the "End Address" will be fixed automatically.
+                Please notice that the "Start Address" should include the
+                "Offset bias". Enable a file by clicking on the checkbox under
+                the "Enabled" heading.
+
+                Note: if you have define "BMS_HIGH_ENABLE" in config.h and make
+                the corresponding changes to Makefile, the "Start Address"
+                should be "0xfff00000".
+
+            2.2.5.3 Press the "Erase/Program" button to erase the flash and then
+                program the flash with "bootrom.bin" file. A window pops up to
+                show the progress of the Flash device programming. When it is
+                complete, the Flash should contain the new boot program.
+
+        2.2.6 Running the VxWorks bootrom
+
+        Power on the board, you will get VxWorks bootrom running.
+
+FEATURES
+
+This section describes all features of the board, supported or not.
+It documents all configurations of the board and the interaction between
+features and configuration items.
+
+\sh List of Hardware Features (Freescale MDS837x board)
+
+\ts
+Hardware Interface | Controller | Driver/Component   | Status
+-------------------------------------------------------------
+UART:0             | on-chip    | vxbNs16550Sio.c    | SUPPORTED
+UART:1             | on-chip    | vxbNs16550Sio.c    | SUPPORTED
+1GB-ETHERNET:0     | on-chip    | vxbEtsecEnd.c      | SUPPORTED
+1GB-ETHERNET:1     | on-chip    | vxbEtsecEnd.c      | SUPPORTED
+NOR-FLASH          | S29GL256N  | flashmem.c/TFFS    | SUPPORTED
+NAND-FLASH         | K9F5608U0D | -                  | UNSUPPORTED
+TIMER              | on-chip    | vxbPpcDecTimer.c   | SUPPORTED
+TIMER              | on-chip    | vxbPpcQuiccTimer.c | SUPPORTED
+PCI-HOST           | on-chip    | m83xxPci.c         | SUPPORTED
+PCI-E-HOST         | on-chip    | m83xxPciEx.c       | SUPPORTED
+I2C                | on-chip    | sysMotI2c.c        | SUPPORTED
+RTC                | DS1374     | ds1374.c           | SUPPORTED
+SPI                | on-chip    | -                  | UNSUPPORTED
+USB2-HOST          | on-chip    | INCLUDE_EHCI       | SUPPORTED
+USB2-DEVICE        | on-chip    | -                  | UNSUPPORTED
+ENCRYPTION         | on-chip    | ipfreescale        | SUPPORTED
+SD-CARD            | on-chip    | -                  | UNSUPPORTED
+\te
+
+\sh Feature Interactions
+The RTC depends on the I2C bus 0.
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Verified Hardware
+This BSP has been verified on Rev 2.03 of Freescale MDS837x pilot board. The
+default clock speed for MDS837x is 594MHz core, 396MHz CCB, 396MHz DDR2 and
+99MHz Local Bus.
+
+Note: The Rev 0.3 of Freescale Platform I/O pilot board (PQ-MDS-PIB), the
+PQ-MDS-PCIe prototype module and PQ-MDS-SATA prototype module are verified for
+PCI/PCIe and SATA function.
+
+\sh Memory Maps
+The following table describes the default memory map of this BSP.
+
+The following table describes the MDS837x default memory map:
+\ts
+
+Start       | Size  | End         | Access to
+-----------------------------------------------------------
+0x0000_0000 | 512MB | 0x1FFF_FFFF | DDR2 SDRAM
+0x8000_0000 | 512MB | 0x9FFF_FFFF | PCI
+0xA000_0000 | 512MB | 0xBFFF_FFFF | PCIE1
+0xC000_0000 | 512MB | 0xDFFF_FFFF | PCIE2
+0xE000_0000 | 1MB   | 0xE00F_FFFF | CCSR
+0xF800_0000 | 64KB  | 0xF800_FFFF | BCSR
+0xFE00_0000 | 32MB  | 0xFFFF_FFFF | NOR Flash
+\te
+
+\sh Serial Configuration
+No special configuration needed.
+Default configuration is:
+    Baud Rate: 115200
+    Data: 8 bit
+    Parity: None
+    Stop: 1 bit
+    Flow Control: None
+
+\sh Network Configuration
+The ETSEC ports allows 10/100/1000T connection. The driver will auto-negotiate
+and configure the port accordingly. The BSP also supports Intel 825xx based NICs
+via PCIe or PCI. See the gei825xxVxbEnd driver for the supported mode numbers.
+
+The following END and corresponding END2 drivers are supported in this BSP.
+However, only END driver is enabled by default.
+
+\ts
+Driver | END                      | END2
+----------------------------------------
+TSEC   | INCLUDE_ETSEC_VXB_END    | INCLUDE_ETSEC_VXB_END2
+\te
+
+For command line build, add INCLUDE_END2 into config.h right after the
+definition of INCLUDE_END. Also replace the END driver name with corresponding
+END2 driver name, then rebuild the bootrom and vxWorks image.
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, add INCLUDE_END2 component and corresponding END2
+component, this will un-define END automatically. Then rebuild your project.
+
+Note: The PIB board is necessary if you want to support Intel 825xx based NICs
+via PCI, but it is untested.
+
+\sh Security Engine
+The Freescale Security Engine (SEC) 3.0 is supported in this release.
+The VxWorks PNE MSP must be installed to enable security engine offload.
+
+SEC driver usage are described as follows.
+
+1. Create a VSB (VxWorks Source Build)
+
+    1.1 Create a VSB in any directory. For instance, run the command:
+
+\cs
+       $WIND_BASE/target/proj/vxprj vsb create -bsp mds837x myVsb_bsp_mds837x
+\ce
+
+        This command creates a VSB for the BSP mds837x, myVsb_bsp_mds837x
+        is the name of this VSP.
+
+    1.2 Configure VSB
+
+        After run the command in step 1.1, you will be prompted to select the
+        configuration options of this new VSB. Below is a example of
+        configuration result:
+
+\cs
+        starting VSB configuration...
+        *
+        * VxWorks Source Build (VSB) Configuration
+        *
+        *
+        * VxWorks Global Configuration Options for BSP mds837x
+        *
+        Set advanced options  (ADVANCED_OPT) [N/y/?] (NEW) y
+        *
+        * mds837x_CPU = PPC32
+        *
+        Select the Floating Point configuration
+        > 1. hard (FP_hard) (NEW)
+        choice[1]: 1
+        Select the Primary Tool
+        > 1. diab (PRI_TOOL_ILP32_diab) (NEW)
+        choice[1]: 1
+        optional compiler flags for mds837x_TOOL [?]  (ADDEDCFLAGS) [] (NEW)
+        Enable use of Secondary TOOL to build kernel libraries.  (ENABLE_TOOL2_ILP32) [Y/n/?] (NEW) Y
+          Select the Secondary Tool
+          > 1. gnu (SEC_TOOL_ILP32_gnu) (NEW)
+          choice[1]: 1
+        optional compiler flags for mds837x_TOOL2 [?]  (ADDEDCFLAGS2) [] (NEW)
+        Select the Applications Tool
+        > 1. diab (APP_TOOL_ILP32_diab) (NEW)
+          2. gnu (APP_TOOL_ILP32_gnu) (NEW)
+        choice[1-2?]: 1
+        optional compiler flags for mds837x_APP_TOOL [?]  (ADDEDCFLAGS_APP) [] (NEW)
+        *
+        * ppc Architecture Options
+        *
+        Low-level arch code need not support inconsistent cache modes  (PPC_CACHE_MODE_IS_CONSISTENT) [N/y/?] (NEW)
+        System Viewer Instrumentation  (SV_INSTRUMENTATION) [Y/n/?] (NEW) Y
+        Global Debug Flag  (DEBUG_FLAG) [N/y/?] (NEW)
+        Real-Time Process (RTP)  (RTP) [Y/n/?] (NEW) Y
+        *
+        * VxWorks Kernel Configuration Options
+        *
+        *
+        * VxWorks Kernel Component Configuration
+        *
+        WIND Object Management  (OBJECT_MANAGEMENT) [Y/n/?] (NEW) Y
+          WIND Object ID Validation  (OBJECT_VERIFICATION) [Y/n/?] (NEW) Y
+        Task Create Hooks  (TASK_CREATE_HOOKS_D) [Y/n/?] (NEW) Y
+        Task Switch Hooks  (TASK_SWITCH_HOOKS_D) [Y/n/?] (NEW) Y
+        CPU Power Management  (CPU_PWR_MGMT_D) [Y/n/?] (NEW) Y
+        *
+        * Multi-OS Support
+        *
+        MIPC  (COMPONENT_MIPC) [Y/n/?] (NEW) n
+        WRLOAD  (COMPONENT_WRLOAD) [Y/n/?] (NEW) n
+        *
+        * Optional Kernel Features
+        *
+        Enable Kernel Per-Task CWD  (PERTASK_CWD) [Y/n/?] (NEW)
+        *
+        * File System Configuration
+        *
+        Set Maximum Device Name Length  (MAX_DEVNAME) [10] (NEW)
+        Optimize NFS3 server read/write procedure  (NFS3_RWOPT) [N/y/?] (NEW)
+        Set factor for maximum block size transferred in NFS3 server  (NFS3_BLKSIZE_FACTOR) [1] (NEW)
+        Enable VXTESTV2  (COMPONENT_VXTESTV2_D) [Y/n/?] (NEW)
+        Enable BENCHMARK tests  (COMPONENT_BENCHMARK) [N/y/?] (NEW)
+        Enable Code Coverage Analyzer test instrumentation of VSB   (COMPONENT_COVERAGE) [N/y/?] (NEW)
+        *
+        * VxWorks Applications Configuration Options
+        *
+        Select networking code to be built
+        > 1. Build Networking IPNET Libraries (COMPONENT_IPNET) (NEW)
+          2. No Networking Libraries (NO_IP) (NEW)
+        choice[1-2]: 1
+        *
+        * Networking Build Options
+        *
+        Set the IPNET build mode
+        > 1. speed mode (BUILD_MODE_speed) (NEW)
+          2. debug mode (BUILD_MODE_debug) (NEW)
+        choice[1-2]: 1
+        Enable VERBOSE mode  (FEATURE_IPNET_VERBOSE) [N/y] (NEW) y
+        Generate IPNET Dependencies  (FEATURE_IPNET_GEN_DEPEND) [Y/n] (NEW) Y
+        Build basic IPNET support libraries  (BUILD_BASIC_IPNET) [Y/n/?] (NEW) Y
+        Choose the Networking Libraries to be built
+        > 1. Build libraries with IPV4 support (FEATURE_IPNET_INET4_ONLY) (NEW)
+          2. Build libraries with IPV4 and IPV6 support (FEATURE_IPNET_INET6) (NEW)
+          3. Build libraries with IPV6 support (FEATURE_IPNET_INET6_ONLY) (NEW)
+        choice[1-3]: 1
+        Select the default Build-time Syslog level for Networking Components
+          1. Emergency level (IPCOM_DEFAULT_SYSLOG_PRIORITY_EMERG) (NEW)
+          2. Critical level (IPCOM_DEFAULT_SYSLOG_PRIORITY_CRIT) (NEW)
+          3. Error level (IPCOM_DEFAULT_SYSLOG_PRIORITY_ERR) (NEW)
+        > 4. Warning level (IPCOM_DEFAULT_SYSLOG_PRIORITY_WARNING) (NEW)
+          5. Notice level (IPCOM_DEFAULT_SYSLOG_PRIORITY_NOTICE) (NEW)
+          6. Informational level (IPCOM_DEFAULT_SYSLOG_PRIORITY_INFO) (NEW)
+          7. Debug level (IPCOM_DEFAULT_SYSLOG_PRIORITY_DEBUG) (NEW)
+          8. Detailed debug level (IPCOM_DEFAULT_SYSLOG_PRIORITY_DEBUG2) (NEW)
+        choice[1-8?]: 4
+        Enable selection of Advanced Debugging Build Options for Networking Component   (IPCOM_DEBUG_ADVANCED) [N/y/?] (NEW)
+        Enable MSP Feature Set PAD  (MSP_FEATURE_PAD) [Y/n/?] (NEW) n
+        Enable MSP Feature Set PCD  (MSP_FEATURE_PCD) [Y/n/?] (NEW) n
+        Enable MSP Feature Set PID  (MSP_FEATURE_PID) [Y/n/?] (NEW) n
+        Enable MSP Feature Set PNE  (MSP_FEATURE_PNE) [Y/n/?] (NEW) Y
+        *
+        * VxWorks Networking Component Configuration
+        *
+        *
+        * Layer 2 (Link) Components
+        *
+        Enable L2TP  (COMPONENT_IPL2TP) [N/y/?] (NEW)
+        Enable MACsec  (COMPONENT_IPMACSEC) [N/y/?] (NEW)
+        Enable PPP  (COMPONENT_IPPPP) [Y/n/?] (NEW)
+        Enable 802.1ad VLAN stacking  (COMPONENT_VLAN_STACKING) [N/y/?] (NEW)
+        Enable WLAN  (COMPONENT_WLAN) [N/y/?] (NEW)
+        *
+        * Layer 3 (Network) Components
+        *
+        Enable FIREWALL  (COMPONENT_IPFIREWALL) [N/y/?] (NEW)
+        Enable IPSEC  (COMPONENT_IPIPSEC) [N/y/?] (NEW)
+        Enable MPLS  (COMPONENT_IPMPLS) [N/y] (NEW)
+        Enable ROHC  (COMPONENT_IPROHC) [N/y/?] (NEW)
+        Enable IPNET Network Address Translation (NAT)  (COMPONENT_NAT) [Y/n/?] (NEW) n
+        Enable Quality of Service and Differentiated Services  (COMPONENT_DIFF_SERV) [Y/n/?] (NEW) n
+        Enable tunneling support  (COMPONENT_TUNNEL_SUPPORT) [Y/n/?] (NEW) n
+        *
+        * Layer 4 (Transport) Components
+        *
+        Enable SCTP  (COMPONENT_IPSCTP) [N/y/?] (NEW)
+        *
+        * Layer 5 (Applications) Components
+        *
+        Enable 802.1X Authenticator  (COMPONENT_DOT1X) [N/y/?] (NEW)
+        Enable 802.1X Supplicant  (COMPONENT_IP8021X) [N/y/?] (NEW)
+        Enable APPL  (COMPONENT_IPAPPL) [Y/n/?] (NEW) Y
+        Enable DHCPR  (COMPONENT_IPDHCPR) [N/y] (NEW)
+        Enable DHCPS  (COMPONENT_IPDHCPS) [N/y/?] (NEW)
+        *
+        * Diameter Components
+        *
+        Enable DIAMETER Client  (COMPONENT_IPDIAMETERC) [N/y/?] (NEW)
+        Enable DIAMETER Proxy  (COMPONENT_IPDIAMETERP) [N/y/?] (NEW)
+        Enable IKE  (COMPONENT_IPIKE) [N/y/?] (NEW)
+        Enable Multicast Proxy daemon  (COMPONENT_IPMCP) [N/y/?] (NEW)
+        Enable MIP  (COMPONENT_IPMIP) [N/y/?] (NEW)
+        Enable MIP4  (COMPONENT_IPMIP4) [N/y/?] (NEW)
+        Enable MIPFA  (COMPONENT_IPMIPFA) [N/y/?] (NEW)
+        Enable MIPHA  (COMPONENT_IPMIPHA) [N/y/?] (NEW)
+        Enable MIPMN  (COMPONENT_IPMIPMN) [N/y/?] (NEW)
+        Enable MIPPM  (COMPONENT_IPMIPPM) [N/y/?] (NEW)
+        Enable RADIUS  (COMPONENT_IPRADIUS) [Y/n/?] (NEW) n
+        Enable RIP  (COMPONENT_IPRIP) [N/y] (NEW)
+        Enable SNMP  (COMPONENT_SNMP) [Y/n/?] (NEW) n
+        Enable SNTP  (COMPONENT_IPSNTP) [Y/n/?] (NEW) n
+        Enable SSH  (COMPONENT_IPSSH) [N/y/?] (NEW) y
+        Enable SSL  (COMPONENT_IPSSL) [Y/n/?] (NEW) Y
+        *
+        * WPS requires COMPONENT_WLAN and COMPONENT_IPEAP and COMPONENT_IP8021X to be selected and COMPONENT_IPCRYPTO_USE_FIPS_140_2 to be deselected
+        *
+        *
+        * Cryptography Components
+        *
+        *
+        * Component CRYPTO preselected - required by  Component SSL
+        *
+        Enable CRYPTO  (COMPONENT_IPCRYPTO) [Y/?] (NEW) y
+          Enable FIPS 140-2 validated crypto libraries  (COMPONENT_IPCRYPTO_USE_FIPS_140_2) [N/y/?] (NEW)
+        Enable FREESCALE  (COMPONENT_IPFREESCALE) [N/y/?] (NEW) y
+        Enable HWCRYPTO  (COMPONENT_IPHWCRYPTO) [N/y/?] (NEW) y
+        *
+        * Networking Library Components
+        *
+        Enable EAP  (COMPONENT_IPEAP) [N/y/?] (NEW)
+        Enable VXCOMPAT  (COMPONENT_VXCOMPAT) [Y/n/?] (NEW) Y
+        *
+        * Networking Acceleration Platform Components
+        *
+        Enable IFPROXY  (COMPONENT_IFPROXY) [N/y/?] (NEW)
+        Enable WRNAD  (COMPONENT_WRNAD) [N/y/?] (NEW)
+        *
+        * Common Analysis Framework Components
+        *
+        *
+        * COMPONENT CAFE and COMPONENT_STACKTRACE are used by analysis tools
+        *
+        Enable CAFE framework  (COMPONENT_CAFE) [Y/n/?] (NEW) n
+        *
+        * Stacktrace Debug Component
+        *
+        Enable stacktrace debugging output  (COMPONENT_STACKTRACE_DEBUG) [N/y] (NEW)
+        Route stacktrace debugging output to a session logger  (COMPONENT_STACKTRACE_SESSION_LOGGER) [N/y] (NEW)
+        *
+        * Target Communication Framework (TCF) Agent Component
+        *
+        Enable TCF_AGENT  (COMPONENT_TCF_AGENT) [Y/n/?] (NEW) n
+        Enable WM  (COMPONENT_WM) [Y/n/?] (NEW) n
+        Enable XML  (COMPONENT_XML) [Y/n/?] (NEW) Y
+        *
+        * VxWorks User Library Configuration
+        *
+        Build User-side libraries  (FEATURE_USR) [Y/n/?] (NEW) Y
+          Choose the User Networking Libraries to be built
+          > 1. Build libraries with IPV4 support (USR_INET4_ONLY) (NEW)
+            2. Build libraries with IPV4 and IPV6 support (USR_INET6) (NEW)
+            3. Build libraries with IPV6 support (USR_INET6_ONLY) (NEW)
+          choice[1-3]: 1
+          Build User Networking Libraries  (COMPONENT_USR_IPNET) [Y/n/?] (NEW) Y
+          Build core USR APPS  (COMPONENT_USR_APPS) [Y/n/?] (NEW) Y
+            Build test USR APPS  (COMPONENT_USR_TEST) [Y/n/?] (NEW) n
+          Build USR libraries for DOT1X  (COMPONENT_USR_DOT1X) [N/y/?] (NEW)
+          Build USR libraries for SNMP  (COMPONENT_USR_SNMP) [N/y/?] (NEW)
+          Build USR libraries for WM  (COMPONENT_USR_WM) [N/y/?] (NEW)
+          Build USR libraries for XML  (COMPONENT_USR_XML) [Y/n/?] (NEW) Y
+          Build USR libraries for SNMP_V3  (COMPONENT_USR_SNMP_V3) [N/y/?] (NEW)
+          Build USR libraries for SNMP_AGENTX  (COMPONENT_USR_SNMP_AGENTX) [N/y/?] (NEW)
+
+        This VSB supports the following BSPs: mds837x
+\ce
+
+        Note that 'Enable MSP Feature Set PNE' must be set to 'Yes' and other
+        'Enable MSP Feature Set' must be set to 'No'. And some options like
+        "Enable FREESCALE" are also required to test Freescale's SEC.
+
+    1.3 Build VSB
+
+        Run the following command to build the libraries based on the selected
+        options.
+
+\cs
+        cd myVsb_bsp_mds837x
+        make
+\ce
+
+2. Create a VIP based on the new VSB
+
+    2.1 Create a VIP, in the step of "Project Setup", select new VSB which is
+        created above as the configuration of "A source build project", and
+        select the correct BSP.
+
+    2.2 Configure and build VIP
+
+        In the Kernel Configuration editor include INCLUDE_IPFREESCALE. For
+        Freescale mds837x board set two parameters as follows:
+
+\cs
+        SEC2_CORE_VERSION = "3.0"
+        SEC2_DEVICE_FAMILY = "3"
+\ce
+
+        build this VIP.
+
+    2.3 Test the Security Engine
+
+        Download the image file, then issue the command 'freescale test all'
+        from the VxWorks target shell.
+
+        For Freescale MPC837X MDS board you should see:
+
+\cs
+        -> ipcom_run_cmd "freescale test all"                                          
+        freescale :: testing md5 hash...success                                        
+        freescale :: testing md5 hmac...success                                        
+        freescale :: testing sha1 hash...success                                       
+        freescale :: testing sha1 hmac...success                                       
+        freescale :: testing des cbc cipher...success                                  
+        freescale :: testing des ecb cipher...success                                  
+        freescale :: testing 3des cbc cipher...success                                 
+        freescale :: testing 3des ecb cipher...success                                 
+        freescale :: testing aes cbc cipher...success                                  
+        freescale :: testing aes ecb cipher...success                                  
+        freescale :: testing rc4 cipher...success                                      
+        freescale :: testing rng oper...success                                        
+        freescale :: testing mod exp...success  
+\ce
+
+\sh Boot Devices
+The supported boot devices are:
+
+\ts
+    `motetsec0' | ETSEC0 by default
+    `motetsec1' | ETSEC1
+    `fei'       | Intel Pro100 Ethernet PCI adaptor when the PCI bus is enabled
+    `gei'       | Intel Pro1000 Ethernet PCI adaptor when the PCIe bus is enabled
+    `tffs'      | TFFS when INCLUDE_TFFS is defined in config.h
+    `fs'        | U-Disk when USB is enabled
+\te
+
+\sh Boot Methods
+The boot methods are affected by the boot parameters.  If no password is
+specified, RSH (remote shell) protocol is used.  If a password is specified,
+FTP protocol is used, or, if the flag is set to 0x80, TFTP protocol is used.
+
+\sh PCI Access
+The MDS837x boards do not have PCI plus slot itself. To implement PCI host
+function, the board need be mounted on PIB through riser connectors, then the
+PCI card through PMC-PCI adaptor board could be mounted on PIB through PMC slot.
+Usually there are four PMC slots in PIB, they are PMC0, PMC1, PMC2, PMC3. Only
+GEI PCI card and FEI PCI card were tested on PIB PMC slot through PMC-PCI
+adaptor board, and the following information should be noted.
+
+1. By default the macro "DRV_PCIBUS_M83XX" is closed, to implement PCI host
+   function, the macro "DRV_PCIBUS_M83XX" must be defined in config.h. The
+   macros for the PCI card driver are necessary to defined in config.h.
+
+2. The PMC-PCI adaptor board must be mounted on PMC1, PMC2 or PMC3. The BSP
+   configures the kernel to support PMC1 by default.If mounting PMC2 or PMC3 is
+   desired, the macros "INCLUDE_PIB_SUPPORT" and "INCLUDE_I2C" must also be
+   defined in the config.h file.
+
+\sh PCIe Access
+There is two PCIe slot on the Freescale MDS8360 board if you configure the board
+to MDS8377E or MDS8378E and the PQ-MDS-PCIe module has been connected to the
+LYNX2 Connector(P10).
+
+Note: Don't modify the factory setting for SW1 of the PQ-MDS-PCIe module. The
+factory setting should be [OFF-OFF-ON-OFF].
+
+The Intel PRO/1000PT 82571GB Gigabit Ethernet Adapter and PRO/1000PT 8257x
+adapter are the two ones of the tested PCIe device supported in this release.
+Define INCLUDE_GEI825XX_VXB_END and DRV_PCIBUS_M83XX_EX in config.h to enable
+this device.
+
+\sh Interrupts
+
+PCI legacy interrupts are used
+
+\sh SATA Support
+There are 2 SATA interfaces for MDS8377E when the PQ-MDS-SATA module is
+connected to LYNX1 Connector(P9) and 4 SATA interfaces for MDS8379E when the
+PQ-MDS-SATA module is connected to LYNX1 Connector(P9) and LYNX2 Connector(P10).
+If the Board Model is configured to MPC8378E, no SATA interface is supported. To
+use the SATA interfaces, and the macro DRV_STORAGE_FSLSATA must be defined in
+config.h.
+
+Note: Don't modify the factory setting for SW1 of the PQ-MDS-SATA module. The
+factory setting should be [ON-ON-ON-OFF-ON-OFF-OFF-OFF].
+
+\sh RTC
+The real-time clock used on the board is the Maxim Semiconductor DS1374. Address
+and data are transferred serially through the I2C interface. The device exists
+on the I2C bus 0. To use the device, define INCLUDE_I2C and INCLUDE_RTC in
+config.h first. Then type the following commands to get the seconds elapsed
+since 1970/01/01
+
+\cs
+    sysDS1374GetTime
+\ce
+
+or the following commands to set the seconds in the vxWorks target shell.
+
+\cs
+    sysDS1374SetTime xxx
+\ce
+
+Note: xxx is the seconds elapsed since 1970/01/01.
+
+SPECIAL CONSIDERATIONS
+
+\sh TrueFFS
+The standard Wind River TrueFFS product is supported in this release.
+
+This BSP uses the Spansion S29GL256N flash as the TrueFFS media.
+The FLASH address space that is used as TrueFFS is 0xff000000 - 0xffffffff by
+default and 0xfe000000 - 0xfeffffff when BMS_HIGH_ENABLE is defined in config.h.
+
+Note: Bootloader and TFFS are sharing the same flash part, so please be very
+careful because misusing of TFFS may damage the bootloader and cause the
+board failure to boot up.
+
+To use it, define INCLUDE_TFFS in config.h.  If you want to use TFFS with DOSFS
+file system, please define the following macros in config.h.
+
+\cs
+    #define INCLUDE_DOSFS
+    #define INCLUDE_DOSFS_MAIN
+    #define INCLUDE_DOSFS_FAT
+    #define INCLUDE_DOSFS_FMT
+    #define INCLUDE_DOSFS_DIR_VFAT
+    #define INCLUDE_DOSFS_DIR_FIXED
+    #define INCLUDE_ERF
+    #define INCLUDE_XBD
+    #define INCLUDE_XBD_TRANS
+    #define INCLUDE_XBD_BLK_DEV
+    #define INCLUDE_DEVICE_MANAGER
+    #define INCLUDE_FS_MONITOR
+    #define INCLUDE_FS_EVENT_UTIL
+    #define INCLUDE_TL_FTL
+\ce
+
+When using TrueFFS on a new FLASH for the first time, you should format and
+configure the FLASH by using:
+
+\cs
+    sysTffsFormat ();
+    usrTffsConfig (0, 0, "/tffs0");
+\ce
+
+If you are using DOSFS, please use
+
+\cs
+    dosfsDiskFormat ("/tffs0");     /@ For VxWorks 6.6 and later version @/
+\ce
+
+Note: If you are running these commands in the VxWorks target shell, please use
+
+\cs
+    sp sysTffsFormat
+\ce
+
+to format the FLASH as it would take long time to complete.
+
+You should now be able to use VxWorks I/O and file system commands to access
+the FLASH device as if it were a disk.  For example, you can copy a vxWorks
+image from your host to TFFS by using file system 'copy'.  Of course, you should
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/tffs0/vxWorks");
+\ce
+
+If you want to use "/tffs0" as a boot device, you should follow the instructions:
+
+For command line mode, make sure INCLUDE_TFFS is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the flash chip.  Also make sure you have all the necessary file system
+components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_ERF
+    INCLUDE_XBD
+    INCLUDE_XBD_TRANS
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_MONITOR
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_TFFS_MOUNT
+    INCLUDE_TL_FTL
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a default_romCompress.bin in the project directory, program
+it into the flash chip as a bootrom.
+
+Below is an example by using /tffs as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /tffs0/vxWorks
+\ce
+
+\sh Ethernet Address
+The Freescale MDS837x boards do not have unique Ethernet hardware addresses
+assigned to each board. A unique address is absolutely necessary if the user
+wishes to connect the board to a network. Thus, the user must provide a suitable
+6-byte Ethernet address for each on-board network interface.
+
+The definition of macro ETHERNET_MAC_HANDLER in config.h indicates the MAC
+address is stored in NVRAM and alterable via the 'M' bootrom command. This
+option allows only the last three bytes to be changed. To use this option,
+open a console window and reset the hardware. When the bootrom banner appears
+and the countdown starts, press any key to get the "[VxWorks Boot]:" prompt.
+Type 'M' and follow the instructions.
+
+\sh USB Host Support
+USB Enhanced Host Controller (EHCD) driver has been integrated into this BSP,
+to enable it, you should modify as follows:
+
+For command line build, define INCLUDE_EHCI in config.h, this will include
+the following items automatically: the EHCI host controller, bulk only mass
+storage class driver and DOS file system. You can also add other USB class
+drivers in config.h, then rebuild the bootrom or vxWorks image.
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, add INCLUDE_EHCI component, which will
+automatically include EHCI host controller driver, then add USB class drivers
+which you want, then rebuild your project. For example:
+
+To support USB mass storage device, you can include the following components:
+
+\cs
+    INCLUDE_USB_MS_BULKONLY
+    INCLUDE_USB_MS_BULKONLY_INIT
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_DOSFS_CHKDSK
+    INCLUDE_DOSFS_FMT
+    INCLUDE_FS_MONITOR
+    INCLUDE_ERF
+    INCLUDE_XBD
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_XBD_PART_LIB
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_XBD_BLK_DEV
+\ce
+
+Note: Mass storage device has been verified on the target.
+
+For more information, please refer to
+\tb Wind River USB for VxWorks 6 PROGRAMMER'S GUIDE
+
+\sh Make Targets
+The make targets are listed as the names of object-format files. Append `.hex'
+to each to derive a hex-format file name. Other images not listed here may not
+be tested.
+
+\ts
+`bootrom'
+`bootrom.bin'
+`bootrom.hex'
+`vxWorks' (with `vxWorks.sym')
+`vxWorks.st'
+\te
+
+\sh BSP Bootloaders and Bootroms
+
+\ts
+Bootloader/Bootrom  | Status
+----------------------------
+U-Boot (pre-flashed)| SUPPORTED
+bootrom             | SUPPORTED
+bootrom_uncmp       | SUPPORTED
+bootrom_res         | UNSUPPORTED
+vxWorks             | SUPPORTED
+vxWorks_rom         | SUPPORTED
+vxWorks_romCompress | SUPPORTED
+vxWorks_romResident | SUPPORTED
+\te
+
+\sh BSP Validated Tools
+
+\ts
+Tool                         | Connection/Type | Status
+-------------------------------------------------------
+Workbench Debugger           | ETHERNET/WDB    | SUPPORTED
+Workbench System Viewer      | ETHERNET/WDB    | SUPPORTED
+Workbench MemScope           | ETHERNET/WDB    | SUPPORTED
+Workbench ProfileScope       | ETHERNET/WDB    | SUPPORTED
+Workbench StethoScope        | ETHERNET/WDB    | SUPPORTED
+Workbench CoverageScope      | ETHERNET/WDB    | SUPPORTED
+Workbench Core File Analysis | ETHERNET/WDB    | UNVALIDATED
+Workbench Sensor Points      | ETHERNET/WDB    | UNVALIDATED
+Workbench OCD Debugger       | JTAG            | UNSUPPORTED
+Workbench OCD Flash          | JTAG            | UNSUPPORTED
+\te
+
+\sh Known Problems
+The MPC837X-MDS-PB does not support USB SER port for Serial USB Transceiver for
+Low speed 1.5Mbps and Full speed 12Mbps.The EHCI controller supports only high
+speed connections.  To have low speed/full speed USB you need a companion
+controller, such as the OHCI or UHCI controller.  The 837x does not have a
+companion controller and therefore does not support low speed/full speed
+connections. In other words, only the USB ULPI port can be used.
+
+On the board, the NVRAM makes use of the only FLASH. When bootrom_res is used to
+boot the target, the code runs on the FLASH, so the board will hang if you want
+to modify the bootline and save it into the NVRAM becuase it will change the
+status of the FLASH.
+
+\sh Power-on Reset Initialization
+The state of the chip post reset is controlled via the HRCW or switch settings.
+The hardware reset configuration word(HRCW) is set via DIP switches.
+
+The definitions are in MDS837x.h and are set in config.h. To change this
+setting you must modify config.h and rebuild and replace the bootrom.
+Note this BSP uses the default RGMII mode setting for the MAC to PHY.
+The switch settings are setup NOT to load HRCW from flash but from the
+switches themselves.
+
+\sh Hard Reset Configuration Words
+If a Wind River ICE or Probe cannot enter background mode(BKM) when attempting
+to connect to the board the Hardware Reset Configuration Words(HRCWs) in Flash
+memory may have been corrupted. To get into BKM set the HRCWs in the processor
+by entering "cf rcw 26030000 a0006C02" at the >ERR> prompt.
+
+BOARD LAYOUT
+
+Front Side
+
+\bs
++------------------------------------------------------------+
+| o  o  |SW2|  |       DDR       |                           |
+|RST J2 +---+  |      SDRAM      |                           +-----------------+
+|-+    o J3    +-----------------+ J7 J8      +---+ +---+ +---+ +---+      +---|
+| |USB o J6                        o  o       |SW3| |SW4| |SW5| |SW6|      |5V |
+|-+ULPI       +-+ +-------------+ +-+         +---+ +---+ +---+ +---+      +---|
+|-+           |L| |             | |L|                           +---+          |
+| |USB        |A| |             | |A|                           |SW7|          |
+|-+SER        |N| |    M P C    | |N|                           +---+          |
+|------+      |E| |    837xE    | |E|                                          |
+|ETSEC0|      |1| |             | |2|            o J9                          |
+|------+      +-+ |             | +-+           +---+                  o       |
+|------+          +-------------+               |  J|          +-----+ J10   o |
+|ETSEC1|                                        |C  |          |     | o   HRST|
+|------+                                        |P A|          | NOR | J11     |
+|-----+                                         |U G|          |FLASH|       o |
+|DUART|                                         |   |          +-----+   ON/OFF|
+|-----+                                         +---+                          |
++------------------------------------------------------------------------------+
+\be
+
+Back Side
+
+\bs
+             +-----------------------------------------------------------------+
+             |                                         +----------+            |
+             |                                         |          |            |
++------------+                                         |   SD     |            |
+|                                                      |  CARD    |            |
+|                                                      |          |            |
+|                                                      |          |            |
+|                                                      +----------+            |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|           +------+                                                           |
+|           | NAND |                                                           |
+|           |FLASH |                                                           |
+|           +------+                                                           |
++------------------------------------------------------------------------------+
+\be
+
+SEE ALSO
+
+\tb Workbench User's Guide: Introduction
+
+\tb VxWorks Programmer's Guide: Configuration
+
+\tb VxWorks Programmer's Guide: Architecture Appendix
+
+BIBLIOGRAPHY
+
+\tb PowerPC e300 Core Family Reference Manual
+
+\tb MPC8379E PowerQUICCII ProIntegrated Host Processor Family Reference Manual
+
+\tb MPC837x-MDS-PB HW User Guide
+
+\tb MPC837x-MDS-PB Hardware Getting Started Guide
+
+\tb PowerPC E300c4 Core Reference Manual
+
+\tb PowerPC Microprocessor Family: The Programming Environments for 32-bit Microprocessors MPCFPE32B/AD
+
+WEB RESOURCES
+
+Much of the Freescale documentation can be found on line. The following
+URL was correct at the time of writing for semiconductor area.
+You'll have to search the documentation using processor name for specific documentation.
+
+http://www.freescale.com/

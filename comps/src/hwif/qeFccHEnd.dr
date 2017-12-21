@@ -1,0 +1,3 @@
+#ifdef INCLUDE_QE_FCC_HEND
+    qeFccHEndRegister();
+#endif /* INCLUDE_QE_FCC_HEND */

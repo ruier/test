@@ -1,0 +1,3 @@
+#ifdef INCLUDE_PENTIUM_PCI
+extern void pentiumPciRegister (void);
+#endif /* INCLUDE_PENTIUM_PCI */

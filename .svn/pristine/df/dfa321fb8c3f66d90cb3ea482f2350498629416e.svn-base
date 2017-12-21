@@ -1,0 +1,3 @@
+#ifdef INCLUDE_MCF5475_PCI
+extern void mcf5475PciRegister (void);
+#endif /* INCLUDE_MCF5475_PCI */

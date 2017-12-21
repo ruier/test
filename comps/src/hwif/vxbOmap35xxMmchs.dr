@@ -1,0 +1,3 @@
+#ifdef DRV_STORAGE_OMAP35XX_MMCHS
+    omap35xxMmchsRegister ();
+#endif /* DRV_STORAGE_OMAP35XX_MMCHS */

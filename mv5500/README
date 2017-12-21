@@ -1,0 +1,68 @@
+                 README: Motorola MVME5500 
+
+This file contains board-specific information for the Motorola MVME5500 in
+support of the MVME5500 BSP.  Specifically, this file contains information on
+any BSP interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+Additionally, the target board's manual page entry (for example,
+MV5500/target.ref) provides board-specific information necessary to run
+VxWorks, and should be read before this BSP is used.
+
+-------------------------------------------------------------------------------
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+    
+    Fix TFFS failure on Emerson MVME5500 revision 01F. (WIND00295145)
+    Fix interrupt vector description in target.ref. (WIND00237447)
+    Fix serial console hang problem. (WIND00286133)
+    Fix sysBusIntGen protection problem. (WIND00296177)
+    Fix the issue about array overflow in routine sysBusToLocalAdrs(). (WIND00371712)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+    
+    Delete _MMU_UBAT_VP attribute(WIND00162540)
+    Fix sector locked error when writing. (WIND00117833)
+
+RELEASE 2.0/7
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Fix L3Cache initialization issue. (WIND00158826)
+    Add the definition of INCLUDE_TFFS before to setting the FLASH_WP_UNLOCK bit. (WIND00174423)
+        
+RELEASE 2.0/6
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Fix wancom's problem when changing the value of RAM_LOW_ADRS (WIND00112036)
+    Disable GPP interrupt in sysMv64260Init to boot quickly. (WIND00129359)
+    Fix TFFS issue and update related documentation. (WIND00135153)
+    Fix SCSI issue and update related documentation. (WIND00135158)
+    Fix boot slowly problem when call reboot(BOOT_CLEAR | BOOT_QUICK_AUTOBOOT). (WIND00133342)
+
+RELEASE 2.0/5
+
+    Released from Wind River for VxWorks 6.6.
+
+    Fixed defects: WIND00045696, WIND00046415, WIND00072666, WIND00072676,
+    WIND00076030, WIND00077610, WIND00100009, WIND00107657
+
+RELEASE 2.0/4
+
+   Release converting the present ipstack to the new ipnet stack
+
+RELEASE 2.0/3
+
+   Release fixing TFFS build errors and un-write protect
+
+RELEASE 2.0/2
+
+   Release for Base 6; merge TFFS support
+
+RELEASE 1.2/1
+
+    FCS release for Tornado 2.2.1 
+ 

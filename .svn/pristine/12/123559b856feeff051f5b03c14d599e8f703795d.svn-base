@@ -1,0 +1,4 @@
+#ifdef DRV_STORAGE_FSLSATA
+    vxbFslSataStorageRegister ();
+#endif
+

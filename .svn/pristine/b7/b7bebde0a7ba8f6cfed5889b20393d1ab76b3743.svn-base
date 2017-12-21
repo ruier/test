@@ -1,0 +1,3 @@
+#ifdef INCLUDE_TIMER_EARLY_VXB_DELAY 
+    vxbTimerEarlyDelayInit ();
+#endif /* INCLUDE_TIMER_EARLY_VXB_DELAY */

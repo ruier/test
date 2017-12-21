@@ -1,0 +1,3 @@
+#ifdef DRV_TIMER_M85XX
+extern void m85xxTimerDrvRegister (void);
+#endif /* DRV_TIMER_M85XX */   

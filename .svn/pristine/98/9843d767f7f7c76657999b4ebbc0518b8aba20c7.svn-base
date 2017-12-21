@@ -1,0 +1,3 @@
+#ifdef DRV_VGA_M6845
+extern void m6845vxbRegister (void);
+#endif

@@ -1,0 +1,18 @@
+#ifdef INCLUDE_USB_INIT
+IMPORT STATUS usbInit (void); 
+IMPORT void vxbUsbHciRegister (void);
+#endif
+
+#ifdef INCLUDE_USB_TGT
+IMPORT void vxbUsbTcdRegister (void);
+#endif
+
+#ifdef INCLUDE_USB
+IMPORT void usbHcdInstantiate (void);
+#endif
+
+#ifdef INCLUDE_USBTGT_FUNC_BUS
+IMPORT void usrUsbTgtFuncVxbRegister (void);
+#endif
+
+

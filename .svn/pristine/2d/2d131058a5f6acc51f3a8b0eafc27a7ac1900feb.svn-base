@@ -1,0 +1,64 @@
+
+           README: Freescale P2020RDB (fsl_p2020_rdb)
+
+This file contains board-specific information for the Freescale P2020RDB
+target board.  This file documents BSP interface changes from previous software
+or hardware versions, and notifies the user of serious caveats that must be
+noted before using this BSP.  Additionally, the target board's reference entry
+(i.e. fsl_p2020_rdb/target.ref) provides board-specific information necessary
+to run VxWorks and should be read fully before this BSP is used.
+
+--------------------------------------------------------------------------------
+RELEASE 6.9/3
+
+    Released from Wind River for General Purpose Platform 3.9, VxWorks 6.9.2.1
+
+    Moved L1 cache parity error handling to the arch library.  L1 cache parity 
+       checking is now enabled by default. L1 parity errors now generate
+       (in many cases recoverable) machine check exceptions.  (WIND00309426)
+    Fixed SMP image booting issue. (WIND00314083)
+
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 3.9, VxWorks 6.9.2
+
+    Update to openPicTimerDevBresources[] to support OpenPIC timers for the 2nd
+       AMP core by changing the clock source from the grounded RTC pin to the
+       internal clock. (WIND00281979)
+    Fixed memory mapping bugs and isolated the cores' memory from each other.
+       (WIND00247805 & WIND00253685) 
+    Implemented an architecture independant wrload initialization and memory
+       mapping/unmapping.  Added bootrom and BSP support to execute secondary
+       uAMP images with a physical bias on any 64MB boundary. Removed use of 
+       M85XX_BPTR for starting the 2nd core.  It now executes through romInit
+       and uses CPU1_INIT_START_ADR.
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 3.9, VxWorks 6.9.1
+
+    Rename DRV_STORAGE_FSL_SDHC to DRV_STORAGE_SDHC. (WIND00300116)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 3.9, VxWorks 6.9
+
+    Modify the OR0 value to improve the nor flash performance.
+    Change the SDRAM controller's CLK_CTRL timing to support the DDR found
+       on rev D targets. (WIND00234239)
+    Replace manual cache flushing in sysCpuEnable with calls to architecture
+       functions. (WIND00239454)
+    Modify the sysToMonitor SMP shutdown sequence so each CPU flushes its data
+       cache before resetting. (WIND00242091)
+
+Version 2.0/1
+
+    Re-released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Add AMP feature support.
+
+Version 2.0/0
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Initial release.

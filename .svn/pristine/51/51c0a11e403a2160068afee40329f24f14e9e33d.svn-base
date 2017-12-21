@@ -1,0 +1,3 @@
+#ifdef DRV_M8641_IIC
+    m8641I2cDrvRegister();
+#endif /* DRV_M8641_IIC */

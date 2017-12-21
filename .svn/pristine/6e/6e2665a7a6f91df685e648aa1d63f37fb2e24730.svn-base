@@ -1,0 +1,664 @@
+\" fsl_mds8568/target.ref - Freescale MDS8568 target specific documentation
+\"
+\" Copyright (c) 2007-2008, 2011 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01c,26jan11,kxb  remove obsolete TFFS component
+\" 01b,08aug08,b_m  completely rewritten using new template.
+\" 01a,04jul07,b_m  written.
+\"
+\TITLE fsl_mds8568 - Freescale MDS8568
+
+NAME
+`Freescale MDS8568'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks for the fsl_mds8568 BSP. Please read the section "Getting the board
+running VxWorks" in order to configure the board to run VxWorks.
+
+\sh Jumpers & Switches
+Default Jumper Settings:
+
+\ts
+Jumper Number | Description              | Setting
+--------------------------------------------------
+JP2           | Input for CLK7           | 1-2
+JP4 & JP5     | Input for CLK16          | JP4-JP5.2
+JP6           | Input clock for MPC8568E | 1-2
+JP14          | Input for CLK8           | 2-3
+JP16          | Input voltage for TSEC   | 1-2
+JP17          | Input voltage for UCC    | 1-2
+\te
+
+Default Switch Settings:
+
+\ts
+Switch Number | Switch ON | Switch OFF
+--------------------------------------
+SW1           | 1,4,6     | 2,3,5,7,8
+SW2           | 3         | 1,2,4,5,6,7,8
+SW3           | 1,2,5     | 3,4,6,7,8
+SW4           | 2,4,5,6   | 1,3,7,8
+SW6           | 2         | 1,3,4
+\te
+
+\sh Getting the board running VxWorks (boot from VxWorks bootrom)
+This section will guide you how to run VxWorks on the Freescale MDS8568 board.
+
+1. Creating a bootrom.bin:
+    1.1 Launch Workbench 3.x, go to the "File" menu and choose the option
+        "New" -> "VxWorks Boot Loader / BSP Project".
+
+    1.2 The "New VxWorks Boot Loader / BSP Project" window will popup, input a
+        project name then click "Next" button. In the next window, choose the BSP
+        as "fsl_mds8568", "Tool chain" could be set as "e500v2diab", in the
+        "Boot loader / BSP image" part, choose the style as "Compressed (default)",
+        "Format" as "Bin", then press the "Finish" button to finish the project
+        creation.
+
+    1.3 Once the build process finish successfully (You will see "Build Finished"
+        in the "Build Console" window without error), you will find the file
+        "bootrom.bin" in the BSP directory "$(WIND_BASE)/target/config/fsl_mds8568".
+
+2. Programming bootrom.bin to the Freescale MDS8568 FLASH:
+   Support for MDS8568 part is available with Workbench 3.x.
+
+   Using Workbench, complete the following steps to flash your boot ROM image:
+
+    2.1 Install Wind River Probe or Wind River ICE and power it on.
+
+        Connect the JTAG interface cable from the Wind River Probe or Wind
+        River ICE to the Freescale MDS8568 board's JTAG connector (P5).
+        Once the connections have been made, power up the Freescale MDS8568
+        board and launch Workbench on the host.
+
+    2.2 Configure the Wind River Probe or Wind River ICE connection.
+
+        In Workbench on the left pane, there is a "Remote Systems" window.
+        Click on the "Define a connection to remote system" button. In the popup
+        "New Connection" window, select the Connection type as
+        "Wind River OCD ICE Connection" for Wind River ICE and "Wind River
+        OCD Probe Connection" for Wind River Probe. If the Wind River ICE
+        is connected via serial port, specify the configuration else select
+        "Specify all communication settings manually".
+
+        In the "Wind River ICE Settings" or "Wind River Probe Settings",
+        select the Board file by clicking on the "Board file" radio button and
+        browse to the appropriate board file. For example:
+        "$WIND_OCD_PATH/BoardFiles/PowerPC/85xx/Generic/Generic_MPC8568E.brd"
+        Select "Auto-attach to connected designators" checkbox. In the
+        "Communications" tab, "Emulator Hostname / IP address" of ICE for Wind
+        River ICE or "USB Device Name" for Wind River Probe. Connect
+        Workbench OCD with the Wind River Probe or Wind River ICE
+        by clicking the "Next" and then "Finish" button. A New connection
+        appears in the "Remote Systems" window.
+
+    2.3 Program Wind River Probe / Wind River ICE with the proper register
+        settings for the Freescale MDS8568 board.
+
+        To view/modify the Wind River ICE firmware setting, terminate the
+        debug session for Wind River ICE. In the "Remote Systems" window,
+        right click on the newly connected OCD connection. Select
+        "OCD Utilities". To know about the current firmware information,
+        select "Emulator firmware version information". To download the new
+        firmware, Select "Firmware Download" and select appropriate file
+        from "$WIND_OCD_PATH/CommonHardwareFiles/*.bin".
+
+        Go to the "OCD Command Shell" and click on the "Settings" button.
+        The OCD Command Shell Settings dialog appears, where you can
+        select the appropriate register file. Navigate to the location of
+        the appropriate register configuration file for the Freescale MDS8568
+        board ("$WIND_OCD_PATH/RegisterFiles/PowerPC/85xx/Motorola/mpc8568e_mds_pmc_rev_19_191.reg").
+        After choosing the register file, press the "OK" button. In the OCD
+        Command Shell, click the "Playback File" button. The selected register
+        file is downloaded to the target and the commands from the file appear
+        in the OCD command shell. When playback is finished the ">BKM>" or the
+        ">ERR>" prompt returns.
+
+    2.4 Get into Background Mode.
+
+        Execute the "IN" command to reset the board and initialize it with
+        the register setting.
+\cs
+            IN
+\ce
+
+    2.5 Program the Freescale MDS8568 Flash.
+
+        In WindRiver OCD, Select the "Flash Programmer". The
+        "Flash Programmer" view has three tabs: "Configuration",
+        "Programming" and "Memory/Diagnostics".
+
+        2.5.1 Select the "Configuration" tab. In the "Device Selection'
+            field, select the "AMD -> S29GL256N -> 16384 x 16 -> 1 Device".
+
+            In "Flash Bank Address" group for the "Base" enter "FE000000" .
+            In the "RAM Workspace" group for the "Workspace Start at"
+            enter "0x00005000" and for the "Workspace Size" enter
+            "0x20000".
+
+        2.5.2 Click on the "Programming" tab. Select the "Add File"
+            button, in the popup window, select the newly generated
+            "$(WIND_BASE)/target/config/fsl_mds8568/bootrom.bin", and click
+            the "This is a raw binary file" checkbox then click "OK" to finish
+            file adding. Click the "Start Address" and set it as "0xfff00000",
+            the "End Address" will be fixed automatically. Please notice that
+            the "Start Address" should include the "Offset bias".
+            Enable a file by clicking on the checkbox under the "Enabled" heading.
+
+        2.5.3 In the "Erase Sector Selection" pane, select addresses
+            fff00000 through ffffffff.  Press the "Erase/Program"
+            button to erase the flash and then program the flash with selected
+            "bootrom.bin" file. A window pops up to show the progress of the
+            Flash device programming. When it is complete, the Flash should
+            contain the new boot program.
+
+3. Running the VxWorks bootrom
+
+    Power on the board, you will get VxWorks bootrom running.
+
+\sh Getting the board running VxWorks (boot from U-Boot)
+This section will guide you how to run VxWorks on the Freescale MDS8568 board.
+
+1. Creating a bootrom.bin:
+    1.1. Modify BSP
+
+        Open config.h, change
+\cs
+        #undef BOOT_FROM_UBOOT
+\ce
+        to
+\cs
+        #define BOOT_FROM_UBOOT
+\ce
+
+        Open Makefile, change
+\cs
+        # boot from vxWorks bootrom
+        ROM_TEXT_ADRS   = fff00100 # ROM entry address
+        ROM_WARM_ADRS   = fff00108 # ROM warm entry address
+        ROM_LINK_ADRS   = fff00000
+
+        # boot from U-Boot
+        #ROM_TEXT_ADRS  = ffe00100 # ROM entry address
+        #ROM_WARM_ADRS  = ffe00108 # ROM warm entry address
+        #ROM_LINK_ADRS  = ffe00000
+\ce
+        to
+\cs
+        # boot from vxWorks bootrom
+        #ROM_TEXT_ADRS  = fff00100 # ROM entry address
+        #ROM_WARM_ADRS  = fff00108 # ROM warm entry address
+        #ROM_LINK_ADRS  = fff00000
+
+        # boot from U-Boot
+        ROM_TEXT_ADRS   = ffe00100 # ROM entry address
+        ROM_WARM_ADRS   = ffe00108 # ROM warm entry address
+        ROM_LINK_ADRS   = ffe00000
+\ce
+
+    1.2 Creating a VxWorks bootrom image
+
+        Open the VxWorks Development Shell, change directory to fsl_mds8568
+        BSP directory, and then build the VxWorks bootrom image.
+
+\cs
+        cd target/config/fsl_mds8568
+        make bootrom.bin
+\ce
+
+2. Flashing the VxWorks bootrom image
+
+    This section will describe how to program VxWorks bootrom onto a flash
+    by using the on-board U-Boot.
+
+    2.2 Starting a TFTP server
+
+        Open a TFTP server on your host. Make sure the root directory is
+        your fsl_mds8568 BSP directory which contains the VxWorks bootrom
+        image you've just created.
+
+    2.3 Configuring the U-Boot environment
+
+        Power up the board, you'll see the U-Boot shell prompt, something like:
+
+\cs
+        U-Boot 1.3.4-00082-g2fd0aad (Aug 12 2008 - 08:20:22)
+
+        CPU:   8568E, Version: 1.0, (0x807d0010)
+        Core:  E500, Version: 2.1, (0x80210021)
+        Clock Configuration:
+               CPU: 990 MHz, CCB: 396 MHz,
+               DDR: 198 MHz (396 MT/s data rate), LBC:  99 MHz
+        L1:    D-cache 32 kB enabled
+               I-cache 32 kB enabled
+        Board: 8568 MDS
+        I2C:   ready
+        DRAM:  Initializing
+            SDRAM: 64 MB
+            DDR: 512 MB
+        FLASH: 32 MB
+        L2:    512 KB enabled
+        *** Warning - bad CRC, using default environment
+
+            PCI: 32 bit, 66 MHz, async, host, arbiter
+                       Scanning PCI bus 00
+        PCI on bus 00 - 00
+
+            PCIE connected to slot as Root Complex (base address e000a000)
+                       Scanning PCI bus 02
+        PCIE on bus 01 - 02
+        In:    serial
+        Out:   serial
+        Err:   serial
+        Net:   eTSEC0, eTSEC1, FSL UEC0, FSL UEC1
+        Hit any key to stop autoboot:  0
+\ce
+
+        Type the following commands to setup the U-Boot environment.
+
+\cs
+        setenv ipaddr 192.168.0.3
+        setenv netmask 255.255.255.0
+        setenv serverip 192.168.0.2
+        setenv gatewayip 192.168.0.1
+\ce
+
+        Note: you must change the network parameters according to your
+        actual situation. 'ipaddr' is the target IP address while 'serverip'
+        is your host IP address.
+
+    2.4 Programming the Freescale MDS8568 flash
+
+        Type the following commands in the U-Boot shell.
+
+\cs
+        tftp 200000 bootrom.bin
+        erase ffe00000 ffe7ffff
+        cp.b 200000 ffe00000 $filesize
+\ce
+
+        Note: if the bootrom size exceeds 0x80000 (512KB), you should erase
+        one or more sectors, for example:
+
+\cs
+        erase ffe00000 ffefffff.
+\ce
+
+3. Running the VxWorks bootrom
+
+    In the U-Boot shell prompt, type the following command:
+
+\cs
+    go ffe00100
+\ce
+
+    Now you will get VxWorks bootrom running.
+
+FEATURES
+
+This section describes all features of the board, supported or not.
+It documents all configurations of the board and the interaction between
+features and configuration items.
+
+\sh List of Hardware Features (Freescale MDS8568 board)
+
+\ts
+Hardware Interface | Controller | Driver/Component | Status
+-----------------------------------------------------------
+UART:0             | on-chip    | vxbNs16550Sio.c  | SUPPORTED
+UART:1             | on-chip    | vxbNs16550Sio.c  | UNVALIDATED
+1GB-ETHERNET:0     | on-chip    | vxbEtsecEnd.c    | SUPPORTED
+1GB-ETHERNET:1     | on-chip    | vxbEtsecEnd.c    | SUPPORTED
+1GB-ETHERNET:2     | on-chip    | vxbUccEnd.c      | SUPPORTED
+1GB-ETHERNET:3     | on-chip    | vxbUccEnd.c      | SUPPORTED
+NOR-FLASH          | S29GL256N  | flashmem.c/TFFS  | SUPPORTED
+TIMER              | on-chip    | vxbM85xxTimer.c  | SUPPORTED
+PCI-E-HOST         | on-chip    | m85xxPci.c       | SUPPORTED
+I2C                | on-chip    | sysMpc85xxI2c.c  | SUPPORTED
+RTC                | DS1374     | ds1374.c         | SUPPORTED
+SRIO               | on-chip    | -                | UNSUPPORTED
+ENCRYPTION         | on-chip    | -                | UNSUPPORTED
+\te
+
+\sh Feature Interactions
+Refer to the board vendor's documentation.
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Verified Hardware
+This BSP has been verified on Rev.1.91 of Freescale MDS8568 board.
+The default clock speed for MDS8568 is 1GHz core, 400MHz CCB and 400MHz QE.
+
+\sh Memory Maps
+The following table describes the default memory map of this BSP.
+
+\ts
+Start       | Size  | End         | Access to
+---------------------------------------------
+0x0000_0000 | 512MB | 0x1FFF_FFFF | DDR SDRAM
+0x8000_0000 |  64MB | 0x83FF_FFFF | PCI Prefetchable Memory
+0x8400_0000 |  64MB | 0x87FF_FFFF | PCI Non-Prefetchable Memory
+0x8800_0000 |  64MB | 0x8BFF_FFFF | PCI IO
+0xA000_0000 |  64MB | 0xA3FF_FFFF | PCIe Prefetchable Memory
+0xA400_0000 |  64MB | 0xA7FF_FFFF | PCIe Non-Prefetchable Memory
+0xA800_0000 |  64MB | 0xABFF_FFFF | PCIe IO
+0xC000_0000 | 256MB | 0xCFFF_FFFF | SRIO
+0xE000_0000 |   1MB | 0xE00F_FFFF | CCSR
+0xF000_0000 |  64MB | 0xF3FF_FFFF | LBC SDRAM
+0xF800_0000 |  32KB | 0xF800_7FFF | BCSR
+0xFE00_0000 |  32MB | 0xFFFF_FFFF | NOR FLASH
+\te
+
+\sh Serial Configuration
+No special configuration needed.
+Default configuration is:
+    Baud Rate: 115200
+    Data: 8 bit
+    Parity: None
+    Stop: 1 bit
+    Flow Control: None
+
+\sh Network Configuration
+The ETSEC ports allows 10/100/1000T connection. The driver will auto-negotiate
+and configure the port accordingly.  The BSP also supports Intel 8257x based
+NICs via PCIe.  See the gei825xxVxbEnd driver for the supported mode numbers.
+
+The following END and corresponding END2 drivers are supported in this BSP.
+However, only END driver is enabled by default.
+
+\ts
+Driver | END                   | END2
+-------------------------------------
+ETSEC  | INCLUDE_ETSEC_VXB_END | INCLUDE_ETSEC_VXB_END2
+\te
+
+To enable the END2 driver, you should modify as follows:
+
+For command line build, add INCLUDE_END2 into config.h right after the
+definition of INCLUDE_END.  Also replace the END driver name with corresponding
+END2 driver name, then rebuild the bootrom and vxWorks image.
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, add INCLUDE_END2 component and corresponding END2
+component, this will un-define END automatically.  Then rebuild your project.
+
+\sh Boot Devices
+The supported boot devices are:
+
+\ts
+    `motetsec0' | - Primary ETSEC Ethernet (10baseT, 100baseTX, or 1000baseT)
+    `motetsec1' | - Secondary ETSEC Ethernet (10baseT, 100baseTX, or 1000baseT)
+    `qefcc0'    | - Primary UCC Ethernet (10baseT, 100baseTX, or 1000baseT)
+    `qefcc1'    | - Secondary UCC Ethernet (10baseT, 100baseTX, or 1000baseT)
+    `tffs'      | - TFFS
+\te
+
+\sh Boot Methods
+The boot methods are affected by the boot parameters.  If no password is
+specified, RSH (remote shell) protocol is used.  If a password is specified,
+FTP protocol is used, or, if the flag is set to 0x80, TFTP protocol is used.
+
+\sh L2 Cache
+L2 Cache is configured with callback function pointers for L2 cache Global
+Invalidation, L2 Cache Enable, L2 Cache Flush and L2 Cache Disable are
+initialized in sysHwInit(). By default, the 256 KB L2 is configured to 256 KB
+of cache. If a different configuration is desired, a new bootrom image should
+be used to match the RAM image configuration of L2.
+
+\sh PCIe Access
+There is only one PCIe x4 slot (P6) on the Freescale MDS8568 board.
+
+In order to support PCIe devices in this BSP, please define following macro
+in config.h:
+
+\cs
+    #define DRV_PCIBUS_M85XX
+\ce
+
+The Intel 8257x Gigabit Ethernet adapter is one of the tested PCIe device
+supported in this release.  Define INCLUDE_GEI825XX_VXB_END in config.h to
+enable this device.
+
+This BSP defaults to use PCIe legacy interrupts.  To enable PCIe MSI interrupt,
+please define following macro in config.h:
+
+\cs
+    #define INCLUDE_INTCTLR_DYNAMIC_LIB
+\ce
+
+SPECIAL CONSIDERATIONS
+
+\sh TrueFFS
+The standard Wind River TrueFFS product is supported in this release.
+
+This BSP uses the Spansion S29GL256N flash as the TrueFFS media.
+The FLASH address space that is used as TrueFFS is 0xfe000000 - 0xfeffffff.
+
+Note: Bootloader and TFFS are sharing the same flash part, so please be very
+careful because misusing of TFFS may damage the bootloader and cause the
+board failure to boot up.
+
+To use it, define INCLUDE_TFFS in config.h.  If you want to use TFFS with DOSFS
+file system, please define the following macros in config.h.
+
+\cs
+    #define INCLUDE_DOSFS
+    #define INCLUDE_DOSFS_MAIN
+    #define INCLUDE_DOSFS_FAT
+    #define INCLUDE_DOSFS_FMT
+    #define INCLUDE_DOSFS_DIR_VFAT
+    #define INCLUDE_DOSFS_DIR_FIXED
+    #define INCLUDE_ERF
+    #define INCLUDE_XBD
+    #define INCLUDE_XBD_TRANS
+    #define INCLUDE_XBD_BLK_DEV
+    #define INCLUDE_DEVICE_MANAGER
+    #define INCLUDE_FS_MONITOR
+    #define INCLUDE_FS_EVENT_UTIL
+\ce
+
+When using TrueFFS on a new FLASH for the first time, you should format and
+configure the FLASH by using:
+
+\cs
+    sysTffsFormat ();
+    usrTffsConfig (0, 0, "/tffs0");
+\ce
+
+If you are using DOSFS, please use
+
+\cs
+    dosfsDiskFormat ("/tffs0");     /@ For VxWorks 6.6 and later version @/
+\ce
+
+Note: If you are running these commands in the VxWorks target shell, please use
+
+\cs
+    sp sysTffsFormat
+\ce
+
+to format the FLASH as it would take long time to complete.
+
+You should now be able to use VxWorks I/O and file system commands to access
+the FLASH device as if it were a disk.  For example, you can copy a vxWorks
+image from your host to TFFS by using file system 'copy'.  Of course, you should
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/tffs0/vxWorks");
+\ce
+
+If you want to use "/tffs0" as a boot device, you should follow the instructions:
+
+For command line mode, make sure INCLUDE_TFFS is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the flash chip.  Also make sure you have all the necessary file system
+components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_ERF
+    INCLUDE_XBD
+    INCLUDE_XBD_TRANS
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_MONITOR
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_TFFS_MOUNT
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a default_romCompress.bin in the project directory, program
+it into the flash chip as a bootrom.
+
+Below is an example by using /tffs as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /tffs0/vxWorks
+    inet on ethernet (e) : 128.224.163.75:fffff000
+    host inet (h)        : 128.224.162.146
+    gateway inet (g)     : 128.224.162.1
+    user (u)             : user
+    ftp password (pw)    : pass
+    flags (f)            : 0x0
+    target name (tn)     : mds8568
+    other (o)            : motetsec0
+\ce
+
+\sh Ethernet Address
+The Freescale MDS8568 board has unique Ethernet hardware addresses assigned to
+each board.  A unique address is absolutely necessary if the user wishes to
+connect the board to a network.  Thus, the user must provide a suitable
+6-byte Ethernet address for each on-board network interface.
+
+The definition of macro ETHERNET_MAC_HANDLER in config.h indicates the MAC
+address is stored in NVRAM and alterable via the 'M' bootrom command.  This
+option allows only the last three bytes to be changed. To use this option,
+open a console window and reset the hardware. When the bootrom banner appears
+and the countdown starts, press any key to get the "[VxWorks Boot]:" prompt.
+Type 'M' and follow the instructions.
+
+\sh Make Targets
+The make targets are listed as the names of object-format files. Append `.hex'
+to each to derive a hex-format file name. Other images not listed here may not
+be tested.
+
+\ts
+`bootrom'
+`bootrom.bin'
+`bootrom.hex'
+`vxWorks' (with `vxWorks.sym')
+`vxWorks.st'
+\te
+
+\sh BSP Bootloaders and Bootroms
+
+\ts
+Bootloader/Bootrom  | Status
+----------------------------
+Uboot (pre-flashed) | SUPPORTED
+bootrom             | SUPPORTED
+bootrom_uncmp       | UNVALIDATED
+vxWorks             | SUPPORTED
+vxWorks_rom         | UNSUPPORTED
+vxWorks_romCompress | SUPPORTED
+vxWorks_romResident | UNSUPPORTED
+\te
+
+\sh BSP Validated Tools
+
+\ts
+Tool                         | Connection/Type | Status
+-------------------------------------------------------
+Workbench Debugger           | ETHERNET/WDB    | SUPPORTED
+Workbench System Viewer      | ETHERNET/WDB    | SUPPORTED
+Workbench MemScope           | ETHERNET/WDB    | SUPPORTED
+Workbench ProfileScope       | ETHERNET/WDB    | SUPPORTED
+Workbench StethoScope        | ETHERNET/WDB    | SUPPORTED
+Workbench CoverageScope      | ETHERNET/WDB    | SUPPORTED
+Workbench Core File Analysis | ETHERNET/WDB    | UNVALIDATED
+Workbench Sensor Points      | ETHERNET/WDB    | UNVALIDATED
+Workbench OCD Debugger       | JTAG            | SUPPORTED
+Workbench OCD Flash          | JTAG            | SUPPORTED
+\te
+
+\sh Known Problems
+The size of default vxWorks_rom image is grater than 1 MB, which is oversized
+than the default ROM_SIZE.  ROM_SIZE and the corresponding link addresses can be
+adjusted to make vxWorks_rom work, however it is an unsupported configuration.
+
+vxWorks_romResident image will take several minutes to boot up, the reason of
+which is unknown.  This image type is unsupported in this release.
+
+BOARD LAYOUT
+
+\bs
++------------------------------------------------------------------------------+
+|          +---+        o    o                                   J17 J16       |
+|---+      | F |       HRST SRST                                               |
+|12V|      | L |                                                               |
+|---+      | A |                    +---+                                   +--|
+|---+      | S |             +---+  |   |                             eTsec1|  |
+|5V |      | H |             |   |  | P |  +---------+                      +--|
+|---+      +---+             | S |  |   |  |         |                         |
+|                            | R |  | C |  |  M P C  |                      +--|
+|------+           SW6       | I |  |   |  |  8568E  |                eTsec0|  |
+| JTAG |                     | O |  | I |  |         |                      +--|
+|------+                     |   |  |   |  +---------+                         |
+|                            +---+  | E |                                   +--|
+|  +----+                           |   |                             qefcc1|  |
+|  | P4 |                           +---+                                   +--|
+|  +----+                                                                      |
+|                                                         J4 & J5           +--|
+| O Power                                                             qefcc0|  |
+|                                                       J2                  +--|
+|                                                                              |
+| SW4 SW3                                                                      |
+| SW2 SW1                           +-------------+                            |
+|                                   |     DDR     |                  +-------+ |
+|                                   |    SDRAM    |                  | DUART | |
++------------------------------------------------------------------------------+
+\be
+
+SEE ALSO
+
+\tb Workbench User's Guide: Introduction
+
+\tb VxWorks Programmer's Guide: Configuration
+
+\tb VxWorks Programmer's Guide: Architecture Appendix
+
+BIBLIOGRAPHY
+
+\tb MPC8568E Reference Manual
+
+\tb MPC8568E MDS Processor Board User's Guide
+
+\tb PowerPC E500 Core Reference Manual
+
+\tb Motorola PowerPC Microprocessor Family: The Programming Environments

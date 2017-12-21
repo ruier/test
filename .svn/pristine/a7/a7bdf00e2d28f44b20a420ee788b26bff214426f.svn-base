@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTLR_MIPS_MT_IPI
+extern void vxbMipsMtIntCtlrRegister (void);
+#endif /* DRV_INTCTLR_MIPS_MT_IPI */

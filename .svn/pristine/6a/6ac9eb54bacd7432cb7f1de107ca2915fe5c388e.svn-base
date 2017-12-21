@@ -1,0 +1,4 @@
+#ifdef DRV_PCIBUS_XLP_PCIEX
+    xlpPciExRegister();
+#endif /* DRV_PCIBUS_XLP_PCIEX */
+

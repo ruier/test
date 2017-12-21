@@ -1,0 +1,3 @@
+#ifdef DRV_DMA_OMAP35XX
+    omap35xxDmaRegister();
+#endif

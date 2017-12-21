@@ -1,0 +1,3 @@
+#ifdef DRV_SIO_NS16550
+extern void ns16550SioRegister (void);
+#endif /* DRV_SIO_NS16550 */

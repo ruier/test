@@ -1,0 +1,3 @@
+#ifdef INCLUDE_VXB_IBM_MAL
+extern void vxbMalRegister(void);
+#endif /* INCLUDE_VXB_IBM_MAL */

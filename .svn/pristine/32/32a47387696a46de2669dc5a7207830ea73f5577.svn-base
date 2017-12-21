@@ -1,0 +1,4 @@
+#ifdef INCLUDE_OCTEON_MDIO
+    octeonMdioRegister();
+#endif
+

@@ -1,0 +1,1838 @@
+\" mv7100/target.ref - Emerson MVME7100 target specific documentation
+\"
+\" Copyright (c) 2008-2012 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01m,29mar12,c_l  updated document for NVRAM. (WIND00328678)
+\" 01l,28mar12,mpc  updated BOOT ROMS section. (WIND00266582)
+\" 01k,26oct11,swu  Fix document error for NVRAM. (WIND00309132)
+\" 01j,14jan11,syt  updated content of AMP with wrload section.(WIND00248327) 
+\" 01i,09jan11,syt  updated content of USB Host Support.(WIND00214444)
+\" 01h,07jul10,liu  add description for smNet comunication. (WIND00208858)
+\" 01g,31may10,e_d  Add new MIPC description and verified hardware version
+\" 01f,02dec09,e_d  Add AMP mode description
+\" 01e,23apr09,e_d  Add support for new SMP
+\" 01d,14nov08,y_w  Fix USB related comments
+\" 01c,10sep08,y_w  Rewrite based on the latest template
+\" 01b,18jul08,y_w  Fix format errors
+\" 01a,17mar08,mdg  Created
+\"
+\TITLE mv7100 - Emerson MVME7100
+
+NAME
+`Emerson MVME7100'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks.  This BSP is compatible with Wind River's Workbench 3.1 development 
+environment. 
+
+This BSP encompasses the MVME7100 Single Board Computer.  It consists of the 
+MPC8641D dual core integrated processor with serial USB 2.0, 2eSST VMEbus 
+interfaces, dual 64-bit/100MHz PMC sites, one flash bank (with two boot blocks), 
+quad 10/100/1000 Ethernet, five serial ports, and a single SODIMM module.
+
+The MVME7100 has its own transition board, but does not require one.
+
+\sh BOOT ROMS
+
+The bootrom for UP, SMP and AMP must be built from the mv7100 BSP instead of 
+mv7100_AMP BSP. But AMP VIP must be built from mv7100_AMP BSP instead of this BSP.
+The MVME7100 supports one bank of FLASH memory.  This bank consists of two
+AMD S29GL512/256/128N MirrorBit flash devices.  These devices are configured
+to operate in 16-bit mode to provide a 32-bit FLASH port, and are soldered
+onboard.  The FLASH bank contains two boot blocks which are switch selectable.
+The switch effectively swaps the mapping of the boot blocks so that the
+active boot block is mapped at 0xFFF00000.  The start address of the FLASH
+bank is dependent on the FLASH bank size.  This configuration of the bank's
+start address is handled, dynamically, by the BSP.
+
+\sh Jumpers & Switches
+
+The following jumpers and switches are relevant to the VxWorks configuration:
+
+'Configuration Switch'
+
+\ts
+Switch Number | Default Setting | Name | Description
+------------------------------
+1 | OFF | Safe Start | Controls the safe start ENV settings.  The 'SAFE_START' 
+ | | | switch is OFF to indicate that the normal ENV setting should be used. 
+ | | | When it is on, the safe ENV settings should be used. This switch status 
+ | | | is readable from System Status  register 1, bit 5. Software should check 
+ | | | this bit and act accordingly.
+------------------------------
+2 | ON | Block Boot B Select | When the 'BOOT BLOCK B SELECT' switch is OFF, 
+ | | | the FLASH memory map is normal and boot block A is selected.  When the 
+ | | | switch is ON, boot block B is selected and mapped to the highest address.
+------------------------------
+3 | OFF | Flash Bank WP | The 'FLASH BANK WP' switch in the OFF position 
+ | | | indicates that the entire FLASH is not write-protected. The switch is ON
+ | | | to indicate that the FLASH is write-protected.
+------------------------------
+4 | OFF | JTAG Pass Thru | This switch is OFF to select normal operation.  The 
+ | | | switch is ON to select JTAG Pass Thru mode in conjunction with the 
+ | | | 'VME SCON SELECT' switch.
+------------------------------
+5 | OFF | Low Memory Offset | The 'Low Memory Offset' switch is OFF to select 
+ | | | VxWorks SMP mode operation.  The switch is ON to select VxWorks AMP mode, 
+ | | | where each processor runs the same copy of VxWorks.  Core 1's memory 
+ | | | from 0x10000000 to 0x20000000 is remapped to appear to core 1 as being 
+ | | | 0x00000000 to 0x10000000. A single-core (UP) build can run with the switch in either position. 
+------------------------------
+6 | OFF | Reserved |
+------------------------------
+7 | OFF | Reserved |
+------------------------------
+8 | OFF | Reserved |
+------------------------------
+\te
+
+'Geographical Address Switch'
+
+These switches reflect inverted states of the geographical address signals, 
+and controls PCI Bus A mode. The more Geographical Address description, please
+see Motorola Engineering Specification and Programming Model for MVME7100.
+
+\ts
+Switch Number | Default Setting | Name | Description
+------------------------------
+1 | OFF | GA0# |
+------------------------------
+2 | OFF | GA1# |
+------------------------------
+3 | OFF | GA2# |
+------------------------------
+4 | OFF | GA3# |
+------------------------------
+5 | OFF | GA4# |
+------------------------------
+6 | OFF | GAP# |
+------------------------------
+7 | OFF | VME SCON SELECT | This switch is OFF to select Non-SCON mode. The 
+ | | | switch is ON to select SCON mode. This switch is only effective when 
+ | | | the 'VME SCON AUTO MODE' switch is ON.
+------------------------------
+8 | OFF | VME SCON AUTO MODE | This switch is OFF to select Auto-SCON mode.  
+ | | | The switch is ON to select manual SCON mode which works in conjunction 
+ | | | with the 'VME SCON SELECT' switch.
+ | | | 
+------------------------------
+\te
+
+\sh Getting VxWorks running 
+The MVME7100 single board computer contains two "boot blocks" in its
+FLASH bank.  The boot blocks are each 1MB in size, located in the last
+2MBs of the FLASH bank.  The "boot bank" is located at 0xFFF00000.  Which
+boot block is acting as the boot bank is selectable via the onboard
+configuration switch.  Switch number 2 is used to select the boot bank.  
+If switch 2 is set to OFF, then boot block A is selected as the boot bank.  
+If switch 2 is set to ON, then boot bank B is selected as the boot bank.  
+Motorola MotLoad firmware is installed in one of the boot banks.  This 
+firmware can be used to download and FLASH the VxWorks bootrom into either 
+of the FLASH boot banks.
+
+First set the MOTLoad global variables to conform to your particular
+operational environment.  This is done by executing 'gevInit', which only
+needs to be executed once.  This routine initializes and clears the MotLoad 
+global environmental variable area in the EEPROM.  The 'gevEdit' command can 
+then be executed to set the global variables to match your environment.  These 
+variables, are stored in EEPROM and retain their values through power cycles. 
+The global variables can be changed, if desired,  with the MOTLoad `gevDelete' 
+and `gevEdit' commands.  The following are examples of MOTLoad command:
+
+\cs
+    MVME7100> gevEdit mot-/dev/enet0-cipa
+    (Blank line terminates input.)
+    123.111.32.90
+
+
+    Update Global Environment Area of NVRAM (Y/N)? y
+
+    MVME7100> gevEdit mot-/dev/enet0-sipa
+    (Blank line terminates input.)
+    123.111.32.180
+
+
+    Update Global Environment Area of NVRAM (Y/N)? y
+
+
+    MVME7100> gevEdit mot-/dev/enet0-gipa
+    (Blank line terminates input.)
+    123.111.32.1
+
+
+    Update Global Environment Area of NVRAM (Y/N)? y
+
+
+    MVME7100> gevEdit mot-/dev/enet0-file
+    (Blank line terminates input.)
+    bootrom.bin
+
+
+    Update Global Environment Area of NVRAM (Y/N)? y
+    MVME7100>
+\ce
+
+The above sequence sets the client IP address (IP address of the MVME7100)
+to 123.111.32.90, the IP address of the server to 123.111.32.180, the
+IP address of the gateway to 123.111.32.1 and the tftp file name to
+"bootrom.bin".  Note that we have used "dev/enet0" as the ethernet
+device involved in the download.  You can use another device, such as
+"dev/enet1" if you wish.  Use of the `netShow' command will display
+which interfaces are "up" and available for use in the download operation.
+
+The file is transferred from the TFTP host to the target board using
+the `tftpGet' command.  IMPORTANT: You must have a TFTP server running
+on your host's subnet for the `tftpGet' command to succeed.  The file
+name must be set to the location of the binary file on the TFTP host.
+The binary file must be stored in the directory identified for TFTP
+accesses, but the file name is a relative path and does not include
+the `/tftpboot' directory name:
+Now that the MOTLoad global variables have been set, you
+can perform the tftp load of the file image with the following
+command:
+
+\cs
+    MVME7100> tftpGet -d/dev/enet0
+\ce
+
+Notice that we have specified "/dev/enet0" as the interface.  This is
+the same interface that was specified with the `gevEdit' command.  If
+no interface is specified on the `tftpGet' command line, MOTLoad
+defaults to "dev/enet0".  Also take note that you can override the
+settings previously set via the `gevEdit' command by specifying
+additional MOTLoad options on the `tftpGet' command line.  The "-c"
+option can override the client IP address, the "-s" option can
+override the server IP address, the "-g" option can override the
+gateway IP address, and the "-f" option can override the file name.
+
+After the file is loaded onto the target, the 'flashProgram' command is used
+to put it into soldered FLASH parts.
+
+\cs
+    MVME7100> flashProgram -oXXXXXXXX -n100000 -d/dev/flash0
+\ce
+
+The offset "XXXXXXXX" to use in the 'flashProgram' command depends upon
+the size of the FLASH bank (it is assumed that the file will be
+flashed into the current non-boot block of the FLASH bank, in order 
+to preserve the firmware in the other boot block).
+
+MotLoad has a command, `flashShow', that presents information
+necessary to calculate offset.  The output looks something like this:
+
+\cs
+    MVME7100> flashShow
+    Device-Name  Base-Address,Size  Device-Size,Count  Boot  Type
+    /dev/flash0  F8000000,08000000  ...,...            Yes   ...
+\ce
+
+In this example, flash0 starts at F8000000 and is 128MB in size.
+
+To determine the offset at which to flash the bootrom the following
+calculation can be used:
+
+(size FLASH bank) - 2MB 
+
+Using the example output above we would get:
+
+0x08000000 - 0x00200000 = 0x07E00000
+
+This is the offset to use in place of "XXXXXXXX" in the 'flashProgram'
+command.
+
+When the 'flashProgram' command is finished, power down the board and switch
+boot blocks via the configuration switch number 2, then power the board back 
+up.
+
+To flash VxWorks into the current non-boot block, with MotLoad running
+in the boot block: 
+
+\cs
+    MVME7100> flashProgram -o07e00000 -n100000 -v
+\ce
+
+The MotLoad firmware can also be copied from one boot block to another.
+
+To flash MotLoad from the boot block into the non-boot block:
+
+\cs
+    MVME7100> flashProgram -o07e00000 -n100000 -v -sfff00000
+\ce
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh SUPPORTED FEATURES - MPC8641D Based Single Board Computer (MVME7100)
+
+The following features of the MVME7100 board family are supported:
+
+\ts
+Feature | Description
+------------------------------
+Processor | MPC8641D
+------------------------------
+NOR FLASH | 128MB soldered
+------------------------------
+TFFS | True Flash File System support for flash bank.
+ | The last 2MB of the FLASH has to be reserved for 
+ | the two boot blocks containing the boot images.
+------------------------------
+DRAM | Two banks of DDR SDRAM with ECC 1 or 2 GBytes.
+------------------------------
+NVRAM | 4KB (portion of the 64KB User EEPROM 1)
+------------------------------
+Tempe (Tsi148) chip | PCI-X to VMEbus bridge
+ | Major features:
+ | A16, A24, A32 and A64 address
+ | SCT, BLT, MBLT, 2eVME, 2eSST protocols
+ | DMA controller
+------------------------------
+EEPROM | Two 64KB dual-address serial EEPROMs.
+ | One 8KB VPD serial EEPROM.
+------------------------------
+Peripherals | One on-board async serial debug port available via front panel RJ45;
+ | Four async serial debug ports available via rear transition module;
+ | Four 10/100/1000 MPC8641D ETSEC Ethernet interfaces; 
+ | One NEC uPD720101 USB 2.0 Host Controller (OHCI/EHCI)
+------------------------------
+PCI Interface | 64-bit PCI/PCI-X; complies with <PCI Local Bus Specification>,
+ | Revision 2.1
+------------------------------
+Miscellaneous | RESET switch 
+ | MPC8641 I2C Controller
+ | MPC8641 Interrupt Controller
+ | ADT7461 Temperature Module
+ | Maxim DS1375 RTC with Alarm
+------------------------------
+\te
+
+\sh UNSUPPORTED FEATURES
+The following features of the MVME7100 board family are not supported:
+
+\is
+\i None.
+\ie
+
+\sh FEATURE INTERACTIONS
+Refer to the board vendor's documentation
+
+\sh List of Hardware Features (MVME 7100 board)
+
+\ts
+Hardware Interface | Controller | Driver/Component  | Status
+------------------------------------------------------------
+UART:0             | on-chip    | vxbNs16550Sio.c   | SUPPORTED
+UART:1             | on-chip    | vxbNs16550Sio.c   | SUPPORTED
+UART:2             | on-chip    | vxbNs16550Sio.c   | SUPPORTED
+UART:3             | on-chip    | vxbNs16550Sio.c   | SUPPORTED
+UART:4             | on-chip    | vxbNs16550Sio.c   | SUPPORTED
+1GB-ETHERNET:0     | on-chip    | vxbEtsecEnd.c     | SUPPORTED
+1GB-ETHERNET:1     | on-chip    | vxbEtsecEnd.c     | SUPPORTED
+1GB-ETHERNET:2     | on-chip    | vxbEtsecEnd.c     | SUPPORTED
+1GB-ETHERNET:3     | on-chip    | vxbEtsecEnd.c     | SUPPORTED
+NOR-FLASH          | S29GL-N    | sysAmdS29GLxxxN.c | SUPPORTED
+TIMER              | on-chip    | vxbPpcDecTimer.c  | SUPPORTED
+TIMER              | on-chip    | vxbOpenPicTimer.c | SUPPORTED
+DMA                | Tsi148     | sysTempeDma.c     | SUPPORTED
+I2C                | on-chip    | sysMpc8641I2c.c   | SUPPORTED
+RTC                | DS1375     | sysDs1375.c       | SUPPORTED
+PCI-MASTER         | on-chip    | m85xxPci.c        | SUPPORTED
+USB2-HOST          | uPD720101  | usbPciStub.c      | SUPPORTED
+VME                | Tsi148     | sysTempe.c        | SUPPORTED
+WATCHDOG           | on-board   | sysMv7100Wdog.c   | SUPPORTED
+\te
+
+\sh MPC8641 I2C SUPPORT
+
+I2C support is provided by the MPC8641 I2C interface.  The following I2C 
+devices are available on the MVME7100:
+
+\ts
+
+Address | Device
+------------------------------
+$4C | DS1621 Temperature Sensor
+$A0 | Memory Bank 1 SPD
+$A2 | Memory Bank 2 SPD
+$A4 | User EEPROM 1 (64KB) 
+$A6 | User EEPROM 2 (64KB) 
+$A8 | Board resident VPD
+$AA | RTM resident VPD
+$D0 | Maxim DS1337 RTC
+\te
+
+The routines sysMotI2cWrite() and sysMotI2cRead() are provided to read 
+from, and write to, the I2C devices.  Below is a description of the 
+arguments that are required for these routines:
+
+\cs
+STATUS sysMotI2cWrite
+    (
+    UINT32 devAddr,     /@ I2C address of target device @/
+    UINT32 devOffset,   /@ offset within target device to write @/
+    UINT32 devAddrBytes,/@ number of address bytes of device @/
+    UINT32 numBytes     /@ number of bytes to write @/
+    UCHAR  *pBfr,       /@ pointer to data to be written @/
+    )
+STATUS sysMotI2cRead
+    (
+    UINT32 devAddr,     /@ I2C address of target device @/
+    UINT32 devOffset,   /@ offset within target device to read @/
+    UINT32 devAddrBytes,/@ number of address bytes of device @/
+    UINT32 numBytes     /@ number of bytes to read @/
+    UCHAR  *pBfr,       /@ pointer to read buffer @/
+    )
+\ce
+
+The macro VALID_I2C_WRT_ADDR is provided as a software protection to 
+prevent inadvertent writes to the I2C devices, such as the SPDs and 
+VPD.  VALID_I2C_WRT_ADDR can be found in "mv7100.h".
+
+\sh INTERRUPTS
+
+The system interrupt vector table has 256 entries.  Vectors for the various
+devices on the buses are assigned hierarchically as follows:
+
+\ts
+
+Vector# | Assignment
+------------------------------
+`0x00 - 0x0B' | external or off-chip sources
+`0x0C - 0x3B' | internal or on-chip sources
+`0x3C - 0x3F' | global timer sources
+`0x40 - 0x47' | message register sources
+`0x48 - 0x4B' | inter-processor sources
+`0x60 - 0x76' | Tempe (Tsi148) PCI-X to VMe related interrupts.
+`0xc0 - 0xff' | Available for user application software.
+\te
+
+As the above table shows, the BSP uses interrupt vectors (numbers)
+beginning with 0 and proceeding to numerically higher values.  Interrupts
+such as VME bus interrupts which can be assigned a value by the user
+should be confined to numbers in the range 0xc0 through 0xff to avoid
+conflict with system required interrupts.  It is suggested that
+application software avoid the use of 0xff as an interrupt vector.  Although
+a legal number, 0xff often is associated with a nonresponding PCI read and
+may cause confusion when debugging.
+
+The extIntConfig table, in config.h, is provided for user configuration of
+various interrupt source parameters.  Each row in the table represents 
+one interrupt source.  The first entry provides the interrupt polarity,
+and the second interrupt the interrupt sense (level or edge).
+
+The tempe interrupts can be prioritized with TEMPE_INT_PRIORITIES in config.h.
+
+The following functions, sysUsrIntEnable() and sysUsrIntDisable() have been 
+provided in order to define the intEnable and intDisable routines associated 
+with the user reserved interrupt vectors. These just return for now but should 
+be filled with a valid intEnable and intDisable functions when the user 
+actually needs to hook functions to these interrupt numbers. 
+
+Dealing with VME Bus IRQx interrupts:
+
+The following code fragments illustrate how to connect interrupt handlers
+for VME bus interrupts IRQ1 and IRQ2 to vectors 0xc0 and 0xc2 respectively
+and how to generate the associated VME bus interrupts.
+
+Notice the following: We are using vectors 0xc0 and 0xc2 which are contained
+within the user reserved set of interrupt vectors.  This is because the
+actual interrupt vectors associated with IRQ1, IRQ2 ... IRQ7 are user
+selectable and we don't want to interfere with vector numbers which are already
+specifically assigned.  Also we are confining ourselves to even numbered
+vectors (not using vector 0xc1 for example) because older boards such as the
+MVME5100 (which use the Universe PCI-VME bridge chip) can only deal with even
+numbered bus interrupt vectors.
+
+The functions vmeIrq1Intr() and vmeIrq2Intr() are the actual interrupt service
+routines associated with IRQ1 and IRQ2 interrupts and are not presented below.
+
+Connecting the interrupts:
+
+\cs
+    void irqConnect()
+        {
+        /@ Connect IRQ1 interrupt to vector 0xc0 @/
+
+        printf("intConnect(0xc0,vmeIrq1Intr,0xc0);\n");
+        if (intConnect(0xc0,vmeIrq1Intr,0xc0) == ERROR)
+            {
+            printf("Could not intConnect(0xc0,vmeIrq1Intr,0xc0)\n\r");
+            }
+        printf("sysIntEnable(1);\n\r");
+        sysIntEnable(1);        /@ Enable IRQ1 interrupt @/
+
+        /@ Connect IRQ2 interrupt to vector 0xc2 @/
+
+        printf("intConnect(0xc2,vmeIrq2Intr,0xc2);\n");
+        if (intConnect(0xc2,vmeIrq2Intr,0xc2) == ERROR)
+            {
+            printf("Could not intConnect(0xc2,vmeIrq2Intr,0xc2)\n");
+            }
+        printf("sysIntEnable(2);\n");
+        sysIntEnable(2);        /@ Enable IRQ2 interrupt @/
+        }
+\ce
+
+The following code fragment works in conjunction with the previous fragment
+which connected the interrupts.  Once the interrupts are connected via the
+irqConnect() routine, the functions vmeIrq1Intr() and vmeIrq2Intr() can be
+activated by actually generating the bus interrupts with the irqGen() routine
+which follows.  Notice that the sysBusIntGen() takes two parameters - the
+first is the IRQ number (1 through 7) and the second is the actual vector 
+number which was used in the previous routine intConnect() calls.
+
+Generating the interrupts:
+
+\cs
+    void irqGen()
+        {
+        /@ Generate Bus Interrupt IRQ1 via vector 0xc0 @/
+
+        printf("sysBusIntGen(1,0xc0);\n");
+
+        /@
+         @ The interrupt generated via the call which follows
+         @ will ultimately cause vmeIrq1Intr() to be activated.
+         @/
+
+        sysBusIntGen(1,0xc0);
+
+        printf("sysBusIntGen(2,0xc2);\n");
+
+        /@
+         @ The interrupt generated via the call which follows
+         @ will ultimately cause vmeIrq2Intr() to be activated.
+         @/
+
+        sysBusIntGen(2,0xc2);
+        }
+\ce
+
+\sh AUXILIARY CLOCK
+
+Support for the AuxClock is provided.  The AuxClock is implemented with
+one of the four MPC8641 global timers. 
+
+AuxClock support can be included in the BSP by defining INCLUDE_AUX_CLK in 
+config.h.  This support is #undef'd by default.  
+
+The minimum recommended rate setting for the AuxClock is 1 Hz, and the maximum
+rate setting for the AuxClock is 50000 Hz.  This maximum value was determined
+using the MPC8641 global timer 0 as the AuxClock, and starting the other three
+global timers with interrupts enabled.  This maximum value may not be realistic
+in all situations, because the interrupt handlers for the global timers did
+nothing more than clear the interrupt for each timer.
+
+\sh NON-VOLATILE MEMORY
+
+The MVM7100 board does not have a true NVRAM chip.  This functionality 
+is implemented via the 64KB User EEPROM 1.   Only one portion of the EEPROM 
+is available as NVRAM.  It is divided in the following way:
+
+0x0000 - 0x0FFF  Available as VxWorks "NVRAM" storage
+0x1000 - 0xFFFF  User defined
+
+Of the storage area available to VxWorks, the first 0x100 (256 bytes)
+are used to store the VxWorks boot parameters. In AMP mode, the first 0x100
+(256 bytes) is assigned to core 0 and the second 256 bytes is assigned to 
+core 1.
+
+\sh WATCHDOG TIMER
+
+The MVME7100's watchdog timer is a timer that will reset the board or
+the VME system if it is enabled and not serviced at a periodic 
+interval. To use the watchdog timer define INCLUDE_WDOG_TIMER in
+config.h.
+
+\cs
+STATUS sysWdogStart (resolution, count, systemReset)
+\ce
+
+This routine has three input parameters: the resolution of the watchdog
+timer, the second is the count that will be loaded into the watchdog
+when it is started or when it is serviced, and the third is the system
+reset mode. 
+
+The resolution is an integer from 0-7 which has the following encoding:
+    0 - 8usec
+    1 - 16usec
+    2 - 32usec
+    3 - 64usec
+    4 - 128usec
+    5 - 256usec
+    6 - 512usec
+    7 - 1024usec
+
+The count can be in the range of 0 - 655535, and together with the resolution
+determines the timeout interval. The timeout is specified by the resolution 
+multiplied by the count.
+
+If system reset is true, the watchdog timer will reset the VME system, but if 
+it is false, only the board will be reset.
+
+\cs
+STATUS sysWdogStop ()
+\ce
+
+This routine will stop the watchdog timer by disabling it.  The only way to
+restart it is to call sysWdogStart() again.
+
+\cs
+STATUS sysWdogService ()
+\ce
+
+This routine will service the watchdog timer.  Servicing the watchdog
+periodically will prevent it from expiring and triggering an interrupt or
+issuing a system reset. Servicing sets the watchdog to its initial state 
+regardless of its current stage. The timer continues to run after 
+servicing.  It can be serviced as often as desired, but at least once 
+before each timeout interval expires.
+
+\cs
+BOOL sysWdogIsRunning ()
+\ce
+
+This routine will return true if the watchdog timer is armed and running.
+
+\cs
+UINT32 sysWdogPeriodGet ()
+\ce
+
+This routine returns the actual watchdog timer period supported by hardware
+in microseconds. 
+
+\sh Verified Hardware
+This BSP has been verified on MEMV7100-173 board.
+
+\sh MEMORY MAPS
+
+\ts
+Start       | Size     | End         | Access to
+---------------------------------------------
+0x0000_0000 |   2GB    | 0X7FFF_FFFF | DDR SDRAM
+0x8000_0000 | 128MB    | 0x87FF_FFFF | PCI Non-Prefetchable Memory
+0x8800_0000 | 128MB    | 0x8FFF_FFFF | PCI Prefetchable Memory
+0x9000_0000 | 256MB    | 0x9FFF_FFFF | VME A32 Space 
+0xA000_0000 |  16MB    | 0xA0FF_FFFF | VME A24 Space
+0xA100_0000 |  64KB    | 0xA000_FFFF | VME A16 Space
+0xC000_0000 | 128MB    | 0xC7FF_FFFF | PCI Non-Prefetchable Memory
+0xC800_0000 | 128MB    | 0xCFFF_FFFF | PCI Prefetchable Memory
+0xF000_0000 |  64KB    | 0xF000_FFFF | ISA0 IO Space
+0xF001_0000 | 8MB-64KB | 0xF07F_FFFF | PCI0 IO Space
+0xF080_0000 |  64KB    | 0xF080_FFFF | ISA1 IO Space
+0xF081_0000 | 8MB-64KB | 0xF0FF_FFFF | PCI1 IO Space
+0xF100_0000 |   1MB    | 0xF10F_FFFF | IMMR
+0xF200_0000 |   4MB    | 0xF203_FFFF | MVME7100 Control/Status Registers
+0xF240_0000 |   8MB    | 0xF247_FFFF | MRAM
+0xF800_0000 | 128MB    | 0xFFFF_FFFF | Flash Bank 
+\te
+
+On-board RAM always appears at address 0x00000000 locally.
+
+Dynamic memory sizing is supported.  By default, LOCAL_MEM_AUTOSIZE is
+defined so memory is auto-sized at hardware initialization time.
+If auto-sizing is not selected, LOCAL_MEM_SIZE must be set to the actual size
+of DRAM memory available on the board to ensure all memory is available.
+The default fixed RAM size is set to 128MB (see LOCAL_MEM_SIZE in config.h).
+
+Note that LOCAL_MEM_SIZE only controls the amount of memory mapped by the MMU.
+It does not control the amount of memory detected and configured by the Bootrom.
+The amount of physical memory indicated by the Serial Presence Detect data
+determines the memory controller configuration.
+
+In single Core or SMP modes, all of the memory on the board is allocated to 
+the single running vxWorks image, and is usable by it.  However, in AMP mode, 
+the 8641D's Low Memory Offset mode is used.  In this mode, the first 256MB is 
+assigned to core 0 and the second 256MB is assigned to core 1.  Memory above 
+512MB may be used by either core.  
+
+\cs
+
+   CPU Space                                   PCI (|) or VME (}) Space
+   (default values)
+  
+   LOCAL_MEM_LOCAL_ADRS =        -----------------  0x00000000
+                (0x00000000)    |      DRAM       |
+                                :                 :
+                                :                 :
+   PCI0_MSTR_MEMIO_LOCAL =       ----------------- PCI0_MSTR_MEMIO_BUS =
+                (0x80000000)    |                 |  PCI0_MSTR_MEMIO_LOCAL =
+                                | NonPrefetch PCI |  (0xa0000000)
+                                | Memory space    |
+                                |     128MB       |
+                                | (0x08000000)    |
+                                |                 |
+   PCI0_MSTR_MEM_LOCAL =         ----------------- PCI0_MSTR_MEM_BUS =
+   PCI0_MSTR_MEMIO_LOCAL +      |                 |  PCI0_MSTR_MEM_LOCAL
+   PCI0_MSTR_MEMIO_SIZE =       | Prefetch PCI    |  (0xa0800000)
+                (0x88000000)    | Memory space    |
+                                |    128MB        |
+                                | (0x08000000)    |
+   VME_A32_MSTR_LOCAL =          -----------------  VME_A32_MSTR_BUS
+                (0x90000000)    |                 } (0x08000000)
+                                | VME A32 space   } .
+                                |    256MB        } . Tempe outbound window 1
+                                | (0x10000000)    } .
+                (0x97ffffff)    |                 } (0x0fffffff)
+                                |.................}
+                                | Unused A32      }
+                (0x9fff0000)    |.................} (0xfb000000)
+                                |                 } .
+                                |                 } . Tempe outbound window 0
+                                |                 } .
+                (0x9fffffff)    |                 } (0xfb00ffff)
+   VME_A24_MSTR_LOCAL =          -----------------
+   VME_A32_MSTR_LOCAL +         |                 } (0x00000000)
+   VME_A32_MSTR_SIZE =          | VME A24 space   } .
+                (0xa0000000)    |    16MB         } . Tempe outbound window 2
+                                | (0x01000000)    } .
+                (0xa0ffffff)    |                 } (0x00ffffff)
+   VME_A16_MSTR_LOCAL =          -----------------
+   VME_A24_MSTR_LOCAL +         |                 } (0x00000000)
+   VME_A24_MSTR_SIZE =          | VME A16 space   } .
+                (0xa1000000)    |    64KB         } . Tempe outbound window 3
+                                | (0x00010000)    } .
+                (0xa10fffff)    |                 } (0x0000ffff)
+                                 -----------------
+                                :                 :
+                                :  Not used       :
+                                :  239 MB         :
+                                : (0x0ef00000)    :
+                                : Available for   :
+                                : expansion of    :
+                                : VME space       :
+                                 ----------------- 
+                (0xb0000000)    :                 :
+                                : Not used,       :
+                                :  256 MB         :
+                                : Available for   :
+                                : expansion of    :
+                                : PCI0 spaces     :
+                                :                 :
+                                :                 :
+   PCI1_MSTR_MEMIO_LOCAL =       ----------------- PCI1_MSTR_MEMIO_BUS =
+                (0xC0000000)    |                 |  PCI1_MSTR_MEMIO_LOCAL =
+                                | NonPrefetch PCI |  (0xC0000000)
+                                | Memory space    |
+                                |     128MB       |
+                                | (0x08000000)    |
+                                |                 |
+   PCI1_MSTR_MEM_LOCAL =         ----------------- PCI1_MSTR_MEM_BUS =
+   PCI1_MSTR_MEMIO_LOCAL +      |                 |  PCI1_MSTR_MEM_LOCAL
+   PCI1_MSTR_MEMIO_SIZE =       | Prefetch PCI    |  (0xC8000000)
+                (0xC8000000)    | Memory space    |
+                                |    128MB        |
+                                | (0x08000000)    |
+                (0xd0000000)     ----------------- 
+                                :                 :
+                                : Not used,       :
+                                :    256 MB       :
+                                : Available for   :
+                                : expansion of    :
+                                : PCI1 spaces     :
+                                :                 :
+                (0xe0000000)     ----------------- 
+                                :                 :
+                                : Not used,       :
+                                :    256 MB       :
+                                :                 :
+   ISA0_MSTR_IO_LOCAL =          ----------------- ISA0_MSTR_IO_BUS =
+   PCI0_MSTR_MEM_LOCAL +        |                 |   (0xf0000000)
+   PCI0_MSTR_MEM_SIZE           |  I/O space      |
+                (0xf0000000)    |    64KB         |
+                                | (0x00010000)    |
+   PCI0_MSTR_IO_LOCAL =          ----------------- PCI0_MSTR_IO_BUS =
+   ISA0_MSTR_IO_LOCAL +         |                 |   (0xf0010000)
+   ISA0_MSTR_IO_SIZE =          |   I/O space     |
+                (0xf0010000)    |   8MB - 64KB    |
+                                | (0x007f0000)    |
+                (0xf0800000)     ----------------- 
+   ISA1_MSTR_IO_LOCAL =          ----------------- ISA1_MSTR_IO_BUS =
+   PCI1_MSTR_MEM_LOCAL +        |                 |   (0xf0800000)
+   PCI1_MSTR_MEM_SIZE           |  I/O space      |
+                (0xf0800000)    |    64KB         |
+                                | (0x00010000)    |
+   PCI1_MSTR_IO_LOCAL =          ----------------- PCI1_MSTR_IO_BUS =
+   ISA1_MSTR_IO_LOCAL +         |                 |   (0xf0810000)
+   ISA1_MSTR_IO_SIZE =          |   I/O space     |
+                (0xf0810000)    |   8MB - 64KB    |
+                                | (0x007f0000)    |
+   CCSBAR =                      -----------------
+                (0xf1000000)    | MPC8641         :
+                                | internal regs.  :
+                                |     1M          :
+                                | (0x00100000)    :
+                (0xf1100000)     -----------------
+                                :     Unused      :
+   LOCAL_BOARD_ACCESS_ADRS       -----------------
+                (0xf2000000)    :   MVME7100      :
+                                : Control/Status  :
+                                :   Registers     :
+                                :   Quad UARTs    :
+                                :  Tick Timers    :
+                                :  (0x00040000)   :
+                (0xf2040000)     -----------------
+                                :     Unused      :
+                                :                 :
+   LOCAL_BOARD_ACCESS_ADRS       -----------------
+                (0xf2400000)    :   MVME7100      :
+                                :     MRAM        :
+                                :  (0x00080000)   :
+                (0xf2480000)     -----------------
+                                :     Unused      :
+                                :                 :
+                                :                 :
+   Flash Bank  =                 -----------------
+                (0xf8000000)    |   Flash Bank    :
+                                |     128MB       :
+                                |                 :
+                                |                 :
+                                |                 :
+                (0xffffffff)     -----------------
+\ce
+
+In AMP mode, Core 0's VxWorks image uses memory from 0 to 
+0x10000000 (256MB), and Core 1's VxWorks image uses memory from 
+0x10000000 to 0x20000000.  In addition, some memory above 0x2000000
+is used by both cores for shared memory and inter-core communication.
+The end of the shared memory is indicated by the macro SM_MEM_END
+in config.h.  Memory from SM_MEM_END to the top of physical memory 
+in AMP mode is not controlled by VxWorks, but is usable by applications
+on either core, and may be used to add to the VxWorks heap or create
+new VxWorks memory partitions for either core.
+
+PCI Mapped Memory consists of non-prefetchable and prefetchable. There
+are seperate allocations for each of the two PCI buses on the board.
+
+The maximum amount of non-prefetchable PCI memory is defined by
+the user as PCI0_MSTR_MEMIO_SIZE and PCI1_MSTR_MEMIO_SIZE.  The maximum 
+amount of prefetchable PCI memory is defined by the user as 
+PCI0_MSTR_MEM_SIZE and PCI1_MSTR_MEM_SIZE.  This is a 
+one-to-one mapping.  The address used on the processor bus is the 
+address used on the PCI memory bus.
+
+PCI Mapped I/O consists of 16 and 32 bit I/O. The amount of 16 bit I/O
+is configured by ISA0_MSTR_IO_SIZE and ISA1_MSTR_IO_SIZE and defaults 
+to 64KB in size. This is a one-to-one mapping.  The amount of 32 bit 
+I/O is configured by PCI0_MSTR_IO_SIZE and PCI1_MSTR_IO_SIZE.
+
+The following definitions, found in config.h, control the sizes of
+the PCI and VME windows:
+
+\cs
+#define VME_A64_MSTR_SIZE       0x00000000      /@ 0 MB @/
+#define VME_A32_MSTR_SIZE       0x10000000      /@ 256 MB @/
+#define VME_A24_MSTR_SIZE       0x01000000      /@ 16 MB @/
+#define VME_A16_MSTR_SIZE       0x00010000      /@ 64 KB @/
+#define PCI0_MSTR_MEMIO_SIZE    (0x08000000)    /@ 128 MB @/
+#define PCI0_MSTR_MEM_SIZE      (0x08000000)    /@ 128 MB @/
+#define ISA0_MSTR_IO_SIZE       (0x00010000)    /@ 64 kbytes @/
+#define PCI0_MSTR_IO_SIZE       (0x007f0000)    /@ 8 MB - 64 KB @/
+#define PCI1_MSTR_MEMIO_SIZE    (0x08000000)    /@ 128 MB @/
+#define PCI1_MSTR_MEM_SIZE      (0x08000000)    /@ 128 MB @/
+#define ISA1_MSTR_IO_SIZE       (0x00010000)    /@ 64 kbytes @/
+#define PCI1_MSTR_IO_SIZE       (0x007f0000)    /@ 8 MB - 64 KB @/
+\ce
+
+Also, since PCI auto-configuration is performed by the bootroms,
+changing any of these values requires the creation of new bootroms.
+
+\sh WORKBENCH PROJECT CONSIDERATIONS
+
+A component description file (20bsp.cdf) is included with this BSP to
+allow configuration of the following items, from within the Workbench
+Project facility:
+
+\ms
+\m (1) 
+'Flash Boot Image Programming' allows the boot image programming support to be 
+enabled/disabled.  In order for sysFlashDevsMount() to be called at start up 
+it is necessary to add 'sysApplInit();' to usrAppInit() in usrAppInit.c
+from within the project facility.  sysFlashDevsMount() mounts the
+FLASH devices and makes them available to the VxWorks IO system.
+\m (2) 
+'ADT7461 Temp Sensor Support' allows the ADT7461 Temperature sensor
+to be enabled/disabled. In AMP mode, this device is assigned to core0.
+\m (3) 
+'Maxim DS1375 Real-Time Clock' allows the real-time clock support to be 
+enabled/disabled. In AMP mode, this device is assigned to
+core0.
+\m (4) 
+'MVME7100 Watchdog Timer Support' allows the MVME7100's watchdog timer 
+to be enabled/disabled. In AMP mode, this device is assigned to core0.
+\m (5)
+'AMP Mode Serial Port Assignment' allows the serial ports to be assigned to either core 0 or core 1
+in AMP mode.
+\m (6)
+'AMP Mode Ethernet Port Assignment' This allows the ethernet ports to be assigned to either core 0 or core 1
+in AMP mode. But if we assigned the ethernet ports to either core0 or core1,
+we should modify the TSECX_CORE (X is the number for TSEC,such as TSEC0_CORE
+is the motetsec0) to 0 or 1.
+\m (7)
+'AMP Mode VME Controller Assignment' This allows the VME controller to be assigned to erther core0 and core1 
+in AMP mode. The VME controller is under the m85xx PCI controller1, so 
+if you assign the m85xx PCI controller1 to which core, the VME controller
+is assigned to which core. If you assign the VME controller to core1, when
+both cores is boot, you should run sysPhbCapt and sysTempeCapt on core0's
+target shell.  
+\me
+
+There are a number of other user-configurable items available in this
+BSP, in config.h.  However, components have not been created for these
+other items because of the restriction that these items must be configured
+the same way in the bootloader as they are in the VxWorks kernel.  Since
+the Project components are not used when building the bootloader, and
+therefore have no effect on it, these items must be configured within
+config.h prior to the creation of your Project.  Once that is done the
+Project facility can be used to create both the bootloader and kernel
+images.
+
+\sh AMP with wrload
+
+You must use the Workbench or vxprj to build the BSPs.
+You can build any image for core0 from the mv7100_AMP BSP.
+This image is configured for AMP, wrload .For core1 you can build a 
+RAM based image (vxWorks) and it is also configured to be loaded 
+using wrload and to route the console to core0. 
+
+In order to run in AMP mode, the low memery offset option for the second core
+must be enabled. With this option enabled, the second core can use the second
+256MB(0x10000000 ~ 0x20000000) bank of memory while making it appear to be mapped
+at address 0x0. The same vxWorks image can then be used on either core.
+
+To enable low memory offset mode, the Configuration Switch [SW5] must be set
+to the ON position. The board is shipped by hardware vendor with the switch at
+OFF position, so this switch setting must be changed to support AMP mode.
+This switch should be turned back to OFF to run the board in SMP mode.
+
+When in AMP mode, the ETSEC interfaces can be allocated to either core.
+The default configuration assigns motetsec0 and motetsec2 to the first
+core and motetsec1 and motetsec3 to the second. This configuration can
+be changed by editing the hwconf.c file and changing the "coreNum"
+and "physMask" properties in the ETSEC resource entries. When operating
+in UP or SMP mode, all 4 ETSEC interfaces are available together.
+
+Note that while there are 4 separate ETSEC controllers, only the MDIO
+registers on ETSEC0 are actually functional, and all 4 ethernet PHYs
+are wired to this port. In AMP mode, the TSEC_MDIO driver must be used
+in conjunction with the ETSEC driver to access the MDIO registers: the
+TSEC_MDIO driver includes an inter-core synchronization mechanism to
+prevent both cores from touching the MDIO registers at the same time.
+
+In the sysLib.c file for a BSP, you can control the assignment of devices
+to CPUs by using struct ampCpuTable definitions. For example,suppose four
+ethernet devices are entered in a sysLib.c file, as follows:
+\cs
+AMP_CPU_TABLE ampCpuTable[] = {
+    { "m85xxPci",  0, 1 },
+    { "m85xxPci",  1, 0 },
+    { XTSEC_NAME,  0, 0 }, ===> for core0
+    { XTSEC_NAME,  1, 0 }, ===> for core0
+    { XTSEC_NAME,  2, 1 }, ===> for core1
+    { XTSEC_NAME,  3, 1 }, ===> for core1
+    { "ns16550",   0, 0},
+#ifdef INCLUDE_QUAD_UART
+    { "ns16550",   1, 1},
+    { "ns16550",   2, 1},
+    { "ns16550",   3, 1},
+    { "ns16550",   4, 1},
+#endif /@ INCLUDE_QUAD_UART @/
+    { "openPicTimer", 0,  0 },
+    { "openPicTimer", 1,  0 }
+};
+\ce
+To assign a different ethernet device to each of two CPUs, you can use the
+following changes:
+\cs
+AMP_CPU_TABLE ampCpuTable[] = {
+    { "m85xxPci",  0, 1 },
+    { "m85xxPci",  1, 0 },
+    { XTSEC_NAME,  0, 0 }, ===> for core0
+    { XTSEC_NAME,  1, 1 }, ===> for core1
+    { XTSEC_NAME,  2, 0 }, ===> for core0
+    { XTSEC_NAME,  3, 1 }, ===> for core1
+    { "ns16550",   0, 0},
+#ifdef INCLUDE_QUAD_UART
+    { "ns16550",   1, 1},
+    { "ns16550",   2, 1},
+    { "ns16550",   3, 1},
+    { "ns16550",   4, 1},
+#endif /@ INCLUDE_QUAD_UART @/
+    { "openPicTimer", 0,  0 },
+    { "openPicTimer", 1,  0 }
+};
+\ce
+For QUAD_UART, you must assign four UARTS to the same core. 
+
+\sh MIPC Support
+
+You must use the Workbench or vxprj to build the BSPs.
+You can build any AMP image for either core0 or core 1 from the 
+wrSbc8641d_AMP BSP, but each image must be configured manually 
+with the appropriate components.
+
+The image for core 0 must be configured with
+BUNDLE_AMP_PRI (Primary core bundle) which adds all required MultiOS components, including wrload,
+MIPC and MSD (MIPC Serial Device), and the optional but very useful WDB proxy.
+
+The image for core 1 must be configured with 
+BUNDLE_AMP_SEC (Secondary core bundle), which adds
+all required secondary core MultiOS components, including MIPC and MSD 
+(configured as client), 
+and INCLUDE_WRLOAD_IMAGE_BUILD, which provides the correct image offset for wrload.  
+Additionally, the secondary core must be configured with INCLUDE_AMP_CPU_01 
+(Kernel configurations: hardware -> BSP configuration variants -> vxWorks AMP core build).
+
+See documentation on MIPC/wrload and MIPC Serial Device for additional details. 
+
+\sh TFFS - TRUE FLASH FILE SYSTEM
+
+This BSP supports TrueFFS Flash File System. TFFS is disabled by default.  
+To enable TFFS change #undef INCLUDE_TFFS, in config.h, to
+#define INCLUDE_TFFS.  The size is dynamically set to be half of the flash
+bank.  We do this to protect the boot blocks located in the last 2MB of the
+flash bank, and also to conform to the TFFS restriction that the flash bank 
+size must be a power of 2 (1,2,4,8,16,32,...).
+
+After enabling TFFS support and rebuilding the kernel, the TFFS drive
+will be available as "RFA0", as support is provided to automatically 
+mount the TFFS drive during kernel initialization.  If you wish to use 
+TFFS to boot the VxWorks kernel you will need to rebuild the bootrom.
+
+\sh BOOT IMAGE FLASH PROGRAMMING FROM VXWORKS KERNEL
+
+This BSP supports FLASH programming of a boot image into either of the boot 
+blocks.  This support is disabled by default.  To enable FLASH bank 
+programming change #undef INCLUDE_BOOT_IMAGE_PROGRAM to 
+#define INCLUDE_BOOT_IMAGE_PROGRAM in config.h.
+
+This will provide two utilities for programming a boot image into the
+boot blocks of the FLASH device. One utility allows you to download
+the boot image via the network, and one utility allows you to specify
+a locally resident boot image (ie. on disk, tffs, etc.).
+
+The device name is /flash0.
+
+\cs
+-> devs
+drv name
+  0 /null
+  1 /tyCo/0
+  7 /flash0
+\ce
+
+The utility to program a file that has been downloaded from a remote host is:
+
+\cs
+ programRemoteBootImage
+    -n  filename to download
+    -d  devicename of FLASH bank to be programmed
+    -b  boot block to be programmed
+    -h  host dotted ip address (optional - boot host as default)
+    -g  gateway dotted ip address (optional - boot gateway as default)
+    syntax: remoteBootImage "-n<fname>","-d<devname>","-h<host>","-g<gateway>"
+\ce
+
+Either RSH, FTP, or TFTP will be used to download the file, based on the
+vxWorks boot parameters that are specified.  If the "flags" boot parameter
+is set to 0x80 (for TFTP) then TFTP will be used.  Otherwise, if a
+"password" is specified, then FTP will be used.  If neither of the previous
+two conditions are met, then RSH will be used to download the file.
+
+The utility to program a "local" file is:
+
+\cs
+ programLocalBootImage
+    -n  filename to open
+    -d  devicename of FLASH bank to be programmed
+    -b  boot block to be programmed
+    syntax: localBootImage "-n<fname>","-d<devname>"
+\ce
+
+The file name specified must be a locally accessible file located on
+a hard disk, a TFFS drive, or another such local medium.
+
+Be very careful when using this utility to not overwrite the
+MotLoad firmware image, if that is not your intent, as this could be
+troublesome to fix.
+
+\sh SYSTEM CONTROL AND STATUS REGISTERS
+
+Definitions are provided for access to the MVME7100's system control and 
+status registers.  These definitions are located in mv7100.h and are as
+follows:
+
+\cs
+#define BRD_SYSTEM_STATUS_REG
+#define BRD_SYSTEM_CONTROL_REG
+#define BRD_SYSTEM_STATUS_INDICATOR_REG
+#define BRD_FLASH_CONTROL_REG
+#define BRD_PCI_BUS_A_STAT_REG
+#define BRD_PCI_BUS_B_STAT_REG
+#define BRD_PCI_BUS_C_STAT_REG
+#define BRD_INTERRUPT_DETECT_REG
+#define BRD_PRESENCE_DETECT_REG
+#define BRD_PLD_REVISION_REG
+#define BRD_PLD_DATE_CODE_REG
+#define BRD_TEST_1_REG
+#define BRD_TEST_2_REG
+\ce
+
+\sh SHOW ROUTINES
+
+The following routines are provided to display current information
+from all of the board level system status registers. Each register
+is displayed by its own show routine in a formatted output describing 
+each bit. These routines are available only if #INCLUDE_SHOW_ROUTINES
+is defined in config.h.
+
+\is
+\i sysStatusRegShow()
+This function displays to the console the system status register and 
+interprets the bit values.
+\i sysStatusIndicatorRegShow()
+This function displays to the console the system status indicator register
+and interprets the bit values.
+\i sysFlashStatusRegShow()
+This function displays to the console the system FLASH status register
+and interprets the bit values.
+\i sysPciBusStatusRegShowA()
+This function displays to the console the system status registers for PCI 
+bus A and interprets their bit values.
+\i sysPciBusStatusRegShowB()
+This function displays to the console the system status registers for PCI 
+bus B and interprets their bit values.
+\i sysPciBusStatusRegShowC()
+This function displays to the console the system status registers for PCI 
+bus C and interprets their bit values.
+\i sysPresenceDetectRegShow()
+This function displays to the console the system presence detect
+register and interprets the bit values.
+\i sysPldInfoShow()
+This function displays to the console the system PLD revision and date
+code information.
+\i sysStatusRegShowAll()
+This function displays to the console all of the board system status
+registers and interprets their bit values.
+\ie
+
+\sh UTILITY ROUTINES
+
+The following utility routines allow control and status of several board 
+level functions in the system control and status registers. These 
+routines are in sysLib.c and are always available.
+
+\is
+\i 'void sysUserLedSet (UINT8 whichLed, BOOL setOn)'
+This function turns the specified user LED (whichLED = 1, 2, or 3) 
+to on (setOn = TRUE) or off (setOn = FALSE).  Any other LED number 
+results in all three LEDs being acted upon. User LED 1 is on the 
+front panel. User LEDs' 2 and 3 are on the board surface 
+(non-component side) near the front panel edge.
+\i 'void sysBrdHardReset (void)'
+This function forces an immediate and complete hard reset of the board.
+\i 'BOOL sysBootBlkAIsSelected (void)'
+This function returns TRUE when boot block A is the active boot 
+block. If FALSE is returned if the selected boot block is B.
+\i 'void sysEepromWriteProtectSet (BOOL setOn)'
+This function sets the EEPROM write protection to on (setOn = TRUE)
+or off (setOn = FALSE).
+\i 'BOOL sysFlashIsHwWriteProtected (void)'
+This function returns TRUE when the FLASH bank is hardware write protected.
+\i 'void sysFlashSwWriteProtectSet (BOOL setOn)'
+This function sets the FLASH software write protection to on 
+(setOn = TRUE) or off (setOn = FALSE).
+\ie
+
+\sh SHARED MEMORY
+
+'Note', the shared memory support in this BSP is not compatible with shared
+memory in a PNE (Platform for Network Equipment) environment.
+
+On all boards, shared memory across the backplane can also be used as a
+network interface.  The name of the shared memory interface is `sm'.
+The BSP can be configured for shared memory support by
+#define INCLUDE_SM_COMMON and #define INCLUDE_SMFORVME in config.h.  If you
+didn't want to use the smNet in this BSP. You should undefine the macro
+INCLUDE_SM_COMMON and INCLUDE_SMFORVME.
+
+NOTE: For AMP mode, if you want to use the smNet between the cores, you should
+configure for shared memory support by #define INCLUDE_SM_COMMON and #undef INCLUDE_SMFORVME
+in config.h. If you want to use the smNet between the board, you should configure for shared
+memory support by #define INCLUDE_SM_COMMON and #define INCLUDE_SMFORVME in config.h.
+
+Shared memory network communications requires a signaling method and a method
+of mutually exclusive memory resource access.  Signaling can be done using
+software polling or interrupts.  By default, mailbox interrupts are used and
+SM_INT_TYPE is set to SM_INT_USER_1.  To use polling, define
+SM_INT_TYPE as SM_INT_NONE.
+
+There are master and slave windows into VME address space to access the 
+VME mailbox registers so that each CPU can send and receive shared memory
+interrupts using single-byte mailboxes.  The windows map a 4KB region in 
+A32 space at address 0xFB000000 + (0x1000 * CPU #) into the Tempe chip 
+registers.  This configuration allows one processor to generate a mailbox 
+interrupt in another processor by accessing the other processor's mailbox 
+register.  Each CPU has a master window covering the A32 address range of
+0xFB000000 through 0xFB00ffff representing CPU numbers 0 through 15.  Each 
+CPU's slave window maps the appropriate address for that CPU to the Tempe 
+chip's register set.
+
+On the processor node compiled with SM_OFF_BOARD set to FALSE, an inbound
+window is opened using Tempe's inbound window 0 to map the shared-memory
+anchor and shared-memory pool.
+
+The inbound access is shown here (obtained from sysTempeInWinShow(0)):
+
+\cs
+Inbound window 0: ENABLED,  Size = 00000000_00040000
+
+raw: 00000000 08000000 00000000 0803fff0 ffffffff f8000000 80000faf
+VME Base:  00000000_08000000    PCI Base:  00000000_00000000
+VME Limit: 00000000_0803ffff    PCI Limit: 00000000_0003ffff
+  Attributes:
+  Read-ahead threshold - when FIFO completely empty
+  Virtual FIFO size    - 64 bytes
+  2eSST Mode           - 160 MB/s
+  Cycle response       - 2eSSTB (Two Edge Source Synchronous Broadcast)
+ 2eSST (Two Edge Source Synchronous nonBroadcast)
+ 2eVME (Two Edge VMEbus)
+ MBLT (Multiplexed Block Transfer)
+ BLT (Block Transfer)
+  Address space        - A32
+  VME AM response      - Supervisor, nonSupervisor, Program, Data
+\ce
+
+The algorithm for Tempe (Tsi148) window configuration is as
+follows:
+
+\cs
+If this is not the anchor node (SM_OFF_BOARD == TRUE)
+Then
+  No A32 inbound mappings are programmed for access to DRAM.
+  Note that all nodes must have inbound mapping to reach their mailbox's
+  so that shared memory doorbells can be hit by any other node.  This is
+  taken care of by the RAI register programming on Universe equipped
+  boards and the CRG programming by Tempe equipped boards.
+Else (this is the anchor node ...)
+  A single inbound mapping through Tempe window 0 is configured, mapping
+  DRAM address 0x00000000 through 0x0003ffff to VME bus address
+  0x08000000 through 0x0803ffff.
+\ce
+
+Shared memory resource mutual exclusion is implemented in the sysBusTas()
+function.  Two modes of hardware assist are available to implement
+the test and set function across the VME bus.  They are: bus locking
+and RMW cycle generation.  The method used is selected in config.h
+via the #define/#undef state of ANY_BRDS_IN_CHASSIS_NOT_RMW.  Under
+"Known Problems" in this document a restriction on the choice of hardware
+assist for Tsi148 Rev 1 equipped boards is described.
+
+The following is taken from config.h:
+
+\cs
+#undef ANY_BRDS_IN_CHASSIS_NOT_RMW  /@ required for Rev 1 of Tempe chip @/
+
+#undef VME_TAS_HW_ASSIST
+#ifdef ANY_BRDS_IN_CHASSIS_NOT_RMW
+#   define VME_TAS_HW_ASSIST    VME_BUS_LOCK
+#else
+#   define VME_TAS_HW_ASSIST    VME_BUS_RMW
+#endif
+\ce
+
+\sh PCI SUPPORT
+
+In order to support PCI devices and VME devices in this BSP, please define following macro in
+config.h first:
+
+\cs
+    #   define INCLUDE_PCI_BUS
+\ce
+The standard mapping for PCI is described in config.h for this BSP and uses 
+outbound translation to access. This means PCI space usage is configurable by
+the user in config.h. Because the usb device and vme bus is depended on
+the PCI bus. So If used the usb and vme device, we must define INCLUDE_PCI_BUS first.
+
+\sh PCI AUTO-CONFIGURATION
+
+To simplify the addition of PCI-based add-in cards, the BSP provides a PCI
+auto-configuration library.
+
+The auto-configuration is called from sysHwInit() to discover and configure
+the installed PCI devices and bridges. Device configuration includes the
+following PCI information:
+
+\is
+\i Base Address Registers (BARs)
+Space in the address map is dynamically allocated to each valid BAR detected.
+Allocation pools are maintained for the following PCI address spaces:
+
+16-Bit PCI I/O
+
+32-Bit PCI I/O
+
+PCI Memory I/O (non-prefetchable memory)
+
+PCI Memory (pre-fetchable memory)
+
+\i Interrupt Routing
+The correct interrupt vector number is placed in the intLine register of the
+device's PCI header. To connect to the device's interrupt, simply call
+intConnect with the value read from intLine.
+
+\i PCI Header Completion
+The PCI auto-configuration library fills in the remainder of the PCI header as
+follows:
+
+Cache Line Size = _CACHE_ALIGN_SIZE/4
+
+Latency Timer = PCI_LAT_TIMER
+
+Command Register = I/O enabled, Memory enabled and Bus Master enabled.
+\ie
+
+\sh SERIAL CONFIGURATION
+No special configuration needed.
+Default configuration is:
+    Baud Rate: 9600
+    Data: 8 bit
+    Parity: None
+    Stop: 1 bit
+    Flow Control: None
+
+The MVME7100's on-board asynchronous serial interface is provided by the
+MPC8641 DUART.  COM0 is wired to the front panel RJ45 connector.  The four
+asynchronous serial interfaces are provided by the EXAR ST16C554D Quad UART
+device connected to the MPC8641 device controller bus.  The Quad UART's
+four ports, COM1, COM2, COM3, and COM4, are routed to the P2 connector.
+The TTL-level signals of RX, TX, CTS, and RTS from each port are routed
+through on-board RS-232 drivers and receivers to the P2 connector where the
+signals can be picked up by a rear transition module.  COM0 is the default 
+serial port.  COM1, COM2, COM3, and COM4 are enabled by defining 
+INCLUDE_QUAD_UART in config.h.
+
+In AMP mode, the VxWorks console port for each core is controlled by the macros
+CORE0_CONSOLE_TTY and CORE1_CONSOLE_TTY, and they may be set to NONE.
+
+The VTS baud console test will fail for rates below 600 baud. 
+This is because the 16 bit divisor in the UART cannot be set large enough
+to divide the CCB clock value appropriately. The divisor essentially 
+overflows its maximum value. There is no way to fix or work around this. 
+It's limited by the large CCB clock value and the 16 bit width of the 
+divisor registers.
+
+\sh SCSI CONFIGURATION
+
+There is no SCSI interface on this board.
+
+\sh Network Configuration
+The ETSEC ports allows 10/100/1000T connection.
+The driver will auto-negotiate and configure the port accordingly.
+The BSP also supports Intel 82546/82545/82544/82540/82543/82571/82572/82573
+based NICs
+
+The following END and corresponding END2 drivers are supported in this BSP.
+However, only END driver is enabled by default.
+
+\ts
+Driver | END                      | END2
+----------------------------------------
+TSEC   | INCLUDE_ETSEC_VXB_END    | INCLUDE_ETSEC_VXB_END2
+\te
+
+To enable the END2 driver, you should modify as follows:
+
+For command line build, add INCLUDE_END2 into config.h right after the
+definition of INCLUDE_END. Also replace the END driver name with corresponding
+END2 driver name, then rebuild the bootrom and vxWorks image.
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, add INCLUDE_END2 component and corresponding END2
+component, this will un-define END automatically. Then rebuild your project.
+mottsec0. 
+mottsec1. 
+mottsec2. 
+mottsec3. 
+
+\cs
+#define NUM_NET_MBLKS   1600    /@ no. mBlks to initialize @/
+#define MAX_MBLK_TYPES  256     /@ max number of mBlk types @/
+#define NUM_64          160     /@ no. 64 byte clusters @/
+#define NUM_128         160     /@ no. 128 byte clusters @/
+#define NUM_256         140     /@ no. 256 byte clusters @/
+#define NUM_512         140     /@ no. 512 byte clusters @/
+#define NUM_1024        125     /@ no. 1024 byte clusters @/
+#define NUM_2048        125     /@ no. 2048 byte clusters @/
+\ce
+
+Note that enabled ports that do not have a wire connection at boot will extend 
+the boot time as each non-connected port will wait for auto-negotiation
+to timeout before continuing to the next port. This is typical VxWorks 
+operation. Enabled ports that are connected will auto-negotiate the best 
+link mode immediately, adding little delay to the boot time. Connections can
+be made/changed before or after boot without issue.
+
+\sh USB Host Support
+
+The on-board NEC uPD720101 USB 2.0 Host Controller provides USB ports with
+integrated transceivers for connectivity with any USB compliant device or hub.
+USB channel 1 is routed to a single USB connector located at the front panel.
+Channel 2 is routed to the VME P0 connector for RTM access.
+
+uPD720101 is connected to MPC8641 via PCI-EX bus on the board, therefore, to use
+USB devices, INCLUDE_PCI_BUS must be defined in config.h. Please refer to
+"PCI SUPPORT" section for more details about how to configure PCI bus.
+
+To enable USB OHCI/EHCI software support for the controller, define
+INCLUDE_USB in config.h. Also in config.h define the needed device class
+drivers. USB mouse, keyboard and bulk are defined by default.
+
+Wind River's usbTool may also be optionally included to perform command line
+initialization and testing of the host controller and USB devices. Define
+INCLUDE_USBTOOL in config.h if desired. If usbTool is included, then automatic
+initialization of USB devices will NOT be performed as the kernel starts. All
+USB initialization will be totally manual via usbTool commands only. Execute
+"usbTool" at the kernel prompt. Enter "help" for a list of commands available.
+
+See 
+\tb Wind River USB for VxWorks 6 Programmer's Guide 
+for additional information and descriptions of the available class drivers that
+are supported by Wind River.
+
+\sh TEMPE (TSI148) DMA CONFIGURATION
+
+The Tempe PCI-VME bridge chip contains a DMA controller.  This BSP provides
+a driver for that DMA controller.  No special configuration switches need
+to be modified to configure Tempe (Tsi148) DMA support.
+
+The following is a synopsis of the driver routines:
+
+\cs
+sysTempeDmaStart()
+\ce
+
+A Tempe DMA is started by calling sysTempeDmaStart with a channel specified,
+DMA descriptor structure, DMA attribute structure and a DMA status structure
+which will receive the status of the DMA.
+
+\cs
+  STATUS sysTempeDmaStart
+      (
+      UINT32 chan,                    /@ channel number (0 or 1) @/
+      TEMPE_DMA_DESCRIPTOR * dmaDesc, /@ descriptor @/
+      TEMPE_DMA_ATTRIBUTES * dmaAttr, /@ attributes @/
+      TEMPE_DMA_STATUS     * dmaStat  /@ DMA status, (or NULL) @/
+      )
+\ce
+
+The channel parameter (chan) must contain either 0 or 1, depending on which
+channel the DMA is to run.  The two channels can be run concurrently.
+
+The DMA descriptor parameter (dmaDesc) specifies the information which can
+change for each link-list block.  This includes a source address, destination
+address, byte count and VME bus attributes along with a 'next' pointer which
+optionally points to another dmaDesc type parameter.  If the 'next' field
+of the DMA descriptor parameter is NULL (0) then a "direct mode" DMA
+transaction is performed.  If the 'next' field is non-NULL then it must point
+to another valid DMA descriptor parameter which will be the second in a
+linked-list chain.  The second DMA descriptor in a linked-list chain can
+point to yet another DMA descriptor and so on, the last DMA descriptor in the
+chain will contain NULL in its 'next' pointer.  A linked-list chain can be as
+long as desired. In AMP mode, if you assign the DMA controller to core1, you 
+should add the local memory address to 0x10000000.  
+
+The DMA Attribute parameter (dmaAttr) specifies the information needed to
+program the DMA control register for the particular channel.  Once the
+attributes are set for a particular call, they remain unaltered for the
+duration of the DMA operation, even if it is a chained-mode operation.  The
+information in this parameter includes bus usage information (DMA block
+sizes and back-off timers are flushed on aborted read options) as well as an
+optional 'userHandler' field which points to a user-written function which
+gains control when the DMA finishes.  Use of the 'userHandler' field is
+optional, if it contains NULL then the sysTempeDmaStart() function returns
+to the caller immediately after the DMA is initiated, allowing for
+concurrent processing while the DMA is underway.  If the 'userHandler' field
+contains WAIT_FOREVER then the sysTempeDmaStart() function will not return
+until the DMA operation has completed (successfully or with an error).
+While the function is waiting for the DMA to finish it is blocked on a
+semaphore so that other tasks may run during DMA operation.  If 'userHandler'
+contains something other than NULL or WAIT_FOREVER, it is assumed to be a
+pointer to a user written function.  In this case sysTempeDmaStart() will
+return immediately after initiating the DMA and the user written handler
+will be called after the DMA completes.  The user written handler will be
+operating in the context of an interrupt service routine so it is important
+that this function not perform any blocking calls.  It should execute as
+quickly as possible since other interrupt service processing is held off
+while it executes.
+
+The DMA status parameter will be returned containing information about the
+current state of the DMA, including current source address, current
+destination address, current link address, decrementing byte counter and a
+current upper and lower time base register capture.  The status information
+is returned immediately after the DMA is started and can be subsequently
+obtained via calls to sysTempeDmaStatus().  The dmaStat parameter can be
+NULL when calling sysTempeDmaStart(), in which case no status is returned.
+
+A Tempe DMA status can be obtained by calling sysTempeDmaStatus() with a 
+channel specified and a structure parameter which receives the status data.
+
+\cs
+  STATUS sysTempeDmaStatus
+      (
+      UINT32       chan,               /@ Channel to get status @/
+      TEMPE_DMA_STATUS *dmaStatus      /@ Current status of channel @/
+      )
+\ce
+
+The status is read from the Tempe chip at the time of the call to
+sysTempeDmaStatus().  Included in the status are values of the channels
+status register, current source address, current destination address, current
+link address, remaining byte count and an upper and lower timebase register
+value.
+
+An active DMA operation can be terminated by a call to sysTempeDmaAbort().
+The only parameter is a channel number which must be 0 or 1.  Once a channel
+has been aborted it cannot be resumed.  A new call to sysTempeDmaStart()
+must be made to initiate a new DMA.
+
+\cs
+  STATUS sysTempeDmaAbort
+      (
+      UINT32   chan             /@ Channel to be aborted @/
+      )
+\ce
+
+Using the sysTempeDmaPause() function, a link-list DMA operation can be 
+paused after the current link-list descriptor portion of the DMA has 
+completed and before the next descriptor in the list begins processing.  
+The only parameter is the channel which is to be paused.
+
+\cs
+  STATUS sysTempeDmaPause
+      (
+      UINT32   chan             /@ Channel to be paused @/
+      )
+\ce
+
+After the channel has been paused, it can be "resumed" via a call to
+sysTempeDmaResume().
+
+Using the sysTempeDmaResume() function, a link-list DMA operation which has 
+previously been paused can be resumed.  A channel number is the only required
+parameter.
+
+\cs
+  STATUS sysTempeDmaResume
+      (
+      UINT32   chan             /@ Channel to be resumed @/
+      )
+\ce
+
+Below is a template for setting up a call to sysTempeDmaStart(). See
+"tempe.h" for a breakdown of these structures.
+
+\cs
+TEMPE_DMA_DESCRIPTOR dmaDescSample =
+    {
+    0x01000000,        /@ Source Address 'sourceAddr' @/
+    0x81000000,        /@ Destination Address 'destAddr'  @/
+    0x00010000,        /@ Number of bytes to transfer 'byteCount' @/
+    0,                 /@ 2eSST Broadcast select 'bcastSelect2esst' @/
+
+        /@ The following apply to the source of the DMA @/
+
+        {
+        VME_DMA_PCI,   /@ Bus 'srcVmeAttr.bus' @/
+        VME_SST320,    /@ 2eSST rate 'srcVmeAttr.vme2esstRate' @/
+        VME_MODE_A32,  /@ address mode 'srcVmeAttr.addressMode' @/
+        VME_D32,       /@ data width 'srcVmeAttr.dataWidth' @/
+        VME_2eSST_OUT, /@ xfer out protocol 'srcVmeAttr.xferProtocolOut' @/
+        TRUE,          /@ supervisor access type 'srcVmeAttr.superAccessType' @/
+        TRUE           /@ program access type 'srcVmeAttr.pgmAccessType' @/
+        },
+
+        /@ The following apply to the destination of the DMA @/
+
+        {
+        VME_DMA_VME,   /@ Bus 'dstVmeAttr.bus' @/
+        VME_SST320,    /@ 2eSST rate 'dstVmeAttr.vme2esstRate' @/
+        VME_MODE_A32,  /@ address mode 'dstVmeAttr.addressMode' @/
+        VME_D32,       /@ data width 'dstVmeAttr.dataWidth' @/
+        VME_2eSST_OUT, /@ xfer out protocol 'dstVmeAttr.xferProtocolOut' @/
+        TRUE,          /@ supervisor access type 'dstVmeAttr.superAccessType' @/
+        TRUE           /@ program access type 'dstVmeAttr.pgmAccessType' @/
+        },
+    NULL               /@ Next descriptor if chained mode 'next' @/
+    };
+
+TEMPE_DMA_ATTRIBUTES dmaAttribSample =
+    {
+        {
+        4096,   /@ PCI bus max block size 'busUsg.maxPciBlockSize' @/
+        64,     /@ PCI bus back-off timer (usec) 'busUsg.pciBackOffTimer' @/
+        4096,   /@ VME bus max block size 'busUsg.maxVmeBlockSize' @/
+        64,     /@ VME bus back-off timer 'busUsg.vmeBackOffTimer' @/
+        FALSE,  /@ VME flush on aborted read? 'busUsg.vmeFlshOnAbtRead' @/
+        FALSE   /@ PCI flush on aborted read? 'busUsg.pciFlshOnAbtRead' @/
+        },
+    NULL        /@ User-defined completion routine 'userHandler' @/
+    };
+\ce
+
+To start the DMA on channel 0 with the above parameters (turning on the
+"don't return until done" option), put the following into your code:
+
+\cs
+    TEMPE_DMA_DESCRIPTOR dmaDesc;
+    TEMPE_DMA_ATTRIBUTES dmaAttr;
+    TEMPE_DMA_STATUS     dmaStat;
+    int                  chan;  /@ channel number @/
+
+    dmaDesc = dmaDescSample;
+    dmaAttr = dmaAttrSample;
+    chan = 0;
+    dmaAttr.userHandler = WAIT_FOREVER; /@ Don't return till DMA done @/
+
+    if (sysTempeDmaStart (chan, &dmaDesc, &dmaAttr, &dmaStat) == ERROR)
+        printf("channel 0: DMA start error\n");
+\ce
+
+To change the source, destination and byte count and start another DMA,
+this time on channel 1 do the following:
+
+\cs
+    dmaDesc.sourceAddr = 0x02000000;
+    dmaDesc.destAddr   = 0x81000000;
+    dmaDesc.byteCount  = 0x00020000;
+    chan = 1;
+
+    if (sysTempeDmaStart (chan, &dmaDesc, &dmaAttr, &dmaStat) == ERROR)
+        printf("channel 1: DMA start error\n");
+\ce
+
+\sh Boot Devices
+The supported boot devices are:
+
+\ts
+    `sm'        | - shared memory
+    `motetsec0' | - Front Ethernet (10baseT, 100baseTX, or 1000baseT)
+    `motetsec1' | - Front Ethernet (10baseT, 100baseTX, or 1000baseT)
+    `motetsec2' | - Rear Ethernet  (10baseT, 100baseTX, or 1000baseT)
+    `motetsec3' | - Rear Ethernet  (10baseT, 100baseTX, or 1000baseT)
+    `tffs'      | - TFFS
+\te
+
+\sh BOOT METHODS
+
+The boot methods are affected by the boot parameters.  If no password is
+specified, RSH (remote shell) protocol is used.  If a password is specified,
+FTP protocol is used, or, if the 0x80 boot flag is set, TFTP protocol is used.
+
+These protocols are used for both Ethernet and shared memory boot devices.
+
+The use of the second core as a seperate target can be enabled by the 
+following (assumes the board has been setup in low memory offset mode). 
+The second CPU can be started by calling wrload from the target shell. 
+
+in UP or SMP mode, all 4 ETSEC interfaces are available together.
+
+Note that while there are 4 separate ETSEC controllers, only the MDIO
+registers on ETSEC0 are actually functional, and all 4 ethernet PHYs
+are wired to this port. 
+
+
+SPECIAL CONSIDERATIONS
+
+This section describes miscellaneous information that the user needs
+to know about the BSP.
+
+\sh Make Targets
+
+The make targets are listed as the names of the object-format files.  Append 
+`.hex' to each to derive a hex-format file name. Other images not listed here 
+may not be tested.
+
+\ts
+    `bootrom'
+    `bootrom.bin'
+    `bootrom.hex'
+    `vxWorks' (with `vxWorks.sym')
+    `vxWorks.st'
+\te
+
+\sh BSP Bootloaders and Bootroms
+
+\ts
+Bootloader/Bootrom     | Status
+-------------------------------
+U-Boot (pre-flashed)   | SUPPORTED
+bootrom                | SUPPORTED
+bootrom_uncmp          | SUPPORTED
+vxWorks                | SUPPORTED
+vxWorks_rom            | UNSUPPORTED
+vxWorks_romCompress    | SUPPORTED
+vxWorks_romResident    | UNSUPPORTED
+\te
+
+\sh BSP Validated Tools
+
+\ts
+Tool                              | Connection/Type   | Status
+-----------------------------------------------------------------
+Workbench Debugger                | ETHERNET/WDB      | SUPPORTED
+Workbench System Viewer           | ETHERNET/WDB      | SUPPORTED
+Workbench MemScope                | ETHERNET/WDB      | SUPPORTED
+Workbench ProfileScope            | ETHERNET/WDB      | SUPPORTED
+Workbench StethoScope             | ETHERNET/WDB      | SUPPORTED
+Workbench CoverageScope           | ETHERNET/WDB      | SUPPORTED
+Workbench Core File Analysis      | ETHERNET/WDB      | UNVALIDATED
+Workbench Sensor Points           | ETHERNET/WDB      | UNVALIDATED
+Workbench OCD Debugger            | JTAG              | SUPPORTED
+Workbench OCD Flash Programming   | JTAG              | SUPPORTED
+\te
+
+\sh Additional show routines
+
+In addition to the standard VxWorks "Show" routines, special "Show"
+routines have been added to display specific BSP and board related
+items.  These routines are compiled in to the kernel when INCLUDE_SHOW_ROUTINES
+is defined.  
+
+The following show routines are available:
+
+\ts
+Show Routine Name       | Description
+----------------------------------------------------------
+sysTempeShow            | Display and label every Tempe (Tsi148) PCI-X to VME bridge registers.
+sysTempeWinShow         | Display all Tempe PCI-X to VME bridge window mappings with formatting.
+sysTempeOutWinShow      | Display a specified Tempe bridge outbound window setting with formatting.
+sysTempeInWinShow       | Display a specified Tempe bridge inbound window setting with formatting.
+translationWindowShow   | Display host bridge translation window array used in BusToLocal conversions.
+vpdShow                 | Display the board's VPD (Vital Product Data). If present, display the RTM's VPD.
+sysDs1375RtcShow        | Display the current date and time.
+sysDs1375AlarmShow      | Display the current alarm clock settings.
+sysDs1375RtcRegShow     | Display RTC register settings.
+sysDs1375AlarmRegShow   | Display alarm register settings.
+sysDs1375ControlRegShow | Display control register settings.
+sysDs1375RegShow        | Display all register settings.
+sysDs1375SramShow       | Display DS1375 SRAM contents.
+sysMpc8641SpdShow       | Display contents of DRAM SPD EEPROMs.
+sysFlashShow            | Displays flash bank information.
+\te
+
+\sh MVME7100 BOARD LAYOUT
+
+
+
+\bs
+   --                         MVME7100
+   \  \___________________________________________________________________
+    | |                                                                  |
+   /  |              Geographical address switch-|                       -==
+   ---|                                          |        ||     ||      -==
+      |                               ------  ------      ||     ||      -==
+      |                               |    |  |    |      ||     ||      -==
+      |      Configuration Switch ->  |    |  |    |      ||     ||      -==
+      |                               |    |  |    |      ||     ||      -==
+      |                               ------  ------      ||     ||      -==
+      |                                       PMC         ||     ||      -==
+      |                                    Connector ->   ||     ||      -==
+      |                                                                  -==
+      |                                                   ||             -==
+      |                                                   ||             -==
+      |                                       PMC         ||             -==
+      |                                    Connector ->   ||             -==
+      |                                                   ||             -==
+      |                                                   ||             -==
+      |                                                   ||             -==
+      |                                                   ||             -==
+      |                                                                  -==
+      |                                                                  -==
+      |                                                   ||     ||      |
+      |                                                   ||     ||      |
+      |                                       PMC         ||     ||      |
+      |                                    Connector ->   ||     ||      |
+      |                                                   ||     ||      |
+      |                                                   ||     ||      |
+      |                                                   ||     ||      |
+      |                                                   ||     ||      |
+      |                                                                  |
+      |                                                   ||     ||      |
+      |                                                   ||     ||      |
+      |                                       PMC         ||     ||      |
+      |                                    Connector ->   ||     ||      |
+      |                                                   ||     ||      |
+      |                                                   ||     ||      |
+      |                                                   ||     ||      -==
+      |                                                   ||     ||      -==
+      |---+                                                              -==
+          |                                                              -==
+COM0      |                                                              -==
+      |---+                                                              -==
+      |                                                                  -==
+      |---+                                                              -==
+USB       |                                                              -==
+      |---+                                                              -==
+      |                                                                  -==
+      |---+                                                              -==
+GigE      |                                                              -==
+ mottsec0 |                                                              -==
+      |---+                                                              -==
+      |                                                                  -==
+      |---+                                                              -==
+GigE      |                                                              -==
+ mottsec1 |                                                              -==
+      |---+                                                              -==
+   ---|                                                                  -==
+   \  |                                                                  |
+    | |__________________________________________________________________|
+   /  /
+   ---
+\be
+
+\sh Known Problems
+
+In AMP mode, smNet comunication between boards (at least 2 boards are required using the VME bus) is only supported for core0.
+Because of this limitation, using smNet between boards creates two configuration requirements: 
+
+    PCI controller 1 must be assigned to core0 in ampCpuTable. 
+    The MIPC component cannot be used. 
+
+Due to an issue in the EPIC driver, the vxIpiConnect function will not work to connect the
+ipi interrupt on core1. Use the intConnect function instead. 
+
+AMP mode is incompatible with the INCLUDE_INTCTLR_DYNAMIC_LIB component. 
+
+If we didn't include the INCLUDE_PCI_BUS component, m85xxPci.o must be removed from the MACH_EXTRA macro in the Makefile. 
+
+SEE ALSO
+
+\tb Workbench User's Guide: Getting Started, 
+\tb VxWorks Programmer's Guide: Configuration 
+\tb vxworks_amp_programmers_guide_6.7
+
+BIBLIOGRAPHY
+
+\tb Motorola Embedded Communications Computing Online Documentation
+
+\tb Motorola Engineering Specification and Programming Model for MVME7100
+
+\tb MPC8641D Integrated Host Processor Family Reference Manual
+
+\tb IEEE P1386.1 Draft 2.0 - PCI Mezzanine Card Specification (PMC)
+
+\tb IEEE P1386 Draft 2.0 - Common Mezzanine Card Specification (CMC)
+
+\tb Peripheral Component Interconnect (PCI) Local Bus Specification, Rev 2.1
+

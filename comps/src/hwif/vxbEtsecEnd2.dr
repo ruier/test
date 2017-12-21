@@ -1,0 +1,3 @@
+#ifdef INCLUDE_ETSEC_VXB_END2
+    etsecEnd2Register();
+#endif /* INCLUDE_ETSEC_VXB_END2 */

@@ -1,0 +1,3 @@
+#ifdef INCLUDE_DRV_STORAGE_PIIX
+    vxbPiixStorageRegister ();
+#endif /* INCLUDE_DRV_STORAGE_PIIX */

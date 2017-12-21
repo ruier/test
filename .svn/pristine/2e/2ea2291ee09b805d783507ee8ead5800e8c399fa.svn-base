@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND_XLNX_TEMAC
+    xlnxTemacRegister();
+#endif /* DRV_VXBEND_XLNX_TEMAC */

@@ -1,0 +1,4 @@
+#ifdef DRV_SIO_COLDFIRE
+extern void coldFireSioRegister (void);
+#endif /* DRV_SIO_COLDFIRE */
+

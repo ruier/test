@@ -1,0 +1,3 @@
+#ifdef INCLUDE_BCM54XXPHY
+    brgPhyRegister();
+#endif

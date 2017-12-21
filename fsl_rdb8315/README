@@ -1,0 +1,128 @@
+
+        README: Freescale MPC8315ERDB BSP
+
+This file contains board-specific information for the MPC8315ERDB
+board. This file documents BSP interface changes from previous
+software or hardware versions, and notifies the user of serious
+caveats that must be noted before using this BSP.  Additionally, the
+target board's reference entry (i.e. fsl_rdb8315/target.ref) provides
+board-specific information necessary to run VxWorks and should be read
+fully before this BSP is used.
+
+------------------------------------------------------------------------
+RELEASE 6.9/1:
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+    
+    Update the description of Security Engine. (WIND00331832)
+    Remove the dependency between INCLUDE_PCI_BUS_AUTOCONF and PCI component as
+    they've been defined in 40m83xxPci.cdf and 40m83xxPciEx.cdf. (WIND00252646)
+    
+RELEASE 6.9/0:
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.1
+
+    Define INCLUDE_PCI_BUS_AUTOCONF when PCI or PCIe Bus 
+    is enabled. (WIND00310379)
+
+RELEASE 2.0/3:
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    move vxSvrGet() to vxALib.s.
+
+RELEASE 2.0/2:
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Fix PCIe and USB Host issue.
+    Add support for booting from NOR flash BootRom.
+    Code clean.
+
+RELEASE 2.0/1:
+
+    Re-released from Wind River for General Purpose Platform 3.6, VxWorks 6.6
+
+    Fixed WIND00146982. PCIe doesn't work in new version Uboot and hardware.
+
+RELEASE 2.0/0:
+
+    Released from Wind River for General Purpose Platform 3.6, VxWorks 6.6
+   
+    Initial release.
+
+IMPORTANT!!! Read the following carefully before installing this BSP package.
+
+    This version of BSP will install the following driver files as well as the BSP.    
+
+    target/src/hwif/h/end/vxbEtsecEnd.h
+    target/src/hwif/h/storage/vxbFslSataStorage.h
+
+    target/src/hwif/busCtlr/usb/hcd/ehcd/usbEhcdDataStructures.h
+    target/src/hwif/busCtlr/usb/hcd/ehcd/usbEhcdInitExit.c
+    target/src/hwif/busCtlr/m83xxPci.c
+    target/src/hwif/busCtlr/m83xxPciEx.c    
+    target/src/hwif/busCtlr/Makefile
+
+    target/src/hwif/end/vxbEtsecEnd.c
+
+    target/src/hwif/storage/vxbFslSataStorage.c
+    target/src/hwif/storage/Makefile
+
+    target/config/comps/src/hwif/m83xxPciEx.dc
+    target/config/comps/src/hwif/m83xxPciEx.dr
+    target/config/comps/src/hwif/vxbFslSataStorage.dc
+    target/config/comps/src/hwif/vxbFslSataStorage.dr
+
+    target/config/comps/vxWorks/40m83xxPciEx.cdf
+    target/config/comps/vxWorks/40vxbFslSataStorage.cdf
+
+    Pre-Installation Requirement:
+
+    1) You should consider backing up the following files, so you can
+       undo the install if necessary.
+
+       target/src/hwif/busCtlr/usb/hcd/ehcd/usbEhcdDataStructures.h
+       target/src/hwif/busCtlr/usb/hcd/ehcd/usbEhcdInitExit.c
+       target/src/hwif/busCtlr/m83xxPci.c
+       target/src/hwif/busCtlr/Makefile
+
+       target/src/hwif/end/vxbEtsecEnd.c
+
+       target/src/hwif/h/end/vxbEtsecEnd.h
+              
+       target/src/hwif/storage/Makefile
+       
+    Post Installation Steps:
+
+    1) A build of the updated drivers installed is necessary.
+       In the VxWorks Development Shell, go to '$WIND_BASE/target/src/hwif'.
+       Run the command:
+
+           make CPU=PPC32 TOOL=diab
+       or
+           make CPU=PPC32 TOOL=gnu
+
+       This will archive the updated drivers into the corresponding libraries.
+
+    2) For project builds to work you should close Workbench if you are using it.
+       Next remove the file 'target/config/comps/vxWorks/CxrCat.txt'.
+       You may now restart Workbench and create vxWorks image projects based
+       on the new BSP.
+
+    3) For command line builds to work you should rebuild 'target/config/all/vxbUsrCmdLine.c'.
+       First remove the old vxbUsrCmdLine.c. You should consider backing it up,
+       so you can restore to use the old version if necessary.
+       Next open the VxWorks Development Shell,
+       go to '$WIND_BASE/target/config/comps/src/hwif' and run the command:
+
+           make vxbUsrCmdLine.c
+
+       This will create and copy the updated vxbUsrCmdLine.c to the 'target/config/all' directory.
+
+       NOTE!!! For all Windows users, please install the following patch on Wind River OLS first.
+
+           https://portal.windriver.com/cgi-bin/windsurf/downloads/view_binary.cgi?binaryid=114704.
+
+       After the patch gets installed, rebuild the vxbUsrCmdLine.c according to the instructions above.
+

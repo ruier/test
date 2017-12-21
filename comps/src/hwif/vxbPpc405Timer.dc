@@ -1,0 +1,1 @@
+IMPORT void ppc405TimerRegister (void);

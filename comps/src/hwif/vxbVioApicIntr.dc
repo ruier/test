@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTRL_VIOAPIC
+extern void vxbVioApicIntrDrvRegister (void);
+#endif /* DRV_INTCTRL_VIOAPIC */

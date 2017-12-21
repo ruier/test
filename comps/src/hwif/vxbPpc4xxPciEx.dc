@@ -1,0 +1,1 @@
+IMPORT void ppc4xxPciExRegister (void);

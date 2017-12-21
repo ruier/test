@@ -1,0 +1,3 @@
+#ifdef INCLUDE_SMSCLAN9118_VXB_END
+    smeRegister();
+#endif

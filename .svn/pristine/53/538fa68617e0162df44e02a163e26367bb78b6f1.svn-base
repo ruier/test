@@ -1,0 +1,4 @@
+#ifdef DRV_PCIBUS_M83XX
+extern void m83xxPciRegister (void);
+#endif /* DRV_PCIBUS_M83XX */
+

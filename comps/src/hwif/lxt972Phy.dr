@@ -1,0 +1,3 @@
+#ifdef INCLUDE_LXT972PHY
+    lxtPhyRegister();
+#endif

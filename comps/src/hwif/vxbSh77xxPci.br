@@ -1,0 +1,3 @@
+#ifdef DRV_PCI_SH77XX
+    sh77xxPciRegister();
+#endif /* DRV_PCI_SH77XX */

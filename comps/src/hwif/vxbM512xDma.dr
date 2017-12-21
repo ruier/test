@@ -1,0 +1,3 @@
+#ifdef DRV_DMA_M512X
+    m512xDmaRegister();
+#endif

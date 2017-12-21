@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND_XLRSPI4
+    xlrSpi4Register();
+#endif

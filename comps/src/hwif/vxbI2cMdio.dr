@@ -1,0 +1,3 @@
+#ifdef DRV_MII_I2C_MDIO
+    imRegister();
+#endif

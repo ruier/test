@@ -1,0 +1,263 @@
+#include <stdio.h>
+#include <vxWorks.h>
+
+extern STATUS sysTempLimitRead(INT16  tempLimit[6][3]);
+extern STATUS sysTempLimitWrite(UINT8 nodeNum,UINT8 type,INT16  tempLimit);
+extern STATUS sysTempRead(INT16 tempValue[6]);
+extern STATUS sysI2cRead(UINT8 busNo,UINT8 deviceAddr,UINT8 regAddr,UINT8 *pData,UINT32 count);
+extern STATUS sysI2cWrite(UINT8 busNo,UINT8 deviceAddr,UINT8 regAddr,UINT8 data);
+
+/*
+BSP_THERMAL_SENSOR_0 FPGA External
+BSP_THERMAL_SENSOR_1 CPU_C Internal
+BSP_THERMAL_SENSOR_2 CPU_D Internal
+BSP_THERMAL_SENSOR_3 net_switch External
+BSP_THERMAL_SENSOR_4 CPU_A Internal
+BSP_THERMAL_SENSOR_5 CPU_B Internal
+*/
+
+
+typedef enum
+{
+	BSP_THERMAL_SENSOR_0 = 0,
+	BSP_THERMAL_SENSOR_1,
+	BSP_THERMAL_SENSOR_2,
+	BSP_THERMAL_SENSOR_3,
+	BSP_THERMAL_SENSOR_4,
+	BSP_THERMAL_SENSOR_5,
+	BSP_THERMAL_SENSOR_6,
+	BSP_THERMAL_SENSOR_7,
+	BSP_THERMAL_SENSOR_END	
+} eBSP_THERMAL_SENSOR ;
+
+
+typedef enum
+{
+	BSP_THERMAL_LIMIT_LOW_THRESHOLD = 0,
+	BSP_THERMAL_LIMIT_THERM ,
+	BSP_THERMAL_LIMIT_HIGH_THRESHOLD,
+	BSP_THERMAL_LIMIT_END	
+} eBSP_THERMAL_LIMIT ;
+
+
+STATUS bspTempGet(eBSP_THERMAL_SENSOR eTempNum,INT16 *pCurrTemp)
+{
+	INT16 tempValue[6];
+	if(sysTempRead(&tempValue[0]) == ERROR) return ERROR;
+	*pCurrTemp =  tempValue[eTempNum];
+	return OK;
+}
+
+STATUS bspTempThresholdGet(eBSP_THERMAL_SENSOR eTempNum,eBSP_THERMAL_LIMIT eTempLimit,INT16 *pTempValue)
+{
+	INT16 tempLimit[6][3];
+	if(sysTempLimitRead(&tempLimit[0]) == ERROR)   return ERROR; 
+	*pTempValue = tempLimit[eTempNum][eTempLimit];
+	return OK;
+}
+
+
+STATUS bspTempThresholdSet(eBSP_THERMAL_SENSOR eTempNum,eBSP_THERMAL_LIMIT eTempLimit,INT16 tempLimitValue)
+{
+	//UINT32 data;
+
+#if 0
+	data=*(UINT32*)0xe1000018;
+	*(UINT32*)0xe1000018 = data&0xfe;
+#endif	
+	if(sysTempLimitWrite(eTempNum,eTempLimit,tempLimitValue)==ERROR) return ERROR;
+#if 0
+	data=*(UINT32*)0xe1000018;
+	*(UINT32*)0xe1000018 = data|0x01;
+#endif
+	return OK;
+	
+}
+
+
+STATUS sysI2cRegWrite(UINT8 iicUnit,UINT8 regOffset,UINT8 regValue)
+{
+	UINT32 *pIicReg=NULL;
+	if(iicUnit == 0)  pIicReg = (UINT32*)0xe1000100;
+	else if(iicUnit == 1)  pIicReg = (UINT32*)0xe1000140;
+	else 
+	{
+		printf("iicUnit is error\n");
+		return ERROR;
+	}
+	*(pIicReg+regOffset) =(UINT32)(regValue);
+	return OK;
+}
+
+STATUS sysI2cRegRead(UINT8 iicUnit,UINT8 regOffset,UINT8 *regValue)
+{
+	UINT32 *pIicReg=NULL;
+	
+	if(iicUnit == 0)  pIicReg = (UINT32*)0xe1000100;
+	else if(iicUnit == 1)  pIicReg = (UINT32*)0xe1000140;
+	else 
+	{
+		printf("iicUnit is error\n");
+		return ERROR;
+	}
+
+	*regValue =(UINT8)(*(pIicReg+regOffset));
+	//printf("regValue = 0x%x\n",*regValue);
+
+	return OK;
+}
+/*********************不支持可重入*****************************/
+STATUS sysI2cDeviceAddrGet(UINT8 iicUnit,UINT8 *deviceAddr)
+{
+	UINT32 *pIicReg = (UINT32*)0xe10000ec;
+	
+	if(iicUnit>1)
+	{
+		printf("i2c unit number error!!!\n");
+		return ERROR;
+	}
+	*deviceAddr = (UINT8)(((*pIicReg)>>(8*iicUnit))&0xff);
+	return OK;
+}
+
+
+STATUS sysI2cDeviceAddrSet(UINT8 iicUnit,UINT8 deviceAddr)
+{
+	UINT32 *pIicReg =  (UINT32*)0xe10000ec;
+	UINT32 value;
+	if(iicUnit>1) 
+	{
+		printf("iicUnit is error\n");
+		return ERROR;
+	}
+	value =  *pIicReg;
+	value &=(~(0xff<<(8*iicUnit)));
+	value  |= ((deviceAddr<<(8*iicUnit)));
+	*pIicReg = value;
+	return OK;
+}
+
+
+STATUS sysI2cDeviceModeSet(UINT8 mode)  /*1:test  0:normal*/
+{
+	*(UINT32*)0xe10000f8 = mode;
+	return OK;
+}
+
+#if 1
+STATUS sysI2cDeviceTest(UINT8 iicUnit,UINT8 deviceId)
+{
+	UINT8 i,deviceAddr,value;
+	sysI2cDeviceAddrGet(iicUnit,&deviceAddr);
+	printf("i2c device id = %d\n",deviceAddr);
+	printf("I2C local bus write and read test....\n");
+	for(i=0;i<16;i++) sysI2cRegWrite(iicUnit,i,i);
+	
+	for(i=0;i<16;i++)
+	{
+		sysI2cRegRead(iicUnit,i,(UINT8*)&value);
+		if(value != i) printf("ERROR:offset %d = 0x%x\n",i,value);
+	}
+
+	printf("I2C Bus loopback test....\n");
+	sysI2cDeviceModeSet(1);
+	printf("I2C Bus read....\n");
+	for(i=0;i<16;i++)
+	{
+		sysI2cRead(iicUnit,deviceAddr,i,&value,1);
+		if(value != i) printf("ERROR:offset %d = 0x%x\n",i,value);
+	}
+	printf("I2C Bus Write....\n");
+	for(i=0;i<16;i++) sysI2cRegWrite(iicUnit,i,0xff);
+	for(i=3;i<16;i++) sysI2cWrite(iicUnit,deviceAddr,i,i);
+	for(i=3;i<16;i++) 
+	{
+		sysI2cRegRead(iicUnit,i,&value);
+		if(value != i) printf("ERROR:offset %d = 0x%x\n",i,value);
+	}
+	printf("set device id : %d\n",deviceId);
+	sysI2cDeviceAddrSet(iicUnit,deviceId);
+	sysI2cDeviceAddrGet(iicUnit,&deviceAddr);
+	printf("i2c device id = %d\n",deviceAddr);
+	
+	printf("I2C Bus Write....\n");
+	for(i=0;i<16;i++) sysI2cRegWrite(iicUnit,i,0xff);
+	for(i=3;i<16;i++) sysI2cWrite(iicUnit,deviceAddr,i,i);
+	for(i=3;i<16;i++) 
+	{
+		sysI2cRegRead(iicUnit,i,&value);
+		if(value != i) printf("ERROR:offset %d = 0x%x\n",i,value);
+	}
+	
+
+	return OK;
+}
+#endif
+
+
+static UINT8 sysTempUpdataInterval = 1;
+
+
+void bspTempUpdata(INT16 *pCurrTemp)
+{
+	UINT8 i;
+	INT16 tempValue=0,temp=0;
+	
+	bspTempGet(0,&tempValue);
+	//printf("temp=%d\n",temp);
+	for(i=1;i<6;i++)
+	{
+		bspTempGet(i,&temp);
+		//printf("temp=%d\n",temp);
+		if((temp & 0xff00)&&(tempValue & 0xff00))
+		{
+			if((tempValue&0xff)>(temp&0xff)) tempValue=temp;
+		}
+		else 
+		{
+			if(tempValue & 0xff00) tempValue = temp;
+			else if((temp & 0xff00) == 0)
+			{
+				if(tempValue<temp) tempValue=temp;
+			}
+		}
+	}
+	*pCurrTemp = tempValue;
+}
+	
+
+void sysTaskTempUpdata(UINT8 regOffset)
+{
+	INT16 currTemp;
+	UINT8 temp;
+	int sysClkRate=60;
+	BOOL tempUpdataStop =0;
+	while(!tempUpdataStop)
+	{
+		bspTempUpdata(&currTemp);
+		
+		if(currTemp & 0xff00) temp=0x80;
+		else  temp=0;
+		temp |= (currTemp&0x7f);
+		sysI2cRegWrite(0,regOffset,temp);
+		sysI2cRegWrite(1,regOffset,temp);
+		sysClkRate = sysClkRateGet();
+		//printf("sysClkRate=%d,sysTempUpdataInterval=%d\n",sysClkRate,sysTempUpdataInterval);
+		taskDelay(sysClkRate*sysTempUpdataInterval);
+	}
+}
+
+void sysTempUpdataIntervalSet(UINT8 intervalSecond)
+{
+	sysTempUpdataInterval=intervalSecond;
+}
+
+void sysStatusUpdata()
+{
+	int  cpuID = sysGetCpuID();
+	UINT8 dataValue;
+	sysI2cRegRead(0,cpuID/2,&dataValue);
+	dataValue &= (~(0xf<<((cpuID%2)*4)));
+	dataValue |= (0xf<<((cpuID%2)*4));
+	sysI2cRegWrite(0,cpuID/2,dataValue);
+}

@@ -1,0 +1,3 @@
+#ifdef DRV_I2CBUS_ZYNQ7K
+    zynq7kI2cRegister();
+#endif /* DRV_I2CBUS_ZYNQ7K */

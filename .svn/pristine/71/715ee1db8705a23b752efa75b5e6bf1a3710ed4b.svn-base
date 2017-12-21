@@ -1,0 +1,3 @@
+#ifdef INCLUDE_PPC440GP_PCI
+#include <busCtlr/ppc440gpPci.c>
+#endif /* INCLUDE_PPC440GP_PCI */

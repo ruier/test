@@ -1,0 +1,3 @@
+#ifdef DRV_MF_M512X_FIFOC
+    m512xFifocRegister ();
+#endif /* DRV_MF_M512X_FIFOC */

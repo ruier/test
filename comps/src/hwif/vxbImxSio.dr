@@ -1,0 +1,3 @@
+#ifdef DRV_SIO_IMX
+    vxbImxSioRegister();
+#endif /* DRV_SIO_IMX */

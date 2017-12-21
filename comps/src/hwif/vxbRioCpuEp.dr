@@ -1,0 +1,4 @@
+#ifdef DRV_SRIO_CPU_EP
+    rioCpuRegister ();
+#endif /* DRV_SRIO_CPU_EP */
+

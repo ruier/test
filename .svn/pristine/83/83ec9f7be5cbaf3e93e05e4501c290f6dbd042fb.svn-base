@@ -1,0 +1,3 @@
+#ifdef DRV_SIO_SHSCIF
+extern void shScifSioRegister (void);
+#endif /* DRV_SIO_SHSCIF */

@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTLR_LOAPIC
+extern void vxbLoApicIntrDrvRegister (void);
+#endif /* DRV_INTCTLR_LOAPIC */

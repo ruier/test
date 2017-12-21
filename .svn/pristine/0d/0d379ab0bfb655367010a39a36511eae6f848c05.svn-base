@@ -1,0 +1,4 @@
+#ifdef INCLUDE_VXB_LEGACY_INTERRUPTS
+    vxbLegacyIntInit();
+#endif /* INCLUDE_VXB_LEGACY_INTERRUPTS */
+

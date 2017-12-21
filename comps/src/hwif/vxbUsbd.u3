@@ -1,0 +1,4 @@
+#ifdef INCLUDE_USB_INIT
+    usbInit ();
+#endif             /* INCLUDE_USB_INIT */
+

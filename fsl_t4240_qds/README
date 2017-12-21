@@ -1,0 +1,21 @@
+
+                 README: Freescale QorIQ T4240QDS / Simics 
+
+This file contains board-specific information for the Freescale QorIQ T4240QDS
+and Simics target model.  Specifically, this file contains information on any
+BSP interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+
+------------------------------------------------------------------------------
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    Enalbe RapidIO port 1. (WIND00418128)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+    
+    Initial release.

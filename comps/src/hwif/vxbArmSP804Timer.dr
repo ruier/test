@@ -1,0 +1,3 @@
+#ifdef DRV_TIMER_ARM_SP804
+	vxbArmSP804TimerDrvRegister ();
+#endif

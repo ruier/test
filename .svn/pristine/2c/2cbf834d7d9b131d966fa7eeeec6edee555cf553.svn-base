@@ -1,0 +1,3 @@
+#ifdef INCLUDE_MV88E1X11PHY
+    mvPhyRegister();
+#endif

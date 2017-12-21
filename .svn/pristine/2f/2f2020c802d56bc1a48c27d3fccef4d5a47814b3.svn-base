@@ -1,0 +1,1 @@
+extern void vxbImx51IntCtlrRegister (void);

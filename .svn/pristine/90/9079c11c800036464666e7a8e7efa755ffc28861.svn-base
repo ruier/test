@@ -1,0 +1,3 @@
+#ifdef DRV_I2C_RTC
+IMPORT void vxbI2cRtcRegister (void);
+#endif /* DRV_I2C_RTC */

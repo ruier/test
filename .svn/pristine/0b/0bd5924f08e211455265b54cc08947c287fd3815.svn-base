@@ -1,0 +1,3 @@
+#ifdef INCLUDE_NS83902_VXB_END
+    nicRegister();
+#endif /* INCLUDE_NS83902_VXB_END */

@@ -1,0 +1,128 @@
+
+                    README: Freescale fsl_mpc8360_rdk BSP
+
+This file contains board-specific information for the Freescale MPC8360 RDK
+target board. This file documents BSP interface changes from previous software
+or hardware versions, and notifies the user of serious caveats that must be
+noted before using this BSP. Additionally, the target board's reference entry
+(i.e. fsl_mpc8360_rdk/target.ref) provides board-specific information necessary
+to run VxWorks and should be read fully before this BSP is used.
+
+------------------------------------------------------------------------------
+RELEASE 6.9/x
+    TODO:
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.x
+
+    Fixed potential memory corruption caused by sysNvRamGet(). (WIND00101057)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+    
+    Update the description of Security Engine. (WIND00331832)
+    Fixed potential memory corruption caused by sysNvRamGet(). (WIND00101057)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+    
+    Delete _MMU_UBAT_VP attribute(WIND00162540)
+    Clear mot83xxPci.h. (WIND00212294)
+
+RELEASE 2.0/4:
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Remove QE IO port pin mux codes.
+    Remove qeCpcrReset().
+    Move vxSvrGet() from sysALib.s to vxALib.s.
+    Update quiccEngine configuration.
+
+RELEASE 2.0/3:
+
+    Re-released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Update for VxWorks 6.7.
+
+
+RELEASE 2.0/2:
+
+    Re-released from Wind River for General Purpose Platform 3.6, VxWorks 6.6
+
+    Add support for security engine, please refer to target.ref for detailed
+    instructions.
+    Switch from hEnd qeFcc driver to VxBus UCC driver.
+
+IMPORTANT!!! Read the following carefully before installing this BSP package.
+
+    This version of BSP will install the following driver files as well as the BSP.
+
+    target/config/comps/src/hwif/vxbUccEnd.dc
+    target/config/comps/src/hwif/vxbUccEnd.dr
+    target/config/comps/vxWorks/40vxbUccEnd.cdf
+
+    target/src/hwif/h/mii/bcm54xxPhy.h
+    target/src/hwif/h/end/vxbUccEnd.h
+    target/src/hwif/mii/bcm54xxPhy.c
+    target/src/hwif/end/vxbUccEnd.c
+    target/src/hwif/end/Makefile
+
+    Pre-Installation Requirement:
+
+    1) You should consider backing up the following files, so you can
+       undo the install if necessary.
+
+        target/src/hwif/h/mii/bcm54xxPhy.h
+        target/src/hwif/mii/bcm54xxPhy.c
+        target/src/hwif/end/Makefile
+
+
+    Post Installation Steps:
+
+    1) Build instructions for driver files outside of the BSP:
+       A build of the updated drivers installed is necessary.
+       In the VxWorks Development Shell, go to '$WIND_BASE/target/src/hwif'.
+       Run the command:
+
+           make CPU=PPC32 TOOL=diab
+
+       This will archive the updated drivers into the corresponding libraries.
+
+    2) For project builds to work you should close Workbench if you are using it.
+       Next remove the file 'target/config/comps/vxWorks/CxrCat.txt'.
+       You may now restart Workbench and create vxWorks image projects based
+       on the new BSP.
+
+    3) For command line builds to work you should rebuild 'target/config/all/vxbUsrCmdLine.c'.
+       First remove the old vxbUsrCmdLine.c.  You should consider backing it up,
+       so you can restore to use the old version if necessary.
+       Next open the vxWorks Development Shell,
+       go to '$WIND_BASE/target/config/comps/src/hwif' and run the command:
+
+           make vxbUsrCmdLine.c
+
+       This will create and copy the updated vxbUsrCmdLine.c to the 'target/config/all' directory. 
+
+       NOTE!!! For all Windows users, please install the following patch on Wind River OLS first.
+
+           https://portal.windriver.com/cgi-bin/windsurf/downloads/view_binary.cgi?binaryid=114704
+
+       After the patch gets installed, rebuild the vxbUsrCmdLine.c according to the instructions above.
+
+
+RELEASE 2.0/1:
+
+    Released from Wind River for General Purpose Platform 3.6, VxWorks 6.6
+
+    All drivers get ported to vxBus
+
+
+RELEASE 2.0/0:
+
+    Released from Wind River for General Purpose Platform 3.5, VxWorks 6.5
+
+    Support Freescale MPC8360 RDK board
+
+    Initial version.
+
+

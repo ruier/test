@@ -1,0 +1,679 @@
+\" wrSbc8548/target.ref - Wind River SBC8548 target specific documentation
+\"
+\" Copyright (c) 2006-2008, 2011 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01l,02oct11,y_c  add description of the workaround that added to the romInit.s
+\"                  for MPC8548 DDR20 errata. (WIND00292034)
+\" 01k,13dec11,y_c  correct the description about booting from SODIMM flash.
+\"                  (WIND00316702)
+\" 01j,26jan11,kxb  remove obsolete TFFS component
+\" 01i,24oct08,z_l  update according to the version released against VxWorks6.6
+\" 01h,31jul08,l_z  fix IPNET native driver description
+\" 01g,24jul08,j_z  fix apigen error.(WIND00124332) 
+\" 01f,08jul08,l_z  update IPNET native driver description
+\" 01e,05may08,x_f  add board layout info.
+\" 01d,25may07,b_m  add boot device selection details.
+\" 01c,25apr07,b_m  updated for the latest SBC8548 rev.2 board.
+\" 01b,28aug06,kds  Changed etsec driver name to "etsec.c".
+\" 01a,31jan06,kds  Modified from cds8548/target.ref/01a
+\"
+\"
+\TITLE wrSbc8548 - Wind River SBC8548
+
+\sh NAME
+`Wind River SBC8548'
+
+EXTERNAL DEPENDENCIES
+None
+
+INTRODUCTION
+This section includes getting-started information, including subsections
+detailing ROM installation, boot ROM flash instructions, and jumper 
+settings for VxWorks operation.
+
+Macro 'REV2_SILICON' in config.h should be defined to support MPC8548 rev.2 
+silicon. This is the default configuration.
+
+The BSP supports booting from either on-board 8-bit 8MB flash or SODIMM 32-bit
+64MB flash. Macro 'BOOT_FLASH' in config.h should be defined properly as well
+as the board jumpers be setup correctly. Booting from on-board 8-bit 8MB flash
+is the default configuration. Please read the section "Setup jumpers to select
+the boot device" for details.
+
+\sh Board Switch Settings
+
+The board must have the switch and jumpers set to appropriate values before 
+software can be loaded into the memory, or before flash memory can be 
+programmed as described below.
+
+In order to get the board running with the default configuration(1Ghz Core and 
+400Mhz CCB with 66Mhz SYSCLK), the switches need to be set as follows: 
+
+\ts
+Switch Number | Switch ON           | Switch OFF   |  X       |  NC
+-------------------------------------------------------------------
+SW2           | 2,3,5,7             | 1,4,6,8      |          |
+SW3           | 1,2,3,4             | 5,6          |          | 7,8
+SW4           |                     |              | 1,2,3,4  | 5,6,7,8
+SW5           | 2                   | 1,3,4        |          | 5,6,7,8
+
+ X = don't care (user switches)
+ NC = not connected  
+\te  
+
+
+\sh Getting the board running VxWorks
+   This section will guide you how to run VxWorks on SBC8548 board.
+
+1. Creating a bootrom.bin:
+
+    1.1 Define 'BOOT_FLASH' in config.h to the right boot device name, 
+        'ON_BOARD_FLASH' for booting from on-board flash, and 'SODIMM_FLASH'
+        for booting from SODIMM flash.
+
+    1.2 Launch Workbench 3.x, go to the "File" menu and choose the option
+        "New" -> "VxWorks Boot Loader / BSP Project".
+
+    1.3 The "New VxWorks Boot Loader / BSP Project" window will popup, input a
+        project name then click "Next" button. In the next window, choose the BSP
+        as "wrSbc8548", "Tool chain" could be set as "Diab", in the 
+        "Boot loader / BSP image" part, choose the style as "Compressed (default)",
+        "Format" as "Bin", then press the "Finish" button to finish the project
+        creation.
+
+    1.4 Once the build process finish successfully (You will see "Build Finished"
+        in the "Build Console" window without error), you will find the file
+        "bootrom.bin" in the BSP directory "$(WIND_BASE)/target/config/wrSbc8548".   
+
+2. Programming bootrom.bin to the wrSbc8548 FLASH:
+   Support for MPC548 part is available with Workbench 3.x
+
+    2.1 Setup the board jumpers to select the boot flash which the bootrom.bin
+        will be programed to. Please Refer to the section "Setup jumpers to 
+        select the boot device" for details.
+
+    2.2 Install Wind River Probe or Wind River ICE and power it on.
+
+        Connect the JTAG interface cable from the Wind River Probe or Wind 
+        River ICE to the SBC8548 board's JTAG connector JP10 (ICE) or P2 (Probe). 
+        Once the connections have been made, power up the SBC8548 board and 
+        launch Workbench on the host.     
+
+    2.3 Configure the Wind River Probe or Wind River ICE connection.
+
+        In Workbench on the left pane, there is a "Remote Systems" window. 
+        Click on the "Define a connection to remote system" button. In the popup
+        "New Connection" window, select the Connection type as 
+        "Wind River OCD ICE Connection" for Wind River ICE and "Wind River 
+        OCD Probe Connection" for Wind River Probe. If the Wind River ICE 
+        is connected via serial port, specify the configuration else select
+        "Specify all communication settings manually". 
+
+        In the "Wind River ICE Settings" or "Wind River Probe Settings", 
+        select the processor type by clicking on the "Processor" radio button and 
+        then select "MPC8548" browse to the appropriate board file. 
+        Select "Auto-attach to connected designators" checkbox. In the 
+        "Communications" tab, "Emulator Hostname / IP address" of ICE for Wind 
+        River ICE or "USB Device Name" for Wind River Probe. Connect 
+        Workbench OCD with the Wind River Probe or Wind River ICE 
+        by clicking the "Next" and then "Finish" button. A New connection 
+        appears in the "Remote Systems" window.
+
+    2.4 Program Wind River Probe / Wind River ICE with the proper register 
+        settings for the SBC8548 board.
+
+        To view/modify the Wind River ICE firmware setting, terminate the
+        debug session for Wind River ICE. In the "Remote Systems" window,
+        right click on the newly connected OCD connection. Select 
+        "OCD Utilities". To know about the current firmware information, 
+        select "Emulator firmware version information". To download the new
+        firmware, Select "Firmware Download" and select appropriate file 
+        from "$WIND_OCD_PATH/CommonHardwareFiles/*.bin".
+
+        Go to the "OCD Command Shell" and click on the "Settings" button. 
+        The OCD Command Shell Settings dialog appears, where you can 
+        select the appropriate register file. Navigate to the location of 
+        the appropriate register configuration file. The folder of register 
+        file is "$(WIND_BASE)/target/config/wrSbc8548", you should select 
+        wrSbc8548_onboard_flash.reg for booting from on-board flash or 
+        wrSbc8548_sodimm_flash.reg for booting from SODIMM flash.
+
+        After choosing the register file, press the "OK" button. In the OCD Command
+        Shell, click the "Playback File" button. The selected register file is
+        downloaded to the target and the commands from the file appear in the
+        OCD command shell. When playback is finished the ">BKM>" or the ">ERR>"
+        prompt returns.
+
+    2.5 Get into Background Mode.
+
+        Execute the "IN" command to reset the board and initialize it with
+        the register setting.
+\cs
+            IN
+\ce
+
+    2.6 Program the SBC8548 Flash.
+
+        In WindRiver OCD, Select the "Flash Programmer". The 
+        "Flash Programmer" view has three tabs: "Configuration", 
+        "Programming" and "Memory/Diagnostics".
+
+       2.6.1 Select the "Configuration" tab. In the "Device Selection' 
+            field, select the "Intel -> V28F640Jx -> 8192 x 8 -> 1 Device" for 
+            booting from on-board flash, and select "Intel -> V28F128Jx -> 16384 x 8 -> 4 Devices" 
+            for booting from SODIMM flash.
+
+            In "Flash Bank Address" group for the "Base" enter "0xff800000" for 
+            booting from on-board flash, and "0xfc000000" for booting from SODIMM flash. 
+            In the "RAM Workspace" group for the "Workspace Start at"
+            enter "0x00000000" and for the "Workspace Size" enter 
+            "0x8000".
+
+        2.6.2 Click on the "Programming" tab. Select the "Add File" 
+            button, in the popup window, select the newly generated
+            "$(WIND_BASE)/target/config/wrSbc8548/bootrom.bin", and click
+            the "This is a raw binary file" checkbox then click "OK" to finish
+            file adding. Click the "Start Address" and set it as "0xfff00000",
+            the "End Address" will be fixed automatically. Please notice that
+            the "Start Address" should include the "Offset bias".
+            Enable a file by clicking on the checkbox under the "Enabled" heading.
+
+        2.6.3 In the "Erase Sector Selection" pane, select addresses
+            0xfff00000 through 0xffffffff.  Press the "Erase/Program" 
+            button to erase the flash and then program the flash with selected
+            "bootrom.bin" file. A window pops up to show the progress of the
+            Flash device programming. When it is complete, the Flash should
+            contain the new boot program.
+
+3. Setup jumpers to select the boot device
+
+    3.1 SW 2.8
+          SW 2.8 is for boot device port size.
+
+          SW2.8 OFF(0) = The boot port size is 8-bit (default setting)
+          SW2.8 ON (1) = The boot port size is 32-bit
+
+    3.2 JP 12
+          JP 12 is for boot flash CS switch.
+
+          2   4
+          x   x  (JP12)
+          x   x
+          1   3
+
+          JP12 (1-3), (2-4) = 8-bit 8MB on-board flash (default setting)
+          JP12 (1-2), (3-4) = 32-bit 64MB SODIMM flash
+
+FEATURES
+
+\sh List of Hardware Features
+
+\ts
+Hardware Interface   | Controller  | Driver/Component        | Status
+---------------------------------------------------------------------
+UART:0               | on-chip     | vxbNs16550Sio.c         | SUPPORTED
+UART:1               | on-chip     | vxbNs16550Sio.c         | SUPPORTED
+NOR-FLASH            | V28F128     | sysMtd.c/TFFS           | SUPPORTED
+1GB-ETHERNET:0       | on-chip     | vxbEtsecEnd.c           | SUPPORTED
+1GB-ETHERNET:1       | on-chip     | vxbEtsecEnd.c           | SUPPORTED
+TIMER                | on-chip     | vxbM85xxTimer.c         | SUPPORTED
+I2C                  | on-chip     | sysMotI2c.c             | SUPPORTED
+PCI-MASTER           | on-chip     | m85xxPci.c              | SUPPORTED
+EEPROM               | CAT28LV64G  | eeprom.c                | SUPPORTED
+PCI-E-HOST           | on-chip     | m85xxPci.c              | SUPPORTED
+EXPANSION/ETSEC3/4   | on-board    | vxbEtsecEnd.c           | UNVALIDATED
+\te
+
+\sh Feature Interactions
+Refer to the board vendor's documentation.
+
+HARDWARE DETAILS
+This section discusses memory maps for each bus and lists of interrupt levels 
+and/or vector numbers for each interrupting source.
+
+\sh Verified Hardware
+This BSP has been verified on the following board and silicon:
+
+\cs
+    SBC8548 board REVA with MPC8548E REV2
+\ce
+
+\sh Memory Maps
+
+The following table describes the SBC8548 default memory map:
+\ts
+
+Start       | Size | End         | Access to
+--------------------------------------------
+0x0000_0000 | 256MB| 0x0FFF_FFFF | DDR SDRAM
+0x5000_0000 | 64MB | 0x53FF_FFFF | PCI 1 Prefetchable Memory
+0x5400_0000 | 64MB | 0x57FF_FFFF | PCI 1 Non-Prefetchable Memory
+0x5800_0000 | 64MB | 0x5BFF_FFFF | PCI 1 IO
+0x6000_0000 | 64MB | 0x63FF_FFFF | PCI Express Prefetchable Memory
+0x6400_0000 | 64MB | 0x67FF_FFFF | PCI Express Non-Prefetchable Memory
+0x6800_0000 | 64MB | 0x6BFF_FFFF | PCI Express IO
+0xF8B0_0000 | 16MB | 0xF7FF_FFFF | NVRAM/CADMUS
+0xF000_0000 | 64MB | 0xFBFF_FFFF | LBC SDRAM
+0xE000_0000 | 1MB  | 0xFE0F_FFFF | Configuration Control Registers
+
+For booting from on-board flash:
+0xD000_0000 | 64MB | 0xD3FF_FFFF | SODIMM Flash
+0xFF80_0000 | 8MB  | 0xFFFF_FFFF | On-Board Flash (boot device)
+
+For booting from SODIMM flash:
+0xFB80_0000 | 8MB  | 0xFBFF_FFFF | On-Board Flash
+0xFC00_0000 | 64MB | 0xFFFF_FFFF | SODIMM Flash (boot device)
+
+\te
+
+Note: The default SODIMM flash address is configured at 0xFB800000, as described
+in the board document, which will not map full 64MB in the system memory space.
+So its base address is modified to 0xD0000000 to solve this issue.
+
+\sh Serial Configuration
+Default configuration is:
+
+\ts
+    Baud Rate   : 9600
+    Data        : 8 bit
+    Parity      : None
+    Stop        : 1 bit
+    Flow Control: None
+\te
+
+\sh Boot Devices
+The supported boot devices are:
+
+\ts
+    `motetsec'   | - Primary Ethernet (10baseT, 100baseTX, or 1000baseT)
+    `motetsec'   | - Secondary Ethernet (10baseT, 100baseTX, or 1000baseT)
+    'gei'        | - Intel PRO1000XT PCI Network Card in the PCI slot
+    `tffs'       | - True FFS
+\te
+
+\sh Boot Methods
+The boot methods are affected by the boot parameters.  If no password is
+specified, RSH (remote shell) protocol is used.  If a password is specified,
+FTP protocol is used, or, if the flag is set, TFTP protocol is used.
+
+SPECIAL CONSIDERATIONS
+This section identifies the unique characteristics of the board. It includes
+all information needed by the user that does not fit in any other section. 
+
+\sh TrueFFS
+The standard Wind River TrueFFS product is supported in this release.
+
+This BSP uses 4 8-bit Intel V28F128J3M flash as the TrueFFS media.
+To use it, define INCLUDE_TFFS in config.h. When booting from SODIMM flash,
+only first half size of flash is used as the TrueFFS media.
+When using TrueFFS on a new FLASH for the first time, you should format and
+configure the FLASH by using:
+
+\cs
+    sysTffsFormat ();
+    usrTffsConfig (0, 0, "/tffs0");
+    dosfsDiskFormat ("/tffs0");     /@ For VxWorks 6.6 and later version @/
+\ce
+
+Note: If you are running these commands in the VxWorks target shell, please use
+
+\cs
+    sp sysTffsFormat
+\ce
+
+to format the FLASH as it would take long time to complete.
+
+You should now be able to use VxWorks I/O and file system commands to access
+the FLASH device as if it were a disk. If you put a vxWorks image in your FTP
+home directory, then it could be tested by using the following commands:
+
+\cs
+    devs
+    copy ("vxWorks", "/tffs0/vxWorks");
+\ce
+
+If you want to use "/tffs0" as a boot device, you should follow the instructions:
+
+For command line mode, make sure INCLUDE_TFFS is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the Flash chip.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    INCLUDE_TFFS_MOUNT
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_XBD
+    INCLUDE_XBD_TRANS
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_DIR_FIXED
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a default_romCompress.bin in the project directory, program
+it into the Flash chip as a bootrom.
+
+Below is an example by using /tffs as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /tffs0/vxWorks
+    inet on ethernet (e) : 128.224.163.75:fffff000
+    host inet (h)        : 128.224.162.146
+    gateway inet (g)     : 128.224.162.1
+    user (u)             : user
+    ftp password (pw)    : pass
+    flags (f)            : 0x0
+    target name (tn)     : SBC8548
+    other (o)            : motetsec0
+\ce
+
+\sh Support for L2 Cache
+L2 Cache is configured with callback function
+pointers for L2 cache Global Invalidation, L2 Cache Enable, L2 Cache
+Flush and L2 Cache Disable are initialized in sysHwInit().  By default, the
+256 KB L2 is configured to 256 KB of cache. If a different configuration is
+desired, a new bootrom image should be used to match the RAM image
+configuration of L2.
+
+\sh Support for Serial RapidIO via VXBUS
+To add Serial RapidIO support, define INCLUDE_RAPIDIO_BUS in config.h.
+We only support a point-to-point connection between two wrSbc8548 targets.
+The memory allocation is based on requirements for shared memory interface
+and is fixed initially to use memory traditionally set aside for that.
+The targetID and window allocation is determined via the hwconf.c file.
+Also the Local Access Windows are allocated based on this file so if an
+unused LAWBAR isn't available or allowed for SRIO then configuration will
+fail. If Configuration of Serial RapidIO fails makes sure that the link
+was actually established in hardware. That is address 0xe00c0158 value
+should be 0x2.
+
+\sh ETSEC via VXBUS
+The Etsec is configured with checksum offload capability by default.
+The Filer isn't enabled by default but there is an Ioctl available for that.
+Look at the example table in the driver before trying to configure the filer
+through the IOCTL. Support for queue prioritization is provided by the driver
+not the network stack so it pulls the packets off from the highest priority
+queue first which is queue 0 and sends them to the stack. Once it is empty it
+will go to the next queue and so on.
+VLAN tag insertion/removal support is not fully tested with the stack.
+
+\sh Operating Speed
+The processor has built-in PLL circuits to control the operating speed of
+the Core Complex Bus (CCB) as well as the E500v2 core. The BSP supports 533MHz for
+CCB. The clock rate for E500v2 core supported is
+to 1GHz for MPC8548. The default setting for the SBC8548 is 1GhZ core and 400Mhz
+CCB.
+
+\sh Boot Process
+Upon reset, the MPC85xx begins executing from 0xFFFF_FFFC. Only the last
+4KB of memory is mapped by the TLB.  The instruction at 0xFFFF_FFFC branches
+to resetEntry() located at the last 2KB of memory to begin initialization
+and mapping of memory static TLB entries.  The DDR SDRAM is then mapped to
+0x0 where the vectors are setup to use and execution is then transferred
+to the RAM after copying and uncompressing if necessary.
+
+The bootrom for the wrSbc8548 allows loading vxWorks with two ETSEC ethernet
+channels. In the boot dialog, they correspond to the "motetsec0" and
+the "motetsec1" devices. To switch between the two boot devices after a load
+is attempted, a hard reset or power cycle is necessary in order for the
+device to function properly.  After the reset, press a key to stop the
+countdown, then use the "c" command to change the boot device to the desired
+network device.
+
+If the bootrom is built with PCI support enabled, it is also possible to
+boot the target from an Intel PRO/1000 PCI/PCI-X or PCIe adapter. PCI/PCI-X
+cards can be plugged into slot J3, while PCIe devices can be plugged into
+slot J1. PCI support can be enabled by including the INCLUDE_PCI_BUS
+component. When enabled, and a device is connected, the "gei0" device
+should among the END devices available for booting.
+
+\sh DDR RAM Size
+This BSP supports only 256MB DDR memory since the SBC8548 is shipped with
+a 256MB DDR2 SDRAM SODIMM.
+
+\sh Local Bus SDRAM Size
+The wrSbc8548 supports 64MB of Local Bus SDRAM. The board is populated with a
+128MB module if more LB memory is necessary.
+
+\sh  NVRAM Support
+This BSP uses NVRAM on the 8KB EEPROM device. The bootline
+is stored at the beginning of the NVRAM.
+
+\sh Network Configuration
+The ETSEC ports allows 10/100/1000T connection.
+The driver will auto-negotiate and configure the port accordingly.
+The BSP also supports Intel 82546/82545/82544/82540/82543/82571/82572/82573
+based NICs
+
+The following END and corresponding END2 drivers are supported in this BSP.
+However, only END driver is enabled by default.
+
+\ts
+Driver | END                      | END2
+----------------------------------------
+TSEC   | INCLUDE_ETSEC_VXB_END    | INCLUDE_ETSEC_VXB_END2
+\te
+
+To enable the END2 driver, you should modify as follows:
+
+For command line build, add INCLUDE_END2 into config.h right after the
+definition of INCLUDE_END. Also replace the END driver name with corresponding
+END2 driver name, then rebuild the bootrom and vxWorks image.
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, add INCLUDE_END2 component and corresponding END2
+component, this will un-define END automatically. Then rebuild your project.
+
+\sh ROM Considerations
+bootrom_uncmp.hex is provided with this BSP. The bootrom is configured to
+a ROM base address of 0x0. When programming the bootrom to the FLASH an offset
+of 0xFFF00000 needs to be given.
+
+\sh BOOT FLASH
+There are two flash banks on the SBC8548 board. Currently, only the on-board 8MB
+flash device is supported in the BSP.
+
+\sh PCI Support
+The MPC8548 has two PCI/PCI-X channels and one PCIe channel. Both PCI/PCI-X
+channels are compliant with the PCI 2.2 specification. The SBC8548E board
+provides connections for one of the PCI/PCI-X (J3) buses and the PCIe bus
+(J1). Both slots are supported by the BSP, and can be enabled by defining
+INCLUDE_PCI_BUS in config.h.
+
+Once PCI support is enabled, any PCI device with a VxBus driver can be
+used. This include the Intel PRO/1000, Marvell Yukon II and RealTek
+gigabit ethernet adapters. It is recommended that only 66Mhz PCI devices
+be used in the 64-bit PCI/PCI-X slot, as connecting a 33Mhz device will
+reduce the bus speed and also reduce the system clock (causing the CPU
+to run at half speed).
+
+\sh Programmable Interrupt Controller
+The PIC driver provided by this BSP supports all internal and external
+interrupt sources.  It can also be configured to route such sources to
+the critical interrupt pin, as well as acting as handling the critical
+interrupts.  However, since critical interrupts are routed directly to
+the interrupt source instead of being manager by the PIC with IACK or
+EOI, the Critical Interrupt Summary registers are used to check for the
+source.  The transient values in these registers causes spurious vector
+when indexing into the vector table.
+
+\sh Make Targets
+The make targets are listed as the names of object-format files. Append `.hex' to each to derive a 
+hex-format file name. Other images not listed here may not be tested.
+
+\ts
+`bootrom'
+'bootrom_uncmp.hex'
+'bootrom_uncmp.bin'
+`vxWorks' (with `vxWorks.sym')
+`vxWorks.st'
+\te
+
+\sh BSP Bootloaders and Bootroms
+
+\ts
+Bootloader/Bootrom    | Status
+------------------------------
+bootrom               | SUPPORTED
+bootrom_uncmp         | UNVALIDATED
+vxWorks               | SUPPORTED
+vxWorks_rom           | UNSUPPORTED
+vxWorks_romCompress   | SUPPORTED
+vxWorks_romResident   | UNSUPPORTED
+\te
+
+\sh BSP Validated Tools
+
+\ts
+Tool                          | Connection/Type   | Status
+----------------------------------------------------------
+Workbench Debugger            | ETHERNET/WDB      | SUPPORTED
+Workbench System Viewer       | ETHERNET/WDB      | SUPPORTED
+Workbench MemScope            | ETHERNET/WDB      | SUPPORTED
+Workbench ProfileScope        | ETHERNET/WDB      | SUPPORTED
+Workbench StethoScope         | ETHERNET/WDB      | SUPPORTED
+Workbench CoverageScope       | ETHERNET/WDB      | SUPPORTED
+Workbench Core File Analysis  | ETHERNET/WDB      | UNVALIDATED
+Workbench Sensor Points       | ETHERNET/WDB      | UNVALIDATED
+Workbench OCD Debugger        | JTAG              | SUPPORTED
+Workbench OCD Flash           | JTAG              | SUPPORTED
+\te
+
+\sh Special Routines
+None
+
+\sh Serial Connections
+Most VxWorks BSPs do not use hardware handshaking in the serial
+interface, and thus a simple 3 wire connection is commonly used.
+
+\sh Ethernet Address
+The SBC8548 boards do not have a unique Ethernet hardware 
+address assigned to each board.  A unique address is absolutely necessary 
+if the user wishes to connect the board to a network. Thus, the user 
+must provide a suitable 6 byte Ethernet address for each board used 
+on a network.
+
+The definition of macro ETHERNET_MAC_HANDLER in config.h indicates the MAC 
+address is stored in NVRAM and alterable via the "M" bootrom command. This 
+option allows only the last three bytes to be changed. To use this option, 
+open a console window and reset the hardware. When the bootrom banner appears 
+and the countdown starts, press any key to get the "[VxWorks Boot]:" prompt.
+Type 'M' and follow the instructions.
+
+\sh Silicon Consideration
+
+The MPC8548E Chip have a DDR errata that may cause unpredictable, infrequent
+boot failure. The detailed description and the workaround can be found in DDR20
+errata from http://cache.freescale.com/files/32bit/doc/errata/MPC8548ECE.pdf
+The workaround is added to romInit.s by the definition of the macro
+INCLUDE_FSL_DDR_20_WORKAROUND. This macro is defined in config.h by default.
+
+Note that: the workaround is following the Option 1 and the Sub-Option 1 in the
+errata doc.
+
+\sh Known Problems
+
+The system clock for the MPC8548 is derived from the PCI bus clock. By 
+default, the bus runs at 66Mhz, and the BSP and clock multiplier settings 
+have been chosen based on this timebase value. However, if a 33Mhz card is 
+plugged into the 64bit PCI slot (J3), the bus speed will also be reduced 
+to 33Mhz. This will cause the MPC8548 to run at half speed. It may be 
+possible to compensate for this by adjusting the clock multiplier switch 
+settings on the board.
+
+The size of default vxWorks_rom image is grater than 1MB, which is oversized 
+than the default ROM_SIZE. ROM_SIZE and the corresponding link addresses can be 
+adjusted to make vxWorks_rom work, however it is an unsupported configuration.
+
+vxWorks_romResident image will take several minutes to boot up, the reason of
+which is unknown. This image type is unsupported in this release.
+
+BOARD LAYOUT
+
+The diagram below shows top view of SBC8548 board.
+
+\bs
+   ____________________________________________________________________       __
+  |                                                                    |     |  |
+  |                                                                    | ATX |  |
+  |                                                                    |POWER|  |
+  |   ___                                                               -----   |
+  |  |   |                 ________________________                       _     |
+  |  |   |                |       DDR2 SODIMM      |                     | |    |
+  |  |   |                 ------------------------            ____      |S|    |
+  |  |   |                  |                    |            |    |     | |    |
+  |  |   |    _             |        DDR2        |            |    |     |D|    |
+  |  | P |   | |            |       SDRAM        |            |    |     | |    |
+  |  |   |   | | TSEC3      |                    |            |SW2 |     |R|    |
+  |  | C |   | |Expansion   |____________________|            |    |     | |    |
+  |  |   |   | |                                              |____|     |A|    |
+  |  | I |   | |             __________________         ____             | |    |
+  |  |   |   | |            |                  |       |    |            |M|    |
+  |  |   |   | |            |                  |       |SW3 |            | |    |
+  |  | S |   | |            |      C P U       |       |    |            | |    |
+  |  |   |   | |            |                  |       |____|            |D|    |
+  |  | L |   |_|            |     MPC8548E     |        ____             | |    |
+  |  |   |                  |                  |       |    |            |I|    |
+  |  | O |                  |__________________|       |SW4 |            | |    |
+  |  |   |                                      ___     ----   ______    |M|    |
+  |  | T |                                     |   |          |      |   | |    |
+  |  |   |                                     | P |          |BOOT  |   |M|    |
+  |  |   |                                     | C |          |FLASH |   |_|    |
+  |  |   |                                     | I |           ------           |
+  |  |   |                                     | E |   ___________________      |
+  |  |   |                                     |   |  |                   |     |
+  |  |   |                ____________         |__ |  |    SODIMM flash   |     |
+  |  |___|               |            |    _________  |___________________|     |
+  |      ____     ____   |    JTAG    |   |Rapid I/O|     ______                |
+  |     |TSEC|   |TSEC|  |____________|    ---------     |TOP #1| RESET  POWER  |
+  |_____| #1 |___| #0 |__________________________________|BOT #2|__|-|___|---|__|
+         RJ45     RJ45                                     COM      |     |_|
+\be
+ 
+BIBLIOGRAPHY
+
+\tb MPC8548E Reference Manual
+
+\tb PowerPC E500 Core Reference Manual
+
+\tb Motorola PowerPC Microprocessor Family: The Programming Environments
+
+\tb Device Errata for the MPC8548E PowerQUICC III
+
+\tb SBC8548 Engineering Reference Guide
+
+WEB RESOURCES
+
+Much of the Freescale documentation can be found on line. The following
+URL was correct at the time of writing for semiconductor area. You'll have to 
+search the documentation using processor name for specific documentation.
+
+http://www.freescale.com/
+
+SEE ALSO
+
+\tb Workbench User's Guide: Getting Started
+
+\tb VxWorks Programmer's Guide: Configuration
+
+\tb VxWorks Programmer's Guide: Architecture Supplement 

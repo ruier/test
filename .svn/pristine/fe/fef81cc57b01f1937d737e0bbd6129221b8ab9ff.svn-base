@@ -1,0 +1,4 @@
+#ifdef INCLUDE_XLR_PCI
+    xlrPciRegister();
+#endif
+

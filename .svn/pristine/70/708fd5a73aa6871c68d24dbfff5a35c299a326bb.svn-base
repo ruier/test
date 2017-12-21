@@ -1,0 +1,3 @@
+#ifdef DRV_STORAGE_ALT_SOC_GEN5_DW_MSHC
+    altSocGen5DwMshcRegister ();
+#endif /* DRV_STORAGE_ALT_SOC_GEN5_DW_MSHC */

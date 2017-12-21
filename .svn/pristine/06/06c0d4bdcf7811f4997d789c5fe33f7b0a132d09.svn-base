@@ -1,0 +1,13 @@
+---- sysFpgaRtcGet Matches (12 in 2 files) ----
+usrApi.c (e:\windriver69\windriver69\vxworks-6.9\target\config\svpx6-5s512-smp):INT32 sysFpgaRtcGet(RTC_DATE_TIME *tm)
+usrApi.c (e:\windriver69\windriver69\vxworks-6.9\target\config\svpx6-5s512-smp):	sysFpgaRtcGet(&fpgaTm);
+usrApi.c (e:\windriver69\windriver69\vxworks-6.9\target\config\svpx6-5s512-smp):		sysFpgaRtcGet(&tm);
+usrApi.c (e:\windriver69\windriver69\vxworks-6.9\target\config\svpx6-5s512-smp):		sysFpgaRtcGet(&curtm);
+usrTest.c (e:\windriver69\windriver69\vxworks-6.9\target\config\svpx6-5s512-smp):		sysFpgaRtcGet(&tmpTimetest[0]);/*获取当前时间*/
+usrTest.c (e:\windriver69\windriver69\vxworks-6.9\target\config\svpx6-5s512-smp):		sysFpgaRtcGet(&tmpTimetest[1]);/*获取当前时间*/
+usrTest.c (e:\windriver69\windriver69\vxworks-6.9\target\config\svpx6-5s512-smp):		sysFpgaRtcGet(&tmpTimetest[0]);/*获取当前时间*/
+usrTest.c (e:\windriver69\windriver69\vxworks-6.9\target\config\svpx6-5s512-smp):		sysFpgaRtcGet(&tmpTimetest[1]);/*获取当前时间*/
+usrTest.c (e:\windriver69\windriver69\vxworks-6.9\target\config\svpx6-5s512-smp):		sysFpgaRtcGet(&tmpTimetest[0]);/*获取当前时间*/
+usrTest.c (e:\windriver69\windriver69\vxworks-6.9\target\config\svpx6-5s512-smp):			sysFpgaRtcGet(&tmpTimetest[1]);/*获取当前时间*/
+usrTest.c (e:\windriver69\windriver69\vxworks-6.9\target\config\svpx6-5s512-smp):		sysFpgaRtcGet(&tmpTimetest[0]);/*获取当前时间*/
+usrTest.c (e:\windriver69\windriver69\vxworks-6.9\target\config\svpx6-5s512-smp):			sysFpgaRtcGet(&tmpTimetest[1]);/*获取当前时间*/

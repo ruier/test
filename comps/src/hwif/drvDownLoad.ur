@@ -1,0 +1,3 @@
+#ifdef INCLUDE_DOWNLOADABLE_DRIVERS
+    drvUnloadLibInit();
+#endif /* INCLUDE_DOWNLOADABLE_DRIVERS */

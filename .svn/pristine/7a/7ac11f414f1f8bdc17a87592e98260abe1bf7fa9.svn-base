@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND_DTSEC
+    vxbDtsecEndRegister();
+#endif /* DRV_VXBEND_DTSEC */

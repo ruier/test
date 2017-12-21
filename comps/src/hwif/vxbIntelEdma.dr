@@ -1,0 +1,3 @@
+#ifdef DRV_DMA_INTEL_EDMA 
+    vxbIntelEdmaRegister ();
+#endif /* DRV_DMA_INTEL_EDMA */

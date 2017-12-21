@@ -1,0 +1,4 @@
+#ifdef DRV_RESOURCE_XLRCPLD
+    xlrCpldRegister();
+#endif
+

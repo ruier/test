@@ -1,0 +1,3 @@
+#ifdef INCLUDE_RTL8201PHY
+    rtlPhyRegister();
+#endif

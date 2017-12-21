@@ -1,0 +1,591 @@
+\" ads8572/target.ref - Freescale MPC8572-DS (White Fin) target specific documentation
+\"
+\" Copyright (c) 2007-2010 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01i,19may10,syt  remove known issue about PCI does not work with AMP.
+\"                  (WIND00210150)
+\" 01h,23feb10,wqi  correct flash information (WIND00199688)
+\" 01g,06oct09,d_c  Defect WIND00185185 Fix WIND00185188 - Split from rvb8572
+\" 01f,15June09,rgo add notes for PCI-EX2 errata 
+\" 01e,17mar09,rec  add notes for rvb8572 guestOs support
+\" 01d,29jan09,kxb  fix AMP documentation
+\" 01c,26aug08,d_l  correct switch number to select flash bank.(WIND00117073)
+\" 01b,10aug08,dtr  Updated for AMP
+\" 01a,12jul07,dtr  Created from ads8544/01a
+\"
+\"
+\TITLE ads8572 - Freescale MPC8572-DS 
+
+NAME
+`Freescale MPC8572-DS'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks for the ads8572 BSP.  Please read the section 
+"RUNNING VXWORKS" in order to configure the board to run vxWorks.
+
+The board is also call the WHITEFIN.
+
+Board Revision The BSP supports is WHITEFIN x3. The latest board supported 
+has a Rev A sticker. Rev of U-Boot 1.3.0-rc3 (Dec  4 2007 - 01:21:14)
+NOTE: If the board or u-boot revision changes it may break this BSP. 
+Please provide Wind River Support any board and u-boot revision information 
+along with the details when making queries into any 
+issues you may come across.  
+
+RUNNING VXWORKS
+This section provides guidelines for running VxWorks on the ads8572 
+reference board.
+
+\sh 1. Setting the board Jumpers and Switches.
+
+Switch Settings for the three boards which constitute the ADS8572 system.
+
+Use the relevent MPC8572ADS users guide for switch details.
+Here is a quick reference for switch settings used for testing this BSP. They 
+maybe out of date for newer revisions of the board. Board revision used in testing was Whitefin REV x3 and RevA.
+
+Quick config: 1-on 0-off
+\ts
+
+Pins 1->8
+SW1
+
+0 0 0 0 0 0 0 0 
+
+SW2
+
+0 1 0 0 0 0 0 0
+
+SW3
+Cfg Sys pll 6 times cfg sys == 600MHz system clk
+0 1 0 0 1 1 1 0
+
+SW4
+
+1 1 1 1 1 1 1 1
+
+SW5
+cfg ddr ppl is 12 times cfg ddr clk == DDR clk 800Mhz /2 = 400Mhz 
+1 1 1 1 1 1 0 1
+
+SW6
+cfg sysclk 100MHz
+cfg ddrclk 66MHz
+1 0 1 0 1 1 0 0
+
+SW7
+
+1 1 1 1 0 1 1 0
+
+SW8
+
+1 0 0 0 0 0 0 0
+
+SW9
+
+0 0 -> UBOOT
+1 1 -> VXWORKS/DINK
+- - 0 1 0 1 0 0
+
+SW10
+Core0 and 1 is 2.5 times sys clk == 1500MHz
+1 0 1 0 0 1 0 1	
+
+\te
+
+
+\sh 2. Flashing the Boot ROM Image Using Workbench
+
+   This section describes how to program a VxWorks bootrom image onto 
+   a flash bank using Workbench 2.6 (or later) and the Wind River ICE 
+   plugin. Note that the Wind River Probe (USB) is also supported and 
+   uses the same basic instructions as the Wind River ICE but does not 
+   require an IP address.
+
+   If you want to preserve the UBOOT image, switch the flash bank that 
+   will be used for the bootrom image using SW9 pins 1 & 2. 00 -> 11
+   This switches bank 1 and bank 0 of the flash bank and should prevent 
+   UBOOT from being overwritten. Note that UBOOT can be used to program 
+   a VxWorks bootrom image.
+   
+
+   Using Workbench, complete the following steps to flash your boot ROM image:
+          
+	a) Create a bootrom.hex image.
+
+	Create a VxWorks boot loader project based on the ads8572 BSP.
+	You can use the default compressed image. However, use hex 
+	format in place of the elf format.
+	After the project is created, build the default image.
+ 
+	b) Install the WindRiver ICE and power it on.
+
+	Connect the JTAG interface cable from the Wind River ICE to the 
+	ADS8572 board JTAG connector (located on the CPU card). When all 
+	of the connections have been made, power up the ADS8572 board and 
+	create a Wind River ICE connection in Workbench.
+
+	c) Configure the Workbench connection.
+
+	When creating the connection, specify the MPC8572 CPU.
+	Enter the IP address of the Wind River ICE when requested.
+
+	d) Load the proper ads8572 register setting for WindRiver ICE.
+
+	Once you have connected the probe to the CPU, right-click on the 
+	connection in the target manager and attach to the CPU core. At 
+	this point, you can go to the main Workbench Window tab at the top 
+	of the view and select "show view". Browse the view list and select 
+	OCD Command Shell. This launches the original BKM command shell.
+	Navigate to the target manager and right-click on core(U1). Select 
+	reset and download. You can now put the register file in this BSP or 
+	one provided by the installation in "play register file" 
+	(for example,mpc8572e_whitefin_uboot.reg). Reset with IN then click the 
+	reset download button. You have now loaded the target board with 
+	enough settings to program the boot ROM. Select "Window > show view" 
+	again and select Flash Programmer.
+
+	e) Converting the bootrom.hex file to bootrom.bin.
+
+	Select the Add/Remove tab in the flash programmer. Click 
+	"convert file" and navigate to the boot loader project you created 
+	previously e.g. WindRiver\workspace\ads8572BootProj\bootrom.hex. 
+	Select the project. The start adress should be 0x0 and the end 
+	adress should be set to 0xfffffff. Click "convert and add" to convert 
+	the file. 
+ 	At this point, the file is added to the list. Click on the start 
+	address entry (should be 0x0) and change it to 0xfff00000. The file 
+	is now ready for programming.
+
+
+	f) Program the ads8572 flash.
+
+	Select the configuration tab and choose the following device:
+	AMD -> S29GL01 -> 65536 x 16 -> 1 Device.
+
+	Set the base address to 0xf8000000.
+	Set the start address to 0x5000. 
+	Set the size to 65536.
+
+	Select programming tab and set the following options:
+
+	Set the erase from setting to 0xfff00000.
+	Set the erase to setting to 0xffffffff.
+
+	Go to OCD command shell and type IN. Be sure this returns the BKM 
+	prompt and is OK. Return to the flash programmer and select the 
+        Batch Program tab and then select the Initialize/Erase and Program 
+	checkboxes. Click Execute.
+	Wait for the programmer to complete.
+	You can now run the VxWorks boot ROM by going back to the OCD command 
+	shell and typing "INN" followed by "GO". Alternatively, you can 
+	disconnect the ICE and proceed to Step 3 "Running the VxWorks Boot 
+	ROM Program".
+
+\sh 3. Flashing the Boot ROM Image Using the on-board boot loader        
+   
+	The version of U-Boot used for these instructions was:	
+	U-Boot 1.3.0-rc3 (Dec  4 2007 - 01:21:14)
+
+	The MPC8572-DS reference board is shipped with a
+	factory-programmed UBOOT boot loader capable of downloading a
+	Boot ROM image using its tftp client and programming it in the
+	alternate flash bank. SW9 pin1 &pin2 are used to switch between flash 
+	banks. set baud rate to 115200 for u-boot. A tftp server is required. 
+	In the following instructions, the tftp server IP address is 
+	128.224.146.96.
+
+	For some reason u-boot has moved the address of the flash after it 
+	starts up in the latest version to support this board. The 
+	instructions have been modified to match. If however you have an 
+	early version of u-boot the flash was previously at 0xf8000000 as 
+        mapped by u-boot instead of 0xe8000000. You should modify the 
+	addresses below to match.  
+	The following instructions describes all the steps that must
+	be performed. You are only required to type in the line following
+	the "=>" UBOOT prompt.
+	
+	a) set the target ip address.
+   
+	=> setenv ipaddr 128.224.147.196
+   
+	b) set the tftp server ip address
+   
+	=> setenv serverip 128.224.146.96
+   
+	Note: Additional environment changes may be required for
+	your network.
+   
+	c) save the environment
+   
+	=> saveenv
+
+	d) get the bootrom image from the tftp server and store
+	it in RAM at address 0x1000000.
+   
+	=> tftp 10000000 bootrom_uncmp.bin
+   
+	e) erase the alternate Flash bank
+   
+	=> erase ebf00000 ebffffff
+   
+	f) program the flash at location 0xebf00000 for 0x100000 bytes.
+	Note that the number of bytes to program will depend on the image
+	size. The actual number of bytes in the image is available in the
+	output of step 'd' above after 'Bytes transfered'. It will be 1MB by 
+        default unless you change the ROM_SIZE to create a larger image.
+   
+	=> cp.b 10000000 ebf00000 100000
+   
+	At this point, the Boot ROM image is programmed and is ready
+	to be used once these additional steps are complete.
+   
+	g) Turn off the target
+   
+	h) Toggle switch 9 position 1 & 2 to swap the flash banks
+   
+	i) Turn on the target.
+   
+        
+\sh 4. Running the VxWorks Boot ROM Program
+
+	To run the VxWorks boot ROM program, complete the following steps:
+
+	a) If you have not already done so, disconnect the Wind River ICE.
+	Note that if the ICE remains connected, it can stop the processor at 
+	the first instruction in certain cases.
+
+	b) Connect the Ethernet and serial channels.
+	
+	i) Connect the serial port to the host using the supplied serial 
+	cable.
+	ii) Connect the RJ45 Ethernet cables to the ETSEC ports which 
+	are next to the serial port. The connector ontop is ETSEC1 and is used
+	as the standard boot device.
+
+	c) Launch a terminal program on the host and configure as follows:
+
+	8 data bits
+	1 stop bit
+	no hardware handshaking 
+	parity disabled
+	baud rate = 115200 bps
+
+	d) Power cycle the board.
+
+	If the board is not already powered off, turn it off momentarily. 
+	Then, power the board on. At this point, you should see characters 
+	being printed to the terminal window signaling the boot countdown. 
+	Press any key to stop the count down. You are now ready to configure 
+	VxWorks. For detailed instructions, see the VxWorks Kernel 
+	Programmer's Guide.
+
+\sh BOOT DEVICES
+The supported boot devices are:
+\cs
+	motetsec - 10/100/1000 Triple Speed Ethernet Controller
+\ce
+
+FEATURES
+This section describes the supported and unsupported features of the ads8572
+
+\sh Supported Features
+
+The supported features of the ADS8572 board are:
+
+	SMP and AMP support
+	MMU support, including 36-bit physical addressing (see the Makefile)
+	Cache support
+	L2 cache support
+	L2 SRAM support
+	Decrementer timer, used to implement a system clock
+	Timestamp clock
+	Auxilliary clock
+	MPC8572 DUART
+	on-chip 10/100/1000 TSEC 1,2,3,4
+	on-chip programmable interrupt controller
+	DDR SDRAM (1 GB memory)
+	Flash (128MB) - used for bootline and images only
+	PCI Express 
+	PCI slots on ULi
+
+\sh Unsupported Features
+
+The following devices are unsupported by this BSP:
+	Security Engine - untested. 
+			- See Wind River/Freescale support for latest drivers
+	I2C controller - partial support only, single thread access
+	DMA controller.
+	Performance Monitor
+        TLU engine
+        Pattern Matcher
+	Fast Ethernet Controller(FEC)
+	GPIO
+	ULI bridge other than PCI slots.
+	TFFS 
+
+HARDWARE DETAILS
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Devices
+
+The chip drivers included are:
+
+	vxbM85xxTimer.c - Timer driver.
+	vxbEpicIntCtlr.c - On-chip interrupt controller.
+	vxbOpenPicTimer.c - PIC timers.
+	vxbEtsecEnd.c - TSEC ethernet controller.
+	vxbNs16550Sio.c - Serial driver.
+	gei825xxVxbEnd.c - Intel 8254x/8257x(PEX) Gigabit.
+	sysL2Cache.c - L2 cache library.
+	m85xxPci.c - PCI bus controller driver.
+
+\sh Memory Maps
+
+The following table describes the ADS8572 default memory map:
+\ts
+
+Start | Size | End | Access to
+------------------------------
+0x0000_0000 | 1 GB | 0x1FFF_FFFF | DDR SDRAM
+0x5000_0000 | 64 MB | 0x53FF_FFFF | PEX1 Prefetchable Memory
+0x5400_0000 | 64 MB | 0x57FF_FFFF | PEX1 Non-Prefetchable Memory
+0x5800_0000 | 64 MB | 0x5BFF_FFFF | PEX1 I/O
+0x6000_0000 | 64 MB | 0x63FF_FFFF | PEX2 Prefetchable Memory
+0x6400_0000 | 64 MB | 0x67FF_FFFF | PEX2 Non-Prefetchable Memory
+0x6800_0000 | 64 MB | 0x6BFF_FFFF | PEX2 I/O
+0x8000_0000 | 64 MB | 0x63FF_FFFF | PEX3 Prefetchable Memory
+0x8400_0000 | 64 MB | 0x67FF_FFFF | PEX3 Non-Prefetchable Memory
+0x8800_0000 | 64 MB | 0x6BFF_FFFF | PEX3 I/O
+0xE000_0000 | 1 MB | 0xE00F_FFFF | Configuration Control Registers
+0xE800_0000 | 1 MB | 0xE81F_FFFF | PIXIS 
+0xF800_0000 | 8 MB | 0xFFFF_FFFF | Flash 
+\te
+
+The following table describes the default VxWorks macros that are used 
+to address memory
+\ts
+
+Macro Name | Macro Definition | Description
+------------------------------
+LOCAL_MEM_LOCAL_ADRS | 0x0000_0000 | base of RAM
+RAM_LOW_ADRS | LOCAL_MEM_LOCAL_ADRS + 0x0010_0000 | VxWorks image point and stack grows down from this address.
+RAM_HIGH_ADRS | LOCAL_MEM_LOCAL_ADRS + 0x0100_0000 | VxWorks boot ROM loaded here.
+LOCAL_MEM_SIZE | 4000_0000 | default 1GB of RAM
+ROM_BASE_ADRS | 0xFFF0_0000 | base address of ROM
+ROM_TEXT_ADRS | ROM_BASE_ADRS + 0x100 | text must start after vector table 
+ROM_WARM_ADRS | ROM_TEXT_ADRS + 8 | warm Reboot Entry Address
+ROM_SIZE | 0x0010_0000 | default 1 MB of ROM
+\te
+
+\sh Support for L2 Cache
+L2 Cache is configured with callback function pointers for L2 Cache Global 
+Invalidation, L2 Cache Enable, L2 Cache Flush, and L2 Cache Disable. These 
+function pointers are initialized in sysHwInit( ). By default, the 256 KB 
+L2 is configured to 256 KB of cache. If a different configuration is desired, 
+a new boot ROM image should be used to match the RAM image configuration of 
+the L2.
+
+\sh Boot Process
+
+Upon reset, the MPC85xx begins executing from 0xFFFF_FFFC. Only the last 
+4 KB of memory is mapped by the TLB. The instruction at 0xFFFF_FFFC branches 
+to resetEntry( ) (which is located at the last 2 KB of memory) to begin 
+initialization and mapping of memory static TLB entries. The DDR SDRAM is 
+then mapped to 0x0 where the vectors are set up for use and execution is 
+then transferred to RAM after copying and uncompressing (if necessary). 
+
+The boot ROM for the ADS8572 allows you to load VxWorks with four eTSEC 
+Ethernet channels. In the boot dialog, these channels correspond to the 
+"motetsec0" and the "motetsec1" devices. To switch between the boot devices 
+after a load is attempted, a hard reset or power cycle is necessary in order 
+for the device to function properly. After the reset, press a key to stop 
+the count down and use the "c" command to change the boot device to the 
+desired network device. 
+
+To configure the MAC address of the ETSEC devices you must use the M command:
+\cs
+[VxWorks Boot]: M
+Set device MAC address
+
+  0  quit
+  1  motetsec0  31:31:92:1e:a0:00
+  2  motetsec1  31:31:93:1e:a0:00
+  3  motetsec2  31:31:94:1e:a0:00
+  4  motetsec3  31:31:95:1e:a0:00
+  Selection : 1
+Mac address for motetsec0 invalid. Using a reproducible random address.
+motetsec0 current Ethernet Address is: 00:a0:1e:92:31:31
+Modify only the last 3 bytes (board unique portion) of Ethernet Address.
+The first 3 bytes are fixed at manufacturer's default address block.
+00- 00
+a0- a0
+1e- 1e
+92- 
+31- 
+31- 
+
+Address unchanged
+New Ethernet Address is: 31:31:92:1e:a0:00
+[VxWorks Boot]: 
+
+\ce
+
+An Intel 82573-based PEX NIC can be plugged into an empty slot. 
+The config.h must be modified to define INCLUDE_GEI8255X_VXB_END. If the 
+8257x PEX NIC is plugged into the PCIEX slot1 or 2. 
+Then, you will need to rebuild the boot ROM with the above changes in 
+config.h. At this point, you can re-flash the boot ROM to flash memory. The 
+boot device for Intel 8254X gigabit controllers is "gei".
+
+
+\sh AMP with wrload and MIPC
+
+The default bootrom provided from either ads8572_AMP or the ads8572 BSP
+may be used to boot the board with UP, AMP or SMP images.
+
+You must use the Workbench or vxprj to build the BSPs.
+You can build any AMP image for either core0 or core 1 from the 
+ads8572_AMP BSP, but each image must be configured manually 
+with the appropriate components.
+
+The image for core 0 must be configured with
+BUNDLE_AMP_PRI (Primary core bundle) which adds all required MultiOS components, including wrload, MIPC and MSD (MIPC Serial Device), and the optional but very useful WDB proxy.
+
+The image for core 1 must be configured with 
+BUNDLE_AMP_SEC (Secondary core bundle), which adds
+all required secondary core MultiOS components, including MIPC and MSD 
+(configured as client), 
+and INCLUDE_WRLOAD_IMAGE_BUILD.
+Additionally, the secondary core must be configured with INCLUDE_AMP_CPU_01 
+(Kernel configurations: hardware -> BSP configuration variants -> vxWorks AMP core build).
+
+The secondary core image uses the DEFAULT_BOOT_LINE by default, so you want 
+to set this parameter in your vxWorks Image Project. 
+For example (all on one line, no breaks, note the escaped internal double-quotes):
+
+$ vxprj parameter set DEFAULT_BOOT_LINE "\"motetsec(2,0)host:<image_dir>/vxWorks 
+h=192.168.1.1 e=192.168.1.2 u=vxworks pw=vxworks f=0x0\""
+
+Boot the image created with BUNDLE_AMP_PRI from the bootrom.
+Call wrload using the following either add as part of the usrAppInit or call 
+from a shell such as the target shell.
+For Example:
+
+-> wrload "-file <image dir>/vxWorks -cpu 1"
+
+The image you load should be the image built with BUNDLE_AMP_SEC and INCLUDE_AMP_CPU_01.
+
+\sh DDR RAM Size
+This BSP can support up to 512 MB DDR memory. By default, only 512MB DDR 
+memory is configured in config.h. Change the definition of LOCAL_MEM_SIZE 
+in romInit.s for your desired DDR memory size and chip selects. Auto-detect 
+has not been implemented.
+
+\sh Network Configuration
+The ETSEC port allows a 10/100/1000T connection. 
+The driver will auto-negotiate and configure the port accordingly. 
+The BSP also supports Intel GEI 82573 NICs with the PCIEX interface.
+
+\sh ROM Considerations
+
+UP/SMP and AMP with WRLOAD
+
+The bootrom.hex file is provided with the ads8572 BSP is prebuilt and will work
+ for all 3 BSP variants. The boot ROM is configured to a ROM base address of 
+0x0. When programming the boot ROM to the flash, an offset of 0xFFF00000 needs 
+to be used.
+
+\sh Boot Flash
+There are two flash banks on the ADS8572 board.
+
+\sh PCI/PCI Express Support
+
+There are three PCI Express host controllers on the MPC8572.
+
+The support for multiple PCIEX bus conrollers and vxBus PCI devices is 
+provided by a new vxBus PCIEX bus controller driver and PCI config 
+libraries which will be added.
+
+Support for Message Signal Interrupt (MSI) has been added via EPIC and 
+PCI bus controller driver.
+
+There is the Errata "PCI-Ex2" (Chip Errata for the MPC8572E PowerQUICC
+III Processor Rev. D) for Revision 1.0 which exists in
+REV.B assembly of the ads8572E-DS chassis. This errata causes PCIe
+link between 8572 PCIe controller and PEX device fails after /HRESET. The 
+workaround is enabled in hardware configuration resource `pciExt2ErrataFlag'.
+This workaround has been fixed in silicon revision 1.1.1 of MPC8572E
+populated in REV.D assembly chassis.
+
+\sh TrueFFS
+
+Unsupported 
+
+\sh Serial Configuration
+
+The UART device is configured with 8 data bits, 1 stop bit, hardware
+handshaking, and parity disabled.  The device operates at 115200 bps. The
+on-chip DUART on the MPC8572 is supported. However, only one channel of the 
+DUART is used on the ADS8572 reference boards.
+
+\sh Programmable Interrupt Controller
+
+The PIC driver provided by this BSP supports all internal and external 
+interrupt sources. The driver can also be configured to route such interrupt 
+sources to the critical interrupt pin. However, because critical interrupts 
+are routed directly to the interrupt source instead of being manager by the 
+PIC with IACK or EOI, the Critical Interrupt Summary registers are used to 
+check for the source. The transient values in these registers cause a spurious
+vector when indexing into the vector table.
+Support for shared message interrupt for PCI Expresss MSI has been added.
+
+
+\sh SPECIAL CONSIDERATIONS
+This section describes miscellaneous information that you need to know before 
+using this BSP.
+
+
+\sh Delivered Objects
+\is
+\i bootrom
+\i bootrom_uncmp.hex
+\i bootrom_uncmp.bin
+\i vxWorks
+\i vxWorks.sym
+\i vxWorks.st
+\ie
+
+
+BIBLIOGRAPHY
+For further information on the ADS8572 board, refer to the following 
+documents:
+
+\tb MPC8572E Reference Manual 
+
+\tb PowerPC E500 Core reference Manual 
+
+\tb Motorola PowerPC Microprocessor Family: The Programming Environments 
+
+\tb MPC8572-DS Users Guide  
+
+\tb Chip Errata for the MPC8572E PowerQUICC III Processor, Rev.D-4/2008
+
+Much of the Freescale documentation listed above can be found online. 
+The following URL is correct at the time of writing:
+
+http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=MPC8572E
+
+If the MPC8572E-specific link listed above does not work, you can also 
+navigate to the documentation from the main link at: 
+
+http://www.freescale.com/

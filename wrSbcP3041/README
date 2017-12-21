@@ -1,0 +1,35 @@
+
+            README: WindRiver SBC P5020/P3041 (wrSbcP5020/wrSbcP3041)
+
+This file contains board-specific information for the WindRiver SBC P5020/P3041 
+target board.  This file documents BSP interface changes from previous software
+or hardware versions, and notifies the user of serious caveats that must be
+noted before using this BSP.  Additionally, the target board's reference entry
+(i.e. (wrSbcP5020/wrSbcP3041)/target.ref) provides board-specific information 
+necessary to run VxWorks and should be read fully before this BSP is used.
+
+--------------------------------------------------------------------------------
+
+RELEASE 6.9/3
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    Remove default_rom and default_romResident support in 20bsp.cdf. (WIND00411417)
+
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    Fixed time base enable issue on non-zero CPUs. (WIND00403567)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Add related define for romInit.s (WIND00360538)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Initial release.

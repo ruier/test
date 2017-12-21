@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND_AT91EMAC
+    at91EmacRegister();
+#endif /* DRV_VXBEND_AT91EMAC */

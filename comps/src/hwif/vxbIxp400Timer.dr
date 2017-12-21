@@ -1,0 +1,3 @@
+#ifdef DRV_TIMER_IXP400
+    ixp400TimerDrvRegister ();
+#endif

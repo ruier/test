@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTLR_OMAPL137
+    vxbOmapL137IntCtlrRegister ();
+#endif /* DRV_INTCTLR_OMAPL137 */

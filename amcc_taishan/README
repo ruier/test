@@ -1,0 +1,63 @@
+README: amcc_taishan BSP for AMCC PPC440GX Evaluation Board
+ 
+This file contains information on any BSP interface changes from
+previous software or hardware versions, and contains caveats that the
+user must be aware of before using this BSP. Additionally, the target
+board's manual page entry (amcc_440gx/target.nr) provides board-specific
+information necessary to run VxWorks, and should be read before this BSP
+is used.
+
+-------------------------------------------------------------------------
+RELEASE 6.9/x
+    TODO:
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.x
+
+    Fixed potential memory corruption caused by sysNvRamGet(). (WIND00101057)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    disable TAH by default to avoid EMAC lock up. (WIND00272618)
+    Remove the component INCLUDE_AIM_MMU_SHOW for footprint. (WIND00334904)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+    define INCLUDE_EMAC_VXB_END to avoid build error. (WIND00190329)
+	
+RELEASE 2.0/4
+
+    Released from Wind River for General Purpose Platform 3.8, Vxworks 6.8
+
+    Add vxbus timer & uic support.
+    Fix bootApp couldn't load vxWorks image issue.(WIND00128808)
+	
+RELEASE 2.0/3
+
+    Released from Wind River for General Purpose Platform 3.7, Vxworks 6.7
+
+    Updated for new VxBus EMAC driver and replaced legacy phy driver with vxBus 
+    generic phy driver.
+    Replace sysDcrInLong/sysDcrOutLong with dcrInLong/dcrOutLong 
+    (WIND00132797)
+    Add support for bootApp.
+	
+RELEASE 2.0/2
+
+    Released from Wind River for General Purpose Platform 3.6, Vxworks 6.6
+
+    Updated device drivers: SIO,EMAC,IbmMAL and PCIX with vxBus drivers support.
+
+RELEASE 2.0/1
+
+    Release from Wind River for VxWorks 6.5
+
+    Added support for the IPNet Network Stack.
+
+RELEASE 2.0/0:
+
+    Released from Wind River for Workbench 2.6, VxWorks 6.4
+
+    First version, created based on ocotea bsp.

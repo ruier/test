@@ -1,0 +1,3 @@
+#ifdef INCLUDE_MSG_NET
+     msgEndRegister ();
+#endif /* INCLUDE_MSG_NET */

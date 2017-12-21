@@ -1,0 +1,101 @@
+README:  AMCC PPC440EP Evaluation Board (Yosemite)
+ 
+This file contains information on any BSP interface changes from previous
+software or hardware versions, and contains caveats that the user must be
+aware of before using this BSP. Additionally, the target board's manual
+page entry (for example, amcc440ep/target.ref) provides board-specific
+information necessary to run VxWorks, and should be read before this BSP is
+used.
+ 
+-------------------------------------------------------------------------------
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    Fixed a memory corruption caused by MAC address get and set. (WIND00344736)
+    Disable lower priority interrupts in uicIntr.c. (WIND00417545)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Add ROM_EXTRA definition in Makefile. (WIND00201051)
+    Fix bootApp couldn't boot issue.(WIND00250960)
+    Update information on flashing bootrom.bin with workbench. (WIND00232731)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+    Fixed a memory corruption caused by MAC address get and set. (WIND00344736)  
+
+Version 2.0/7
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Modified the value of PM_RESERVED_MEM to the default value if INCLUDE_EDR_PM 
+    is not defined.(WIND00135575)
+    Remove INCLUDE_PING from config.h for default_romResident.(WIND00137237)
+    Fix bootApp couldn't load vxWorks image issue.(WIND00128808)
+
+Version 2.0/6
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Replace sysDcrInLong/sysDcrOutLong with dcrInLong/dcrOutLong
+    (WIND00132797)
+    Add support for bootApp.
+
+RELEASE 2.0/5
+
+    Released from Wind River for VxWorks 6.6
+
+    Add AUX_CLK_RATE related 3 macros to config.h to pass the BSPVTS 
+    auxClock test. (WIND00046349 & WIND00061262)
+    The string returned from sysNvRamGet() should be terminated with EOS.
+    (WIND00063183)
+
+RELEASE 2.0/4:
+
+    Release from Wind River for VxWorks 6.5
+        
+    Added support for the IPNet Network Stack.
+
+RELEASE 2.0/3:
+
+    Release from Wind river for Workbench 2.5 VxWorks 6.3
+
+RELEASE 2.0/2:
+
+    Release from Wind river for Workbench 2.4 VxWorks 6.2
+
+    Fixed auto-negotiation problem due to incorrect PHY addresses.
+
+    Changed the BSP to use drv/end/emacEnd.c and drv/dma/ibmMalDma.c
+    instead of local driver in the BSP directory
+
+    Added the commmand "M" to modify/store the Ethernet Mac address
+    in EEPROM storage via the IIC bus interface.
+
+RELEASE 2.0/1:
+
+    Released from Wind River for Workbench 2.4 VxWorks 6.2 
+
+    Initial release
+
+    This version of the BSP was primarily developed using the following
+    tools:
+            Diab compiler
+            Linux host Wind Power ICE 
+    Restrictions/Limitations
+    ------------------------
+    
+    USB
+    ---
+
+    Only the USB1.1 host controller is supported in this release. 
+    The USB1.1 and USB 2.0 device controllers are not currently supported
+
+    TFFS
+    ----
+    
+    Not suppported

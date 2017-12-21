@@ -1,0 +1,4 @@
+#ifdef DRV_INTCTLR_AT91
+    vxbAt91IntCtlrRegister();
+#endif /* DRV_INTCTLR_AT91 */
+    

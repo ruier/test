@@ -1,0 +1,25 @@
+
+         README: Freescale fsl_mpc8308_rdb BSP
+
+This file contains board-specific information for the Freescale MPC8308_RDB
+target boards. This file documents BSP interface changes from previous
+software or hardware versions, and notifies the user of serious caveats
+that must be noted before using this BSP. Additionally, the target board's
+reference entry (fsl_mpc8308_rdb/target.ref) provides board-specific
+information necessary to run VxWorks and should be read fully before
+this BSP is used.
+
+
+------------------------------------------------------------------------
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Rename DRV_STORAGE_FSL_SDHC to DRV_STORAGE_SDHC.
+	
+RELEASE 2.0/0
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Initial release.

@@ -1,0 +1,1 @@
+IMPORT void vxbLpc24xxIntCtlrRegister(void);

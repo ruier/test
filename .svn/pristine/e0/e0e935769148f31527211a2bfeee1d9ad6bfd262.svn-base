@@ -1,0 +1,1242 @@
+\" target.ref - Freescale QorIQ P2041RDB target specific documentation
+\"
+\" Copyright (c) 2012 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01g,12oct12,d_l  update memory space for AMP cores. (WIND00344670)
+\" 01f,11oct12,d_L  update PCIe x4 known issue. (WIND00361031)
+\" 01e,04jul12,d_l  removed INCLUDE_BOOT_EDR_SUPPORT. (WIND00359794)
+\"                  update hardware support list for I2C. (WIND00359788)
+\" 01d,09apr12,h_k  removed SYSTEM_GLOBALS and RESERVED_ATOMICS. (WIND00341977)
+\" 01c,19mar12,y_y  add vxBus I2C support.
+\" 01b,01mar12,d_l  misc code clean up.
+\" 01a,31jan12,d_l  created.
+\"
+\TITLE fsl_p2041_rdb - Freescale QorIQ P2041RDB
+
+NAME
+`Freescale QorIQ P2041RDB'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks for the fsl_p2041_rdb BSP.  Please read the section "Getting the board
+running VxWorks" in order to configure the board to run vxWorks.
+
+\sh Getting the board running VxWorks
+This section will guide you on how to run VxWorks on the Freescale P2041RDB
+board.
+
+1. Switches
+
+    There are three DIP-switches on the P2041RDB board. 
+    Please make sure all these switches are in the correct state that the 
+    document "P2041RDB-PA_RM_2p0.pdf" in the U-disk shipped with board 
+    describes before using the VxWorks BSP.
+
+    Correct DIP-Switch Settings for P2041RDB REV B is:
+
+\ts
+Switch Number | Switch ON     | Switch OFF
+---------------------------------------------
+SW1           | 1,3,4,6       | 2,5,7,8
+SW2           | 3,6           | 1,2,4,5,7,8
+SW3           | 2,4,6,7,8     | 1,3,5
+\te
+
+    SW#2[2] will select whether upper bank flash or lower bank flash will
+    boot.(OFF: upper bank for booting, ON: lower bank for booting).
+    For REV B board with default factory setting, U-Boot can boot from both
+    upper bank flash and lower bank flash.
+
+2. Creating a bootrom.bin:
+
+    Open the VxWorks Development Shell, change directory to fsl_p2041_rdb
+    BSP directory, then build the VxWorks bootrom image.
+
+\cs
+    cd target/config/fsl_p2041_rdb
+    make bootrom.bin
+\ce
+
+3. Flashing the VxWorks bootrom with U-boot
+
+    This section will describe how to program a VxWorks bootrom into the flash
+    using the pre-flashed U-Boot.
+
+    3.1 Set the Boot Flash Switch
+
+        Make sure lower bank flash is selected by checking:
+        SW#2[2] = [ON]
+
+    3.2 Starting a TFTP server
+
+        Open a TFTP server on your host.  Make sure the root directory is
+        your fsl_p2041_rdb BSP directory which contains the VxWorks bootrom
+        image you've just created.
+
+    3.3 Make sure your host serial port's configuration is:
+
+        Baud Rate: 115200
+        Data: 8 bit
+        Parity: None
+        Stop: 1 bit
+        Flow Control: None
+
+    3.4 Configuring the U-Boot environment
+
+        Power up the board, you'll see the U-Boot shell prompt, something like:
+
+\cs
+U-Boot 2011.06-rc2 (Sep 16 2011 - 13:51:39)
+
+CPU0:  P2041E, Version: 1.0, (0x82180110)
+Core:  E500MC, Version: 2.2, (0x80230022)
+Clock Configuration:
+       CPU0:1500 MHz, CPU1:1500 MHz, CPU2:1500 MHz, CPU3:1500 MHz, 
+       CCB:750  MHz,
+       DDR:666.667 MHz (1333.333 MT/s data rate) (Asynchronous), LBC:93.750 MHz
+       FMAN1: 583.333 MHz
+       PME:   375 MHz
+L1:    D-cache 32 kB enabled
+       I-cache 32 kB enabled
+Board: P2041RDB, CPLD version: 2.2 vBank: 1
+36-bit Addressing
+Reset Configuration Word (RCW):
+       00000000: 12600000 00000000 241c0000 00000000
+       00000010: 649fa0c1 c3c02000 fe800000 40000000
+       00000020: 00000000 00000000 00000000 d0030f07
+       00000030: 00000000 00000000 00000000 00000000
+SERDES Reference Clocks: Bank1=100Mhz Bank2=125Mhz 
+I2C:   ready
+SPI:   ready
+DRAM:  Initializing....using SPD
+Detected UDIMM UG51U6400N8SU-ACF
+2 GiB left unmapped
+    DDR: 4 GiB (DDR3, 64-bit, CL=9, ECC off)
+       DDR Chip-Select Interleaving Mode: CS0+CS1
+Testing 0x00000000 - 0x7fffffff
+Testing 0x80000000 - 0xffffffff
+Remap DDR 2 GiB left unmapped
+
+POST memory PASSED
+Flash: 128 MiB
+L2:    128 KB enabled
+Corenet Platform Cache: 1024 KB enabled
+SERDES: timeout resetting bank 3
+SRIO1: disabled
+SRIO2: disabled
+MMC:  FSL_ESDHC: 0
+EEPROM: Invalid ID (ff ff ff ff)
+PCIe1: disabled
+PCIe2: Root Complex, no link, regs @ 0xfe201000
+PCIe2: Bus 00 - 00
+PCIe3: disabled
+In:    serial
+Out:   serial
+Err:   serial
+Net:   Initializing Fman
+Fman1: Uploading microcode version 101.8.0
+FM1@DTSEC1 connected to Vitesse VSC8221
+FM1@DTSEC2 connected to Vitesse VSC8221
+FM1@DTSEC3 connected to Vitesse VSC8221
+FM1@DTSEC4 connected to Vitesse VSC8641
+FM1@DTSEC5 connected to Vitesse VSC8641
+FM1@DTSEC1, FM1@DTSEC2, FM1@DTSEC3, FM1@DTSEC4, FM1@DTSEC5
+Hit any key to stop autoboot:  0 
+=> 
+\ce
+
+        Type the following commands to setup the U-Boot environment.
+
+\cs
+        setenv ipaddr 192.168.0.3
+        setenv netmask 255.255.255.0
+        setenv serverip 192.168.0.2
+        setenv gatewayip 192.168.0.1
+        saveenv
+\ce
+
+        Note: This is just an example, you should change the network parameters
+        according to your actual environment. 'ipaddr' is the target IP address
+        while 'serverip' is your host IP address.
+
+    3.5 Programming the Freescale P2041RDB flash
+
+        VxWorks bootrom is stored on the upper bank of the on-board NOR flash.
+        Type the following commands in the U-Boot shell.
+
+\cs
+        tftp 1000000 bootrom.bin;
+        protect off ebf00000 +100000
+        erase ebf00000 +100000
+        cp.b 1000000 ebf00000 100000
+        protect on ebf00000 +100000
+        cmp.b 1000000 ebf00000 100000
+\ce
+
+    3.6 Update the RCW
+        For REV B board with default factory setting, this step can be omitted.
+        Some hardware features need updating RCW.
+        Type the following commands in the U-Boot shell.
+\cs
+        tftp 1000000 rcw.bin;
+        protect off ec000000 +50
+        erase ec000000 +50;
+        cp.b 1000000 ec000000 50
+        protect on ec000000 +50
+        cmp.b 1000000 ec000000 50
+\ce
+
+        Note: this step only needs to be done once, when the bootrom is loaded
+        onto a new board for the first time. If the bootrom is upgraded later,
+        the existing copy of the RCW can be retained.
+
+    3.7 Change SW#2 to choose VxWorks bootrom bank (bank#4)
+\cs
+        SW#2[2] = [OFF]
+\ce
+
+4. Running the VxWorks bootrom
+    Power the target back on. After a few seconds, the VxWorks bootrom
+    banner should appear.
+
+    If this is the first time a VxWorks bootrom has been loaded onto this
+    board, use the 'M' command from the [VxWorks Boot]: prompt to set the
+    MAC addresses for all of the network ports. These will be stored in
+    flash.
+
+FEATURES
+
+This section describes all features of the board, supported or not.
+It documents all configurations of the board and the interaction between
+features and configuration items.
+
+\sh List of Hardware Features (Freescale P2041RDB board)
+
+\ts
+Hardware Interface | Controller | Driver/Component    | Status
+--------------------------------------------------------------
+UART:0             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+UART:1             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+1GB-ETHERNET:0     | on-chip    | vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:1     | on-chip    | vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:2     | on-chip    | vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:3     | on-chip    | vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:4     | on-chip    | vxbDtsecEnd.c       | SUPPORTED
+10GB-ETHERNET:0    | XAUI Card  | vxbTgecEnd.c        | SUPPORTED
+NOR-FLASH          | S29GL01G   | 'flashMem.c'        | SUPPORTED
+TIMER              | on-chip    | vxbM85xxTimer.c     | SUPPORTED
+TIMER              | on-chip    | vxbOpenPicTimer.c   | SUPPORTED
+PCI-E-HOST:0       | on-chip    | vxbQorIQPciEx.c     | UNVALIDATED
+PCI-E-HOST:1       | on-chip    | vxbQorIQPciEx.c     | SUPPORTED
+PCI-E-HOST:2       | on-chip    | vxbQorIQPciEx.c     | UNVALIDATED
+DMA:0              | on-chip    | DRV_DMA_FSL         | SUPPORTED
+DMA:1              | on-chip    | DRV_DMA_FSL         | SUPPORTED
+I2C:0              | on-chip    | vxbFslI2c.c         | SUPPORTED
+I2C:1              | on-chip    | vxbFslI2c.c         | SUPPORTED
+I2C:2              | on-chip    | vxbFslI2c.c         | UNVALIDATED
+I2C:3              | on-chip    | vxbFslI2c.c         | UNVALIDATED
+SPI-FLASH          | on-chip    | spS25flxxSpiFlash.c | SUPPORTED
+RTC                | DS3232     | vxbI2cRtc.c         | SUPPORTED
+EEPROM             | M24256     | vxbI2cEeprom.c      | SUPPORTED
+USB-HOST:0         | on-chip    | INCLUDE_USB         | SUPPORTED
+USB-HOST:1         | on-chip    | INCLUDE_USB         | SUPPORTED
+SATA:0             | on-chip    | vxbFslSataStorage.c | SUPPORTED
+SATA:1             | on-chip    | vxbFslSataStorage.c | SUPPORTED
+SD-CARD            | on-chip    | DRV_STORAGE_SDHC    | SUPPORTED
+Temperature Sensor | LM75B      | -                   | UNSUPPORTED
+SRIO               | on-chip    | -                   | UNSUPPORTED
+Security Engine    | on-chip    | -                   | UNVALIDATED
+Performance Monitor| on-chip    | -                   | UNSUPPORTED
+\te
+
+\sh Feature Interactions
+Refer to the board vendor's documentation.
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and board hardware
+elements.
+
+\sh Verified Hardware
+This BSP has been verified on a P2041RDB REV B board with default clock settings.
+Note the default clock speed for P2041RDB is 1.5GHz for core0 and core1, 750MHz
+for CCB.
+
+\sh Memory Maps
+The default hardware memory map of this BSP is as follows:
+
+\ts
+Start       | Size  | End         | Access to
+---------------------------------------------
+0x0000_0000 |  2GB  | 0x7FFF_FFFF | DDR3 SDRAM
+0x7FD0_0000 |  2MB  | 0x7FF0_0000 | 2MB reserved memory for QMAN hardware
+0x7FF0_0000 |  1MB  | 0x7FFF_FFFF | 1MB reserved memory for BMAN hardware
+0x8000_0000 |  64MB | 0x83FF_FFFF | PCIe 1 Prefetchable Memory
+0x8400_0000 |  64MB | 0x87FF_FFFF | PCIe 1 Non-Prefetchable Memory
+0x8800_0000 |  64MB | 0x8BFF_FFFF | PCIe 1 IO
+0x8C00_0000 |  64MB | 0x8FFF_FFFF | PCIe 1 IO32
+0xA000_0000 |  64MB | 0xA3FF_FFFF | PCIe 2 Prefetchable Memory
+0xA400_0000 |  64MB | 0xA7FF_FFFF | PCIe 2 Non-Prefetchable Memory
+0xA800_0000 |  64MB | 0xABFF_FFFF | PCIe 2 IO
+0xAC00_0000 |  64MB | 0xAFFF_FFFF | PCIe 2 IO32
+0xC000_0000 |  64MB | 0xC3FF_FFFF | PCIe 3 Prefetchable Memory
+0xC400_0000 |  64MB | 0xC7FF_FFFF | PCIe 3 Non-Prefetchable Memory
+0xC800_0000 |  64MB | 0xCBFF_FFFF | PCIe 3 IO
+0xCC00_0000 |  64MB | 0xCFFF_FFFF | PCIe 3 IO32
+0xF400_0000 |   2MB | 0xF41F_FFFF | BMAN
+0xF420_0000 |   2MB | 0xF43F_FFFF | QMAN
+0xFE00_0000 |  16MB | 0xFEFF_FFFF | CCSBAR
+0xFF00_0000 |  16MB | 0xFFFF_FFFF | NOR FLASH
+\te
+
+The default software memory map of this BSP is as follows:
+
+\ts
+Start Addr  | End Addr    | Used for
+---------------------------------------------
+0x0000_0000 | 0x000F_FFFF | PHYS_MEM_START
+0x0000_0000 | 0x3FFF_FFFF | (core 0) LOCAL_MEM_LOCAL_ADRS
+0x0000_0100 | 0x0000_3500 | Vectors (3500 - Performance Mon)
+0x0000_4100 | 0x0000_41FF | SM_ANCHOR
+0x0000_4200 | 0x0000_42FF | BOOT_LINE
+0x0000_4300 | 0x0000_43FF | EXC_MSG
+0x000C_0000 | 0x000C_0014 | CPUn_SPACE(3) (if _WRS_CONFIG_SMP)
+0x000D_0000 | 0x000D_0014 | CPUn_SPACE(2) (if _WRS_CONFIG_SMP)
+0x000E_0000 | 0x000E_0014 | CPUn_SPACE(1) (if _WRS_CONFIG_SMP)
+0x000F_0000 | 0x000F_0014 | CPUn_SPACE(0)        
+0x000F_0014 | 0x000F_FFFF | root stack (core 0)
+0x0010_0000 | 0x3FFF_FFFF | core 0 image/heap 
+0x4000_0000 | 0x4FFF_FFFF |(core 1 static)  LOCAL_MEM_LOCAL_ADRS 
+0x4000_0000 | 0x4FFF_FFFF |(core 1 dynamic) LOCAL_MEM_LOCAL_ADRS 
+0x4010_0000 | 0x4FFF_FFFF | core 1 image/heap (RAM_LOW_ADRS)
+0x5000_0000 | 0x5FFF_FFFF |(core 2 static)  LOCAL_MEM_LOCAL_ADRS 
+0x5000_0000 | 0x5FFF_FFFF |(core 2 dynamic) LOCAL_MEM_LOCAL_ADRS 
+0x5010_0000 | 0x5FFF_FFFF | core 2 image/heap (RAM_LOW_ADRS)
+0x6000_0000 | 0x6FFF_FFFF |(core 3 static)  LOCAL_MEM_LOCAL_ADRS 
+0x6000_0000 | 0x6FFF_FFFF |(core 3 dynamic) LOCAL_MEM_LOCAL_ADRS 
+0x6010_0000 | 0x6FFF_FFFF | core 3 image/heap (RAM_LOW_ADRS)
+0x6001_0000 | 0x6008_FFFF | MIPC_SM_SYSTEM_POOL_BASE
+0x4000_0000 | 0x400F_FFFF | root stack (core 1)
+0x5000_0000 | 0x500F_FFFF | root stack (core 2)
+0x6000_0000 | 0x600F_FFFF | root stack (core 3)
+0x7700_4400 | 0x7700_44FF | TM_ANCHOR_ADRS             
+0x7800_0000 | 0x78FF_FFFF | VIRTUAL_SM_BASE
+0x7FD0_0000 | 0x7FEF_FFFF | QMAN_MEM_BASE 
+0x7FF0_0000 | 0x7FFF_FFFF | BMAN_MEM_BASE
+------------|-------------|-----------------
+0x8000_0000 | 0x8FFF_FFFF | PCIEX1_LAW_BASE
+0xA000_0000 | 0xAFFF_FFFF | PCIEX2_LAW_BASE
+0xC000_0000 | 0xCFFF_FFFF | PCIEX3_LAW_BASE
+0xFE00_0000 | 0xFEFF_FFFF | CCSBAR
+0xEFDF_0000 | 0xEFDF_0FFF | CPLD_BASE
+0xF400_0000 | 0xF41F_FFFF | BMAN_LAW_BASE
+0xF420_0000 | 0xF43F_FFFF | QMAN_LAW_BASE 
+0xFD00_0000 | 0xFD3F_FFFF | DCSR_LAW_BASE
+0xFF00_0000 | 0xFFFF_FFFF | FLASH_BASE_ADRS
+0xFFFF_FFFC |             | Reset vector (only 1, 4-K page valid).
+\te
+    
+\sh Serial Configuration
+
+UART0 as default console. If UART1 will be used, CONSOLE_TTY should be change to 
+1 in config.h
+
+Default configuration is:
+    Baud Rate: 115200
+    Data: 8 bit
+    Parity: None
+    Stop: 1 bit
+    Flow Control: None
+
+\sh Boot Process
+
+Upon reset, the e500mc begins executing from 0xFFFF_FFFC. Only the last 
+4 KB of memory is mapped by the TLB. The instruction at 0xFFFF_FFFC branches 
+to resetEntry( ) (which is located at the last 2 KB of memory) to begin 
+initialization and mapping of memory static TLB entries. The DDR SDRAM is 
+then mapped to 0x0 where the vectors are set up for use and execution is 
+then transferred to RAM after copying and uncompressing (if necessary). 
+
+\sh DDR RAM
+
+The following DDR memory has been tested on P2041RDB REV B board:
+
+\ts
+Mfg.   | Part Number     | Size | ECC | Verified? | Notes
+-----------------------------------------------------------------------
+Unigen | UG51U6400N8SU   | 4GB  |  N  | Yes       | Or later revs
+\te
+
+This BSP can support up to 2048 MB DDR memory. By default, project builds set
+LOCAL_MEM_SIZE to 512Mb (see 20bsp.cdf).
+
+By default, only 2048MB DDR memory is configured in config.h. 
+
+\sh Network Configuration
+The DTSEC ports allow 10/100/1000 connections. The driver will auto-negotiate
+and configure the port accordingly.  The BSP also supports TGEC with a 10G
+connection.
+
+The following END drivers are supported in this BSP.
+
+\ts
+Driver | END
+-------------------------
+DTSEC  | DRV_VXBEND_DTSEC
+TGEC   | DRV_VXBEND_TGEC
+\te
+
+The P2041 processor has a total of 5 internal DTSEC network controllers, spread
+across one frame manager. DTSEC0-2 use SGMII PHY and the other two use
+RGMII PHY.
+
+RCW[SRDS_PRTCL] should be checked to make sure it supports SGMII. 
+The configuration of SRDS_PRTCL=0x19, which uses SERDES bank1 lane C,D,G for 
+SGMII#1/2/3 is tested. DTSEC0-2 are all supported.
+The configuration of SRDS_PRTCL=0x09, which uses SERDES bank1 lane C,D for 
+SGMII#1/2 is tested. In this configuration, DTSEC2 is not supported.
+DTSEC3-4 are always supported.
+
+Using the DTSEC ports requires the DRV_VXBEND_DTSEC driver component.
+
+FMAN also has a Ten Gigabit Ethernet Controller (TGEC), a TGEC driver is supplied.
+Using the TGEC ports requires the addition of a XAUI riser card, which provides 
+a single 10GBase-T media port. To use XAUI riser card, reset control word(RCW)
+may need to be updated. The configuration of SRDS_PRTCL=0x09, which uses SERDES 
+bank2 lane A,B,C,D for XAUI slot2 is tested. 
+To use the TGEC in VxWorks, the DRV_VXBEND_TGEC driver component must be included
+into the project configuration. 
+
+The XAUI media riser card supplied by Freescale has both a 10GBase-T port
+and a slot for an SFP+ module, which can accommodate a 10GBase-SR fiber
+module. The card is not normally supplied with a module, and the 10GBase-T
+port is usually enabled by default. Support for fiber media is available,
+however some caveats apply. In order to use a fiber SFP+ module, the
+XAUI card must be flashed with the latest PHY firmware. If it's set to
+default to 10Gbase-T, the fiber module must be enabled via software by
+accessing some MDIO registers in the PHY. This requires the use of the
+TGEC MDIO driver. To select fiber media, the TGEC0_FIBER macros in config.h 
+should be defined.
+
+Both the DTSEC and TGEC drivers include support for jumbo frames.
+
+\sh Ethernet Address
+Six Ethernet hardware addresses are assigned to P2041RDB board. A unique 
+address is absolutely necessary if the user wishes to connect the board to a network.
+Thus, the user must provide a suitable 6-byte Ethernet address for each on-board
+network interface.
+
+Definition of the macro ETHERNET_MAC_HANDLER in p2041rdb.h indicates the MAC
+address is stored in NVRAM and alterable via the 'M' bootrom command.  This
+option allows only the last three bytes to be changed. To use this option,
+open a console window and reset the hardware. When the bootrom banner appears
+and the countdown starts, press any key to get the "[VxWorks Boot]:" prompt.
+Type the 'M' command to modify the MAC address.
+
+\sh DPAA
+In addition to standard DTSEC and TGEC END drivers, support is also
+provided for Qman, Bman and Fman DPAA components. The vxbQorIQQman,
+vxbQorIQBman and vxbQorIQFman modules support the following functionality:
+
+\is
+\i User creation of Qman frame queues
+\i Interrupt driven and polled Qman event handling
+\i Management of Bman buffer pools
+\i Use of Fman hard parser for RX checksum offload in the DTSEC and TGEC drivers
+\i APIs provided to program the keygen, parser, coarse classifier and policer in the Fman
+\ie
+
+Documentation for these APIs can be found in the following files:
+
+\is
+\i target/src/hwif/resource/vxbQorIQBmanPortal.c -- Bman API
+\i target/src/hwif/resource/vxbQorIQQmanPortal.c -- Qman API
+\i target/src/hwif/resource/vxbQorIQQmanFman.c -- Fman API
+\ie
+
+\sh Boot Devices
+The supported boot devices are:
+
+\ts
+    `dtsec0   ' | DTSEC0
+    `dtsec1   ' | DTSEC1
+    `dtsec2   ' | DTSEC2  (make sure RCW supports SGMII#3)
+    `dtsec3   ' | DTSEC3
+    `dtsec4   ' | DTSEC4
+    `fs       ' | USB/SD/SATA/TFFS
+\te
+
+\sh SMP
+
+VxWorks SMP(Symmetric Multiprocessing) kernels can be configured for use on
+the multiprocessor target hardware supported by this BSP. Please refer to
+the chapter "VxWorks SMP" of vxworks_kernel_programmers_guide_6.9.pdf for 
+details about the SMP-specific features in the operating system.
+
+For convenience, some key features for using SMP with this BSP are highlighted
+below.
+
+1. SMP build
+
+   VxWorks SMP can be configured and built using the standard Wind River
+   Workbench and vxprj facilities. However, VxWorks SMP images cannot be 
+   created from the legacy BSP-directory configuration and build methods 
+   (using config.h and the local Makefile).
+
+   Workbench provides a VxWorks Image Project (VIP) option for creating VxWorks
+   SMP projects. vxprj uses the '-smp' option to specify configuration of
+   VxWorks SMP from the command line. For example:
+
+\cs   
+   vxprj create -smp fsl_p2041_rdb diab mySmpProject
+\ce
+
+2. Boot loader
+
+   The 'bootrom' images for VxWorks cannot be built with the SMP configuration
+   option. As such, the 'bootrom' image may still be built using the legacy
+   BSP directory and Makefile method. With Workbench, build the 'bootrom' using
+   the same steps as for a UP system,
+
+   Finally, while the 'bootrom' itself cannot be configured for SMP, it will
+   support loading UP, SMP and AMP enabled images.
+
+3. MMU
+
+   VxWorks SMP does not support MMU-less configuration.
+   
+4. Cache and bus snoop
+
+   Snoop logic is specific to the hardware architecture. Usually it is supported
+   by multiprocessor hardware. When hardware support is present, CACHE_SNOOP_ENABLE
+   should be specified in the BSP to maintain system coherency. Please refer to 
+   the config.h of this BSP to find how CACHE_SNOOP_ENABLE is used.
+
+   Note: CACHE_SNOOP_ENABLE is required for PowerPC, ARM and IA. It is undefined
+   for MIPS BSPs.
+
+   Cache cannot be disabled in a VxWorks SMP system. Direct calls to the 
+   function cacheDisable() will do nothing.
+   
+   Also, only copy-back mode is tested and supported for VxWorks SMP kernels. This
+   will be the default configuration set by BSP. Changing the cache mode
+   to write-through may result in unpredictable behavior. Some architectures
+   place additional restrictions on write-through mode. For example, write-through
+   is not allowed at all by VxWorks for PowerPC processors because the atomic 
+   instructions stwcx and lwarx are used by the kernel and would generate 
+   machine check exceptions if the cache is in write-through mode. Similarly,
+   ARM does not allow write-through with SMP.
+
+5. Interrupt CPU affinity 
+
+   Hardware resources can be allocated via VxWorks configuration. Here we focus on the 
+   interrupt to show how it's implemented. SMP hardware usually requires programmable 
+   interrupt controller. VxWorks SMP makes use of this hardware to allow assignment 
+   interrupts to a specific CPU. By default, interrupts are routed to the VxWorks 
+   instance's logical CPU 0. Interrupt CPU affinity can be useful for load balancing, 
+   for example, if there is too much total interrupt traffic for one CPU to handle.
+   
+   For example, in hwconf.c of this BSP, there is the following data structure:
+   
+   struct intrCtlrCpu epicCpu[] = { { EPIC_XX_INT_VEC, 0 },};
+   
+   User can reroute interrupt to other CPUs by changing 0 to 1 or any other 
+   supported CPU index.
+   
+6. CPU number
+
+   The project parameter VX_SMP_NUM_CPUS is used to specify the number of CPUs
+   assigned to the SMP kernel. The CPU number we are discussing here includes all the 
+   hardware units which have the same behavior as CPU, for example, the thread, 
+   hyper-thread, etc. VxWorks supports less than all of the CPUs in a multiprocessor system 
+   to participate in the SMP kernel. This allows some CPUs to be used for other purposes 
+   such as dedicated "bare-iron" tasks or additional asymmetric operating systems. CPUs not 
+   assigned to the SMP kernel are left in the default, power-on reset state. 
+
+   The maximum CPU number for this BSP is 4. Note, the maximum possible value 
+   for vxWorks is 32.
+
+\sh AMP
+
+VxWorks AMP (Asymmetric Multiprocessing) kernels can be configured for use on
+the multiprocessor target hardware supported by this BSP. Please refer to
+the chapter "Overview of VxWorks AMP" in the
+vxworks_kernel_programmers_guide_6.9.pdf for details about the AMP-specific
+features in the operating system.
+
+1. AMP build
+
+   VxWorks AMP can be configured and built using the standard Wind River
+   Workbench and vxprj facilities. VxWorks AMP images cannot be created with the
+   legacy BSP directory configuration and build method (using config.h and make).
+   
+   To produce an AMP image, the component INCLUDE_AMP must be selected in the VIP.
+   
+   The following configurations are suggested as useful development baselines:
+
+\ts
+Image Type | Components
+------------------------------
+AMP primary   | INCLUDE_MSD INCLUDE_WRLOAD   INCLUDE_AMP INCLUDE_AMP_CPU_00
+AMP secondary | INCLUDE_MSD INCLUDE_WRLOAD_IMAGE_BUILD INCLUDE_AMP INCLUDE_AMP_CPU_0x * 
+
+\te
+* Substitute x with 1 to (N-1), corresponding to the processor core for which the
+image is targeted.
+
+2. AMP image download
+
+   AMP image for CPU0 should always be started first via bootloader, and then used to load 
+   vxWorks AMP images(created in step 1 above) to other CPUs.
+   
+   wrload is the latest approach to loading vxWorks AMP images to additional CPUs. Call syntax
+   command as below to either add as part of the usrAppInit or call from a shell such as the
+   target shell.
+
+\cs
+-> wrload "-file <path_to_image> -cpu <cpu_num> -tsym \"*sysBootLine=<network_device(unit,cpu_index)> 
+           [host:<path_to_cpu_image>] h=<host_IP_address> e=<ethernet_IP_address> \" "
+\ce
+
+   MIPC is the fundamental technology for wrload implementation. Please see 
+   MIPC-related description in this document for more details.
+
+3. Boot loader
+
+   Please refer to the bootloader description in the SMP section above.
+
+\sh wrload and memory management. 
+
+wrload, executed from the primary CPU, calls the function usrWrloadMap() to
+dynamically allocate virtual memory pages in the primary CPU's context for
+placing the secondary image into physical memory.  The argument to
+usrWrloadMap() is 'pAddr' which is set based upon the ELF file's load memory
+address (LMA) plus a physical bias.
+
+The physical bias is compiled into the loaded image via the CDF parameter 
+WRLOAD_IMAGE_BUILD_PHYS_BIAS.  The value of the parameter is stored across two
+32 bit variables as (_wrload_bias_high_32 | _wrload_bias_low_32). wrload, on 
+the primary CPU, reads these symbols directly from the ELF file prior to 
+loading.  This physical bias is superseded by wrload's -loadbias argument
+(i.e. a dynamic bias not defined at build time).  Which ever value is used, 
+the result is placed into the symbol _wrload_bias.
+
+There are a few limitations when using WRLOAD_IMAGE_BUILD_PHYS_BIAS.
+If the -loadbias argument is used, the primary CPU will load the image to the
+physical bias specified by -loadbias, however the secondary CPU cannot execute
+the image because the sysPhysMemDesc table and sysVirtToPhys routines use the
+WRLOAD_IMAGE_BUILD_PHYS_BIAS macro defined at compile-time.  If a load bias is
+used, the MMU no longer uses a 1-to-1 physical-to-virtual mapping.  The ICE
+may require a 1-to-1 mapping (with a physical bias of 0) to properly debug
+an image.  Finally, the bootrom supports but constraints the bias to lie on
+a 256MB boundary.
+
+For secondary images the bootrom (romInit) reads a shared memory area
+starting at CPUn_SPACE to get the image's stack pointer, starting address
+and MMU data.  The primary image sets up CPUn_SPACE from sysAmpCpuEnable().
+The usrWrload functions usrWrloadBiasHighGet() and usrWrloadBiasLowGet()
+are provided for sysAmpCpuEnable() to get the _wrload_bias value and put it
+into CPUn_LOCAL_MEM_ERPN and CPUn_LOCAL_MEM_RPN.  The bootrom uses RPN and
+ERPN to specify the (36-bit) physical address for a 256MB mapping that the
+secondary image starts running in.  The corresponding virtual address is
+derrived from the CPUn_FUNC_START_ADR.  Later, as the image boots and runs
+sysHwInit() this initial 256MB mapping is overwritten by sysStaticTlbDesc[].
+This allows the entries in sysStaticTlbDesc[] to expand (or reduce) the
+image's footprint to any workable size.
+
+The primary image's MMU does not include a mapping for the physical area
+used by the secondary image(s).  This protects the secondary image(s)
+from the primary.  The primary image uses usrWrloadMap() to map a virtual
+scratchpad area created just to load the image.  This area must be outside
+the primary's current virtual space and is typically the lower 32-bits of
+the image physical address.  However, if these lower 32-bits overlap the
+primary's current virtual space an error is returned and wrload will abort.
+Consequently, a fixed offset wrloadPriScratchMemOffset based on the CDF
+parameter WRLOAD_PRI_SCRATCH_OFFSET is added to the lower 32-bits to generate
+the virtual address.
+
+As indicated above, the image virtual address is derrived from the start
+address and should be RAM_LOW_ADRS.  The physical address is equal to
+the virtual address added to the WRLOAD_IMAGE_BUILD_PHYS_BIAS.  
+
+\sh Virtual Shared Memory
+This BSP contains enhanced support for AMP, allowing SMP images to participate
+in AMP, and allowing SMP images to be loaded above the 32-bit boundary.  To
+accommodate these features, one shared memory component has been added.
+
+1. Virtual Shared Memory
+This BSP contains enhanced support for AMP, allowing SMP images to participate
+in AMP, and allowing SMP images to be loaded above the 32-bit boundary.  To
+accommodate these features, virtual shared memory component has been added.
+
+Virtual Shared Memory - the INCLUDE_VIRTUAL_SM is optional, but it must
+be added to any image built for loading above the 32-bit boundary utilizing
+SMP or MIPC.  This component sets up a virtual to physical mapping above the
+1GB (default) page mapping SDRAM, for MIPC.
+
+There are three configurable parameters for INCLUDE_VIRTUAL_SM: VIRTUAL_SM_BASE,
+VIRTUAL_SM_BASE_PHYS, and VIRTUAL_SM_SIZE.  These specify the virtual address,
+physical address, and size of the region, respectively.  These default to
+0x78000000, 0x78000000, and 0x01000000.  The BSP only supports 16MB for the
+size.
+
+Note: MIPC is located in this shared memory region by default.  For this
+reason, a new configurable parameter is added for the MIPC SM physical address:
+MIPC_SM_SYSTEM_POOL_BASE_PHYS.  When designing a system, this physical address
+should be matched with other images in the system (Linux, VxWorks, etc.).
+
+\sh Logical Partition Support
+The component INCLUDE_LOGICAL_PARTITION is provided to allow each AMP image
+to have its own logical partition ID.  This is required when there is any SMP
+running in the system, as VxWorks SMP uses tlbivax to invalidate TLBs and
+broadcast the invalidation to each of its CPUs.  By default,
+INCLUDE_LOGICAL_PARTITION is included when INCLUDE_AMP is included, and its
+configuration parameter, LOGICAL_PARTITION_ID, defaults to a unique value
+based upon which INCLUDE_AMP_CPU_0x component is included.
+LOGICAL_PARTITION_ID can be a value from 0 to 63.  Note that 0 indicates the
+global partition.
+
+\sh Boot Methods
+
+The boot methods are affected by the boot parameters.  If no password is
+specified, RSH (remote shell) protocol is used.  If a password is specified,
+FTP protocol is used, or, if the flag is set to 0x80, TFTP protocol is used.
+
+\sh PCI Express support
+
+RCW[SRDS_PRTCL] should be checked to make sure it supports PCIe. The configuration 
+of SRDS_PRTCL=0x09, which uses SERDES bank1 lane E,F,G,H for PCIe slot1 is tested. 
+
+The P2041 processor has a total of 3 PCI Express controllers.
+Adding INCLUDE_PCI_BUS with vxprj or from Workbench will automatically add that
+component, as well as INCLUDE_PCI_BUS_AUTOCONF, which is also required. 
+INCLUDE_PCI_BUS_SHOW component can optionally be included to add PCI show routines. 
+Any supported vxBus PCI driver should work once the QorIQ PCI bus controller 
+driver is present. Tests have been done with the INCLUDE_GEI825XX_VXB_END.
+
+When enabled, all three controllers will operate in root complex mode.
+
+This BSP defaults to use PCIe MSI interrupts. When enable PCIe MSI interrupts,
+make sure to define following macro in config.h, or add it to your project using 
+the vxprj tool or Workbench:
+
+\cs
+    #define INCLUDE_INTCTLR_DYNAMIC_LIB
+\ce
+
+\sh SD memory card controller (eSDHC)
+
+The P2041 on chip enhanced SD host controller (eSDHC) is supported in this 
+release. Both stand capacity and high capacity SD memory cards are supported,
+but MMC cards are not.
+
+To enable eSDHC support, make sure the following feature definitions are
+added in config.h:
+
+\cs
+    #define DRV_STORAGE_SDHC
+\ce
+
+When using an SD card for the first time, you should format it as a FAT file
+system by using
+\cs
+    dosFsVolFormat ("/sd0:1", 0x20, 0);    /@ FAT32 format @/
+\ce
+or
+\cs
+    dosFsVolFormat ("/sd0:1", 0x10, 0);    /@ FAT16 format @/
+\ce
+
+Now, you can use VxWorks I/O and file system commands to access the SD card
+device as if it were a disk.  For example, you can copy a vxWorks image from
+your host to the SD card by using file system copy.
+
+\cs
+    copy ("vxWorks", "/sd0:1/vxWorks");
+\ce
+If you want to use sd card as a boot device, you should follow these steps:
+
+For command line mode, make sure DRV_STORAGE_SDHC is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the flash chip.  Also make sure you have all the necessary file system
+components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    DRV_STORAGE_SDHC
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_DISK_UTIL
+    INCLUDE_BOOT_FILESYSTEMS
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a default_romCompress.bin in the project directory, program
+it into the flash chip as a bootrom.
+
+Below is an example by using /sd0:1 as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /sd0:1/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : target
+    ftp password (pw)    : vxTarget
+    flags (f)            : 0x0
+    target name (tn)     : p2041rdb
+    other (o)            : dtsec0
+\ce
+
+\sh USB
+The P2041RDB has two USB host ports, which are supported by this BSP. To enable USB 
+host support, include the following component in config.h:
+
+\cs
+#define INCLUDE_USB
+\ce
+
+For more information, please refer to
+\tb Wind River USB for VxWorks 6 PROGRAMMER'S GUIDE
+
+USB device is not supported by this BSP.
+
+If you want to use usb disk as a boot device, you should follow these steps:
+
+For command line mode, make sure INCLUDE_USB is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the flash chip. Also make sure you have all the necessary file system
+components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_CHKDSK
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_USB_INIT
+    INCLUDE_EHCI
+    INCLUDE_EHCI_INIT
+    INCLUDE_USB_MS_BULKONLY
+    INCLUDE_USB_MS_BULKONLY_INIT
+    INCLUDE_USB_MS_CBI
+    INCLUDE_USB_MS_CBI_INIT
+    INCLUDE_BOOT_USB_FS_LOADER
+    INCLUDE_DISK_UTIL
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a default_romCompress.bin in the project directory, program
+it into the flash chip as a bootrom.
+
+You should now be able to use VxWorks I/O and file system commands to access
+the USB device as if it were a disk. For example, you can copy a vxWorks
+image from your host to usb disk by using file system 'copy'. Of course, you must
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+copy ("vxWorks", "/bd0/vxWorks");
+\ce
+
+Below is an example by using usb disk "/bd0" as a boot device:
+
+\cs
+boot device : fs
+unit number : 0
+processor number : 0
+host name : host
+file name : /bd0/vxWorks
+inet on ethernet (e) : 192.168.0.3:ffffff00
+host inet (h) : 192.168.0.2
+gateway inet (g) : 192.168.0.1
+user (u) : target
+ftp password (pw) : vxTarget
+flags (f) : 0x0
+target name (tn) :
+other (o) : dtsec0
+\ce
+
+\sh TrueFFS
+The standard Wind River TrueFFS product is supported in this release.
+
+This BSP uses the Spansion S29GL01GP flash as the TrueFFS media.
+VxWorks maps 16 MB of FLASH address space at 0xff000000 - 0xffffffff.
+
+Note:The VxWorks bootrom is stored at 0xfff00000~0xffffffff, 8 MBytes of space
+(0xff000000~0xff7fffff) is used for TFFS, please don't extend the TFFS space 
+before you carefully check the flash memory map, otherwise misusing TFFS may 
+damage the bootloader (bootrom) and would cause the board to fail to boot up.
+
+To use it, define INCLUDE_TFFS in config.h. When using TrueFFS on a new FLASH
+for the first time, you should format and configure the FLASH by using:
+
+\cs
+    sysTffsFormat (0);
+    usrTffsConfig (0, 0, "/tffs0");
+\ce
+
+If you are using DOSFS, please use
+
+\cs
+    dosfsDiskFormat ("/tffs0");
+\ce
+
+Note: If you are running these commands in the VxWorks target shell, please use
+
+\cs
+    sp sysTffsFormat
+\ce
+
+to format the FLASH as it will take long time to complete.
+
+You should now be able to use VxWorks I/O and file system commands to access
+the FLASH device as if it were a disk.  For example, you can copy a vxWorks
+image from your host to TFFS by using file system 'copy'.  Of course, you must
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/tffs0/vxWorks");
+\ce
+
+If you want to use "/tffs0" as a boot device, you should follow these steps:
+
+For command line mode, make sure INCLUDE_TFFS is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the flash chip.  Also make sure you have all the necessary file system
+components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_TFFS_MOUNT
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a default_romCompress.bin in the project directory, program
+it into the flash chip as a bootrom.
+
+Below is an example by using /tffs as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /tffs0/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : user
+    ftp password (pw)    : pass
+    flags (f)            : 0x0
+    target name (tn)     : P2041RDB
+    other (o)            : dtsec0
+\ce
+
+\sh SATA Support
+
+RCW[SRDS_PRTCL] should be checked to make sure it supports SATA. The configuration 
+of SRDS_PRTCL=0x19, which uses SERDES bank2 lane C,D for SATA is tested. 
+
+There are 2 SATA interfaces, which are connected to socket J11 and J13 on the
+P2041RDB board. To use the SATA interfaces, the macro DRV_STORAGE_FSLSATA must
+be defined in config.h.
+
+When using an SATA disk for the first time, you should format it as a FAT file
+system by using
+\cs
+    dosFsVolFormat ("/ata0:1", 0x20, 0);    /@ FAT32 format @/
+\ce
+or
+\cs
+    dosFsVolFormat ("/ata0:1", 0x10, 0);    /@ FAT16 format @/
+\ce
+
+Now, you can use VxWorks I/O and file system commands to access the SATA card
+device as if it were a disk.  For example, you can copy a vxWorks image from
+your host to the SATA disk by using file system copy.
+
+\cs
+    copy ("vxWorks", "/ata0:1/vxWorks");
+\ce
+If you want to use SATA disk as a boot device, you should follow these steps:
+
+For command line mode, make sure DRV_STORAGE_FSLSATA is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the flash chip.  Also make sure you have all the necessary file system
+components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    DRV_STORAGE_FSLSATA
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_DISK_UTIL
+    INCLUDE_BOOT_FILESYSTEMS
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a default_romCompress.bin in the project directory, program
+it into the flash chip as a bootrom.
+
+Below is an example by using /ata0:1 as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /ata0:1/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : target
+    ftp password (pw)    : vxTarget
+    flags (f)            : 0x0
+    target name (tn)     : p2041rdb
+    other (o)            : dtsec0
+\ce
+
+\sh Programmable Interrupt Controller
+
+The PIC driver provided by this BSP supports all internal and external 
+interrupt sources. The driver can also be configured to route such interrupt 
+sources to the critical interrupt pin. However, because critical interrupts 
+are routed directly to the interrupt source instead of being manager by the 
+PIC with IACK or EOI, the Critical Interrupt Summary registers are used to 
+check for the source. The transient values in these registers cause a spurious
+vector when indexing into the vector table.
+
+\sh DMA
+Freescale DMA Controller is supported in this release. To enable DMA, please 
+define the following macro in config.h:
+\cs
+    #define DRV_DMA_FSL
+\ce
+Note: The MAX transfer size of every slice on each DMA channel should not
+exceed (64M - 1) Bytes.
+
+\sh eSPI and SPI Flash
+The Freescale eSPI Controller and Spansion SPI Flash S25FLXX are supported 
+(only in polled mode) in this release.
+
+To enable this function, please define the following macro in config.h:
+
+\cs
+    #define DRV_SPI_S25FLXX
+\ce
+
+\sh I2C
+The PT7C43 RTC chip, ST EEPROM M24256, I2C controller are supported in this 
+release. The I2C controllers use the interrupt mode as default.
+
+To enable this function, please define the corresponding macro in config.h:
+
+\cs
+    #define INCLUDE_I2C_BUS
+\ce
+
+To use the pt7c4338 RTC device, which can use the routine sysRtcSet() that is a 
+command-line utility for setting the RTC from the VxWorks kernel prompt. The 
+user will be prompted for the appropriate input. To read the date and the time, 
+the sysRtcGet() routine have to be called. Use of the EEPROM requires the 
+DRV_I2C_EEPROM and INCLUDE_EEPROMDRV driver component. Once the INCLUDE_EEPROMDRV 
+was defined, the EEPROM will be used as I/O device, which can use the standard 
+I/O routine open(), read(), write(), ioctl(), close()...to access it. 
+Note: the four I2C controllers share two internal interrupt line, so every two 
+controllers(0-1/2-3) must be assigned to the same core.
+
+\sh Make Targets
+The make targets are listed as the names of object-format files. Append `.hex'
+to each to derive a hex-format file name. Other images not listed here may not
+be tested.
+
+\ts
+`bootrom'
+`bootrom.bin'
+`vxWorks' (with `vxWorks.sym')
+`vxWorks.st'
+\te
+
+\sh BSP Bootloaders and Bootroms
+
+\ts
+Bootloader/Bootrom   | status
+----------------------------------
+bootrom              | SUPPORTED
+bootrom_uncmp        | SUPPORTED
+bootrom_res          | UNSUPPORTED
+vxWorks              | SUPPORTED
+vxWorks_rom          | UNSUPPORTED
+vxWorks_romCompress  | SUPPORTED
+vxWorks_romResident  | UNSUPPORTED
+\te
+
+The default size of the vxWorks_rom and vxWorks_romResident images are larger
+than the default ROM_SIZE of 1MB. ROM_SIZE and the corresponding link addresses
+can be adjusted to fit these images, however it is an unsupported configuration.
+
+\sh BSP Validated Tools
+
+\ts
+Tool                         | Connection/Type | Status
+-------------------------------------------------------
+Workbench Debugger           | ETHERNET/WDB    | UNVALIDATED
+Workbench System Viewer      | ETHERNET/WDB    | UNVALIDATED
+Workbench MemScope           | ETHERNET/WDB    | UNVALIDATED
+Workbench ProfileScope       | ETHERNET/WDB    | UNVALIDATED
+Workbench StethoScope        | ETHERNET/WDB    | UNVALIDATED
+Workbench CoverageScope      | ETHERNET/WDB    | UNVALIDATED
+Workbench Core File Analysis | ETHERNET/WDB    | UNVALIDATED
+Workbench Sensor Points      | ETHERNET/WDB    | UNVALIDATED
+Workbench OCD Debugger       | JTAG            | UNSUPPORTED
+\te
+
+\sh Known Issues
+
+The SATA CRC error status report is not reliable and cannot be used by SW. 
+In addition, fatal errors report by SATA drive after read commands greater 
+than 8KB, require a soft reset to the SATA Host controller. The workaround 
+enables functionality of the SATA controller, but performance is greatly reduced.
+More information see errata SATA-A005.
+
+PCIe x4 cards do not work on P2041RDB board, because Freescale suggests a CPLD 
+reset operation after setting SERDES lane correctly which is not implemented in
+this BSP. Refer to WIND00361031 for details. As a workaround, you may do the 
+following steps to make PCIe x4 card work.
+    1, Power on the board, enter bootrom shell.
+    2, Set correct PCIe lane setting by changing CPLD register 0x0C to 0. 
+    3, Issue a CPLD reset operation by changing CPLD register 0x03 to 1. This 
+will reset the board and reenter bootrom.
+    4, Load a VxWorks image with PCIe feature enabled. PCIe x4 card will work now.
+The log is as belows:
+/cs
+[VxWorks Boot]: m 0xefdf000c
+0xefdf000c:  0f24-0024
+0xefdf000e:  0001-.
+
+[VxWorks Boot]: m 0xefdf0003
+0xefdf0002:  0300-0301
+/ce
+
+BOARD LAYOUT
+
+\bs
++------------------------------------------------------------------------------+
+|__                                                                            | 
+|  | uart0                                                                     |
+|  |                          ___________________________                      |
+|__| uart1                    |                         |                      |
+|______                       |       DDR  RAM          |                      |
+|      |                      |                         |                      |
+|  SD  |                      |_________________________|                      |
+|_____ |                                                                       |
+|                                                                              |
+|______                           ________________                             |
+|      |  dtsec3                 |                |                            |
+|      |  dtsec4                 |                |                            |
+|_____ |                         |     P2041      |                            |
+|                                |                |                            |
+|______                          |                |                            |
+|      |  dtsec0                 |________________|                            |
+|      |  dtsec1                                                               |
+|______|                                                                       |
+|                                                                              |
+|______                                                                        |
+|      |                                                                       |
+|      |  dtsec2                   __       __                                 |
+|______|                          |  |     |  |                                |
+|                           sata2 |  |     |  | sata1                          |
+|      ________________           |__|     |__|                                |
+|     |     slot2      |                                                       |
+|     |________________|                                                       |
+|                                             _______________________          |
+|     _________________                      |       |       |       |         |
+|     |     slot1      |                     |_______|_______|_______|         |
+|     |________________|                        SW1     SW2     SW3            |
+|                                                                              |
+|                                                                              |
++------------------------------------------------------------------------------+
+\be
+
+BIBLIOGRAPHY
+For further information on the fsl_p2041_rdb, refer to the following 
+documents:
+
+\tb P2040 QorIQ Integrated Multicore Communication Processor Family Reference Manual
+
+\tb PowerPC E500MC Core Reference Manual 
+
+\tb P2041RDB Specification QorIQ Integrated Communications Processor
+

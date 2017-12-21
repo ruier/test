@@ -1,0 +1,3 @@
+#ifdef DRV_PCIBUS_PPC4XX_PCI
+    ppc4xxPciRegister();
+#endif /* DRV_PCIBUS_PPC4XX_PCI */

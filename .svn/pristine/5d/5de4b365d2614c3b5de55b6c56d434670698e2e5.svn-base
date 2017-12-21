@@ -1,0 +1,46 @@
+#ifdef DRV_INTCTLR_EPIC
+extern void vxbEpicIntCtlrRegister (void);
+
+# if     defined(PPC_e6500) && defined(_WRS_CONFIG_SMP)
+/*****************************************************************************
+*
+* vxbEpicIntCtlrPreInit - pre-init EPIC interrupt driver in SMP
+*
+* This routine sets function pointers used by the EPIC driver and registers
+* the EPIC driver and device recognition data with the VxBus subsystem in SMP.
+*
+* It is only called by hardWareInterFaceBusInit.
+*
+* RETURNS: N/A
+*
+* ERRNO: N/A
+*
+* \NOMANUAL
+*/
+
+void vxbEpicIntCtlrPreInit (void)
+    {
+#  ifdef T4_ERRATUM_CPU6198
+    /*
+     * Overwrite with e6500 specific EPIC interrupt handler that has
+     * a workaround for errata CPU A-006198.
+     */
+
+    _func_vxbSysEpicIntHandler = vxbSysEpicE6500IntHandler;
+#  endif /* T4_ERRATUM_CPU6198 */
+
+#  ifndef INCLUDE_SMT
+    /* install EPIC IPI getter */
+
+    _func_vxbSysEpicIdGet = vxbSysEpicIdGet;
+
+    /* overwrite with e6500 specific EPIC IPI generater */
+
+    _func_vxEpicIpiCtrlInitIpiEmit = vxbEpicE6500IpiGen;
+#  endif /* !INCLUDE_SMT */
+
+    vxbEpicIntCtlrRegister();
+    }
+# endif /* PPC_e6500 && _WRS_CONFIG_SMP */
+
+#endif /* DRV_INTCTLR_EPIC */

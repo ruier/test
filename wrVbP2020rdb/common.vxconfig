@@ -1,0 +1,38 @@
+# common.vxconfig - VSB configuration flags and options for wrVbP2020rdb BSP
+
+# Copyright (c) 2011 Wind River Systems, Inc.
+#
+# The right to copy, distribute, modify or otherwise make use
+# of this software may be licensed only pursuant to the terms
+# of an applicable Wind River license agreement.
+
+#
+# modification history
+# --------------------
+# 01a,15feb11,agf  created
+#
+
+#
+# DESCRIPTION
+# 
+# This file defines the VxWorks Source Build configuration options that apply
+# only to the wrVbP2020rdb BSP.
+#
+################################################################################
+
+config  SUPPORTS_WRHV_GUEST
+        bool
+        default y
+
+config  REQUIRES_WRHV_GUEST
+        bool
+        default y
+
+config  UNSUPPORTS_RTP
+        bool
+        default y
+
+config  UNSUPPORTS_SMP
+        bool
+        default y
+

@@ -1,0 +1,3 @@
+#ifdef INCLUDE_M85XX_RAPIDIO
+    m85xxRioRegister();
+#endif /* INCLUDE_M85XX_RAPIDIO */

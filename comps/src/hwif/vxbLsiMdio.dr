@@ -1,0 +1,3 @@
+#ifdef INCLUDE_LSI_MDIO
+    lsiMdioRegister ();
+#endif /* INCLUDE_LSI_MDIO */

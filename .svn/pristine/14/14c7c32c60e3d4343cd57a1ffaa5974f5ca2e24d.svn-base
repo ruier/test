@@ -1,0 +1,3 @@
+#ifdef DRV_TIMER_OMAP2530
+    vxbOmap2530TimerDrvRegister ();
+#endif /* DRV_TIMER_OMAP2530 */

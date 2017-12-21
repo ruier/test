@@ -1,0 +1,3 @@
+#ifdef INCLUDE_VXB_IBM_TAH
+    tahRegister();
+#endif /* INCLUDE_VXB_IBM_TAH */

@@ -1,0 +1,4 @@
+#ifdef DRV_MII_DTEPHY
+IMPORT void dtePhyRegister(void);
+#endif
+

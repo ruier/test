@@ -1,0 +1,3 @@
+#ifdef DRV_RESOURCE_FSLGPIO
+    fslGpioRegister();
+#endif /* DRV_RESOURCE_FSLGPIO */

@@ -1,0 +1,806 @@
+\" target.ref - wrSbc8641d target specific documentation
+\"
+\" Copyright (c) 2007-2009, 2011, 2012 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01j,26jun12,l_z  update the AMP section
+\" 01i,26jan11,kxb  remove obsolete TFFS component
+\" 01h,16sep09,e_d  change the default switches settings. (WIND00174333)
+\" 01g,26aug09,syt  update TureFFS description and example. 
+\" 01f,28jan09,kxb  Fix AMP documentation.
+\" 01e,20oct08,d_l  fix auxclk and timestamp description.
+\" 01d,31jul08,l_z  fix IPNET native driver description
+\" 01c,08jul08,l_z  update IPNET native driver description
+\" 01b,21nov07,kk   added information regarding power management
+\" 01a,11jul07,x_s  Written based on Wind River SBC8641D board.
+\"
+\TITLE wrSbc8641d - Wind River SBC8641D
+
+NAME `Wind River SBC8641D'
+
+INTRODUCTION
+
+This document describes the features of the wrSbc8641d reference host board
+with 8641D processor.
+
+The board supports some of the 8641D on-chip devices as well as a PCIexpress
+bridge to other peripherals.
+ 
+\sh Bootrom
+
+The ROM device is an INTEL 28F128P30T. It is addressed from 
+0xFF000000 to 0xFFFFFFFF 16MB.  It resides on the local bus.  
+
+To load VxWorks, and for more information, follow the instructions in the
+\tb Workbench User's Guide: Getting Started. 
+
+\sh Jumpers and Switches
+
+The wrSbc8641d allows flexible operating configuration based on the
+settings of jumpers and switches on the base board.
+Refer to the wrSbc8641d System Documentation for correct interpretation of
+various configurations for the exact revisions of the board in focus.
+
+\sh Jumpers:
+
+Default Jumper Settings:
+
+\ts
+Jumper Number | Description         | Setting
+
+JP1           | Connect/TRST        | 2-3
+JP3           | Core Voltage        | 2-3
+JP5           | Trigger in/out      | open
+JP8,JP9       | Flash Write Protect | open
+JP10          | Boot Image Select   | 1-2
+JP12          | Power Switch Bypass | 2-3
+ 
+\te
+
+\sh Switches:
+
+Default Switch Settings:
+
+\ts
+Switch Number | Switch ON           | Switch OFF
+
+SW1           | 2,6                 | 1,3,4,5
+SW2           | 2,4,6               | 1,3,5,7,8
+SW3           | 1,3                 | 2,4,5,6,7,8
+SW4           | 4,6                 | 1,2,3,5,7,8
+SW5           | 2,4,8               | 1,3,5,6,7
+SW6           | 2,4                 | 1,3,5,6,7,8
+SW7           | 1,6,7,8             | 2,3,4,5
+SW8           |                     | 1,2,3,4,5,6,7,8
+
+\te
+
+\sh BOOT DEVICES
+The supported boot devices are:
+\cs
+	motetsec - 10/100/1000 Triple Speed Ethernet Controller
+	gei      - GbE port using an Intel PRO/1000 series PCI Express Network
+	           Card in the PCI Express slot
+	           (The BSP must be configured to include this option)
+\ce
+
+\sh Memory Maps
+
+The following table describes the wrSbc8641d default memory map.
+
+\ts
+--------------------------------------------------------------------------------
+Start       | Size  | End         | Access to
+--------------------------------------------------------------------------------
+0x0000_0000 | 256MB | 0x0FFF_FFFF | DDR1 SDRAM
+0x1000_0000 | 256MB | 0x1FFF_FFFF | DDR2 SDRAM
+
+0x5000_0000 |  64MB | 0x53FF_FFFF | PCIE1 Memory
+0x5400_0000 |  64MB | 0x57FF_FFFF | PCIE1 Memory IO
+0x5800_0000 |  64MB | 0x5BFF_FFFF | PCIE1 IO
+
+0x6000_0000 |  64MB | 0x63FF_FFFF | PCIE2 Memory
+0x6400_0000 |  64MB | 0x67FF_FFFF | PCIE2 Memory IO
+0x6800_0000 |  64MB | 0x6BFF_FFFF | PCIE2 IO
+
+0xE000_0000 | 128MB | 0xE7FF_FFFF | LB SDRAM
+0xE800_0000 | 128MB | 0xEFFF_FFFF | DOC
+0xF000_0000 |  64KB | 0xF000_FFFF | EEPROM
+0xF100_0000 |   1MB | 0xF10F_FFFF | EPLD
+0xF400_0000 |   1MB | 0xF40F_FFFF | LCD
+0xFF00_0000 |   1MB | 0xFFFF_FFFF | BOOT FLASH
+--------------------------------------------------------------------------------
+\te
+
+
+FEATURES
+This section describes the supported and unsupported features of the wrSbc8641d
+
+\sh Supported Features
+
+The supported features of the wrSbc8641d board are:
+\cs
+
+	MMU support
+	Cache support
+	L2 cache support
+	Decrementer timer, used to implement a system clock
+	MPC8641 DUART
+	on-chip 10/100/1000 TSEC 1/2/3/4
+	on-chip programmable interrupt controller
+	DDR1 SDRAM 
+	DDR2 SDRAM 
+	Flash (about 16 MB)
+	AMP support
+	PCI Express host controller
+	TFFS flash filesystem using the 8MB lower flash.
+	OpenPic timer, used to implement a auxclk and timestamp clock
+	
+\ce
+
+\sh Unsupported Features
+
+The following devices are unsupported by this BSP:
+\cs
+	DMA controller.
+	Serial RapidIO.
+\ce
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Devices
+The chip drivers included are:
+
+\cs
+    sysEpic.c         - embedded interrupt controller driver
+    eeprom.c          - EEPROM support
+    sysSmEnd.c        - Shared memory END driver
+    sysLcd.c          - Lcd driver.
+\ce
+
+
+\sh Flashing the Boot ROM Image Using Workbench
+
+   This section describes how to program a VxWorks bootrom image onto 
+   a flash bank using Workbench 2.6 (or later) and the Wind River ICE 
+   plugin. Note that the Wind River Probe (USB) is also supported and 
+   uses the same basic instructions as the Wind River ICE but does not 
+   require an IP address.
+
+   The SBC8641D board has two Intel 28F128P30T 16MB Strata flash chips, U17
+   and U61. The board comes pre-flashed with a VxWorks bootrom in U17 and
+   a UBOOT image (with Linux kernel and ramdisk images) in U61. Jumper JP10
+   controls which of the two flash chips is visible: putting the jumper in
+   position 1-2 selects U17 (VxWorks) and putting it in position 2-3
+   selects U61 (UBOOT).
+
+   Note that this design does not allow both Strata flash banks to be
+   visible concurrently. Consequently, it isn't possible to use UBOOT
+   from U61 to flash new VxWorks bootrom into U17. Instead, the Wind
+   River ICE or Wind River Probe must be used, according to the
+   instructions below.
+
+   Using Workbench, complete the following steps to flash your boot ROM image:
+          
+	a) Create a bootrom.hex image.
+
+	Create a VxWorks boot loader project based on the wrSbc8641d BSP.
+	You can use the default compressed image. However, use hex 
+	format in place of the elf format.
+	After the project is created, build the default image.
+ 
+	b) Install the WindRiver ICE and power it on.
+
+	Connect the JTAG interface cable from the Wind River ICE to the 
+	wrSbc8641d board JTAG connector. When all of the connections have been made,
+  power up the wrSbc8641d board and create a Wind River ICE connection in Workbench. 
+
+	c) Configure the Workbench connection.
+
+	When creating the connection, specify the MPC8641d CPU which is with 
+        86xx group.
+	Enter the IP address of the Wind River ICE when requested.
+
+	d) Load the proper wrSbc8641d register setting for WindRiver ICE.
+
+	Once you have connected the probe to the CPU, right-click on the 
+	connection in the target manager and attach to the CPU core. At 
+	this point, you can go to the main Workbench Window tab at the top 
+	of the view and select "show view". Browse the view list and select 
+	OCD Command Shell. This launches the original BKM command shell.
+	Navigate to the target manager and right-click on core(U1). Select 
+	reset and download. You can now put the register file in this BSP or 
+	one provided by the installation in "play register file" . Reset with 
+	IN then click the reset download button. You have now loaded the target 
+	board with enough settings to program the boot ROM. Select "Window > show view" 
+	again and select Flash Programmer.
+	
+	e) Converting the bootrom.hex file to bootrom.bin.
+
+	Select the Add/Remove tab in the flash programmer. Click 
+	"convert file" and navigate to the boot loader project you created 
+	previously e.g. WindRiver\workspace\wrSbc8641dBootProj\bootrom.hex. 
+	Select the project. The start address should be 0x0 and the end 
+	address should be set to 0xfffffff. Click "convert and add" to convert 
+	the file. 
+ 	At this point, the file is added to the list. Click on the start 
+	address entry (should be 0x0) and change it to 0xfff00000. The file 
+	is now ready for programming.
+
+
+	f) Program the wrSbc8641d flash.
+
+	Select the configuration tab and choose the following device:
+	INTEL -> 28F128P30T -> 8192 x 16 -> 1 Device.
+
+	Set the base address to 0xff000000.
+	Set the start address to 0x00000000. 
+	Set the size to 65168.
+
+	Select programming tab and set the following options:
+
+	Set the erase from setting to 0xfff00000.
+	Set the erase to setting to 0xffffffff.
+
+	Go to OCD command shell and type IN. Be sure this returns the BKM 
+	prompt and is OK. Return to the flash programmer and select the 
+  Batch Program tab and then select the Initialize/Erase and Program 
+	check boxes. Click Execute.
+	Wait for the programmer to complete.
+	You can now run the VxWorks boot ROM by going back to the OCD command 
+	shell and typing "INN" followed by "GO". Alternatively, you can 
+	disconnect the ICE and proceed to Step 3 "Running the VxWorks Boot 
+	ROM Program".
+        
+\sh Running the VxWorks Boot ROM Program
+
+	To run the VxWorks boot ROM program, complete the following steps:
+
+	a) If you have not already done so, disconnect the Wind River ICE.
+	Note that if the ICE remains connected, it can stop the processor at 
+	the first instruction in certain cases.
+
+	b) Connect the Ethernet and serial channels.
+	
+	i) Connect the serial port in the carrier card to the host 
+	using the supplied serial cable.
+	ii) Connect the RJ45 Ethernet cables to the TSEC ports which 
+	are next to the serial port. The top left next to/above serial is
+  TSEC1. 
+
+	c) Launch a terminal program on the host and configure as follows:
+
+	8 data bits
+	1 stop bit
+	no hardware handshaking 
+	parity disabled
+	baud rate = 9600 bps
+
+	d) Power cycle the board.
+
+	If the board is not already powered off, turn it off momentarily. 
+	Then, power the board on. At this point, you should see characters 
+	being printed to the terminal window signaling the boot countdown. 
+	Press any key to stop the count down. You are now ready to configure 
+	VxWorks. For detailed instructions, see the VxWorks Kernel 
+	Programmer's Guide.
+
+The user configurable options are in config.h.
+
+\sh TrueFFS
+The standard Wind River TrueFFS product is supported in this release.
+
+This BSP uses one lower 8MB 28F128P30T flash as the TrueFFS media.
+The FLASH space used as TrueFFS is 0xff000000 - 0xff7fffff.
+
+To use it, define INCLUDE_TFFS in config.h.  If you want to use TFFS with DOSFS
+file system, please define the following macros in config.h.
+
+\cs
+    #define INCLUDE_ERF
+    #define INCLUDE_DEVICE_MANAGER
+    #define INCLUDE_FS_EVENT_UTIL
+    #define INCLUDE_FS_MONITOR
+    #define INCLUDE_XBD
+    #define INCLUDE_XBD_BLK_DEV
+    #define INCLUDE_XBD_TRANS
+    #define INCLUDE_DOSFS
+    #define INCLUDE_DOSFS_DIR_FIXED
+    #define INCLUDE_DOSFS_DIR_VFAT
+    #define INCLUDE_DOSFS_FAT
+    #define INCLUDE_DOSFS_FMT
+    #define INCLUDE_DOSFS_MAIN
+\ce
+
+When using TrueFFS on a new FLASH for the first time, you should format and
+configure the FLASH by using:
+
+\cs
+    sysTffsFormat ();
+    usrTffsConfig (0, 0, "/tffs0");
+\ce
+
+If you are using DOSFS, please use
+
+\cs
+    dosfsDiskFormat ("/tffs0");
+\ce
+
+Note: If you are running these commands in the VxWorks target shell, please use
+
+\cs
+    sp sysTffsFormat
+\ce
+
+to format the FLASH as it would take long time to complete.
+
+You should now be able to use VxWorks I/O and file system commands to access
+the FLASH device as if it were a disk.  For example, you can copy a vxWorks
+image from your host to TFFS by using file system 'copy'.  Of course, you should
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/tffs0/vxWorks");
+\ce
+
+If you want to use "/tffs0" as a boot device, you should follow the instructions:
+
+For command line mode, make sure INCLUDE_TFFS is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the flash chip.  Also make sure you have all the necessary file system
+components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_TFFS_MOUNT
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a default_romCompress.bin in the project directory, program
+it into the flash chip as a bootrom.
+
+Below is an example by using /tffs as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /tffs0/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : user
+    ftp password (pw)    : pass
+    flags (f)            : 0x0
+    target name (tn)     : wrSbc8641d
+    other (o)            : motetsec0
+\ce
+
+\sh PCI Express
+The Wind River SBC8641D board has two PCI express slots. Each slot
+corresponds to a separate PCIe host bridge on the MPC8641D CPU, which
+are supported using a VxBus PCI controller driver. PCI support is off
+by default, but can be enabled by including the INCLUDE_PCI_BUS component.
+
+\sh Secondary PCIe ethernet
+When PCIe support is enabled, any of the VxBus ethernet drivers that
+support PCIe devices can also be enabled. Supported devices include
+the Intel PRO/1000 8257x controllers, the RealTek PCIe gigE and 10/100
+controllers and the Marvell Yukon II. Support for the Intel PRO/1000
+devices will be included automatically when INCLUDE_PCI_BUS is defined
+(INCLUDE_GEI825XX_VXB_END will also be defined).
+
+\sh NVRAM Support
+This BSP implements non-volatile RAM via the on-board EEPROM device.
+An 8-bit 8KB EEPROM, U18, is provided for non-volatile memory storage.
+It contains boot parameters and the eTsec's MAC addresses.
+
+\sh LCD support
+A 2*16 character module is available for a display device. The manufacturer is 
+DATA-MODUL.BTQH 21603V-FFSMN-LBD RED WITH CONN
+
+\sh Network Configuration
+The ETSEC ports allows 10/100/1000T connection.
+The driver will auto-negotiate and configure the port accordingly.
+The BSP also supports Intel 82546/82545/82544/82540/82543/82571/82572/82573
+based NICs
+
+The following END and corresponding END2 drivers are supported in this BSP.
+However, only END driver is enabled by default.
+
+\ts
+Driver | END                      | END2
+----------------------------------------
+TSEC   | INCLUDE_ETSEC_VXB_END    | INCLUDE_ETSEC_VXB_END2
+\te
+
+To enable the END2 driver, you should modify as follows:
+
+For command line build, add INCLUDE_END2 into config.h right after the
+definition of INCLUDE_END. Also replace the END driver name with corresponding
+END2 driver name, then rebuild the bootrom and vxWorks image.
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, add INCLUDE_END2 component and corresponding END2
+component, this will un-define END automatically. Then rebuild your project.
+
+\sh AMP board configuration
+
+In order to run in AMP mode, the low memory offset option for the second
+core must be enabled. This permits the second core to use the second 256MB
+bank of memory while making it appear to be mapped at address 0. The
+same VxWorks image can then be used on either core.
+
+To enable low memory offset mode, switch SW4:5 must be set to the on
+position. The board typically ships with this feature turned off,
+so this switch setting must be changed before AMP mode will work. This
+switch should turned back off to run the board in SMP mode.
+
+\sh LEGACY AMP support
+The BSP supports running the MPC8641D in AMP mode, with separate VxWorks
+images running on each core. AMP mode can be enabled by defining
+LEGACY_AMP in config.h or uncomment in the Makefile.
+
+NOTE: 
+Currently, the SBC8641D boards come pre-loaded with a VxWorks 6.4
+bootrom in flash. AMP mode will not work correctly until this bootrom is
+updated with a newer one (i.e. one built from this BSP). This is because
+the earlier bootrom does not enable the second DDR controller, which
+prevents the second 256MB RAM bank from being used.
+
+The second CPU can be started by calling startCPU1() in usrAppInit.c or from 
+target shell. You should have shared memory included (INCLUDE_SM_COMMON) and 
+the host machine should have route added to point to the backplane ip address 
+that the shared memory interface is using. The backplane ipAddress 
+recommended is X.X.X.1 as it is incremented. 
+
+[VxWorks Boot]: @
+
+boot device          : motetsec
+unit number          : 0 
+processor number     : 0 
+file name            : target/config/wrSbc8641d/vxWorks
+inet on ethernet (e) : 192.168.0.2
+inet on backplane (b): 100.0.0.1
+host inet (h)        : 192.168.0.1
+user (u)             : vxworks
+ftp password (pw)    : vxworks
+flags (f)            : 0x0 
+target name (tn)     : t0
+other (o)            : 
+
+Attaching interface lo0... done
+Attached IPv4 interface to motetsec unit 0
+Loading... 1374044 + 194492
+Starting at 0x100000...
+
+Host Name: bootHost 
+Attaching interface lo0... done
+Attaching to SM net with memory anchor at 0x10004100...
+SM address: 100.0.0.1
+Attached IPv4 interface to motetsec unit 0
+Attached IPv4 interface to sm unit 0
+Loading symbol table from sxl:vxWorks.sym ...done
+ 
+ ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+ ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+ ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+      ]]]]]]]]]]]  ]]]]     ]]]]]]]]]]       ]]              ]]]]         (R)
+ ]     ]]]]]]]]]  ]]]]]]     ]]]]]]]]       ]]               ]]]]            
+ ]]     ]]]]]]]  ]]]]]]]]     ]]]]]] ]     ]]                ]]]]            
+ ]]]     ]]]]] ]    ]]]  ]     ]]]] ]]]   ]]]]]]]]]  ]]]] ]] ]]]]  ]]   ]]]]]
+ ]]]]     ]]]  ]]    ]  ]]]     ]] ]]]]] ]]]]]]   ]] ]]]]]]] ]]]] ]]   ]]]]  
+ ]]]]]     ]  ]]]]     ]]]]]      ]]]]]]]] ]]]]   ]] ]]]]    ]]]]]]]    ]]]] 
+ ]]]]]]      ]]]]]     ]]]]]]    ]  ]]]]]  ]]]]   ]] ]]]]    ]]]]]]]]    ]]]]
+ ]]]]]]]    ]]]]]  ]    ]]]]]]  ]    ]]]   ]]]]   ]] ]]]]    ]]]] ]]]]    ]]]]
+ ]]]]]]]]  ]]]]]  ]]]    ]]]]]]]      ]     ]]]]]]]  ]]]]    ]]]]  ]]]] ]]]]]
+ ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+ ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]       Development System
+ ]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+ ]]]]]]]]]]]]]]]]]]]]]]]]]]]       VxWorks 6.5
+ ]]]]]]]]]]]]]]]]]]]]]]]]]]       KERNEL: WIND version 2.10
+ ]]]]]]]]]]]]]]]]]]]]]]]]]       Copyright Wind River Systems, Inc., 1984-2006
+
+ CPU: Wind River SBC8641D.  Processor #0.
+ Memory Size: 0x10000000.  BSP version 2.0/0.
+ Created: Jul 05 2007, 17:21:26
+ ED&R Policy Mode: Deployed
+ WDB Comm Type: WDB_COMM_NETWORK
+ WDB: Ready.
+
+-> startCPU1
+value = 0 = 0x0
+-> Host Name: bootHost 
+Attaching interface lo0... done
+Attaching to SM net with memory anchor at 0x10004100...
+
+SM address: 100.0.0.2
+Attached IPv4 interface to sm unit 0
+Loading symbol table from sxl:vxWorks.sym ...done
+ 
+
+ ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+ ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+ ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+      ]]]]]]]]]]]  ]]]]     ]]]]]]]]]]       ]]              ]]]]         (R)
+ ]     ]]]]]]]]]  ]]]]]]     ]]]]]]]]       ]]               ]]]]            
+ ]]     ]]]]]]]  ]]]]]]]]     ]]]]]] ]     ]]                ]]]]            
+ ]]]     ]]]]] ]    ]]]  ]     ]]]] ]]]   ]]]]]]]]]  ]]]] ]] ]]]]  ]]   ]]]]]
+ ]]]]     ]]]  ]]    ]  ]]]     ]] ]]]]] ]]]]]]   ]] ]]]]]]] ]]]] ]]   ]]]]  
+ ]]]]]     ]  ]]]]     ]]]]]      ]]]]]]]] ]]]]   ]] ]]]]    ]]]]]]]    ]]]] 
+ ]]]]]]      ]]]]]     ]]]]]]    ]  ]]]]]  ]]]]   ]] ]]]]    ]]]]]]]]    ]]]]
+ ]]]]]]]    ]]]]]  ]    ]]]]]]  ]    ]]]   ]]]]   ]] ]]]]    ]]]] ]]]]    ]]]]
+ ]]]]]]]]  ]]]]]  ]]]    ]]]]]]]      ]     ]]]]]]]  ]]]]    ]]]]  ]]]] ]]]]]
+ ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+ ]]]]]]]]]]]]]]]]]]]]]]]]]]]]]       Development System
+ ]]]]]]]]]]]]]]]]]]]]]]]]]]]]
+ ]]]]]]]]]]]]]]]]]]]]]]]]]]]       VxWorks 6.5
+ ]]]]]]]]]]]]]]]]]]]]]]]]]]       KERNEL: WIND version 2.10
+ ]]]]]]]]]]]]]]]]]]]]]]]]]       Copyright Wind River Systems, Inc., 1984-2006
+
+ CPU: Wind River SBC8641D.  Processor #1.
+ Memory Size: 0x10000000.  BSP version 2.0/0.
+ Created: Jul 05 2007, 17:21:26
+ ED&R Policy Mode: deployed
+ WDB Comm Type: WDB_COMM_NETWORK
+ WDB: Ready.
+
+-> 
+
+Building with project facility/Workbench kernel configurator requires each 
+image to have the shared memory interface configured manually as it does not 
+start it automatically on cpu0 and assumes the enet address not the backplane 
+address from the bootline should be used on cpu1.
+
+
+\sh AMP with wrload and MIPC
+
+VxWorks AMP(Asymmetric Multiprocessing) configuration can be used on this
+multiprocessor hardware platform supported by this BSP. Apparently VxWorks AMP uses
+the same hardware resources as SMP, but there are lots of specific features for AMP.
+Please refer to the chapter "Configuring VxWorks for AMP" of
+vxworks_kernel_programmers_guide_6.x.pdf for more details about the AMP-specific
+features from software and hardware view.
+
+The default bootrom provided from the wrSbc8641d BSP may be used to boot
+the board with UP, AMP or SMP images.
+
+You must use the Workbench or vxprj to build AMP images. You can build any image
+for core0 or core1 from the wrSbc8641d BSP. 
+
+To get a AMP image, component INCLUDE_AMP_CPU must be included in the VIP.
+The following configurations are suggested as baselines:
+
+\ts
+Image Type | Components
+------------------------------
+AMP primary   | INCLUDE_WRLOAD INCLUDE_AMP_CPU INCLUDE_AMP_CPU_00
+AMP secondary | INCLUDE_WRLOAD_IMAGE_BUILD INCLUDE_AMP_CPU INCLUDE_AMP_CPU_01
+
+\te
+
+The following configurations are provided as optional:
+
+\ts
+Image Type    | Components
+------------------------------
+AMP           | INCLUDE_MSD INCLUDE_SHELL INCLUDE_MIPC_SM INCLUDE_MIPC_SHOW
+\te
+
+When in AMP mode, the ETSEC interfaces can be allocated to either core.
+The default configuration assigns motetsec0 and motetsec1 to the first 
+core and motetsec2 and motetsec3 to the second. 
+
+This configuration can be changed by editing the hwconf.c and sysLib.c files
+
+Update the hwconf.c:
+
+Changing the "coreNum" properties in the ETSEC resource entries to point the core
+which you want to run. 
+
+Update the sysLib.c:
+
+
+In the file sysLib.c for BSP, you can control the assignment of devices
+to CPUs by using struct ampCpuTable definitions. For example, suppose three
+Ethernet devices are entered in a sysLib.c file, as follows:
+\cs
+AMP_CPU_TABLE ampCpuTable[] = {
+    { XTSEC_NAME,     0, 0 }, ===> for core0
+    { XTSEC_NAME,     1, 0 }, ===> for core0
+    { XTSEC_NAME,     2, 1 }, ===> for core1
+    { XTSEC_NAME,     3, 1 }, ===> for core1
+    { "ns16550",      0, 0 }, ===> for core0
+    { "ns16550",      1, 0 }, ===> for core0
+    { "m85xxCCSR",    0, 0 }, ===> for core0
+    { "openPicTimer", 0, 0 }, ===> for core0
+    { "openPicTimer", 1, 0 }, ===> for core0
+    { "m85xxPci",     0, 0 }, ===> for core0
+    { "m85xxPci",     1, 0 }, ===> for core0
+    { "m85xxPci",     2, 0 }  ===> for core0
+    };
+\ce
+To assign a different ethernet device to each of two CPUs, you can use the
+following changes:
+\cs
+AMP_CPU_TABLE ampCpuTable[] = {
+    { XTSEC_NAME,     0, 0 }, ===> for core0
+    { XTSEC_NAME,     1, 1 }, ===> for core1
+    { XTSEC_NAME,     2, 1 }, ===> for core1
+    { XTSEC_NAME,     3, 0 }, ===> for core0
+    { "ns16550",      0, 0 }, ===> for core0
+    { "ns16550",      1, 0 }, ===> for core0
+    { "m85xxCCSR",    0, 0 }, ===> for core0
+    { "openPicTimer", 0, 0 }, ===> for core0
+    { "openPicTimer", 1, 0 }, ===> for core0
+    { "m85xxPci",     0, 0 }, ===> for core0
+    { "m85xxPci",     1, 0 }, ===> for core0
+    { "m85xxPci",     2, 0 }  ===> for core0
+    };
+\ce
+
+If you want to allocate the console UART to the secondary core, you can use
+the following changes:
+\cs
+AMP_CPU_TABLE ampCpuTable[] = {
+    { XTSEC_NAME,     0, 0 }, ===> for core0
+    { XTSEC_NAME,     1, 0 }, ===> for core0
+    { XTSEC_NAME,     2, 1 }, ===> for core1
+    { XTSEC_NAME,     3, 1 }, ===> for core1
+    { "ns16550",      0, 1 }, ===> for core1
+    { "ns16550",      1, 1 }, ===> for core1
+    { "m85xxCCSR",    0, 0 }, ===> for core0
+    { "openPicTimer", 0, 0 }, ===> for core0
+    { "openPicTimer", 1, 0 }, ===> for core0
+    { "m85xxPci",     0, 0 }, ===> for core0
+    { "m85xxPci",     1, 0 }, ===> for core0
+    { "m85xxPci",     2, 0 }  ===> for core0
+    };
+\ce
+
+Note that while there are 4 separate ETSEC controllers, only the MDIO
+registers on ETSEC0 are actually functional, ETSEC1, ETSEC2 and ETSEC3
+Ethernet PHYs are wired to this port.
+
+Note: On the wrSbc8641d the two UARTs share one internal interrupt line, so they must
+be assigned to the same core. Devices "m85xxCCSR" and "m85xxPci" should be assigned 
+to the same core,otherwise the PCI controller will not work.
+
+
+The secondary core image uses the DEFAULT_BOOT_LINE by default, so you should
+set this parameter in your vxWorks Image Project.
+For example (all on one line, no breaks, note the escaped internal double-quotes):
+
+$ vxprj parameter set DEFAULT_BOOT_LINE "\"motetsec(2,1)host:<image_dir>/vxWorks
+h=192.168.1.1 e=192.168.1.2:fffffe00 u=vxworks pw=vxworks f=0x0\""
+
+Boot the image created with INCLUDE_AMP_CPU_00 from the bootrom.
+Call wrload using the following either add as part of the usrAppInit or call
+from a shell such as the kernel shell.
+
+For Example:
+
+-> wrload "-file <image_dir>/vxWorks -cpu 1"
+
+Alternately, instead of setting the bootline at project build time or to change
+it after completing the build, the desired bootline can be passed to wrload as
+a command-line argument. (Again, as with the vxprj command, note the use of 
+escaped double-quotes):
+
+-> wrload "-file <image_dir>/vxWorks -cpu 1 -tsym \"*sysBootLine=motetsec(2,1)host:<image_dir>/vxWorks h=192.168.1.1 e=192.168.1.2:fffffe00 u=vxworks pw=vxworks f=0x0\" "
+
+\sh Networking support with AMP
+In AMP mode, the four ETSEC ports are divided up between the cores, such
+that motetsec0 and motetsec1 are available on the first core and motetsec2
+and motetsec3 are available on the second. This configuration can be
+customized by editing the resource entries in hwconf.c. When used in this
+configuration, the TSEC_MDIO driver is required in order to arbitrate
+access to the MDIO port between cores.
+
+By default, the VxWorks image on the second core will try to download its
+symbol table via the shared memory interface, using the first core as a
+gateway. In order for this to work, the host system (i.e. the one from which
+the target will fetch the symbol table) must have a routing entry which
+allows it to communicate with the second core using the first one as
+a gateway.
+
+\sh Wind River SBC8641D Board Diagram
+
+.bS  
++------------------------------------------------------------------------------+
+|          -----                                                   |  LCD      |
+| 12V      | F |                                                   |---------- |
+|          | L |    -----------------                                          |
+|          | A |    |  LBC SDRAM    |                                       ---|
+|          | S |    -----------------              SW9 ---- SW2       eTsec0|  |
+|          | H |                       -----------------                    ---|
+|          |----                       |  PCIE 1       |                       |
+| JP8    ---------------               -----------------                    ---|
+| JP9    |             |               -----------------              eTsec1|  |
+|        |    M P C    |               |  PCIE 2       |                    ---|
+|        |    8641D    |               -----------------                       |
+|        |             |                               SW1                  ---|
+|        |             |                                              eTsec2|  |
+|        ---------------                                                    ---|
+|                                                                              |
+|        ---------------                                                    ---|
+|        |             |                                              eTsec3|  |
+|        | DDR SDRAM   |                                                    ---|
+|        ---------------                            -------                    |
+|                                                   |  J   |              _____|
+|                                                   |  T   |             |     |
+|                                            JP1    |  A   |             |DUART|
+|                                                   |  G   |             |____ |
++------------------------------------------------------------------------------+
+.bE  
+
+SPECIAL CONSIDERATIONS
+
+\sh Known Problems
+
+The SBC8641D board includes two 256MB banks of DDR SDRAM, but the
+VxWorks 6.4 bootrom that comes pre-flashed on some boards does not
+enable the second DDR controller, which renders the second RAM bank
+inaccessible. This will break support for AMP mode, which requires
+access to the second bank of memory. In order to fix this, the board
+must be reflashed with a new bootrom that has INCLUDE_DDR_SDRAM2 defined
+in config.h.
+
+On VxWorks 6.6, with power management (INCLUDE_CPU_PWR_MGMT and
+INCLUDE_CPU_LIGHT_PWR_MGR components) configured, i.e. NAP mode enabled,
+and heavy interrupt rates, potential board lock-ups have been encountered
+on this board.  For more information regarding the issues and workarounds,
+please refer to the VxWorks 6.6 Release Notes and defect WIND00104713 (SMP)
+and defect WIND00111630 (UP).
+
+\sh Delivered Objects
+\is
+\i bootrom
+
+\i bootrom_uncmp.hex
+
+\i bootrom_uncmp.bin
+
+\i vxWorks
+
+\i vxWorks.sym
+
+\i vxWorks.st
+\ie
+
+BIBLIOGRAPHY
+
+Please refer to the following documents for further information on the
+wrSbc8641d boards.
+
+\tb Wind River SBC8641D Engineering Reference Guide
+
+\tb MPC8641D Integrated Host Processor Family Reference Manual
+
+\tb SBC8641D AMP Configuration

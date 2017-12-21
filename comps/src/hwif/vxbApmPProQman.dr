@@ -1,0 +1,3 @@
+#ifdef DRV_APM_PPRO_QMAN
+    vxbApmPProQmanRegister ();
+#endif /* DRV_APM_PPRO_QMAN */

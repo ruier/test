@@ -1,0 +1,506 @@
+\" ads85xx/target.ref - Motorola MPC85XXADS target specific documentation
+\"
+\" Copyright (c) 2003-2004, 2008, 2009, 2012 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01g,22aug12,clx  fix typo error of RAM_LOW_ADRS. (WIND00371217)
+\" 01f,14sep09,e_d  update section of flashing bootrom using Workbench. (WIND00137254)
+\" 01e,25dec08,e_d  correct Flash program enable jumper J1 -> J6.
+\" 01d,07aug08,fao  update IPNET native driver description
+\" 01c,23sep04,dtr  Support revA board only.
+\" 01b,21jul04,dtr  Include info for revA board.
+\" 01a,16oct03,dtr  Created
+\"
+\"
+\TITLE ads85xx - Motorola MPC85XXADS
+
+NAME
+`Motorola MPC85XXADS'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks for the ads8540/8560 BSP. 
+
+
+BOOT ROMS
+
+No VxWorks Boot ROM is provided with this BSP release. Nevertheless VxWorks
+boot code is working if downloaded into the on board Flash.
+This is can be done using the UBOOT. See Motorola documentation on the UBOOT
+to see how to flash bootrom into the top 1MB of flash.
+
+\sh Getting the board running VxWorks 
+This section will guide you how to run VxWorks on the MPC85XXADS board.
+
+1. Creating a bootrom.bin:
+    1.1 Launch Workbench 3.2, go to the "File" menu and choose the option
+        "New" -> "VxWorks Boot Loader / BSP Project".
+
+    1.2 The "New VxWorks Boot Loader / BSP Project" window will popup, input a
+        project name then click "Next" button. In the next window, choose the BSP
+        as ads8540/ads8560, "Tool chain" could be set as "sfdiab", in the 
+        "Boot loader / BSP image" part, choose the style as "Compressed (default)",
+        "Format" as "Bin", then press the "Finish" button to finish the project
+        creation.
+
+    1.3 Once the build process finish successfully (You will see "Build Finished"
+        in the "Build Console" window without error), you will find the file
+        "bootrom.bin" in the BSP directory "$(WIND_BASE)/target/config/ads8540" or
+        "$(WIND_BASE)/target/config/ads8560". 
+
+2. Programming bootrom.bin to the MPC85XXADS FLASH:
+   Support for MPC85XXADS part is available with Workbench 3.2.
+
+   Using Workbench, complete the following steps to flash your boot ROM image:
+
+    2.1 Install Wind River Probe or Wind River ICE and power it on.
+
+        Connect the JTAG interface cable from the Wind River Probe or Wind 
+        River ICE to the MPC85XXADS board's JTAG connector(P28) .
+        Once the connections have been made, power up the MPC85XXADS 
+        board and launch Workbench on the host.     
+
+    2.2 Configure the Wind River Probe or Wind River ICE connection.
+
+        In Workbench on the left pane, there is a "Remote Systems" window. 
+        Click on the "Define a connection to remote system" button. In the popup
+        "New Connection" window, select the Connection type as 
+        "Wind River OCD ICE Connection" for Wind River ICE and "Wind River 
+        OCD Probe Connection" for Wind River Probe. If the Wind River ICE 
+        is connected via serial port, specify the configuration else select
+        "Specify all communication settings manually". 
+
+        In the "Wind River ICE Settings" or "Wind River Probe Settings", 
+        select the Board file by clicking on the "Board file" radio button and
+        browse to the appropriate board file. For example:
+        "$WIND_OCD_PATH/BoardFiles/PowerPC/85xx/Generic/Generic_MPC8540.brd or Generic_MPC8560.brd"
+        Select "Auto-attach to connected designators" checkbox. In the 
+        "Communications" tab, "Emulator Hostname / IP address" of ICE for Wind 
+        River ICE or "USB Device Name" for Wind River Probe. Connect 
+        Workbench OCD with the Wind River Probe or Wind River ICE 
+        by clicking the "Next" and then "Finish" button. A New connection 
+        appears in the "Remote Systems" window.
+
+    2.3 Program Wind River Probe / Wind River ICE with the proper register 
+        settings for the MPC85XXADS board.
+
+        To view/modify the Wind River ICE firmware setting, terminate the
+        debug session for Wind River ICE. In the "Remote Systems" window,
+        right click on the newly connected OCD connection. Select 
+        "OCD Utilities". To know about the current firmware information, 
+        select "Emulator firmware version information". To download the new
+        firmware, Select "Firmware Download" and select appropriate file 
+        from "$WIND_OCD_PATH/CommonHardwareFiles/*.bin".
+
+        Go to the "OCD Command Shell" and click on the "Settings" button.
+        The OCD Command Shell Settings dialog appears, where you can 
+        select the appropriate register file. Navigate to the location of
+        the appropriate register configuration file. The folder of register 
+        file is '$WIND_OCD_PATH/RegisterFiles/PowerPC/85xx/Motorola', the register
+        file of MPC85XXADS board is 'mpc8540_ads.reg/mpc8560_ads.reg'.
+
+        After choosing the register file, press the "OK" button. In the OCD Command
+        Shell, click the "Playback File" button. The selected register file is
+        downloaded to the target and the commands from the file appear in the
+        OCD command shell. When playback is finished the ">BKM>" or the ">ERR>"
+        prompt returns.
+
+    2.4 Get into Background Mode.
+
+        Execute the "IN" command to reset the board and initialize it with
+        the register setting.
+\cs
+            IN
+\ce
+        Also make sure Flash program enable jumper J6 is set to 2-3 closed.
+
+    2.5 Program the MPC85XXADS Flash.
+
+        In WindRiver OCD, Select the "Flash Programmer". The 
+        "Flash Programmer" view has three tabs: "Configuration", 
+        "Programming" and "Memory/Diagnostics".
+
+        2.5.1 Select the "Configuration" tab. In the "Device Selection' 
+            field, select the "INTEL -> 28F640Jx -> 4096 x 16 -> 2 Device" for 
+            MPC85XXADS board. 
+
+            In "Flash Bank Address" group for the "Base" enter "0xFF000000" . 
+            In the "RAM Workspace" group for the "Workspace Start at"
+            enter "0x0000" and for the "Workspace Size" enter 
+            "0xFFFF".
+
+        2.5.2 Click on the "Programming" tab. Select the "Add File" 
+            button, in the popup window, select the newly generated
+            "$(WIND_BASE)/target/config/ads8540(or ads8560)/bootrom.bin", and click
+            the "This is a raw binary file" checkbox then click "OK" to finish
+            file adding. Click the "Start Address" and set it as "0xfff00000",
+            the "End Address" will be fixed automatically. Please notice that
+            the "Start Address" should include the "Offset bias".
+            Enable a file by clicking on the checkbox under the "Enabled" heading.
+
+        2.5.3 In the "Erase Sector Selection" pane, select addresses
+            fff00000 through ffffffff.  Press the "Erase/Program" 
+            button to erase the flash and then program the flash with selected
+            "bootrom.bin" file. A window pops up to show the progress of the
+            Flash device programming. When it is complete, the Flash should
+            contain the new boot program.
+
+FEATURES
+
+Supported Features (PILOT board revisions)
+
+ADS8540
+
+ System Clock
+ Aux clock
+ Watchdog
+ L2Cache
+ L2SRAM
+ EPIC
+ DUART
+ TSEC
+ PCI
+ TFFS
+ 256MB DDR SDRAM
+ 64MB LBC SDRAM
+
+
+ADS8560
+
+ System clock
+ Aux clock
+ Watchdog
+ L2 Cache
+ L2 SRAM
+ EPIC
+ CPM interrupt controller
+ SCC1/2
+ FCC2/3
+ TSEC 
+ PCI 
+ TFFS
+ 256MB  DDR SDRAM
+ 64MB  LBC SDRAM
+
+\sh Feature Interactions
+None known
+
+HARDWARE DETAILS
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Devices
+The chip drivers included are:
+
+  'Generic:'
+    <cfiscs.c> - flash memory driver
+    <m85xxTimer.c> - timer driver
+    <miiLib.c> - Media Independent Interface library
+    <sysEpic.c> - On chip interrupt controller
+  'ADS8540:'
+    <ns16553Sio.c> - serial driver
+  'ADS8560:'
+    <m8260Sio.c> - serial driver
+    <m85xxCpmIntrCtl.c> - CPM interrupt controller driver
+
+The 8560 BSP configures both SCC1 and SCC2 as UART devices. 
+SCC1 is used as a console device.
+
+\sh Memory Maps
+
+
+The following table describes the ads85xx default memory map:
+\ts
+
+Start | Size | End | Access to
+------------------------------
+0x0000_0000 | 256MB | 0x0FFF_FFFF | DDR SDRAM
+0x1000_0000 | 64MB | 0x13FF_FFFF | LBC SDRAM
+0xFE00_0000 | 1MB | 0xFE0F_FFFF | Configuration Control Registers
+0xFF00_0000 | 16MB | 0xFFFF_FFFF | Flash SIMM
+
+\te
+
+The following table describes the default VxWorks macros which
+are used to address memory
+\ts
+
+Macro Name | Macro Definition | Description
+_
+LOCAL_MEM_LOCAL_ADRS | 0x0000_0000 | Base of RAM
+RAM_LOW_ADRS  | LOCAL_MEM_LOCAL_ADRS + 0x0010_0000 | VxWorks image loaded here. Stack grows down from this address.
+RAM_HIGH_ADRS | LOCAL_MEM_LOCAL_ADRS + 0x0100_0000 | VxWorks bootrom loaded here.
+LOCAL_MEM_SIZE | 0x1000_0000 | Default 256 MBytes of RAM
+ROM_BASE_ADRS | 0xFFF0_0000 | Base address of ROM on PILOT rev
+ROM_TEXT_ADRS | ROM_BASE_ADRS + 0x100 | Text must start after vector table 
+ROM_WARM_ADRS | ROM_TEXT_ADRS + 8 | Warm Reboot Entry Address
+ROM_SIZE | 0x0010_0000 | Default 1 MByte of ROM on PILOT rev (see ROM considerations)
+
+\te
+
+\sh Shared Memory
+NA
+
+\sh PCI Support
+The standard mapping for PCI is described in config.h of this BSP and uses 
+outbound translation to access. This means PCI space usage is configurable by
+the user in config.h. 
+
+\sh Serial Configuration
+SCC1 and SCC2 are configured as UART devices with 8 data bits, 1 stop
+bit, hardware handshaking, and parity disabled. 
+
+\sh SCSI Configuration
+There is no SCSI interface on this board.
+
+\sh Network Configuration
+The ADS8560 includes four ethernet ports: two FCC 10/100 ports, and
+two TSEC 10/100/1000 ports. The ADS8540 supports only the TSEC. On
+the ADS8560, the FCC ports have Davicom DM9161 PHYs and the TSECs
+use Marvell 88E1011S PHYs, which support both copper and fiber media.
+Both the copper and fiber ports are supported, though copper is the default.
+The user's guide for the ADS8560 board suggests that configuring the
+board for fiber operation requires changing switch settings on the
+board to configure the TSEC for TBI mode, however this method is not
+used. Instead, the Marvell PHY is programmed for "fiber over GMII" mode
+if INCLUDE_TSEC_FIBER_PORT0 or INCLUDE_TSEC_FIBER_PORT1 is defined.
+This method does not require any changes to switch or jumper
+settings on the board.
+
+Note that when operating in fiber mode, the TSEC ports support 1000Mbps
+operation over multimode fiber only. Also note that when fiber mode is
+enabled, the copper port is non-functional (and vice-versa).
+
+The following END and corresponding END2 drivers are supported in this BSP.
+However, only END driver is enabled by default.
+
+\ts
+Driver | END                      | END2
+----------------------------------------
+TSEC   | INCLUDE_TSEC_VXB_END    | INCLUDE_TSEC_VXB_END2
+\te
+
+To enable the END2 driver, you should modify as follows:
+
+For command line build, add INCLUDE_END2 into config.h right after the
+definition of INCLUDE_END. Also replace the END driver name with corresponding
+END2 driver name, then rebuild the bootrom and vxWorks image.
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, add INCLUDE_END2 component and corresponding END2
+component, this will un-define END automatically. Then rebuild your project.
+
+\sh VME Access
+NA
+
+\sh PCI Access
+PCI interface support is available. To enable it, INCLUDE_PCI_BUS must
+be defined in config.h
+
+Any of the VxBus PCI network drivers will work with this BSP. This includes
+support for Intel PRO/100, Intel PRO/1000, AMD PCnet/PCI, 3Com Fast
+Etherlink XL, Marvell Yukon and Yukon II, RealTek 10/100, RealTek
+10/100/1000 and Infineon AN985 devices. The FEI8255X and GEI825XX drivers
+for the Intel PRO/100 and PRO/1000 adapters will be enabled automatically
+when PCI support is turned on.
+
+\sh Boot Devices
+mottsec, motfcc
+
+\sh Boot Methods
+
+  'Ethernet'
+   Load vxWorks image via WINDPOWER ICE.
+
+
+\sh ROM Considerations for PILOT board revision
+The actual size of Flash memory on this board is 16MB
+
+The BSP was tested with both compressed and uncompressed boot roms
+programmed at ROM_BASE_ADRS. If there is not enough space for the
+bootrom image or a vxWorks standalone image is required to be in
+ROM, this can be achieved by placing a stub that jumps to start of
+flash memory. This requires either a compiler which can
+provide 2 text segments or manually programming the stub and the
+main image at different locations without overwriting each other.
+
+
+SPECIAL CONSIDERATIONS
+This section describes miscellaneous information that the user needs
+to know about the BSP.
+
+\sh Delivered Objects
+
+\sh Make Targets
+
+  bootrom.bin
+  vxWorks
+  vxWorks.st
+  bootrom_uncmp.bin
+  bootrom.hex
+  bootrom_uncmp.hex
+
+\sh Special Routines
+None
+
+
+See also "Known Problems" below.
+
+\sh Documentation Errata
+
+\sh Known Problems
+
+  FEI card was only working in PCI slot 0 of the board.
+  See Rev2.0 Silicon.
+  See RevA Board.
+
+\sh Tested Configuration
+
+\sh Switch Settings - Rev Pilot
+
+\ts
+
+SW Pin-> | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
+-
+1 | OFF | OFF | OFF | OFF | OFF | OFF
+2 | OFF  | OFF  | OFF | OFF  | OFF | OFF
+3 | OFF | OFF | OFF | OFF | OFF | OFF
+4 | ON | ON | ON | ON | ON | ON | OFF | OFF
+5 | ON | ON | OFF  | OFF | OFF | OFF | OFF | OFF | OFF | OFF
+6 | ON | OFF | ON | ON  | OFF | ON | OFF | OFF  
+7 | OFF | OFF | OFF | OFF | OFF | OFF | OFF | OFF
+8 | OFF
+9 | ON | ON
+10  | ON | OFF | OFF | OFF  | OFF | OFF | ON | ON
+11 ADS8540 | OFF | ON | OFF | OFF | OFF | OFF | OFF | ON 
+11 ADS8560 | OFF | OFF | OFF | OFF | OFF | OFF | OFF | ON 
+12 | OFF | ON | ON | OFF | OFF | ON | ON | ON | ON | ON 
+13 | OFF | ON | ON | ON            
+14 | ON | ON | ON  | ON
+15 | ON   | OFF  | OFF  | OFF | ON | OFF
+16 | ON   | ON   | ON   | ON 
+17 | OFF  | ON   | ON   | ON   | ON   | OFF  | ON   | ON 
+18 | OFF
+19 | OFF
+20 | ON | OFF  | OFF  | ON   | OFF | OFF
+21 | OFF
+22 | OFF  | OFF   | ON   | OFF
+23 | ON   | OFF  | ON   | OFF  | OFF  | ON 
+24 | OFF
+25 | ON   | OFF  | OFF  | OFF  | OFF  | ON
+26 | OFF
+27 | OFF
+28 | ON
+29 | ON   | ON   | OFF  | ON
+
+\te
+
+\sh Switch Settings - Rev A
+
+\ts
+
+SW Pin-> | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
+-
+1 | OFF | OFF | OFF | OFF | OFF | OFF
+2 | OFF  | OFF  | OFF | OFF  | OFF | OFF
+3 | OFF | OFF | OFF | OFF | OFF | OFF
+4 | ON | ON | ON | ON | ON | ON | OFF | OFF
+5       OFF     OFF     ON      ON
+6 | ON | ON | OFF  | OFF | OFF | OFF | OFF | OFF | OFF | OFF
+7 | OFF | ON | OFF | ON  | ON | OFF | OFF | OFF  
+8 | OFF | OFF | OFF | OFF | OFF | OFF | OFF | OFF
+9 | OFF
+10  | OFF | OFF | OFF | OFF  | OFF | OFF | ON | ON
+11      OFF | ON
+12 ADS8540 | OFF | ON | OFF | ON | ON | OFF | ON | ON 
+12 ADS8560 | OFF | OFF | OFF | ON | ON | OFF | ON | ON 
+13      ON | OFF | ON | OFF | OFF | ON
+14 | OFF | ON | ON | OFF | OFF | ON | ON | ON | ON | ON       
+15 | ON | ON | OFF  | ON
+16 | OFF   | OFF  | OFF  | OFF | ON | OFF
+17 | ON   | ON   | ON   | ON 
+18 | OFF  | ON   | ON   | ON   | ON   | OFF  | ON   | OFF
+19 | OFF
+20 | OFF 
+21 | ON | OFF  | OFF  | ON   | OFF | OFF
+22 | OFF  | ON   | ON   | OFF
+23 | OFF
+24 | OFF
+25 | OFF   | ON  | ON   | ON  | ON  | OFF 
+26 | OFF
+27 | OFF
+28 | ON
+29 | ON   | ON   | OFF  | ON
+30 | ON | OFF | ON | ON
+\te
+
+\sh Jumper Settings - Rev A
+
+  J6 - 2-3 to enable programming flash
+  J22 - 2-3
+  J24 - 1-2 MII
+  J25 - 1-2 MII
+  J33 - 1-2 MII
+  J37 - 1-2 MII
+  J38 - 1-2 Enable GVDD
+  J49 - 1-2 Enable ATM (unsupported)
+  J50 - connect
+  J51 - connect
+  J52 - 1-2 Enable ATM (unsupported)
+
+\sh Rev 2.0 silicon
+
+On Rev A board Switch 12 pin 7 should be ON for rev2 silicon and off for 
+rev 1. For pilot rev it's switch 11.
+
+\sh Rev A Board
+We only support the default switch settings in MPC8560ADS_RevA_QuickRefGuide 
+Rev1.15 which are specified above but the OSCILLATOR_FREQ defined in config.h
+should be set to 33MHZ with these switch settings. The CCB is set to 333MHz 
+and the Core Freq is 833MHz. The LBC SDRAM is using 83MHz. 
+All other frequencies are unsupported at the moment.
+
+\sh Rev Pilot
+No longer supported - to compile images for Rev Pilot add undefine ADS_BOARD_REVA at the beginning of config.h. No longer test BSP with this board.
+
+SEE ALSO
+
+\tb Tornado User's Guide: Getting Started 
+
+\tb VxWorks Programmer's Guide: Configuration
+
+\tb VxWorks Programmer's Guide: Architecture Appendix 
+
+BIBLIOGRAPHY
+
+\tb MPC8560_Users_Manual.pdf
+
+\tb MPC8540_Users_Manual.pdf
+
+\tb MPC8560ADS_Users_Manual.pdf
+
+\tb MPC8560ADSPilot1_QuickRefGuide.pdf
+
+\tb MPC8560ADS_RevA_QuickRefGuide.pdf
+
+\tb e500_core_users_manual.pdf
+
+See Freescale's web site for all the documentation related to the hardware.
+
+http://www.freescale.com/
+
+
+
+
+
+
+
+
+
+

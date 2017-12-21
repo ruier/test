@@ -1,0 +1,3 @@
+#ifdef INCLUDE_MOT_FEC_HEND
+    motFecHEndRegister();
+#endif /* INCLUDE_MOT_FEC_HEND */

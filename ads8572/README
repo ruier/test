@@ -1,0 +1,83 @@
+
+                 README: Freescale MPC8572-DS (Whitefin)
+
+This file contains board-specific information for the Freescale MPC8572-DS 
+target board. The BSP name is ads8572. Specifically, this file contains 
+information on any BSP interface changes from previous software or hardware 
+versions, and contains caveats that the user must be aware of before using 
+this BSP.
+
+------------------------------------------------------------------------------
+RELEASE 6.9/4
+    TODO:
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    Add CPU-A-005125 erratum. (WIND00403379)
+
+RELEASE 6.9/3
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    Merge AMP support. (WIND00358342)
+    Add support for TrueFFS. (WIND00202696)
+    Fixed build failure for AMP_CPU_01. (WIND00386971)
+    Fixed incompatible MAC address offset. (WIND00381792)
+
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Fixed RAM_HIGH_ADRS and RAM_LOW_ADRS. (WIND00332559)
+    Fixed memory corruption caused by a wrong offset calculation. (WIND00336714)
+    Fixed potential memory corruption caused by sysNvRamGet(). (WIND00101057)
+    Fixed document error. (WIND00252071)
+    Remove the component INCLUDE_AIM_MMU_SHOW for footprint. (WIND00334904)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Rolled back sysPhysMemDesc RAM settings. (WIND00253685)
+
+    Remove the component INCLUDE_AIM_MMU_SHOW for footprint. (WIND00334904)
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+    add _WRS_VX_AMP for compile error. (WIND00192173)
+    correct flash information in target.ref. (WIND00199688)
+    fixed PCI/PCI-EX does not work with AMP issue. (WIND00201150)
+    change vxIpiEmit to vxIpiPhysEmit. (WIND00212106)
+    Modify CCSBAR mmu table size. (WIND00247711)
+
+Version 2.0/3
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Removed macro INCLUDE_SMP_DEMO. (WIND00160267)
+    Update openPicTimer support.
+    Provide a workaround for PCI-Ex2 Errata and add a hw resource,
+    pciExtErrataFlag, and updated the targer.ref.(WIND00127584) 
+    Remove unused INCLUDE_PPC_FPU. (WIND00153695)
+    Fix build warning when include INCLUDE_VXBUS_SM_SUPPORT. (WIND00236270)
+
+Version 2.0/2
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7.
+
+    wrload and MIPC integrated into ads8572_AMP_core0/1 BSPs. 
+    PCI slots support added via ULi bridge.
+    modify FLASH driver from common driver(<mem/flashMem.c>) to local driver
+    ("flashMem.c").(CQ:WIND00121156)
+
+Version 2.0/1
+
+    This is meant for use with vxWorks 6.6.0.59 which is vxWOrks 6.6 with 
+    an E500V2 patch which includes SMP support.
+    AMP support has issues when PCI is enabled. AMP builds are in seperate
+    BSPs directories because of the differences in address space 
+    configuration. Look in ads8572_AMP_core0/core1.
+
+Version 2.0/0
+
+    This is meant for use with vxWorks 6.6 EAR CD. It is not FCS quality.

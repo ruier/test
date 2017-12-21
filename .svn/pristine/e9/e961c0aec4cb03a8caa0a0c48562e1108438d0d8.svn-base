@@ -1,0 +1,3 @@
+#ifdef DRV_SIO_OCTEON
+IMPORT void octeonSioRegister(void);
+#endif /* DRV_SIO_OCTEON */

@@ -1,0 +1,7 @@
+#ifdef INCLUDE_GT64120A_PCI
+    g64120aPciRegister ();
+#endif /* INCLUDE_GT64120A_PCI */
+
+#ifdef INCLUDE_GT64120A_MF
+    g64120aMfRegister ();
+#endif /* INCLUDE_GT64120A_MF */

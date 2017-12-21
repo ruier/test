@@ -1,0 +1,1213 @@
+\" target.ref - Wind River SBCP4080 target specific documentation
+\"
+\" Copyright (c) 2010-2012 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01n,25may12,mpc  added description for Freescale A-004529. (WIND00350649)
+\" 01m,09apr12,h_k  removed SYSTEM_GLOBALS and RESERVED_ATOMICS. (WIND00341977)
+\" 01l,06mar12,y_y  add vxbus I2C support.
+\" 01k,30jan12,agf  Replace SYSTEM_GLOBALS with RESERVED_ATOMICS
+\" 01j,05jan12,d_c  Fix defect WIND00311269. Remove out of date Known Issues.
+\" 01i,08oct11,ers  Fixed wrload description for romInit changes.
+\" 01h,22sep11,ers  Replaced DYNAMIC_WRLOAD with generic wrload. (WIND00253685)
+\" 01g,21jul11,e_d  Modified the know issue description.
+\" 01f,15apr11,e_d  Added the description for boot from filesystem.(WIND00264092)
+\" 01e,01mar11,e_d  Added the description for AMP and SMP mode;
+                    added System Globals and Virtual Shared Memory description
+                    removed any know issue that have fixed in vxWorks 6.9
+                    modified the description for Reset configuration word  
+\" 01d,11jan11,e_d  Added the ethernet address description.(WIND00249641)
+\" 01c,28dec10,e_d  Fix i2c description issue.(WIND00248414)
+\" 01b,31nov10,e_d  Updated by template
+\" 01a,21oct10,wap  Created from fsl_p4080_ds target.ref 01t
+\"
+\"
+\TITLE wrSbcP4080 - Wind River SBCP4080
+
+NAME
+`Wind River SBCP4080'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks for the wrSbcP4080 BSP.
+
+The Wind River SBCP4080 board is based on the Freescale P4080 rev 2 processor.
+The P4080 is an 8-core processor based on the e500mc architecture. The e500mc is
+a 32-bit architecture with 36-bit physical address space. The P4080 is designed
+as a high-speed network processing platform with both 10/100/1000Mbps and
+10 gigabit ethernet controllers and various network offload features,
+collectively known as the Data Path Acceleration Architecture (DPAA).
+
+The P4080 includes the following built-in hardware components:
+
+	. Eight e500mc cores capable of clock speeds up to 1.5Ghz
+	. Three integrated PCI Express controllers
+	. Two Serial Rapid I/O controllers
+	. Four I2C controllers
+	. Two DDR3 memory controllers
+	. Two USB 2.0 controllers
+	. Two UARTs
+	. Hardware queue manager message passing framework (Qman)
+	. Hardware buffer manager (Bman)
+	. Two frame managers (Fman)
+	. Eight 10/100/1000 DTSEC ethernet MACs (4 per Fman)
+	. Two 10 gigabit TGEC ethernet MACs (1 per Fman)
+	. Security Engine (SEC 4.0)
+	. Pattern Matching Engine (PME 2.1)
+
+The P4080 can be configured to support different peripheral combinations via
+it reset configuration word (RCW), which can be stored in I2C EEPROM or flash.
+
+The Wind River SBCP4080 incorporates the P4080 processor, along with 4GB of DDR3
+RAM, NOR and NAND flash, I2C and parallel EEPROMs, a 2x16 character debug LCD
+display, debug LEDs, and a JTAG port for use with the Wind River ICE II emulator.
+
+The SBCP4080 board is configured to support the following I/O interfaces:
+
+	. two x4 PCIe slots
+	. one UART
+	. one USB port
+	. up RGMII 10/100/1000 DTSEC ethernet port
+	. four SGMII 10/100/1000 DTSEC ethernet ports
+	. one XAUI 10 gigabit TGEC port 
+
+The SBCP4080 uses two I2C EEPROMs for storing the RCW, which can be selected
+using a jumper. Each RCW provides a different hardware I/O configuration, which
+are defined as follows:
+
+	Configuration 1:
+	---------------
+
+	. one UART
+	. one USB port
+	. one RGMII 10/100/1000 ethernet port
+	, one XAUI 10 gigabit ethernet port
+	. two x4 PCIe slots
+
+	Configuration 2:
+	---------------
+
+	. one UART
+	. one USB port
+	. one RGMII 10/100/1000 ethernet port
+	. four SGMII 10/100/1000 ethernet ports (via SFP modules)
+
+The four SGMII ethernet ports are wired to SFP slots, which must be populated
+with 1000baseT copper SFP modules for full functionality. The XAUI 10 gigabit
+ethernet port requires a fiber XFP module for full functionality. The SBCP4080
+evaluation kit includes only one Methode Electronics DM7041 1000baseT copper
+SFP module: additional SFP modules and the XFP module may be purchased
+separately. (A Finisar FTLX8511D3 or similar XFP module is recommended.)
+
+\sh Switches
+
+There are two switches at the bottom corner of the wrSbcP4080 board.
+
+Default Switch Settings:
+
+\ts
+Switch Number   | Switch ON           | Switch OFF
+--------------------------------------------------
+SW1             | 1,2,3,4,6           | 5,7,8
+SW2             | 1,3,5,7             | 2,4,6,8
+
+\te
+
+\sh Jumpers
+
+There are thirteen jumpers in the wrSbcP4080 board.
+
+Default jumper Settings:
+
+\ts
+Switch Number   | Description                      | Setting
+--------------------------------------------------------------
+J18             | System Clock Select              | Position 1-2
+J21             | Input Power Selection            | Position 2-3
+JP3             | Flash Write Protect for U56      | Open
+JP4             | Flash Write Protect for U55      | Open
+JP6             | PCIe/Trace Clock Select          | Position 2-3
+JP7             | XAUI Clock Select                | Position 1-2
+JP10            | SFP Clock Select                 | Position 2-3
+JP11            | Ties /TRST to /PORESET           | Open
+JP12            | JTAG Port Select                 | ON
+JP13            | LAB VDD Override                 | Open
+JP17            | POVDD Fuse Read                  | Position 2-3
+JP24            | Reset Configuration Word Select  | ON
+JP25            | Flash Select                     | Position 1-2
+
+\te
+
+The switch and jumper settings are described in detail in the SBCP4080
+Hardware Reference Manual included with the evaluation kit.
+
+\sh Getting the board running VxWorks (boot from VxWorks Bootrom)
+This section will guide you on how to run VxWorks on the wrSbcP4080 board.
+
+1. Creating a bootrom.bin:
+
+    Open the VxWorks Development Shell, change directory to wrSbcP4080
+    BSP directory, and then build the VxWorks bootrom image.
+
+\cs
+    cd target/config/wrSbcP4080
+    make bootrom.bin
+\ce
+
+2. Flashing the VxWorks bootrom with Workbench
+
+    Using Workbench, complete the following steps to flash your boot ROM image:
+    Notes: Support for wrSbcP4080 target is available with Workbench 3.3.
+
+    2.1 Install Wind River Probe or Wind River ICE and power it on.
+
+        Connect the JTAG interface cable from the Wind River Probe or Wind
+        River ICE to the wrSbcP4080 board's JTAG connector (P1).
+        Once the connections have been made, power up the target board and
+        launch Workbench on the host.
+
+    2.2 Configure the Wind River Probe or Wind River ICE connection.
+
+        In Workbench on the left pane, there is a "Remote Systems" window.
+        Click on the "Define a connection to remote system" button. In the popup
+        "New Connection" window, select the Connection type as
+        "Wind River OCD ICE Connection" for Wind River ICE and "Wind River
+        OCD Probe Connection" for Wind River Probe. If the Wind River ICE
+        is connected via serial port, specify the configuration else select
+        "Specify all communication settings manually".
+
+        In the "Wind River ICE Settings" or "Wind River Probe Settings",
+        select the Board file by clicking on the "Processor" radio button and
+        browse to the appropriate CPU type. For example: "P4080E".
+        Connect Workbench OCD with the Wind River Probe or Wind River ICE
+        by clicking the "Next" and then "Finish" button. A New connection
+        appears in the "Remote Systems" window.
+
+    2.3 Program Wind River Probe / Wind River ICE with the proper register
+        settings for the wrSbcP4080 board.
+
+        To view/modify the Wind River ICE firmware setting, terminate the
+        debug session for Wind River ICE. In the "Remote Systems" window,
+        right click on the newly connected OCD connection. Select
+        "OCD Utilities". To know about the current firmware information,
+        select "Emulator firmware version information". To download the new
+        firmware, Select "Firmware Download" and select appropriate file
+        from "$WIND_OCD_PATH/CommonHardwareFiles/*.bin".
+
+        Go to the "OCD Command Shell" and click on the "Settings" button.
+        The OCD Command Shell Settings dialog appears, where you can
+        select the appropriate register file, which is "WRS_SBCP4080_PCTR0360001_VxWorks.reg"
+        After choosing the register file, press the "OK" button. In the OCD
+        Command Shell, click the "Playback File" button. The selected register
+        file is downloaded to the target and the commands from the file appear
+        in the OCD command shell. When playback is finished the ">BKM>" or
+        the ">ERR>" prompt returns.
+
+    2.4 Get into Background Mode.
+
+        Execute the "IN" command to reset the board and initialize it with
+        the register setting.
+\cs
+        IN
+\ce
+
+    2.5 Program the wrSbcP4080 Flash.
+
+        In WindRiver OCD, Select the "Flash Programmer". The "Flash Programmer"
+        view has three tabs: "Configuration", "Programming" and "Memory/Diagnostics".
+
+        2.5.1 Select the "Configuration" tab. In the "Device Selection'
+              field, select the "Intel -> 28F128P30T -> 8192 x 16 -> 1 Device"
+
+              In "Flash Bank Address" group for the "Base" enter "FF000000" .
+              In the "RAM Workspace" group for the "Workspace Start at"
+              enter "0x00000000" and for the "Workspace Size" enter "65000".
+
+        2.5.2 Click on the "Programming" tab. Select the "Add File" button, in
+              the popup window, select the newly generated
+              "$(WIND_BASE)/target/config/wrSbcP4080/bootrom.bin", and click
+              the "This is a raw binary file" checkbox then click "OK" to finish
+              file adding. Click the "Start Address" and set it as "0xfff00000",
+              the "End Address" will be fixed automatically. Please notice that
+              the "Start Address" should include the "Offset bias".
+              Enable a file by clicking on the checkbox under the "Enabled" heading.
+
+        2.5.3 Press the "Auto Program" button to erase the flash and then program
+              the flash with selected "bootrom.bin" file. A window pops up to show
+              the progress of the Flash device programming. When it is complete,
+              the Flash should contain the new boot program.
+
+3. Running the VxWorks bootrom
+
+   Re-power on the board, the VxWorks bootrom should come up.
+
+Note: once a new bootrom has been flashed, check to make sure that MAC
+addresses for the DTSEC and TGEC ethernet ports have been set by using the
+'M' command at the '[VxWorks Boot]:' prompt. The MAC addresses and the
+bootline are stored in EEPROM, and should match those printed on the
+sticker affixed to the board. If the MAC address fields are uninitialized
+and contain nonsense or illegal values, network connecvitity may be impaired.
+
+FEATURES
+
+This section describes all features of the board, supported or not.
+It documents all configurations of the board and the interaction between
+features and configuration items.
+
+\sh List of Hardware Features (wrSbcP4080 board)
+
+\ts
+Hardware Interface | Controller | Driver/Component    | Status
+--------------------------------------------------------------
+UART:0             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+UART:1             | on-chip    | vxbNs16550Sio.c     | UNVALIDATED
+UART:2             | on-chip    | vxbNs16550Sio.c     | UNVALIDATED
+UART:3             | on-chip    | vxbNs16550Sio.c     | UNVALIDATED
+1GB-ETHERNET:0     | on-chip    | vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:1     | on-chip    | vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:2     | on-chip    | vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:3     | on-chip    | vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:4     | on-chip    | vxbDtsecEnd.c       | SUPPORTED
+10GB-ETHERNET:0    | on-chip    | vxbTgecEnd.c        | SUPPORTED
+NOR-FLASH          | 28F128P30  | 'flashmem.c/TFFS'   | SUPPORTED
+TIMER              | on-chip    | vxbM85xxTimer.c     | SUPPORTED
+TIMER              | on-chip    | vxbOpenPicTimer.c   | SUPPORTED
+PCI-E-HOST:0       | on-chip    | vxbQorIQPciEx.c     | SUPPORTED
+PCI-E-HOST:1       | on-chip    | vxbQorIQPciEx.c     | SUPPORTED
+PCI-E-HOST:2       | on-chip    | vxbQorIQPciEx.c     | UNVALIDATED
+DMA:0              | on-chip    | vxbFslDma.c         | SUPPORTED
+DMA:1              | on-chip    | vxbFslDma.c         | SUPPORTED
+I2C:0              | on-chip    | vxbFslI2c.c         | SUPPORTED
+I2C:1              | on-chip    | vxbFslI2c.c         | SUPPORTED
+I2C:2              | on-chip    | vxbFslI2c.c         | SUPPORTED
+I2C:3              | on-chip    | vxbFslI2c.c         | SUPPORTED
+SPI                | on-chip    | sysSpi.c            | UNVALIDATED
+USB-HOST:0         | on-chip    | 'EHCI'              | SUPPORTED
+GPIO               | on-chip    | vxbFslGpio.c        | SUPPORTED
+LCD                | CPLD       | sysLcd.c            | SUPPORTED       
+LED                | CPLD       | sysLed.c            | SUPPORTED
+NAND-FLASH         | NAN01GW3B2C| -                   | UNSUPPORTED
+USB-TARGET         | on-chip    | -                   | UNSUPPORTED
+SRIO               | on-chip    | -                   | UNSUPPORTED
+Security Engine    | on-chip    | -                   | UNSUPPORTED
+Performance Monitor| on-chip    | -                   | UNSUPPORTED
+\te
+
+\sh Feature Interactions
+Refer to the board vendor's documentation.
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh DDR memory selection
+wrSbcP4080 supports DDR-III only. The below memory have been tested and confirmed, or
+noted as such.
+
+\ts
+Mfg.   |Part Number               |Size |Ranks |ECC | Verified? | Notes
+-------------------------------------------------------------------------------------
+Hynix  |KPM0B2564B18U16S71        |2GB  |2     | Y  | Yes       | Or later revs
+\te
+
+\sh Verified Hardware
+This BSP has been verified on PCB-R0360-001 REV.B of wrSbcP4080 board.
+The default clock speed for wrSbcP4080 is 800MHz for core0, 400MHz for CCB.
+
+\sh Memory Maps
+The default hardware memory map of this BSP is as follows:
+
+\ts
+Start       | Size  | End         | Access to
+---------------------------------------------
+0x0000_0000 |  2GB  | 0x7FFF_FFFF | DDR3 SDRAM
+0x8000_0000 |  64MB | 0x83FF_FFFF | PCIe 1 Prefetchable Memory
+0x8400_0000 |  64MB | 0x87FF_FFFF | PCIe 1 Non-Prefetchable Memory
+0x8800_0000 |  64MB | 0x8BFF_FFFF | PCIe 1 IO
+0x8C00_0000 |  64MB | 0x8FFF_FFFF | PCIe 1 IO32
+0xA000_0000 |  64MB | 0xA3FF_FFFF | PCIe 2 Prefetchable Memory
+0xA400_0000 |  64MB | 0xA7FF_FFFF | PCIe 2 Non-Prefetchable Memory
+0xA800_0000 |  64MB | 0xABFF_FFFF | PCIe 2 IO
+0xAC00_0000 |  64MB | 0xAFFF_FFFF | PCIe 2 IO32
+0xC000_0000 |  64MB | 0xC3FF_FFFF | PCIe 3 Prefetchable Memory
+0xC400_0000 |  64MB | 0xC7FF_FFFF | PCIe 3 Non-Prefetchable Memory
+0xC800_0000 |  64MB | 0xCBFF_FFFF | PCIe 3 IO
+0xCC00_0000 |  64MB | 0xCFFF_FFFF | PCIe 3 IO32
+0xEFDF_0000 |  64KB | 0xEFDF_FFFF | CPLD_IO 
+0xF000_0000 |  16KB | 0xF000_3FFF | EEPROM
+0xF100_0000 |  64KB | 0xF100_FFFF | LCD
+0xF400_0000 |   2MB | 0xF41F_FFFF | QMAN
+0xF420_0000 |   2MB | 0xF43F_FFFF | BMAN
+0xFE00_0000 |  16MB | 0xFEFF_FFFF | CCSR
+0xFF00_0000 |  16MB | 0xFFFF_FFFF | NOR FLASH
+\te
+
+
+The default software memory map of this BSP is as follows:
+
+\ts
+Start       | End         | Used for
+---------------------------------------------
+0x0000_0100 | 0x0000_3500 | Vectors (3500 - Performance Mon)
+0x0000_4100 | 0x0000_41FF | SM_ANCHOR
+0x0000_4200 | 0x0000_42FF | BOOT_LINE
+0x0000_4300 | 0x0000_43FF | EXC_MSG
+0x0001_0000 | 0x0007_FFFF | SM_MEM_ADRS
+0x0008_0000 | 0x000C_0000 | SM_OBJ_MEM_ADR
+0x000C_0000 | 0x000D_FFFF | SM_TIPC_ADRS_DEFAULT
+0x0008_0000 | 0x0008_0014 | CPUn_SPACE(7)
+0x000F_0000 | 0x000F_0014 | CPUn_SPACE(1)
+0x000F_0000 | 0x000F_FFFF | root stack (core 0)
+0x0010_0000 | 0x1000_0000 | core 0 image and heap space
+0x1000_0000 | 0x100F_FFFF | root stack (core 1)
+0x1001_0000 | 0x1200_0000 | core 1 image and heap space
+0x1c01_0000 | 0x1E00_0000 | core 7 image and heap space
+0x2000_0000 | 0x2100_0000 | VIRTUAL_SM_BASE_PHYS
+0x2000_4400 | 0x2000_44FF | TM_ANCHOR_ADRS
+0x2001_0000 | 0x2009_0000 | MIPC_SM_SYSTEM_POOL_BASE_PHYS
+0x2001_0000 | 0x2010_0000 | DSHM_SM_POOL_BASE
+\te
+
+Note: As shown above, some software areas may overlap based on kernel
+component configuration.
+
+\sh Serial Configuration
+No special configuration needed.
+Default configuration is:
+    Baud Rate: 115200
+    Data: 8 bit
+    Parity: None
+    Stop: 1 bit
+    Flow Control: None
+
+\sh Network Configuration
+The DTSEC ports allow 10/100/1000 connections. The driver will auto-negotiate
+and configure the port accordingly.  The BSP also supports TGEC with a 10G connection;
+however, the TGEC driver has not been validated with this BSP.
+
+The following END drivers are supported in this BSP.
+
+\ts
+Driver | END                    
+--------------------------
+DTSEC  | DRV_VXBEND_DTSEC       
+TGEC   | DRV_VXBEND_TGEC
+\te
+
+The P4080 processor has a total of 10 internal network controllers, spread
+across two frame managers. However, not all ports can be enabled simultaneously.
+
+Various port configurations can be selected by modifying the reset
+configuration word (RCW). The SBCP4080 board comes programmed with two operational
+RCW's. They are stored in seperate on-board I2C EEPROMs. The EEPROMs are selectable
+with JP24. The factory default is to have JP24 installed. Removing JP24 selects 
+the alternate RCW.
+
+With JP24 installed, dtsec4 and tgec0 are enabled. This corresponds to the
+first DTSEC port on the second frame manager operating in RGMII mode, and
+also the TGEC port on the second frame manager. Using the TGEC 10GbE port
+requires the addition of a suitable XFP module, which is not supplied with
+the SBCP4080 evaluation kit. The SBCP4080 has been tested with a Finisar
+FTLX8511D3-IT 10GBase-SR fiber optic module. Similar XAUI modules should
+also work. Note that the TGEC MAC can only operate at 10 gigabit speeds,
+so while it may be possible to use multi-speed media modules, only 10G
+links will work.
+
+When JP24 is removed, dtsec0, dtsec1, dtsec2, dtsec3 and dtsec4 are
+enabled, and all other ports are disabled. This corresponds to the four DTSEC
+ports on the first frame manager operating in SGMII mode, and the first DTSEC
+port on the second frame manager operating in RGMII mode.
+
+The dtsec0, dtsec1, dtsec2 and dtsec3 interfaces are wired to the four SFP 
+ports on the front of the board. The SBCP4080 kit comes with one port (dtsec0)
+populated with a Methode Eletronics DM7041 1000baseT copper SFP module. 
+Additional SFP modules can be purchased separately to populate the remaining
+3 ports. Note that even if an SFP port is not populated, a "dtsec" device
+driver instance is still created by vxWorks. However, lacking a PHY, the device 
+consequently will not function.
+
+The the following diagrams illustrate the two port configurations, and how
+the board should be configured to support them:
+
+\cs
+   SRDS_PRTCL 0x05 setup (JP24 installed)
+
+   -------------               -------------
+   |Fman1  MAC1|               |Fman2  MAC1| -- dtsec4
+   |SGMII  MAC2|               |RGMII  MAC2|
+   |       MAC3|               |       MAC3|
+   |       MAC4|               |       MAC4|
+   |    10G MAC|               |    10G MAC| -- tgec0
+   -------------               -------------
+
+   SRDS_PRTCL 0x10 setup (JP24 removed)
+
+   -------------               -------------
+   |Fman1  MAC1| -- dtsec0     |Fman2  MAC1| -- dtsec4
+   |SGMII  MAC2| -- dtsec1     |RGMII  MAC2|
+   |       MAC3| -- dtsec2     |       MAC3|
+   |       MAC4| -- dtsec3     |       MAC4|
+   |    10G MAC|               |    10G MAC|
+   -------------               -------------
+
+\ce
+
+Using the DTSEC ports requires the DRV_VXBEND_DTSEC driver component. Using
+the 10 gigabit TGEC port requires the DRV_VXBEND_TGEC driver component. When
+JP24 is removed and the SGMII ports are enabled the DRV_RESOURCE_FSLI2C
+and DRV_MII_I2C_MDIO driver components are also required in order to provide link
+management support for the SFP PHYs. Many 1000baseT copper SFP modules from
+various vendors use the Marvell 88E1111 PHY driver internally. The 
+INCLUDE_MV88E1X11PHY driver component is used to manage this PHY chip.
+
+The DRV_RESOURCE_FSLI2C, DRV_MII_I2C_MDIO and INCLUDE_MV88E1X11PHY drivers
+are included in the BSP by default (see the config.h file), but can be
+removed if the SFP ports will never be used. With the default BSP setup,
+no changes are needed when switching between configurations.
+
+Both the DTSEC and TGEC drivers include support for jumbo frames.
+
+For SPF mode, only the Methode Eletronics DM7041 1000baseT cppper SPF module is validated.
+
+\sh Ethernet Address
+Six Ethernet hardware addresses are assigned to wrSbcP4080 board.
+A unique address is absolutely necessary if the user wishes to
+connect the board to a network.  Thus, the user must provide a suitable
+6-byte Ethernet address for each on-board network interface.
+
+Definition of the macro ETHERNET_MAC_HANDLER in wrSbcP4080.h indicates the MAC
+address is stored in NVRAM and alterable via the 'M' bootrom command.  This
+option allows only the last three bytes to be changed. To use this option,
+open a console window and reset the hardware. When the bootrom banner appears
+and the countdown starts, press any key to get the "[VxWorks Boot]:" prompt.
+Type the 'M' command to modify the MAC address.
+
+\sh DPAA Support
+
+In addition to standard DTSEC and TGEC END drivers, support is also
+provided for Qman, Bman and Fman DPAA components. The vxbQorIQQman,
+vxbQorIQBman and vxbQorIQFman modules support the following functionality:
+
+\is
+\i User creation of Qman frame queues
+\i Interrupt driven and polled Qman event handling
+\i Management of Bman buffer pools
+\i Use of Fman hard parser for RX checksum offload in the DTSEC and TGEC
+drivers
+\i APIs provided to program the keygen, parser, coarse classifier and
+policer in the Fman
+\ie
+
+Note that while the soft parser is supported, it requires
+user-generated soft parser programs. These can either be generated using
+the Freescale FMC tool, or loaded via a runtime soft parser assembler
+component. The FMC tool is not provided with this BSP, but is available
+with the Freescale P4080 Linux SDK. A standalone soft parser assembler is
+provided in the fsl_spa.zip file included with this BSP. This is a host
+side utility which can be used to develop and debug soft parser programs
+before loading them into the hardware. The standalone assembler also
+includes a description of the soft parser assembler syntax.
+
+Documentation for these APIs can be found in the following files:
+
+\is
+\i target/src/hwif/resource/vxbQorIQBmanPortal.c -- Bman API
+\i target/src/hwif/resource/vxbQorIQQmanPortal.c -- Qman API
+\i target/src/hwif/resource/vxbQorIQQmanFman.c -- Fman API
+\ie
+
+Also, several example Fman applications can be found in the
+target/src/demo/p4080 directory.
+
+\sh Boot Devices
+The supported boot devices are:
+
+\ts
+    `dtsec4   ' | DTSEC4
+    `usb'       | USB
+    `tffs'      | TFFS
+\te
+
+\sh Boot process and vxWorks images
+
+Previous releases of vxWorks BSPs provided separate BSP directories for AMP images.
+As of the vxWorks 6.9 release UP, SMP, AMP, and bootrom images are now generated from
+a single BSP directory.
+
+AMP is supported in a vxWorks / vxWorks combination. To add AMP support to a kernel image,
+add one of the AMP bundles, BUNDLE_AMP_PRI or BUNDLE_AMP_SEC as appropriate, corresponding
+to the core the kernel will execute on. Secondary kernel images are loaded to cores using
+wrLoad.
+ 
+The following configurations are provided as baselines:
+
+\ts
+Image Type | Components
+------------------------------
+AMP primary | INCLUDE_MSD INCLUDE_WDB_PROXY_MIPC INCLUDE_WRLOAD INCLUDE_AMP INCLUDE_AMP_CPU_00
+AMP secondary | INCLUDE_MSD INCLUDE_WDB_COMM_MIPC INCLUDE_AMP INCLUDE_AMP_CPU_0n* 
+
+\te
+* Substitute n with 1 - 7 to match the CPU for which this image is targeted.
+
+\sh VxWorks - VxWorks AMP with wrload and MIPC
+
+AMP enabled kernels must be built from Workbench or vxprj. Any of the
+AMP image can be built based on the wrSbcP4080 BSP, however each
+image must be configured manually with the appropriate components for
+the core on which it is to execute.
+
+For instance, core 0 must be configured with the components to execute
+as the primary CPU. To assist with component configuration, the bundle
+BUNDLE_AMP_PRI will automatically add the components required for the 
+kernel on core 0.
+
+\cs
+$ cd $WIND_BASE/target/proj
+$ vxprj create wrSbcP4080 diab wrSbcP4080_amp0
+$ cd wrSbcP4080_amp0
+$ vxprj bundle add BUNDLE_AMP_PRI
+\ce
+
+The images for cores 1-7 must be configured with the components to
+execute as a secondary CPU. Again, a bundle has been created to assist
+with addition of the required components. Use vxprj to add the 
+appropriate component, INCLUDE_AMP_CPU_0[1-7]. Also, vxprj automatically
+maintains mutual exclusion among the CPU components. Adding a CPU 
+component removes the pre-existing one.
+
+\cs
+$ cd $WIND_BASE/target/proj
+$ vxprj create wrSbcP4080 diab wrSbcP4080_amp2
+$ cd wrSbcP4080_amp2
+$ vxprj bundle add BUNDLE_AMP_SEC
+$ vxprj component add INCLUDE_AMP_CPU_01
+\ce
+
+Of course, Workbench may be used instead of vxprj.  Navigate the 
+configuration menus thusly:
+Kernel configurations: hardware -> BSP configuration variants -> vxWorks AMP core build
+
+Boot using an image created from wrSbcP4080 BSP using vxprj or
+Workbench; the default bootrom provided from the wrSbcP4080 BSP may
+be used to boot this image.
+
+Call wrload using the following either add as part of the usrAppInit or call
+from a shell such as the target shell.
+
+For Example:
+
+\cs
+-> wrload "-file <image_dir>/vxWorks -cpu 1"
+\ce
+
+wrload supports modifying the bootline using "-tsym" (highly recommended to
+set the network device and CPU index correctly).
+See wrload documentation for details.
+
+\sh wrload and memory management. 
+
+wrload, executed from the primary CPU, calls the function usrWrloadMap() to
+dynamically allocate virtual memory pages in the primary CPU's context for
+placing the secondary image into physical memory.  The argument to
+usrWrloadMap() is 'pAddr' which is set based upon the ELF file's load memory
+address (LMA) plus a physical bias.
+
+The physical bias is compiled into the loaded image via the CDF parameter 
+WRLOAD_IMAGE_BUILD_PHYS_BIAS.  The value of the parameter is stored across two
+32 bit variables as (_wrload_bias_high_32 | _wrload_bias_low_32). wrload, on 
+the primary CPU, reads these symbols directly from the ELF file prior to 
+loading.  This physical bias is superseded by wrload's -loadbias argument
+(i.e. a dynamic bias not defined at build time).  Which ever value is used, 
+the result is placed into the symbol _wrload_bias.
+
+There are a few limitations when using WRLOAD_IMAGE_BUILD_PHYS_BIAS.
+If the -loadbias argument is used, the primary CPU will load the image to the
+physical bias specified by -loadbias, however the secondary CPU cannot execute
+the image because the sysPhysMemDesc table and sysVirtToPhys routines use the
+WRLOAD_IMAGE_BUILD_PHYS_BIAS macro defined at compile-time.  If a load bias is
+used, the MMU no longer uses a 1-to-1 physical-to-virtual mapping.  The ICE
+may require a 1-to-1 mapping (with a physical bias of 0) to properly debug
+an image.  Finally, the bootrom supports but constraints the bias to lie on
+a 64MB boundary.
+
+For secondary images the bootrom (romInit) reads a shared memory area
+starting at CPUn_SPACE to get the image's stack pointer, starting address
+and MMU data.  The primary image sets up CPUn_SPACE from sysAmpCpuEnable().
+The usrWrload functions usrWrloadBiasHighGet() and usrWrloadBiasLowGet()
+are provided for sysAmpCpuEnable() to get the _wrload_bias value and put it
+into CPUn_LOCAL_MEM_ERPN and CPUn_LOCAL_MEM_RPN.  The bootrom uses RPN and
+ERPN to specify the (36-bit) physical address for a 64MB mapping that the
+secondary image starts running in.  The corresponding virtual address is
+derrived from the CPUn_FUNC_START_ADR.  Later, as the image boots and runs
+sysHwInit() this initial 64MB mapping is overwritten by sysStaticTlbDesc[].
+This allows the entries in sysStaticTlbDesc[] to expand (or reduce) the
+image's footprint to any workable size.
+
+The primary image's MMU does not include a mapping for the physical area
+used by the secondary image(s).  This protects the secondary image(s)
+from the primary.  The primary image uses usrWrloadMap() to map a virtual
+scratchpad area created just to load the image.  This area must be outside
+the primary's current virtual space and is typically the lower 32-bits of
+the image physical address.  However, if these lower 32-bits overlap the
+primary's current virtual space an error is returned and wrload will abort.
+Consequently, a fixed offset wrloadPriScratchMemOffset based on the CDF
+parameter WRLOAD_PRI_SCRATCH_OFFSET is added to the lower 32-bits to generate
+the virtual address.
+
+As indicated above, the image virtual address is derrived from the start
+address and should be RAM_LOW_ADRS.  The physical address is equal to
+the virtual address added to the WRLOAD_IMAGE_BUILD_PHYS_BIAS.  Virtual
+(RAM_LOW_ADRS) and physical (RAM_LOW_ADRS + WRLOAD_IMAGE_BUILD_PHYS_BIAS)
+address tables are shown below for an even division of memory to the 8 cores
+for 3 cases of memory: 4GB, 8GB and 16GB.
+
+For example: If the core 1 primary loads core 5 on an 8GB configuration then
+for core 5:
+
+RAM_LOW_ADRS                 = 0_0000_0000
+WRLOAD_IMAGE_BUILD_PHYS_BIAS = 1_0000_0000
+
+Since usrWrloadMap() by default would load core 5 right over the top of core 0
+we need to use a scratchpad area outside core 0's memory region.  Since core 0
+uses memory from 0 to 0x4000_0000 for the 8GB example, lets use 0x4000_0000 and
+above as the virtual scratchpad area.  So for core 0:
+
+WRLOAD_PRI_SCRATCH_OFFSET    = 0x4000_0000
+
+Remember, this is a virtual address for core 0, the corresponding physical
+address is where the image is actually loaded so we don't have to worry about
+using the same virtual scratchpad to load all physical cores.
+
+Here are the tables:
+\cs
+Virtual Addr  CORE  Physical Addr
+RAM_LOW_ADRS
+0_E000_0000    8    0_E000_0000
+0_C000_0000    7    0_C000_0000
+
+0_A000_0000    6    0_A000_0000
+0_8000_0000    5    0_8000_0000
+
+0_6000_0000    4    0_6000_0000
+0_4000_0000    3    0_4000_0000
+
+0_2000_0000    2    0_2000_0000
+0_0000_0000    1    0_0000_0000
+
+
+Virtual Addr  CORE  Physical Addr  CORE  Physical Addr
+0_C000_0000    4    0_C000_0000     8    1_C000_0000
+0_8000_0000    3    0_8000_0000     7    1_8000_0000
+0_4000_0000    2    0_4000_0000     6    1_4000_0000
+0_0000_0000    1    0_0000_0000     5    1_0000_0000
+
+
+Virtual Addr  CORE  Ph. Adr(1,2)   Ph. Adr(3,4)   Ph. Adr(5,6)   Ph. Adr(7,8)
+0_8000_0000    2    0_8000_0000    1_8000_0000    2_8000_0000    3_8000_0000
+0_0000_0000    1    0_0000_0000    1_0000_0000    2_0000_0000    3_0000_0000
+\ce
+
+
+Note: to use the MSD in SMP M-N mode, the MSD_CFG_STR must be set "#auto=y bus=main". 
+Typically the MSD node and instance number corresponds to the core number. However,
+for SMP M-N, the MSD node and instance should be separate from the core number. Setting
+the MSD_CFG_STR to "#auto=y bus=main" removes the direct node to core correspondance.
+See documentation on MIPC/wrload and MIPC Serial Device for details.
+
+\sh Virtual Shared Memory
+This BSP contains enhanced support for AMP, allowing SMP images to participate
+in AMP, and allowing SMP images to be loaded above the 32-bit boundary.  To
+accommodate these features, one shared memory component has been added.
+
+1. Virtual Shared Memory - the INCLUDE_VIRTUAL_SM is optional, but it must
+be added to any image built for loading above the 32-bit boundary utilizing
+SMP or MIPC.  This component sets up a virtual to physical mapping above the
+1GB (default) page mapping SDRAM, for the system globals region and/or for MIPC.
+
+There are three configurable parameters for INCLUDE_VIRTUAL_SM: VIRTUAL_SM_BASE,
+VIRTUAL_SM_BASE_PHYS, and VIRTUAL_SM_SIZE.  These specify the virtual address,
+physical address, and size of the region, respectively.  These default to
+0x40000000, 0x20000000, and 0x01000000.  The BSP only supports 16MB for the
+size.
+
+Note: MIPC is located in this shared memory region by default.  For this
+reason, a new configurable parameter is added for the MIPC SM physical address:
+MIPC_SM_SYSTEM_POOL_BASE_PHYS.  When designing a system, this physical address
+should be matched with other images in the system (Linux, VxWorks, etc.).
+
+\sh Logical Partition Support
+The component INCLUDE_LOGICAL_PARTITION is provided to allow each AMP image
+to have its own logical partition ID.  This is required when there is an SMP
+kernel running in the system, as vxWorks SMP uses tlbivax to invalidate TLBs and
+broadcast the invalidation to each of its CPUs. INCLUDE_LOGICAL_PARTITION is 
+automatically included when INCLUDE_AMP is selected. INCLUDE_LOGICAL_PARTITION's 
+configuration parameter, LOGICAL_PARTITION_ID, defaults to a unique value
+based upon which INCLUDE_AMP_CPU_0x component is included.
+LOGICAL_PARTITION_ID can be a value from 0 to 63.
+
+Note: 0 indicates the global partition; 1 is reserved for Linux SMP.
+
+\sh Boot Methods
+
+The boot methods are affected by the boot parameters.  If no password is
+specified, RSH (remote shell) protocol is used.  If a password is specified,
+FTP protocol is used, or, if the flag is set to 0x80, TFTP protocol is used.
+
+\sh PCI Express Support
+
+The P4080 processor has a total of 3 PCI Express controllers. The SBCP4080
+factory default configuration supports PCIEX1 and PCIEX2, which are configured
+for x4 mode via the PCIe slot 1 and 2 connectors. The PCIe slots are only
+enabled when JP24, which selects the RCW, is installed. When JP24 is
+removed the PCIe slots are disabled.
+
+Use of the PCIe slots requires the DRV_PCIBUS_QORIQ_PCIEX driver component.
+Adding INCLUDE_PCI_BUS with vxprj or from Workbench will automatically add
+that component, as well as INCLUDE_PCI_BUS_AUTOCONF, which is also required.
+INCLUDE_PCI_BUS_SHOW component can optionally be included to add PCI show
+routines. Any supported vxBus PCI driver should work once the QorIQ
+PCI bus controller driver is present. Tests have been done with the
+INCLUDE_GEI825XX_VXB_END and INCLUDE_FEI8255X_VXB_END drivers. PCIe to
+PCI bridges are also supported, as well as both legacy and MSI interrupts.
+
+The PCIe controllers are supported in root complex mode only.
+
+The Marvell YukonII Gigabit Ethernet adapter is one of the tested PCIe devices
+supported in this release. Define INCLUDE_MVYUKONII_VXB_END in config.h to
+enable this device.
+
+This BSP defaults to use PCIe legacy interrupts. To enable PCIe MSI interrupts,
+define following macro in config.h, or add it to your project using the vxprj
+tool or Workbench:
+
+\cs
+    #define INCLUDE_INTCTLR_DYNAMIC_LIB
+\ce
+
+\sh DMA
+The Freescale DMA Controller is supported in this release. To enable DMA
+functionality, please define following macro in config.h, or add it to your
+project using the vxprj tool or Workbench:
+
+\cs
+    #define DRV_DMA_FSL
+\ce
+
+Note: The MAX transfer size of every slice on each DMA channel should not
+exceed 0x03fff_ffff (64M - 1) bytes.
+
+\sh eSPI
+The Freescale eSPI Controller is supported in this release only for polled
+mode. To enable this function, please define the following macro in config.h,
+or add it to your project using the vxprj tool or Workbench:
+
+\cs
+    #define INCLUDE_FSL_SPI
+\ce
+
+\sh USB Host
+The board has one USB port. To enable USB host support, please define the 
+following macro in config.h, or add it to your project using the vxprj tool or Workbench:
+
+\cs
+#define INCLUDE_USB
+\ce
+
+USB Mass storage device has been verified on the target.
+
+For more information, please refer to
+\tb Wind River USB for VxWorks 6 PROGRAMMER'S GUIDE
+
+If you want to use usb disk as a boot device, you should follow these steps:
+
+For command line mode, make sure INCLUDE_USB is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the flash chip. Also make sure you have all the necessary file system
+components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_CHKDSK
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_USB_INIT
+    INCLUDE_EHCI
+    INCLUDE_EHCI_INIT
+    INCLUDE_USB_MS_BULKONLY
+    INCLUDE_USB_MS_BULKONLY_INIT
+    INCLUDE_USB_MS_CBI
+    INCLUDE_USB_MS_CBI_INIT
+    INCLUDE_BOOT_USB_FS_LOADER
+    INCLUDE_BOOT_FILESYSTEMS
+    INCLUDE_BOOT_EDR_SUPPORT
+    INCLUDE_DISK_UTIL
+
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a default_romCompress.bin in the project directory, program
+it into the flash chip as a bootrom.
+
+You should now be able to use VxWorks I/O and file system commands to access
+the USB device as if it were a disk. For example, you can copy a vxWorks
+image from your host to usb disk by using file system 'copy'. Of course, you must
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/bd0/vxWorks");
+\ce
+
+Below is an example by using usb disk "/bd0" as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /bd0/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : target
+    ftp password (pw)    : vxTarget
+    flags (f)            : 0x0
+    target name (tn)     :
+    other (o)            : dtsec4
+\ce
+
+\sh TrueFFS (only supported on UP mode)
+The standard Wind River TrueFFS product is supported in this release.
+
+This BSP uses the Intel 28F128P30 flash as the TrueFFS media.
+The FLASH address space is 0xff000000 - 0xffffffff.
+
+Note: VxWorks bootrom are stored in 0xfff00000~0xffffffff, 8 MBytes
+space(0xff000000~0xff7fffff) used for TFFS, please don't extend the TFFS
+space before you carefully check the flash memory map, otherwise mis-use
+of TFFS may corrupt the bootloader (bootrom) causing a boot-up failure.
+
+To use TrueFFS, define INCLUDE_TFFS in config.h. When using TrueFFS on a new FLASH
+for the first time, you should format and configure the FLASH by calling:
+
+\cs
+    sysTffsFormat ();
+    usrTffsConfig (0, 0, "/tffs0");
+\ce
+
+If you are using DOSFS, please use
+
+\cs
+    dosfsDiskFormat ("/tffs0");
+\ce
+
+Note: If you are running these commands in the VxWorks target shell, please use
+
+\cs
+    -> sp sysTffsFormat
+\ce
+
+to format the FLASH as it will take long time to complete.
+
+You should now be able to use vxWorks I/O and file system commands to access
+the FLASH device as if it were a disk.  For example, you can copy a vxWorks
+image from your host to TFFS by using file system 'copy'.  Of course, you should
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/tffs0/vxWorks");
+\ce
+
+To make "/tffs0" a boot device, complete the following instructions:
+
+For command line mode, make sure INCLUDE_TFFS is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the flash chip.  Also make sure you have all the necessary file system
+components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    INCLUDE_TFFS
+    INCLUDE_TL_FTL
+    INCLUDE_TFFS_MOUNT
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_TFFS_MOUNT
+    INCLUDE_BOOT_FILESYSTEMS
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a default_romCompress.bin in the project directory, program
+it into the flash chip as a bootrom.
+
+Below is an example by using /tffs as a boot device:
+
+\cs
+    boot device          : tffs=0,0
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /tffs0/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : user
+    ftp password (pw)    : pass
+    flags (f)            : 0x0
+    target name (tn)     : p4080ds
+    other (o)            : dtsec0
+\ce
+
+\sh Programmable Interrupt Controller
+
+The PIC driver provided by this BSP supports all internal and external 
+interrupt sources. The driver can also be configured to route such interrupt 
+sources to the critical interrupt pin. However, because critical interrupts 
+are routed directly to the interrupt source instead of being manager by the 
+PIC with IACK or EOI, the Critical Interrupt Summary registers are used to 
+check for the source. The transient values in these registers cause a spurious
+vector when indexing into the vector table.
+
+\sh I2C support
+
+The DRV_I2CBUS_FSL driver component is used to provide access to the I2C 
+controllers. Use of the I2C bus requires the INCLUDE_I2C_BUS driver component.
+The EEPROM (U28/U68/U29)devices are connected to I2C bus 0, The DDR SPD info 
+EEPROM are connected to I2C bus 1. While the SFP modules are connected to I2C 
+bus 3 (see below for GPIO considerations related to the SFP modules). The 
+INCLUDE_EEPROMDRV driver component could be used to config the EEPROM as I/O device.
+
+On I2C bus 0, the following addresses are accessible:
+
+\cs
+Address| Device           | Function
+-------| -----------------| --------------------------------
+0x50   | U28 Atmel 64K-bit| Primary Reset Configuration Word
+0x51   | U68 Atmel 64K-bit| Backup Reset Configuration Word
+0x57   | U29 Atmel 2K-bit | System Configuration Data
+\ce
+
+Note that when JP24 is installed, U28 responds to address 0x50 and U68
+responds to address 0x51. When JP24 is removed, U68 responds to address
+0x50 instead, and U28 responds to address 0x51. The P4080 will use
+whichever device is configured for addres 0x50 as the RCW source. Only
+the Atmel 64K-bit eeproms are supported for programmng the RCW.
+
+On I2C bus 3, the following addresses are accessible:
+
+\cs
+Address| Device            | Function
+-------| ------------------| --------------------------------
+0x50   | Methode DM7041 SFP| Serial EEPROM contents
+0x56   | Methode DM7041 SFP| PHY registers
+\ce
+
+Note that all four SFP modules are managed from the same I2C controller.
+Because they all respond to the same I2C address, special multiplexing
+logic is used to connect only one SFP module to the I2C bus at a time.
+This multiplexing is controlled via GPIO pins, as described below.
+ 
+\sh GPIO Support
+
+The SBCP4080 board uses some of the P4080 GPIO pins for controlling the
+SFP network modules. Each module has an enable pin that can be controlled
+via GPIO. Additionally, because each SFP module uses the same I2C address,
+two GPIO pins are used to multiplex the clock and data pins from the four
+SFP modules so that they can be controlled from a single I2C controller.
+The following table illustrates how the SFP control pins are connected to
+the GPIO controller:
+
+\cs
+              GPIO[18:19]             Function
+              -----------             ----------------
+              0 0                     SFP module 0 select
+              0 1                     SFP module 1 select
+              1 0                     SFP module 2 select
+              1 1                     SFP module 3 select
+
+              GPIO[0,4,9,26]          Function
+              --------------          ----------------
+              1 0 0 0                 SFP module 0 enable
+              0 1 0 0                 SFP module 1 enable
+              0 0 1 0                 SFP module 2 enable
+              0 0 0 1                 SFP module 3 enable
+\ce
+
+To enable a given SFP module, the corresponding GPIO pins (0,4,9 or 26)
+must be configured as an output, and driven low. The GPIO controller is
+managed using the DRV_RESOURCE_FSLGPIO driver.
+
+\sh MDIO Support
+
+MDIO management for dtsec4 is performed using the DRV_MII_DTSEC_MDIO driver.
+MDIO management for the other ports is managed via the DRV_MII_I2C_MDIO
+driver, which provides a shim between the I2C management interface on the
+SFP modules and the DRV_VXBEND_DTSEC driver. In other configurations (such
+as with the Freescale P4080DS board), all MDIO management could be performed
+using the normal MDIO interface, however a separate management mechanism
+for the SFP ports is necessary on the wrSbcP4080 target.
+
+SPECIAL CONSIDERATIONS
+
+This section describes miscellaneous information that you need to know before 
+using this BSP.
+
+\sh Reset Configuration Word
+By default, this BSP only supports reading the reset configuration word from
+I2C bus 0. Provided with the BSP are two reset configuration words in files named
+SBCP4080_revB_RCW_RGMII-PCIe-XAUI-USB.bin and SBCP4080_revB_RCW_RGMII-SGMII-USB.bin.
+
+You can use the i2cResetWordSet() function to write one of these files to the
+auxiliary eeprom. To make use of this routine, with the vxprj tool or Workbench
+add the profile PROFILE_DEVELOPMENT and the component INCLUDE_FTP. Copy the desired
+RCW file to the home directory of the FTP server. In the target shell, run the 
+following commands to write the new RCW to eeprom.
+
+\cs
+    -> cd "host:"
+    -> i2cResetWordSet "<RCW filename>"
+\ce
+
+such as "SBCP4080_revB_RCW_RGMII-PCIe-XAUI-USB.bin" for the <RCW filename>
+
+Note: This routine only writes the RCW file to the auxiliary eeprom (i2c address is 0x51).
+Check the word was written correctly using the routine i2cResetWordShow.
+
+\sh Make Targets
+The make targets are listed as the names of object-format files. Append `.hex'
+to each to derive a hex-format file name. Other images not listed here may not
+be tested.
+
+\ts
+`bootrom'
+`bootrom.bin'
+`vxWorks' (with `vxWorks.sym')
+`vxWorks.st'
+\te
+
+\sh BSP Bootloaders and Bootroms
+
+\ts
+Bootloader/Bootrom   | status
+----------------------------------
+bootrom              | SUPPORTED
+bootrom_uncmp        | SUPPORTED
+bootrom_res          | UNSUPPORTED
+vxWorks              | SUPPORTED
+vxWorks_rom          | UNSUPPORTED
+vxWorks_romCompress  | SUPPORTED
+vxWorks_romResident  | UNSUPPORTED
+\te
+
+The default size of the vxWorks_rom and vxWorks_romResident images are larger 
+than the default ROM_SIZE of 1MB. ROM_SIZE and the corresponding link addresses 
+can be adjusted to fit these images, however it is an unsupported configuration.
+
+\sh BSP Validated Tools
+
+\ts
+Tool                         | Connection/Type | Status
+-------------------------------------------------------
+Workbench Debugger           | ETHERNET/WDB    | SUPPORTED
+Workbench System Viewer      | ETHERNET/WDB    | SUPPORTED
+Workbench MemScope           | ETHERNET/WDB    | SUPPORTED
+Workbench ProfileScope       | ETHERNET/WDB    | SUPPORTED
+Workbench StethoScope        | ETHERNET/WDB    | SUPPORTED
+Workbench CoverageScope      | ETHERNET/WDB    | SUPPORTED
+Workbench Core File Analysis | ETHERNET/WDB    | UNVALIDATED
+Workbench Sensor Points      | ETHERNET/WDB    | UNVALIDATED
+Workbench OCD Debugger       | JTAG            | SUPPORTED
+\te
+
+\sh Known Issues
+
+The P4080 errata A-004529: Phantom Branch triggered by floating point 
+instruction can cause core to stall until interrupted.
+The issue is only in rev 2 silicon and should be fixed in rev 3 and newer 
+versions. 
+
+The workaround for the issue will turn off branch prediction. So the performance
+will be decreased. The workaround is disabled by default for performance.
+Please enable the workaround by defining FREESCALE_ERRATA_A004529_WORKAROUND_ENABLE
+in the file config.h if you hit the the errata.
+
+BOARD LAYOUT
+
+\bs
++------------------------------------------------------------------------------+
+|   | LCD  |  | LED  | | SW2  | | SW1  |  |   PCISLOT      |                   |
+|   +------+  +------+ +------+ +------+  +----------------+                   | 
+|             +---+ +---+  +----+         +----------------+                   |
+|             |JP3| |JP4|  |JP25|         |   PCISLOT      |          +--------|
+|             +---+ +---+  +----+         +----------------+          | XFP    |
+|                                                                     +--------|
+|                                                                              |
+|                                                           +---+     +--------|
+|                                       +-----------+       |JP6|     | SFP    |
+| +--+                                  |           |       +---+     | 0 - 3  |
+| | D|                                  |   QorIQ   |                 |        |
+| | D|                                  |           |       +---+     |        |
+| | R|                                  |   P4080E  |       |JP7|     +--------|
+| |  |                                  |           |       +---+              |
+| +--+                                  +-----------+          +----+          |
+|                                                              |JP10|  +-------|
+| +----+            +--+       +--------+                      +----+  | DTSEC4|
+| |JP21|            |JP|       |  JTAG  |                              +-------|
+| +----+            |24|       +--------+                                      |
+|                   +--+                                               +-------|
+|             +--+                                                     | USB   |
+|             |JP|                                                     +-------|
+|             |17|                                                     +-------|
+|             +--+                                                     | SIO   |
+| +-----+                                                              +-------|
+| | ATX |                                                              +-------|
+| +-----+                                                              | POWER |
++------------------------------------------------------------------------------+
+\be
+
+SEE ALSO
+
+\tb QorIQ P4080 Reference Manual 
+
+\tb PowerPC E500MC Core Reference Manual 
+
+\tb Motorola PowerPC Microprocessor Family: The Programming Environments
+
+\tb Wind River SBCP4080 Hardware Reference Manual

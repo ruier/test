@@ -1,0 +1,1249 @@
+\" fsl_p1021_mds/target.ref - Freescale P1021MDS target specific documentation
+\"
+\" Copyright (c) 2010-2012 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01d,05mar12,y_y  add vxBus I2C support.
+\" 01c,28feb12,c_l  Update the description of Security Engine.(WIND00331832)
+\" 01b,14may11,y_y  modified I2C RTC driver.(WIND00275906)
+\" 01a,17dec10,y_y  written.
+\"
+\TITLE fsl_p1021_mds - Freescale P1021MDS
+
+NAME `Freescale P1021MDS'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks for the fsl_p1021_mds BSP. Please read the section "Getting the board
+running VxWorks" in order to configure the board to run VxWorks.
+
+\sh Switches
+
+There are 7 switches in the bottom left corner of the P1021MDS board.
+
+Default Switch Settings: (0 = ON, 1 = OFF)
+
+\ts
+Switch Number   | 1    | 2    | 3    | 4    | 5    | 6    | 7    | 8    |
+-------------------------------------------------------------------------
+SW2               OFF    ON     ON     OFF    OFF    ON     ON     OFF
+SW3               OFF    OFF    OFF    OFF    OFF    ON     OFF    OFF
+SW6               ON     OFF    ON     OFF    OFF    ON     ON     OFF
+SW7               OFF    ON     ON     ON     OFF    ON     OFF    OFF
+SW8               OFF    ON     OFF    ON     ON     OFF    ON     OFF
+SW9               OFF    OFF    OFF    OFF    OFF    OFF    OFF    OFF
+SW10              OFF    ON     OFF    OFF     /      /      /      
+\te
+
+\sh Getting the board running VxWorks from NAND flash boot
+This section will guide you how to run VxWorks on the Freescale P1021MDS board. 
+
+1. Creating a bootrom image:
+
+    Open the VxWorks Development Shell, change directory to fsl_p1021_mds
+    BSP directory, and then build the VxWorks bootrom image.
+
+\cs
+    cd $WIND_BASE/target/config/fsl_p1021_mds
+    
+    for bootrom: 
+    
+    make bootrom.bin
+    make -f Makefile_nand nand_bootloader
+    cat nand_bootloader.bin bootrom.bin > nand_bootrom.bin
+    
+    for bootrom_uncmp: 
+    
+    make bootrom_uncmp.bin
+    make -f Makefile_nand nand_bootloader
+    cat nand_bootloader.bin bootrom_uncmp.bin > nand_bootrom_uncmp.bin
+    
+    Note: make sure NAND_BLOCKCOPY_COUNT(defined in p1021mds.h)multiplies 16KB
+    beyond image size(*.bin)
+    
+\ce
+
+2. Flashing the Boot ROM Image Using CodeWarrior IDE
+
+This section describes how to program a VxWorks bootrom image onto 
+a nand flash using CodeWarrior IDE. 
+
+1.   Install the CodeWarrior IDE.
+
+1.1. Install the CodeWarrior Development Studio software, After install finished,
+     you will find CodeWarrior IDE. Make sure the CodeWarrior IDE support 
+     p1021mds board, or update your IDE.
+
+1.2. Connect the USB_TAP JTAG cable to the p1021mds board and power on.
+
+2.   Program the p1021mds nand flash.
+
+2.1. open CodeWarrior IDE
+
+2.2. Select the Tools tab -> Flash Programmer
+
+2.3. Select Target Configuration from the left pane.
+
+2.4. Click Load Settings and Select P1021_MDS_NAND_FLASH.xml.
+
+     Path: CodeWarrior PA V8.8 -> bin -> Plugins -> Support -> 
+     Flash_Programmer -> EPPC ->QorIQ_P1->P1021_MDS_NAND_FLASH.xml
+
+2.5. Edit the connection type "USB Tap".
+
+The right configuration as follow:
+
+     Processor Family -> QorIQ
+     Target Processor -> P1021
+     Connection -> CodeWarrior USB TAP.
+     Target Initialization file ->P1021MDS_init_sram_flash.cfg
+
+2.6. Click on Flash Configuration.
+
+     Choose the following device:  'K9F5608U0D -> 32M x 8 x 1 Device'.
+
+2.7. Select Erase/Blank Check.
+
+     Select the desired (image size) sectors you want to erase.
+     Click on erase button.
+
+2.8. Go to Program/Verify.
+
+     Browse and select the nand_bootrom.bin file which needs to be flashed 
+     to the NAND Flash.
+     Specify the appropriate address offset(eg:0xfc000000). Click on Program.
+
+3.   Running the VxWorks bootrom
+
+     Power the target back on. After 1~2 seconds, the VxWorks bootrom banner 
+     should appear.
+    
+4.   If this is the first time a VxWorks bootrom has been loaded onto this board,
+     use the 'M' command from the [VxWorks Boot]: prompt to set the MAC 
+     addresses for all of the network ports. These will be stored in SPI flash.
+    
+FEATURES
+
+This section describes all features of the board, supported or not.
+It documents all configurations of the board and the interaction between
+features and configuration items.
+
+\sh List of Hardware Features (Freescale P1021MDS board)
+
+\ts
+Hardware Interface | Controller | Driver/Component    | Status
+--------------------------------------------------------------
+UART:0             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+UART:1             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+QE_UART:0          | on-chip    | vxbUccSio.c         | SUPPORTED
+1GB-ETHERNET:0     | on-chip    | vxbEtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:1     | on-chip    | vxbEtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:2     | on-chip    | vxbEtsecEnd.c       | SUPPORTED
+100MB-UEC:1        | on-chip    | vxbUccEnd.c         | SUPPORTED
+100MB-UEC:2        | on-chip    | vxbUccEnd.c         | SUPPORTED
+TIMER              | on-chip    | vxbM85xxTimer.c     | SUPPORTED
+TIMER              | on-chip    | vxbOpenPicTimer.c   | SUPPORTED
+PCI-E-HOST:0       | on-chip    | m85xxPci.c          | SUPPORTED
+PCI-E-HOST:1       | on-chip    | m85xxPci.c          | UNVALIDATED
+DMA:0              | on-chip    | vxbFslDma.c         | SUPPORTED
+I2C:0              | on-chip    | vxbFslI2c.c         | SUPPORTED
+I2C:1              | on-chip    | vxbFslI2c.c         | UNVALIDATED
+RTC                | MaximDS1374| vxbI2cRtc.c         | SUPPORTED
+SPI                | on-chip    | sysFslSpi.c         | SUPPORTED
+SPI-FLASH          | S25FL128P  | sysSpiFlash.c       | SUPPORTED
+USB-HOST:          | on-chip    | INCLUDE_USB         | SUPPORTED
+USB-TARGET         | on-chip    | INCLUDE_FSL_TCD     | SUPPORTED
+SD-CARD            | on-chip    | DRV_STORAGE_SDHC    | SUPPORTED
+ENCRYPTION         | on-chip    | 'ipfreescale'       | SUPPORTED
+\te
+
+\sh Feature Interactions
+Refer to the board vendor's documentation.
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Verified Hardware
+This BSP has been verified on Rev 1.0 of Freescale P1021MDS-PB board.
+The default clock speed is 800MHz for core0 and core1, 400MHz for CCB.
+
+\sh Memory Maps
+The default memory map of this BSP is as below:
+
+\ts
+Start       | Size  | End         | Access to
+---------------------------------------------
+0x0000_0000 | 512MB | 0x1fff_ffff | DDR3 SDRAM
+0xa000_0000 | 512MB | 0xbfff_ffff | PCIe-2 Memory
+0xc000_0000 | 512MB | 0xdfff_ffff | PCIe-1 Memory
+0xf800_0000 | 32KB  | 0xf800_7fff | BCSR(CS1)
+0xf200_0000 | 512KB | 0xf207_ffff | L2_SRAM
+0xffc1_0000 | 64KB  | 0xffc1_ffff | PCIe 2 I/O Memory
+0xffc2_0000 | 64KB  | 0xffc2_ffff | PCIe 1 I/O Memory
+0xfff0_0000 | 512KB | 0xfff7_ffff | NAND_Buffer_Base
+0xffe0_0000 | 1MB   | 0xffef_ffff | CCSBAR
+\te
+
+\sh Boot Process
+Upon reset, the e500 begins executing from 0xFFFF_FFFC. 
+Only the last 4 KB of memory is mapped by the TLB. The instruction at 
+0xFFFF_FFFC branches to resetEntry( ) (which is located at the last 2 KB of 
+memory) to begin initialization and mapping of memory static TLB entries. The 
+DDR SDRAM is then mapped to 0x0 where the vectors are set up for use and 
+execution is then transferred to RAM after copying and uncompressing (if 
+necessary). 
+
+\sh Serial Connections
+Most VxWorks BSPs do not use hardware handshaking in the serial interface,
+and thus a simple 3 wire connection is commonly used.
+
+The P1021MDS board have two RS-232 standard UART ports and one QE_UART port.
+\sh Serial Configuration
+
+Default configuration is:
+    Baud Rate: 115200
+    Data: 8 bit
+    Parity: None
+    Stop: 1 bit
+    Flow Control: None
+    
+Note: DUART(UART0 and UART1) is used by default. COM1 as default Serial COM .
+The COM2 of DUART is tested on this BSP. To enable COM2 port, you should 
+change the CONSOLE_TTY macro to 1 in config.h.
+ 
+Also, the QE_UART is disabled by defaut. To enable this port,
+you should modify as follows:
+
+For commmand line build, modify following lines of config.h
+\cs
+    #define DRV_SIO_NS16550
+    #undef  DRV_SIO_UCC
+\ce
+to:
+\cs
+    #undef  DRV_SIO_NS16550
+    #define DRV_SIO_UCC
+\ce
+Then rebuild the bootrom or VxWorks image.
+
+For project build under Workbench, in the Kernel Configuration tab of
+your created VxWorks Image Project:
+
+    Exclude DRV_SIO_NS16550
+    Include DRV_SIO_UCC
+    
+Then rebuild your project. QE_UART can only use the COM2 port.
+
+\sh Ethernet Address
+The P1021MDS board do not have unique Ethernet hardware addresses assigned
+to each eTSEC port. A unique address is absolutely necessary if the user wishes
+to connect the board to a network. Thus, the user must provide suitable 6 byte
+Ethernet addresses for each eTSEC port used on a network. An address is now 
+stored in SPI flash with the bootline. Use the 'M' command to modify for a
+distinct MAC address.
+
+\sh Network Configuration
+The P1021MDS board includes five ethernet ports: qefcc0 and qefcc1 are configured
+as 10/100 Ethernet ports, using the UCC1 and UCC5 controllers. motetsec0, 
+motetsec1, motetsec2 are configured as 10/100/1000 Ethernet ports, using the 
+eTSEC1, eTSEC2 and eTSEC3 controllers. On the P1021E, the UCC ports have MICREL
+KSZ8041NL PHYs and the eTSECs use Marvell 88E1111S PHYs. 
+To enable eTSEC network, please define following macro in config.h:
+
+\cs
+    #define INCLUDE_ETSEC_VXB_END
+\ce
+
+eTSEC3 is used as RGMII mode by default. To enable eTSEC3 in SGMII mode, change
+the SW8[6] OFF to ON, plug in the cable with Lane F[J26], and you should modify
+as follows:
+
+For command line build, modify following line of config.h
+
+\cs
+    #define CONFIG_ETSEC3_IN_SGMII   FALSE
+\ce
+to:
+\cs
+    #define CONFIG_ETSEC3_IN_SGMII   TRUE
+\ce
+
+Then rebuild the bootrom or VxWorks image.
+
+For Workbench or vxprj build:
+
+     change the following components in the Kernel Configuration Window
+(Kernel configurations: hardware -> Device Drivers -> INCLUDE_MV88E1X11PHY)
+     
+\cs
+    MV88E1X11PHY2_MODE        MV88E_MODE_RGMII
+    CONFIG_ETSEC3_IN_SGMII    FALSE
+\ce
+to:
+\cs
+    MV88E1X11PHY2_MODE        MV88E_MODE_SGMII_NOCLK
+    CONFIG_ETSEC3_IN_SGMII    TRUE
+\ce   
+
+To enable QE_UCC network, please define following macro in config.h:
+
+\cs
+    #define DRV_INTCTLR_QE
+\ce
+
+The BSP also supports Intel e100/e1000 series NICs via PCIe. See the 
+gei825xxVxbEnd driver for the supported model numbers.
+
+The following END and corresponding END2 drivers are supported in this BSP.
+However, only the END driver is enabled by default.
+
+\ts
+Driver | END                     | END2
+---------------------------------------
+eTSEC  | INCLUDE_ETSEC_VXB_END   | INCLUDE_ETSEC_VXB_END2
+\te
+
+To enable the END2 driver, you should modify as follows:
+
+In config.h, INCLUDE_END should be commented out when defining INCLUDE_END2
+for a command line build. Also replace the END driver name with corresponding
+END2 driver name, then rebuild the bootrom and vxWorks image.
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, include INCLUDE_END2 and corresponding END2
+driver, exclude INCLUDE_END and END driver, then rebuild your project.
+
+\sh Boot Devices
+The supported boot vxWorks devices are:
+
+\ts
+    `motetsec0' | ETSEC1
+    `motetsec1' | ETSEC2
+    `motetsec2' | ETSEC3
+    `qefcc0'    | UCC1
+    `qefcc1'    | UCC5
+    `gei'       | Intel Pro1000 Ethernet PCI adaptor when the PCIe is enabled
+    `fs'        | SD / USB
+\te
+
+\sh Boot Methods
+The boot methods are affected by the boot parameters. If no password is
+specified, RSH (remote shell) protocol is used. If a password is specified,
+FTP protocol is used, or, if the flag is set to 0x80, TFTP protocol is used.
+
+\sh PCIe Access
+On the fsl_p1021mds board, Freescale PCIE Controller 0 is supported in this 
+release.(Controller 1 is unvalidated). PCIe slot can be supported by inserting
+the PEX adaptor board to the SERDES Lane and can be configured as the PCIe x1,
+x2, or x4 mode by changing the switch SW9[4:7].
+For more details, please refer to the vendor's documentation:
+
+To enable PCIe bus, please define following macro in config.h:
+
+\cs
+    #define INCLUDE_PCI_BUS
+\ce
+
+The Intel 8257x PCIe Gigabit Ethernet adapter is validated in this release. If 
+you want to use gei as a boot device, add following macro in config.h:
+
+\cs
+    #define INCLUDE_GEI825XX_VXB_END
+    #define INCLUDE_GENERICPHY
+\ce
+
+This BSP defaults to use PCIe legacy interrupts.
+
+To enable PCIe MSI interrupt, please define following macro in config.h:
+
+\cs
+    #define INCLUDE_INTCTLR_DYNAMIC_LIB
+\ce
+
+\sh DMA
+Freescale DMA Controller 0 is supported in this release.
+
+To enable DMA controller support, please define the following macro in config.h:
+
+\cs
+    #define DRV_DMA_FSL
+\ce
+The maximum transfer size of a single transaction is (64M - 1) bytes.
+
+\sh eSPI and SPI Flash
+The Freescale eSPI Controller and SPI Flash S25F128 are supported 
+(only in polled mode) in this release.
+
+To enable this function, please define the following macro in config.h:
+
+\cs
+    #define INCLUDE_FSL_SPI
+\ce
+
+Note: Cause we use SPI flash to save MAC address and bootline, so we always 
+     define INCLUDE_FSL_SPI macro.
+
+\sh I2C
+The Maxim DS1374 RTC, BOOT EEPROM and DDR SDP EEPROM are connected to the
+P1021E's I2C Controller 1, which are supported in this release.
+
+To enable this function, please define the following macro in config.h:
+
+\cs
+    #define INCLUDE_I2C_BUS
+\ce
+
+To use the DS1374 RTC device, which can use the routine sysRtcSet() that is a 
+command-line utility for setting the RTC from the VxWorks kernel prompt. The 
+user will be prompted for the appropriate input. To read the date and the time, 
+the sysRtcGet() routine have to be called.
+
+To access EEPROM, the DRV_I2C_EEPROM and INCLUDE_EEPROMDRV driver component are
+required. Once the INCLUDE_EEPROMDRV was defined, the EEPROM will be used as 
+I/O device, which can use the standard IO routine open(), read(), write(), 
+ioctl(), close()...to access it.
+
+\sh USB
+P1021E has 1 high-speed USB controllers. This BSP supports either USB host mode
+or USB target mode. The two modes can't be enabled at the same time.
+
+\sh 1. Host mode
+
+To enable USB host support, make sure the following components are included
+in config.h:
+
+\cs
+#define INCLUDE_USB
+\ce
+
+Host mode has only been validated using mass storage target devices.
+
+For more information, please refer to
+\tb Wind River USB for VxWorks 6 PROGRAMMER'S GUIDE
+
+To enable usb disk as a boot device, you should follow these steps:
+
+For command line mode, make sure INCLUDE_USB is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the flash chip. Also make sure you have all the necessary file system
+components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_CHKDSK
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_USB_INIT
+    INCLUDE_EHCI
+    INCLUDE_EHCI_INIT
+    INCLUDE_USB_MS_BULKONLY
+    INCLUDE_USB_MS_BULKONLY_INIT
+    INCLUDE_USB_MS_CBI
+    INCLUDE_USB_MS_CBI_INIT
+    INCLUDE_BOOT_FILESYSTEMS
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a default_romCompress.bin in the project directory, program
+it into the flash chip as a bootrom.
+
+You should now be able to use VxWorks I/O and file system commands to access
+the USB device as if it were a disk. For example, you can copy a vxWorks
+image from your host to usb disk by using file system 'copy'. Of course, you must
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/bd0/vxWorks");
+\ce
+
+Below is an example by using usb disk "/bd0" as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /bd0/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : target
+    ftp password (pw)    : vxTarget
+    flags (f)            : 0x0
+    target name (tn)     : fsl_p1021_mds
+    other (o)            : motetsec0
+\ce
+
+\sh 2. Target mode
+To enable the board to operate as a USB mass storage target, perform the
+following steps:
+
+2.1 Define INCLUDE_FSL_TCD in the BSP's config.h file. This will cause other
+related macros to be defined automatically
+
+2.2 Adjust the USB TCD and mass storage parameter definitions as needed:
+
+\cs
+
+    /@ Defines for USB Device support @/
+
+    #define INCLUDE_FSL_TCD
+
+    #ifdef INCLUDE_FSL_TCD
+    #   define FSL_USB_DR_DEVICE_IO_BASE      USB1_BASE
+    #   define FSL_USB_DR_DEVICE_INT_NUM      EPIC_USB_INT_VEC
+    #   define FSL_USB_DR_DEVICE_BE_REG       FALSE
+    #   define FSL_USB_DR_DEVICE_BE_DESC      FALSE
+    #   define FSL_USB_DR_DEVICE_BE_SETUP     TRUE
+    #   define FSL_USB_DR_DEVICE_SYS_CONF     TRUE
+    #   define FSL_USB_DR_DEVICE_BUFFER_ES    FALSE
+    #   define FSL_USB_DR_DEVICE_PHY_MODE     FSL_USB_DR_PHY_ULPI
+    #   define INCLUDE_USB_TARG
+    #   define INCLUDE_MS_EMULATOR
+    #   define INCLUDE_MS_EMULATOR_INIT
+    #endif /@ INCLUDE_FSL_TCD @/
+
+    #ifdef INCLUDE_MS_EMULATOR
+    #   define INCLUDE_DOSFS
+    #   define INCLUDE_XBD_RAMDRV
+    #endif /@ INCLUDE_MS_EMULATOR @/
+\ce
+
+\sh SD memory card controller (eSDHC)
+
+The P1021E's on chip enhanced SD host controller (eSDHC), supported for standard 
+capacity SD memory cards up to and including 4 GB. The eSDHC driver does not
+support MMC cards.
+
+To enable eSDHC support, make sure the following feature definitions are
+added in config.h:
+
+\cs
+    #define DRV_STORAGE_SDHC
+\ce
+
+When using an SD card for the first time, you should format it as a FAT file
+system by using
+\cs
+    dosFsVolFormat ("/sd0:1", 0x20, 0);    /@ FAT32 format @/
+\ce
+or
+\cs
+    dosFsVolFormat ("/sd0:1", 0x10, 0);    /@ FAT16 format @/
+\ce
+
+Now, you can use VxWorks I/O and file system commands to access the SD card
+device as if it were a disk. For example, you can copy a vxWorks image from
+your host to the SD card by using file system copy. Of course, you should
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/sd0:1/vxWorks");
+\ce
+
+To enable SD card as a boot device, you should follow these steps:
+
+For command line mode, make sure DRV_STORAGE_SDHC, INCLUDE_BOOT_FILESYSTEMS
+is defined in config.h, re-build a bootrom from the BSP directory under VxWorks
+Development Shell, and program it into the flash chip. Also make sure you have
+all the necessary file system components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    DRV_STORAGE_SDHC
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_BOOT_FILESYSTEMS
+    INCLUDE_DISK_UTIL   
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a default_romCompress.bin in the project directory, program
+it into the flash chip as a bootrom.
+
+Below is an example by using SD card "/sd0:1" as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /sd0:1/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : target
+    ftp password (pw)    : vxTarget
+    flags (f)            : 0x0
+    target name (tn)     : fsl_p1021_mds
+    other (o)            : motetsec0
+\ce
+
+Note: INCLUDE_BOOT_FILESYSTEMS macro is only used to support SD device in
+bootrom/bootapp stage, so undef it after you've finished startup.
+ 
+\sh Security Engine
+The Freescale Security Engine (SEC) 3.3 is supported in this release.
+The VxWorks PNE MSP must be installed to enable security engine offload.
+
+The following steps describe how to enable SEC support in this BSP.
+
+1. Create a VSB (VxWorks Source Build)
+
+    1.1 Create a VSB in any directory. For instance, run the command:
+
+\cs
+       $WIND_BASE/target/proj/vxprj vsb create -bsp fsl_p1021_mds vsb_fsl_p1021_mds
+\ce
+
+        This command creates a VSB for the BSP fsl_p1021_mds, vsb_fsl_p1021_mds
+        is the name of this VSP.
+
+    1.2 Configure VSB
+
+        After running the command in step 1.1, you will be prompted to select the
+        configuration dialog of this new VSB. The following settings
+        are significant in enabling the security engine:
+\cs
+        OBJECT_MANAGEMENT
+        OBJECT_VERIFICATION
+        TASK_CREATE_HOOKS_D
+        TASK_SWITCH_HOOKS_D
+        CPU_PWR_MGMT_D        
+        COMPONENT_IPNET
+        FEATURE_IPNET_VERBOSE
+        FEATURE_IPNET_GEN_DEPEND
+        FEATURE_IPNET_INET4_ONLY
+        MSP_FEATURE_PNE
+        COMPONENT_IPAPPL
+        COMPONENT_IPCRYPTO
+        COMPONENT_IPFREESCALE
+        COMPONENT_IPHWCRYPTO        
+        COMPONENT_IPSSH
+        COMPONENT_IPSSL
+        COMPONENT_VXCOMPAT
+        COMPONENT_XML        
+        FEATURE_USR
+        USR_INET4_ONLY
+        COMPONENT_USR_IPNET
+        COMPONENT_USR_APPS
+        COMPONENT_USR_XML
+
+        and optionally if IPsec is required:
+        COMPONENT_IPIPSEC        
+\ce
+        Below is an example of the configuration dialog:
+
+\cs
+        starting VSB configuration...
+        *
+        * VxWorks Source Build (VSB) Configuration
+        *
+        *
+        * VxWorks Global Configuration Options for BSP fsl_p1021_mds
+        *
+        Set advanced options  (ADVANCED_OPT) [N/y/?] (NEW) y
+        *
+        * fsl_p1021_mds_CPU = PPC32
+        *
+        Select the Floating Point configuration
+        > 1. e500v2 (FP_e500v2) (NEW)
+          2. soft (FP_soft) (NEW)
+        choice[1-2?]: 1
+        Select the ENDIAN configuration
+        > 1. big (ENDIAN_big) (NEW)
+        choice[1]: 1
+        Select the Primary Tool
+        > 1. diab (PRI_TOOL_ILP32_diab) (NEW)
+        choice[1]: 1
+        optional compiler flags for fsl_p1021_mds_TOOL [?]  (ADDEDCFLAGS) [] (NEW)
+        Enable use of Secondary TOOL to build kernel libraries.  (ENABLE_TOOL2_ILP32) [Y/n/?] (NEW) Y
+          Select the Secondary Tool
+          > 1. gnu (SEC_TOOL_ILP32_gnu) (NEW)
+          choice[1]: 1
+        optional compiler flags for fsl_p1021_mds_TOOL2 [?]  (ADDEDCFLAGS2) [] (NEW)
+        Select the Applications Tool
+        > 1. diab (APP_TOOL_ILP32_diab) (NEW)
+          2. gnu (APP_TOOL_ILP32_gnu) (NEW)
+        choice[1-2?]: 1
+        optional compiler flags for fsl_p1021_mds_APP_TOOL [?]  (ADDEDCFLAGS_APP) [] (NEW)
+        *
+        * ppc Architecture Options
+        *
+        Symmetric Multiprocessing (SMP)  (SMP) [N/y/?] (NEW) N
+        Low-level arch code need not support inconsistent cache modes  (PPC_CACHE_MODE_IS_CONSISTENT) [N/y/?] (NEW)
+        System Viewer Instrumentation  (SV_INSTRUMENTATION) [Y/n/?] (NEW) Y
+        Global Debug Flag  (DEBUG_FLAG) [N/y/?] (NEW)
+        Real-Time Process (RTP)  (RTP) [Y/n/?] (NEW) Y
+        *
+        * VxWorks Kernel Configuration Options
+        *
+        *
+        * VxWorks Kernel Component Configuration
+        *
+        WIND Object Management  (OBJECT_MANAGEMENT) [Y/n/?] (NEW) Y
+          WIND Object ID Validation  (OBJECT_VERIFICATION) [Y/n/?] (NEW) Y
+        Task Create Hooks  (TASK_CREATE_HOOKS_D) [Y/n/?] (NEW) Y
+        Task Switch Hooks  (TASK_SWITCH_HOOKS_D) [Y/n/?] (NEW) Y
+        CPU Power Management  (CPU_PWR_MGMT_D) [Y/n/?] (NEW) Y
+        *
+        * Multi-OS Support
+        *
+        MIPC  (COMPONENT_MIPC) [Y/n/?] (NEW) n
+        WRLOAD  (COMPONENT_WRLOAD) [Y/n/?] (NEW) n
+        *
+        * Optional Kernel Features
+        *
+        Enable Kernel Per-Task CWD  (PERTASK_CWD) [Y/n/?] (NEW)
+        *
+        * File System Configuration
+        *
+        Set Maximum Device Name Length  (MAX_DEVNAME) [10] (NEW)
+        Optimize NFS3 server read/write procedure  (NFS3_RWOPT) [N/y/?] (NEW)
+        Set factor for maximum block size transferred in NFS3 server  (NFS3_BLKSIZE_FACTOR) [1] (NEW)
+        Enable VXTESTV2  (COMPONENT_VXTESTV2_D) [Y/n/?] (NEW)
+        Enable BENCHMARK tests  (COMPONENT_BENCHMARK) [N/y/?] (NEW)
+        Enable Code Coverage Analyzer test instrumentation of VSB   (COMPONENT_COVERAGE) [N/y/?] (NEW)
+        *
+        * VxWorks Applications Configuration Options
+        *
+        Select networking code to be built
+        > 1. Build Networking IPNET Libraries (COMPONENT_IPNET) (NEW)
+          2. No Networking Libraries (NO_IP) (NEW)
+        choice[1-2]: 1
+        *
+        * Networking Build Options
+        *
+        Set the IPNET build mode
+        > 1. speed mode (BUILD_MODE_speed) (NEW)
+          2. debug mode (BUILD_MODE_debug) (NEW)
+        choice[1-2]: 1
+        Enable VERBOSE mode  (FEATURE_IPNET_VERBOSE) [N/y] (NEW) y
+        Generate IPNET Dependencies  (FEATURE_IPNET_GEN_DEPEND) [Y/n] (NEW) Y
+        Build basic IPNET support libraries  (BUILD_BASIC_IPNET) [Y/n/?] (NEW) Y
+        Choose the Networking Libraries to be built
+        > 1. Build libraries with IPV4 support (FEATURE_IPNET_INET4_ONLY) (NEW)
+          2. Build libraries with IPV4 and IPV6 support (FEATURE_IPNET_INET6) (NEW)
+          3. Build libraries with IPV6 support (FEATURE_IPNET_INET6_ONLY) (NEW)
+        choice[1-3]: 1
+        Select the default Build-time Syslog level for Networking Components
+          1. Emergency level (IPCOM_DEFAULT_SYSLOG_PRIORITY_EMERG) (NEW)
+          2. Critical level (IPCOM_DEFAULT_SYSLOG_PRIORITY_CRIT) (NEW)
+          3. Error level (IPCOM_DEFAULT_SYSLOG_PRIORITY_ERR) (NEW)
+        > 4. Warning level (IPCOM_DEFAULT_SYSLOG_PRIORITY_WARNING) (NEW)
+          5. Notice level (IPCOM_DEFAULT_SYSLOG_PRIORITY_NOTICE) (NEW)
+          6. Informational level (IPCOM_DEFAULT_SYSLOG_PRIORITY_INFO) (NEW)
+          7. Debug level (IPCOM_DEFAULT_SYSLOG_PRIORITY_DEBUG) (NEW)
+          8. Detailed debug level (IPCOM_DEFAULT_SYSLOG_PRIORITY_DEBUG2) (NEW)
+        choice[1-8?]: 4
+        Enable selection of Advanced Debugging Build Options for Networking Component   (IPCOM_DEBUG_ADVANCED) [N/y/?] (NEW)
+        Enable MSP Feature Set PAD  (MSP_FEATURE_PAD) [Y/n/?] (NEW) n
+        Enable MSP Feature Set PCD  (MSP_FEATURE_PCD) [Y/n/?] (NEW) n
+        Enable MSP Feature Set PID  (MSP_FEATURE_PID) [Y/n/?] (NEW) n
+        Enable MSP Feature Set PNE  (MSP_FEATURE_PNE) [Y/n/?] (NEW) Y
+        *
+        * VxWorks Networking Component Configuration
+        *
+        *
+        * Layer 2 (Link) Components
+        *
+        Enable L2TP  (COMPONENT_IPL2TP) [N/y/?] (NEW)
+        Enable MACsec  (COMPONENT_IPMACSEC) [N/y/?] (NEW)
+        Enable PPP  (COMPONENT_IPPPP) [Y/n/?] (NEW)
+        Enable 802.1ad VLAN stacking  (COMPONENT_VLAN_STACKING) [N/y/?] (NEW)
+        Enable WLAN  (COMPONENT_WLAN) [N/y/?] (NEW)
+        *
+        * Layer 3 (Network) Components
+        *
+        Enable FIREWALL  (COMPONENT_IPFIREWALL) [N/y/?] (NEW)
+        Enable IPSEC  (COMPONENT_IPIPSEC) [N/y/?] (NEW)
+        Enable MPLS  (COMPONENT_IPMPLS) [N/y] (NEW)
+        Enable ROHC  (COMPONENT_IPROHC) [N/y/?] (NEW)
+        Enable IPNET Network Address Translation (NAT)  (COMPONENT_NAT) [Y/n/?] (NEW) n
+        Enable Quality of Service and Differentiated Services  (COMPONENT_DIFF_SERV) [Y/n/?] (NEW) n
+        Enable tunneling support  (COMPONENT_TUNNEL_SUPPORT) [Y/n/?] (NEW) n
+        *
+        * Layer 4 (Transport) Components
+        *
+        Enable SCTP  (COMPONENT_IPSCTP) [N/y/?] (NEW)
+        *
+        * Layer 5 (Applications) Components
+        *
+        Enable 802.1X Authenticator  (COMPONENT_DOT1X) [N/y/?] (NEW)
+        Enable 802.1X Supplicant  (COMPONENT_IP8021X) [N/y/?] (NEW)
+        Enable APPL  (COMPONENT_IPAPPL) [Y/n/?] (NEW) Y
+        Enable DHCPR  (COMPONENT_IPDHCPR) [N/y] (NEW)
+        Enable DHCPS  (COMPONENT_IPDHCPS) [N/y/?] (NEW)
+        *
+        * Diameter Components
+        *
+        Enable DIAMETER Client  (COMPONENT_IPDIAMETERC) [N/y/?] (NEW)
+        Enable DIAMETER Proxy  (COMPONENT_IPDIAMETERP) [N/y/?] (NEW)
+        Enable IKE  (COMPONENT_IPIKE) [N/y/?] (NEW)
+        Enable Multicast Proxy daemon  (COMPONENT_IPMCP) [N/y/?] (NEW)
+        Enable MIP  (COMPONENT_IPMIP) [N/y/?] (NEW)
+        Enable MIP4  (COMPONENT_IPMIP4) [N/y/?] (NEW)
+        Enable MIPFA  (COMPONENT_IPMIPFA) [N/y/?] (NEW)
+        Enable MIPHA  (COMPONENT_IPMIPHA) [N/y/?] (NEW)
+        Enable MIPMN  (COMPONENT_IPMIPMN) [N/y/?] (NEW)
+        Enable MIPPM  (COMPONENT_IPMIPPM) [N/y/?] (NEW)
+        Enable RADIUS  (COMPONENT_IPRADIUS) [Y/n/?] (NEW) n
+        Enable RIP  (COMPONENT_IPRIP) [N/y] (NEW)
+        Enable SNMP  (COMPONENT_SNMP) [Y/n/?] (NEW) n
+        Enable SNTP  (COMPONENT_IPSNTP) [Y/n/?] (NEW) n
+        Enable SSH  (COMPONENT_IPSSH) [N/y/?] (NEW) y
+        Enable SSL  (COMPONENT_IPSSL) [Y/n/?] (NEW) Y
+        *
+        * WPS requires COMPONENT_WLAN and COMPONENT_IPEAP and COMPONENT_IP8021X to be selected and COMPONENT_IPCRYPTO_USE_FIPS_140_2 to be deselected
+        *
+        *
+        * Cryptography Components
+        *
+        *
+        * Component CRYPTO preselected - required by  Component SSL
+        *
+        Enable CRYPTO  (COMPONENT_IPCRYPTO) [Y/?] (NEW) y
+          Enable FIPS 140-2 validated crypto libraries  (COMPONENT_IPCRYPTO_USE_FIPS_140_2) [N/y/?] (NEW)
+        Enable FREESCALE  (COMPONENT_IPFREESCALE) [N/y/?] (NEW) y
+        Enable HWCRYPTO  (COMPONENT_IPHWCRYPTO) [N/y/?] (NEW) y
+        *
+        * Networking Library Components
+        *
+        Enable EAP  (COMPONENT_IPEAP) [N/y/?] (NEW)
+        Enable VXCOMPAT  (COMPONENT_VXCOMPAT) [Y/n/?] (NEW) Y
+        *
+        * Networking Acceleration Platform Components
+        *
+        Enable IFPROXY  (COMPONENT_IFPROXY) [N/y/?] (NEW)
+        Enable WRNAD  (COMPONENT_WRNAD) [N/y/?] (NEW)
+        *
+        * Common Analysis Framework Components
+        *
+        *
+        * COMPONENT CAFE and COMPONENT_STACKTRACE are used by analysis tools
+        *
+        Enable CAFE framework  (COMPONENT_CAFE) [Y/n/?] (NEW) n
+        *
+        * Stacktrace Debug Component
+        *
+        Enable stacktrace debugging output  (COMPONENT_STACKTRACE_DEBUG) [N/y] (NEW)
+        Route stacktrace debugging output to a session logger  (COMPONENT_STACKTRACE_SESSION_LOGGER) [N/y] (NEW)
+        *
+        * Target Communication Framework (TCF) Agent Component
+        *
+        Enable TCF_AGENT  (COMPONENT_TCF_AGENT) [Y/n/?] (NEW) n
+        Enable WM  (COMPONENT_WM) [Y/n/?] (NEW) n
+        Enable XML  (COMPONENT_XML) [Y/n/?] (NEW) Y
+        *
+        * VxWorks User Library Configuration
+        *
+        Build User-side libraries  (FEATURE_USR) [Y/n/?] (NEW) Y
+          Choose the User Networking Libraries to be built
+          > 1. Build libraries with IPV4 support (USR_INET4_ONLY) (NEW)
+            2. Build libraries with IPV4 and IPV6 support (USR_INET6) (NEW)
+            3. Build libraries with IPV6 support (USR_INET6_ONLY) (NEW)
+          choice[1-3]: 1
+          Build User Networking Libraries  (COMPONENT_USR_IPNET) [Y/n/?] (NEW) Y
+          Build core USR APPS  (COMPONENT_USR_APPS) [Y/n/?] (NEW) Y
+            Build test USR APPS  (COMPONENT_USR_TEST) [Y/n/?] (NEW) n
+          Build USR libraries for DOT1X  (COMPONENT_USR_DOT1X) [N/y/?] (NEW) n
+          Build USR libraries for SNMP  (COMPONENT_USR_SNMP) [N/y/?] (NEW) n
+          Build USR libraries for WM  (COMPONENT_USR_WM) [N/y/?] (NEW) n
+          Build USR libraries for XML  (COMPONENT_USR_XML) [Y/n/?] (NEW) Y
+          Build USR libraries for SNMP_V3  (COMPONENT_USR_SNMP_V3) [N/y/?] (NEW)
+          Build USR libraries for SNMP_AGENTX  (COMPONENT_USR_SNMP_AGENTX) [N/y/?] (NEW)
+          
+        This VSB supports the following BSPs: fsl_p1021_mds
+\ce
+
+        Note that 'Enable MSP Feature Set PNE' must be set to 'Yes' and other
+        'Enable MSP Feature Set' must be set to 'No'. And some options like
+        "Enable FREESCALE" are also required to test Freescale's SEC.
+
+    1.3 Build VSB
+
+        Run the following command to build the libraries based on the selected
+        options.
+
+\cs
+        cd vsb_fsl_p1021_mds
+        make
+\ce
+
+2. Create a VIP based on the new VSB
+
+    2.1 Create a VIP, in the step of "Project Setup", select new VSB which is
+        created above as the configuration of "A source build project", and
+        select the correct BSP.
+
+    2.2 Configure and build VIP
+
+        In the Kernel Configuration editor include INCLUDE_IPFREESCALE. For
+        the Freescale P1021MDS board set two parameters as follows:
+
+\cs
+        SEC2_CORE_VERSION = "3.3"
+        SEC2_DEVICE_FAMILY = "3"
+\ce
+
+        build this VIP.
+
+    2.3 Test the Security Engine
+
+        Download the image file, then issue the command 'freescale test all'
+        from the VxWorks kernel shell.
+
+        For the Freescale P1021MDS board you should see:
+
+\cs
+        -> ipcom_run_cmd "freescale test all"                                          
+        freescale :: testing md5 hash...success                                        
+        freescale :: testing md5 hmac...success                                        
+        freescale :: testing sha1 hash...success                                       
+        freescale :: testing sha1 hmac...success                                       
+        freescale :: testing des cbc cipher...success                                  
+        freescale :: testing des ecb cipher...success                                  
+        freescale :: testing 3des cbc cipher...success                                 
+        freescale :: testing 3des ecb cipher...success                                 
+        freescale :: testing aes cbc cipher...success                                  
+        freescale :: testing aes ecb cipher...success                                  
+        freescale :: testing rng oper...success                                        
+        freescale :: testing mod exp...success 
+\ce
+
+\sh AMP with wrload and MIPC
+
+The default bootrom provided from the fsl_p1021_mds BSP may be used to boot
+the board with UP, AMP or SMP images.
+
+To include AMP support in an image, add the INCLUDE_AMP component.
+
+You must use the Workbench or vxprj to build AMP BSPs. You can build any image
+for core0 from the fsl_p1021_mds BSP. This image is configured for AMP wrload.
+For core1 you can build a RAM based image (vxWorks). It is configured
+to be loaded using wrload and to route the console to core0.
+
+When in AMP mode, the eTSEC interfaces can be allocated to either core. But the
+3 UCC interfaces(qe_uart and two qe_fcc), quiccEngine and quiccEngineIntCtlr
+must be allocated to the same core.
+
+The default configuration assigns motetsec0 to the first core and motetsec1, 
+motetsec2 to the second. This configuration can be changed by
+editing the hwconf.c file and changing the "coreNum" properties in the eTSEC 
+resource entries, and changing "DEVICE_CORE0" in ampCpuTable which locate 
+at sysLib.c file.
+
+In the file sysLib.c for BSP, you can control the assignment of devices
+to CPUs by using struct ampCpuTable definitions. For example, suppose five
+Ethernet devices are entered in a sysLib.c file, as follows:
+\cs
+AMP_CPU_TABLE ampCpuTable[] = {
+
+    { "motetsec",              0,  DEVICE_CORE0 }, ===> for core0
+    { "motetsec",              1,  DEVICE_CORE1 }, ===> for core1
+    { "motetsec",              2,  DEVICE_CORE1 }, ===> for core1
+    { "quiccEngine",           0,  DEVICE_CORE0 }, ===> for core0
+    { "quiccEngineIntCtlr",    0,  DEVICE_CORE0 }, ===> for core0
+    { "qefcc0",                0,  DEVICE_CORE0 }, ===> for core0
+    { "qefcc1",                1,  DEVICE_CORE0 }, ===> for core0
+    { "ns16550",               0,  DEVICE_CORE0 }, ===> for core0
+    { "ns16550",               1,  DEVICE_CORE0 }, ===> for core0
+    { "qeUart",                0,  DEVICE_CORE0 }, ===> for core0
+    { "openPicTimer",          0,  DEVICE_CORE0 }, ===> for core0
+    { "openPicTimer",          1,  DEVICE_CORE0 }, ===> for core0
+    { "m85xxCCSR",             0,  DEVICE_CORE0 }, ===> for core0
+    { "m85xxPci",              0,  DEVICE_CORE0 }, ===> for core0
+    { "vxbPlbUsbEhci",         0,  DEVICE_CORE0 }, ===> for core0
+    { "fslDma",                0,  DEVICE_CORE0 }, ===> for core0
+    { "fslSdhc",               0,  DEVICE_CORE0 }, ===> for core0
+    { "fslI2c",                0,  DEVICE_CORE0 }, ===> for core0
+};
+\ce
+To assign a different ethernet device to each of two CPUs, you can use the
+following changes:
+\cs
+AMP_CPU_TABLE ampCpuTable[] = {
+    { "motetsec",              0,  DEVICE_CORE0 }, ===> for core0
+    { "motetsec",              1,  DEVICE_CORE0 }, ===> for core0
+    { "motetsec",              2,  DEVICE_CORE1 }, ===> for core1
+    { "quiccEngine",           0,  DEVICE_CORE1 }, ===> for core1
+    { "quiccEngineIntCtlr",    0,  DEVICE_CORE1 }, ===> for core1
+    { "qefcc0",                0,  DEVICE_CORE1 }, ===> for core1
+    { "qefcc1",                1,  DEVICE_CORE1 }, ===> for core1
+    { "ns16550",               0,  DEVICE_CORE0 }, ===> for core0
+    { "ns16550",               1,  DEVICE_CORE0 }, ===> for core0
+    { "qeUart",                0,  DEVICE_CORE1 }, ===> for core1
+    { "openPicTimer",          0,  DEVICE_CORE0 }, ===> for core0
+    { "openPicTimer",          1,  DEVICE_CORE0 }, ===> for core0
+    { "m85xxCCSR",             0,  DEVICE_CORE0 }, ===> for core0
+    { "m85xxPci",              0,  DEVICE_CORE0 }, ===> for core0
+    { "vxbPlbUsbEhci",         0,  DEVICE_CORE0 }, ===> for core0
+    { "fslDma",                0,  DEVICE_CORE0 }, ===> for core0
+    { "fslSdhc",               0,  DEVICE_CORE0 }, ===> for core0
+    { "fslI2c",                0,  DEVICE_CORE0 }, ===> for core0
+
+\ce
+If you want to allocate the console UART to the secondary core, you can use
+the following changes:
+\cs
+AMP_CPU_TABLE ampCpuTable[] = {
+    { "motetsec",              0,  DEVICE_CORE0 }, ===> for core0
+    { "motetsec",              1,  DEVICE_CORE0 }, ===> for core0
+    { "motetsec",              2,  DEVICE_CORE1 }, ===> for core1
+    { "quiccEngine",           0,  DEVICE_CORE1 }, ===> for core1
+    { "quiccEngineIntCtlr",    0,  DEVICE_CORE1 }, ===> for core1
+    { "qefcc0",                0,  DEVICE_CORE1 }, ===> for core1
+    { "qefcc1",                1,  DEVICE_CORE1 }, ===> for core1
+    { "ns16550",               0,  DEVICE_CORE1 }, ===> for core1
+    { "ns16550",               1,  DEVICE_CORE1 }, ===> for core1
+    { "qeUart",                0,  DEVICE_CORE1 }, ===> for core1
+    { "openPicTimer",          0,  DEVICE_CORE0 }, ===> for core0
+    { "openPicTimer",          1,  DEVICE_CORE0 }, ===> for core0
+    { "m85xxCCSR",             0,  DEVICE_CORE0 }, ===> for core0
+    { "m85xxPci",              0,  DEVICE_CORE0 }, ===> for core0
+    { "vxbPlbUsbEhci",         0,  DEVICE_CORE0 }, ===> for core0
+    { "fslDma",                0,  DEVICE_CORE0 }, ===> for core0
+    { "fslSdhc",               0,  DEVICE_CORE0 }, ===> for core0
+    { "fslI2c",                0,  DEVICE_CORE0 }, ===> for core0
+
+};
+\ce
+Note: On the P1021E, the two UARTs and two I2C controllers share one internal 
+interrupt line, so they must be assigned to the same core.
+Devices "m85xxCCSR" and "m85xxPci" should be assigned to the same core,
+otherwise the PCI controller will not work.
+
+The eTSECs use Marvell 88E1111S PHYs, which need to be assigned the work mode.
+The default configuration assigns mv88e1x11PHY0, mv88e1x11PHY2 use MV88E_MODE_RGMII
+and mv88e1x11PHY1 use MV88E_MODE_SGMII_NOCLK mode. When in AMP mode, the 
+eTSEC interfaces can be allocated to either core, but for each core, it always 
+thought the mv88e1x11phy which the first eTSEC used as the phy 0, the rest eTSEC 
+and phy can be done in the same manner. Cause the eTSEC and phy work mode are 
+different in each core, so you should accord to the eTSEC interfaces and phy 
+to modify the MV88E1X11PHY_MODE parameters for each core build.
+ 
+For example:
+    \cs
+    allocate eTSEC0 to core0; phy mode === >MV88E_MODE_RGMII
+    allocate eTSEC1 to core1; phy mode === >MV88E_MODE_SGMII_NOCLK
+    allocate eTSEC2 to core1; phy mode === >MV88E_MODE_RGMII
+    
+    the image for core 0 must be configured with
+    (Kernel configurations: hardware -> Device Drivers -> INCLUDE_MV88E1X11PHY)
+    
+    MV88E1X11PHY0_MODE as MV88E_MODE_RGMII
+
+    The image for core 1 must be configured with
+    
+    MV88E1X11PHY0_MODE as MV88E_MODE_SGMII_NOCLK 
+    MV88E1X11PHY1_MODE as MV88E_MODE_RGMII 
+    \ce
+
+another example:
+    \cs
+    allocate eTSEC0 to core0; phy mode === >MV88E_MODE_RGMII
+    allocate eTSEC1 to core0; phy mode === >MV88E_MODE_SGMII_NOCLK
+    allocate eTSEC2 to core1; phy mode === >MV88E_MODE_SGMII_NOCLK
+    
+    The image for core 0 must be configured with
+    (Kernel configurations: hardware -> Device Drivers -> INCLUDE_MV88E1X11PHY)
+    MV88E1X11PHY0_MODE as MV88E_MODE_RGMII
+    MV88E1X11PHY1_MODE as MV88E_MODE_SGMII_NOCLK 
+
+    The image for core 1 must be configured with
+    
+    MV88E1X11PHY0_MODE as MV88E_MODE_SGMII_NOCLK
+    \ce
+    
+The image for core 0 must be configured with 
+INCLUDE_AMP and INCLUDE_WRLOAD which adds all required MultiOS components, and the optional
+but very useful WDB proxy. Additionally, the primary core must be configured with
+INCLUDE_AMP_CPU_00 (Kernel configurations:
+hardware -> BSP configuration variants -> vxWorks AMP core build).
+
+The image for core 1 must be configured with INCLUDE_AMP and INCLUDE_WRLOAD_IMAGE_BUILD,
+which provides the correct image offset for wrload. Additionally, the secondary
+core must be configured with
+INCLUDE_AMP_CPU_01 (Kernel configurations:
+hardware -> BSP configuration variants -> vxWorks AMP core build).
+
+The secondary core image uses the DEFAULT_BOOT_LINE by default, so you want
+to set this parameter in your vxWorks Image Project.
+For example (all on one line, no breaks, note the escaped internal double-quotes):
+
+$ vxprj parameter set DEFAULT_BOOT_LINE "\"motetsec(2,0)host:<image_dir>/vxWorks
+h=192.168.1.1 e=192.168.1.2 u=vxworks pw=vxworks f=0x0\""
+
+Boot the image created with INCLUDE_AMP_CPU_00 from the bootrom.
+Call wrload using the following either add as part of the usrAppInit or call
+from a shell such as the kernel shell.
+For Example:
+
+-> wrload "-file <image dir>/vxWorks -cpu 1"
+
+The image you load should be the image built with INCLUDE_AMP_CPU_01.
+
+SPECIAL CONSIDERATIONS
+
+\sh Make Targets
+The make targets are listed as the names of object-format files.
+Other images not listed here have not been validated.
+
+\ts
+`bootrom'
+`bootrom.bin'
+`bootrom_uncmp'
+`bootrom_uncmp.bin'
+`vxWorks' (with `vxWorks.sym')
+`vxWorks.st'
+\te
+
+\sh BSP Bootloaders and Bootroms
+
+\ts
+Bootloader/Bootrom   | status
+----------------------------------
+bootrom              | SUPPORTED
+bootrom_uncmp        | SUPPORTED
+bootrom_res          | UNSUPPORTED
+vxWorks              | SUPPORTED
+vxWorks_rom          | SUPPORTED
+vxWorks_romCompress  | SUPPORTED
+vxWorks_romResident  | UNSUPPORTED
+
+To burn vxWorks_romCompress/vxWorks_rom image:
+
+firstly, create the vxWorks_romCompress/vxWorks_rom image
+then, you should build the following command at the command line
+(example for vxWorks_romCompress):
+
+objcopyppc -O binary --binary-without-bss vxWorks_romCompress vxWorks_romCompress.bin
+make -f Makefile_nand nand_bootloader
+cat nand_bootloader.bin vxWorks_romCompress.bin > nand_vxWorks_romCompress.bin
+
+finally, burn the nand_vxWorks_romCompress.bin to the nand flash
+\te
+
+\sh BSP Validated Tools
+
+\ts
+Tool                         | Connection/Type | Status
+-------------------------------------------------------
+Workbench Debugger           | ETHERNET/WDB    | SUPPORTED
+Workbench System Viewer      | ETHERNET/WDB    | SUPPORTED
+Workbench MemScope           | ETHERNET/WDB    | SUPPORTED
+Workbench ProfileScope       | ETHERNET/WDB    | SUPPORTED
+Workbench StethoScope        | ETHERNET/WDB    | SUPPORTED
+Workbench CoverageScope      | ETHERNET/WDB    | SUPPORTED
+Workbench Core File Analysis | ETHERNET/WDB    | UNVALIDATED
+Workbench Sensor Points      | ETHERNET/WDB    | UNVALIDATED
+Workbench OCD Debugger       | JTAG            | UNVALIDATED
+Workbench OCD Flash          | JTAG            | UNVALIDATED
+\te
+
+\sh Known Problems
+
+SD Card cannot be dynamically detected by the controller as the SD_CD pin 
+from the connector are not connected to the controller. SD card 
+insertion/removal cannot be sensed by controller.
+
+Crystal stops generating clock when board is switched off. Board may not
+retain time/date information.
+
+UCC1-PHY address as per the design should be 2. But With test case the PHY is
+not accessible with address 2 PHY Address on the board to be changed to 0.
+There is another hardware issue in Rev1.0 Soc. if you use QE_UCC1(ENET1), 
+you must plug in the cable with the ENET5 and ENET1 at the same time, or
+the QE_UCC1 does not work.
+
+BOARD LAYOUT
+
+\bs
++---+---+--+-------|---+--------+---+-------------+---------------------------------------+
+|   |USB|  | DUART |   |SD Card |   |     DDR     |                                       |
+|   +---+  +-------+   +--------+   |    SDRAM    |                                       |
+|         +-+         +-+           +-------------+                                       |
+|         |L|         |L|                                        ||SW2|| ||SW3||          |
+|------+  |A|   eTSEC2|A|                                          PLL     ALU            |
+|ENET5 |  |N|  (SGMII)|N|                                        ||SW6|| ||SW7||          |
+|------+  |E|         |E|                                          PLL     BOOT           |
+|         |b|         |e|                                        ||SW8|| ||SW9||       O  |
+|------+  +-+         +-+                                         eTSEC   SERDES      SRST|
+|ENET1 |                                                                               O  |
+|------+  +-+         +-+ +-------------+                                             HRST|
+|         |L|         |L| |             |                                              O  |
+|------+  |A|   eTSEC3|A| |             |    +------+ +------+ +----+                  PWR|
+|eTSEC3|  |N|  (SGMII)|N| |    QorIQ    |    | NAND | |(BCSR)| |JTAG|                     |
+|------+  |E|         |E| |    P1021E   |    |FLASH | | CPLD | |COP |                     |
+|         |a|         |f| |             |    +------+ +------+ +----+                     |
+|         +-+         +-+ |             |             +-----+                             |
+|------+   +---------+    +-------------+             | ISP |                             |
+|eTSEC1|   |spi flash|                                +-----+                             |
+|------+   +---------+                                                                    |
+|                                                                                         |
+|                                                                                         |
+|                                                                                         |
++-----------------------------------------------------------------------------------------+
+\be
+
+SEE ALSO
+
+\tb Workbench User's Guide: Introduction
+
+\tb VxWorks Programmer's Guide: Configuration
+
+\tb VxWorks Programmer's Guide: Architecture Appendix
+
+BIBLIOGRAPHY
+
+\tb QorIQ P1021E Integrated Processor Reference Manual
+
+\tb P1021 Chip Errata
+
+\tb P1021MDS-Quick Start
+
+\tb P1021E System Errata
+
+\tb MAXIM RTC device DS1374 datasheet
+
+\tb PowerPC E500 Core Reference Manual
+
+\tb Motorola PowerPC Microprocessor Family: The Programming Environments

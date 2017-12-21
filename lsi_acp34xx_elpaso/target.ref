@@ -1,0 +1,787 @@
+\" lsi_acp34xx_elpaso/target.ref - LSI ACP34XX ELPASO target specific documentation
+\"
+\" Copyright (c) 2010-2012 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01v,17nov12,j_z  added RapidIO support.
+\" 01u,24aug12,cwl  Correct the macro RAM_LOW_ADRS. (WIND00371428)
+\" 01t,22aug12,clx  fix typo error of RAM_LOW_ADRS. (WIND00371217)
+\" 01s,07aug12,x_s  added LSI ACP34XX JUNCTION target board support.
+\" 01r,15may12,x_s  added Silicon Rev 2.1 support.
+\" 01q,11oct11,d_c  added caveat for INCLUDE_MMU_OPTIMIZE
+\" 01p,05may11,x_z  added information for SMP and modified information for
+\"                  Workbench support. (WIND00270381)
+\" 01o,14apr11,x_z  added AXIS timer support.
+\" 01n,23mar11,x_z  added known issue for USB reset issue; removed fixed issues
+\"                  for network and DOSFS.
+\" 01m,08mar11,x_z  replaced INCLUDE_PCI with DRV_PCIBUS_LSI_PCIEX.
+\" 01l,01mar11,x_z  fixed and added AMP and USB details.
+\" 01k,24feb11,x_z  added known issue for FIT/WDT.
+\" 01j,23feb11,x_s  modified known issue for PCIe.
+\" 01i,10feb11,x_z  added known issue for Auxiliary Clock.
+\" 01h,18jan11,x_s  added PCIe support.
+\" 01g,12jan11,x_z  added virtual address map and fixed documentation issues.
+\" 01f,22dec10,x_s  added I2C support.
+\" 01e,21dec10,x_s  added SPI support.
+\" 01d,20dec10,x_z  declared support for USB and some known issues.
+\" 01c,23nov10,x_z  added uAMP support.
+\" 01b,10nov10,x_z  added support for USB and FEMAC 100M mode of X1V2 board.
+\" 01a,15oct10,x_z  written.
+\"
+\TITLE lsi_acp34xx_elpaso - LSI ACP34XX ELPASO/JUNCTION
+
+\sh NAME
+'LSI ACP34XX ELPASO/JUNCTION'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks for the lsi_acp34xx_elpaso BSP.
+
+This BSP supports two types of target boards:
+\ts
+Supported Target board    | Supported SOC Version   |  Number of Cores
+----------------------------------------------------------------------
+LSI ACP34XX ELPASO        | ACP3448 2.0 & 2.1       |  4
+LSI ACP34XX JUNCTION      | ACP3423 2.0             |  2
+\te
+
+\sh Jumpers & Switches
+
+There is only one switch on LSI ACP34XX ELPASO/JUNCTION board.
+
+Default Switch Settings
+
+\ts
+Switch Number | Switch ON                       | Switch OFF
+------------------------------------------------------------
+SW3           | 1,2,4,7,8,9,10,11               | 3,5,6,12
+\te
+
+To enable the PCI Express interfaces as RC mode, make sure SW3&SW6 are OFF state.
+
+For the details, please refer to LSI ACP34XX ELPASO/JUNCTION board user guide.
+
+\sh Getting the board running VxWorks
+This section will describe how to run VxWorks on the LSI ACP34XX ELPASO/JUNCTION
+board.
+
+1. Creating a bootrom.bin:
+
+    1.1 Launch VxWorks Development Shell, go to the BSP directory
+        "$(WIND_BASE)/target/config/lsi_acp34xx_elpaso".
+
+    1.2 Type "make bootrom.bin" and press ENTER.
+
+    1.3 Once the make process finish successfully, you will find
+        the file "bootrom.bin" in the BSP directory
+        "$(WIND_BASE)/target/config/lsi_acp34xx_elpaso".
+
+2.Flashing the VxWorks bootrom image
+
+    This section will describe how to program VxWorks bootrom onto a flash.
+
+    2.1 Starting a TFTP server
+
+        Open a TFTP server on your host.  Make sure the root directory is
+        your lsi_acp34xx_elpaso BSP directory which contains the VxWorks bootrom
+        image you've just created.
+
+    2.2 Configuring the U-Boot environment
+
+        Connect the UART0 on your ELPASO/JUNCTION board to the designated
+        serial port of your host, start the terminal program, and power
+        up your board. You should see messages like this:
+
+\cs
+        Parameter Table Version 3
+        PCIe/SRIO Mode: 0x00001001
+        Switching PHY0 Control from 0x00000000 to 0x00001001
+        Initializing system memory for ECC : v2 (fast) method
+
+             __    _   _  __   _         __          __
+         /  (  /  /_| / )/__)  _)   _/  ( _/_ _ _   / _)   _/  /    _ _/_ _
+        (____)(  (  |(__/     /__/)(/  __)/(/(/(-  /(_)()()/  (__()(/(/(-/
+                                            _/
+
+        ACP3448V2
+        System Memory Size: 4096 M
+        LSI Version: 4.8.1.49
+        Hit any key to stop autoboot:  0
+        =>
+\ce
+
+        Then type the following commands to setup the U-Boot environment.
+
+\cs
+        setenv ipaddr 192.168.0.3
+        setenv netmask 255.255.255.0
+        setenv serverip 192.168.0.2
+        setenv gatewayip 192.168.0.1
+        saveenv
+\ce
+
+        Note: you must change the network parameters according to your actual
+        situation every time you want to use the network interface. 'ethaddr'
+        and 'ipaddr' are the MAC address and the IP address of the target,
+        'serverip' is your host IP address.
+
+    2.3 Programming the flash
+
+        Type the following commands in the U-Boot shell.
+
+\cs
+        tftp 1000000 bootrom.bin
+        nand erase 30000000 100000
+        nand write 1000000 30000000 100000
+\ce
+
+    2.4 Running the VxWorks bootrom
+
+        In the U-Boot shell prompt, type the following command:
+
+\cs
+        nand read 3ff00000 30000000 100000
+        go 3ff00000
+\ce
+
+        Now you will get VxWorks bootrom running.
+
+    2.5 Running the VxWorks bootrom automatically after power up/reset
+
+        In the U-Boot shell prompt, type the following commands to enable
+        the VxWorks bootrom to execute automatically after power up/reset:
+
+\cs
+        setenv bootcmd2 nand read 3ff00000 30000000 100000\;go 3ff00000
+        saveenv
+\ce
+
+        To prevent the VxWorks bootrom from executing automatically, hit any
+        key to stop U-Boot counting down.
+
+FEATURES
+
+This section describes all features of the board, supported or not.
+It documents all configurations of the board and the interaction between
+features and configuration items.
+
+\sh List of Hardware Features (LSI ACP34XX ELPASO/JUNCTION board)
+
+\ts
+Hardware Interface | Controller | Driver/Component    | Status
+-------------------------------------------------------------------
+UART:0             | on-chip    | vxbPrimeCellSio.c   | SUPPORTED
+UART:1             | on-chip    | vxbPrimeCellSio.c   | SUPPORTED
+100MB-ETHERNET     | on-chip    | vxbLsiMacEnd.c      | SUPPORTED
+NAND-FLASH         | ST         | sysNandFlash.c      | SUPPORTED
+TIMER              | on-chip    | vxbPpc440DecTimer.c | SUPPORTED
+TIMER              | on-chip    | vxbPpc4xxFITimer.c  | SUPPORTED
+TIMER              | on-chip    | vxbPpc4xxWDTimer.c  | SUPPORTED
+AXIS Timer         | on-chip    | vxbLsiTimer.c       | SUPPORTED
+MPIC               | on-chip    | vxbMpicIntCtlr.c    | SUPPORTED
+MPIC TIMER         | on-chip    | -                   | UNSUPPORTED
+I2C                | on-chip    | sysLsiI2c.c         | SUPPORTED
+I2C-EEPROM         | AT24C01B   | at24cEeprom.c       | SUPPORTED
+SPI                | on-chip    | sysLsiSpi.c         | SUPPORTED
+SPI-FLASH          | M95M01     | sysSpiFlash.c       | SUPPORTED
+PCIe               | on-chip    | vxbLsiPciEx.c       | SUPPORTED
+sRIO               | on-chip    | DRV_SRIO_LSI        | SUPPORTED
+USB Host           | on-chip    | INCLUDE_EHCI        | SUPPORTED
+10GB-ETHERNET      | on-chip    | -                   | UNSUPPORTED
+1GB-ETHERNET:0     | on-chip    | -                   | UNSUPPORTED
+1GB-ETHERNET:1     | on-chip    | -                   | UNSUPPORTED
+1GB-ETHERNET:2     | on-chip    | -                   | UNSUPPORTED
+1GB-ETHERNET:3     | on-chip    | -                   | UNSUPPORTED
+1GB-ETHERNET:4     | on-chip    | -                   | UNSUPPORTED
+1GB-ETHERNET:5     | on-chip    | -                   | UNSUPPORTED
+1GB-ETHERNET:6     | on-chip    | -                   | UNSUPPORTED
+1GB-ETHERNET:7     | on-chip    | -                   | UNSUPPORTED
+\te
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Verified Hardware
+This BSP has been verified on X1V2 of LSI ACP34XX ELPASO board with LSI ACP3448
+REV2 and REV2.1 and LSI ACP34XX JUNCTION board with LSI ACP3423 REV2. Other 
+revisions of the board are unvalidated and unsupported. 
+
+The default clock speed for LSI ACP34XX ELPASO/JUNCTION is 1.6GHz core and 
+200MHz peripherals.
+
+\sh Memory Maps
+The following table describes the default memory map of this BSP.
+
+\ts
+Start(Virtual) | Start(Physical) | Size  | Access to
+-----------------------------------------------------------------
+0x0000_0000    | 0x000_0000_0000 | 1GB   | DDR SDRAM
+0x8000_0000    | 0x020_4000_0000 | 128MB | PCIe 0 Configuration Space
+0x8800_0000    | 0x020_4800_0000 | 128MB | PCIe 0 Prefetchable Memory
+0x9000_0000    | 0x020_5000_0000 | 128MB | PCIe 0 Non-Prefetchable Memory
+0x9800_0000    | 0x020_5800_0000 | 64KB  | PCIe 0 IO
+0xC000_0000    | 0x020_8000_0000 | 256M  | SRIO 1 memory
+0xF0A0_0000    | 0x010_0000_0000 | 1MB   | Local CPU Memory (LCM)
+0xF080_0000    | 0x020_0040_0000 | 2MB   | Peripherals Register
+0xF0B0_0000    | 0x021_0000_0000 | 1MB   | BOOT ROM
+\te
+
+\sh Serial Configuration
+No special configuration needed.
+Default configuration is:
+    Baud Rate: 9600
+    Data: 8 bit
+    Parity: None
+    Stop: 1 bit
+    Flow Control: None
+
+\sh Network Configuration
+The FEMAC ports allows 10/100M connection. The driver will auto-negotiate
+and configure the port accordingly.
+
+The following END driver is supported in this BSP.
+
+\ts
+Driver | END
+------------
+FEMAC  | INCLUDE_LSI_MAC_VXB_END
+\te
+
+\sh Boot Devices
+The supported boot devices are:
+
+\ts
+    `lsiMac0' | FEMAC
+    `gei'     | Intel Pro1000 Ethernet PCIe adaptor when the PCIe bus is enabled
+    `usb'     | U-Disk when USB is enabled
+\te
+
+\sh Boot Methods
+The boot methods are affected by the boot parameters. If no password is
+specified, RSH (remote shell) protocol is used. If a password is specified,
+FTP protocol is used, or, if the flag is set to 0x80, TFTP protocol is used.
+
+\sh PCIe Access
+There are 3 PCIe controllers on chip, however only one PCIe controller is
+outgoing line, this release only supports PCIe 0 controller as RC. The PCIe
+feature is validated with PCIe x 4 mode. There is one PCIe cable connectors
+on the front panel, extra PCIe cable and slot backplane board are needed to
+validate PCIe feature, an example of using extra devices(One Stop Systems's
+2-slot backplane) is below:
+
+1. Insert the upstream host cable adapter into the PCIe cable connectors of
+   LSI ACP34XX ELPASO/JUNCTION board.
+
+2. Insert the downstream target cable adapter into the PCIe slot closest to the
+   white ATX power connector, labeled TARGET on the 2-slot backplane.
+
+3. Connect the 2-slot backplane to an ATX power supply separate from the host
+   system power supply.
+
+4. Insert the PCIe add-in board(The Intel 8257x Gigabit Ethernet adapter) in the
+   ENDPOINT slot on the 2-slot backplane.
+
+5. Turn on the power supply to the 2-slot backplane, the 3V aux LED will light.
+   Note: the power supply and 2-slot backplane will not power up at this time.
+
+6. Turn on the host system(LSI ACP34XX ELPASO/JUNCTION board), signals across the 
+   PCIe cable will cause the 2-slot backplane to power up, the power and cable LEDs
+   on the upstream and downstream cable adapters will light.
+
+In order to support PCIe devices in this BSP, please define following
+macro in config.h:
+
+\cs
+    #define INCLUDE_PCI_BUS
+\ce
+
+The Intel 8257x Gigabit Ethernet adapter is one of the tested PCIe device
+supported in this release. Define INCLUDE_GEI825XX_VXB_END in config.h to
+enable this device.
+
+\sh RapidIO support
+
+There is 1 RapidIO port on this board, which shares the interface with PCIe. To
+enable RapidIO port, Switch 8 need be modified and the following components
+must be defined in config.h or added into project build dynamically.
+
+\bs
++--------------------------------------------------------------------------------+
+|     |SW8.1|SW8.2|SW8.3|SW8.4|SW8.5|SW8.6|SW8.7|SW8.8|SW8.9|SW8.10|SW8.11|SW8.12|
+|Host | ON  | ON  | OFF | ON  | ON  | ON  | ON  | ON  | ON  | ON   | ON   | OFF  |
++-----+-----+-----+-----+-----+-----+-----+-----+-----+-----+------+------+------+
+|Agent| ON  | ON  | OFF | ON  | ON  | ON  | OFF | ON  | ON  | ON   | ON   | OFF  |
++--------------------------------------------------------------------------------+
+\be
+
+\cs
+#define INCLUDE_RAPIDIO_BUS
+#define DRV_SRIO_LSI
+#define DRV_SRIO_EP_CPU
+\ce
+
+Note:
+
+1.The basic share memory, door bell and mail box message are only supported;
+
+2.The share memory and message END driver are unsupported because LSI RapidIO
+controller has the align requirement for the share memory access and the buffer
+address and length of the mail box message. For more detail please refer to the
+LSI RapdIO controller driver 
+
+\sh Ethernet Address
+The LSI ACP34XX ELPASO/JUNCTION boards do not have unique Ethernet hardware addresses
+assigned to each board. A unique address is absolutely necessary if the user
+wishes to connect the board to a network. Thus, the user must provide a suitable
+6-byte Ethernet address for each on-board network interface.
+
+The definition of macro ETHERNET_MAC_HANDLER in config.h indicates the MAC
+address is stored in NVRAM and alterable via the 'M' bootrom command. This
+option allows only the last three bytes to be changed. To use this option,
+open a console window and reset the hardware. When the bootrom banner appears
+and the countdown starts, press any key to get the "[VxWorks Boot]:" prompt.
+Type 'M' and follow the instructions.
+
+\sh SMP
+
+VxWorks SMP(Symmetric Multiprocessing) configuration can be used on this
+multiprocessor hardware platform supported by this BSP. Please refer to
+the chapter "VxWorks SMP" of vxworks_kernel_programmers_guide_6.9.pdf for
+more details about the SMP-specific features from software and hardware view.
+
+Here we list some key features of SMP.
+
+1. SMP build
+
+   VxWorks SMP can be configured and built using the standard Wind River
+   Workbench and vxprj facilities. VxWorks SMP images cannot be created with the
+   legacy BSP directory configuration and build method (using config.h and make).
+
+   Workbench provides a VxWorks Image Project (VIP) option for creating VxWorks
+   SMP projects. The vxprj provides the '-smp' option for configuring and
+   building VxWorks SMP from the command line. For example:
+\cs
+   vxprj create -smp lsi_acp34xx_elpaso diab <project name>
+\ce
+
+2. Boot loader
+
+   Boot loader for VxWorks SMP must not be built with the SMP build option -
+   neither with Workbench nor with vxprj. In other words, you can build a
+   bootloader using command line or Workbench, just like the steps you follow in
+   UP system, the bootloader will support UP, SMP and AMP.
+
+3. MMU
+
+   VxWorks SMP does not support MMU-less configuration.
+
+4. Cache and bus snoop
+
+   For PPC476, snoop logic is implemented by memory coherence required (M)
+   storage attribute of MMU UTLB entries. It is defined by the architecture to
+   support cache and memory coherency within multiprocessor shared memory
+   systems.
+
+   Cache can not be disabled in a VxWorks SMP system. I.e, function
+   cacheDisable() directly returns error and does nothing.
+
+   Only copy-back mode is tested and supported officially by Wind River BSP and
+   VxWorks kernel for SMP system and this is the default configuration in BSP.
+   So system may has unpredictable behavior if you decide to change the cache
+   mode from copy-back to write-through. In addition, there are some other
+   reasons for this restriction. For example, write-through is not supported by
+   VxWorks for PowerPC processors because of the atomic operation.
+
+5. Interrupt CPU affinity
+
+   Hardware resources can be allocated via VxWorks configuration. Here we focus
+   on the interrupt to show how it's implemented. SMP hardware usually requires
+   programmable interrupt controller. VxWorks SMP makes use of this hardware to
+   allow assignment interrupts to a specific CPU. By default, interrupts are
+   routed to the VxWorks instance's logical CPU 0. Interrupt CPU affinity can be
+   useful for load balancing, for example, if there is too much total interrupt
+   traffic for one CPU to handle.
+
+   For example, in hwconf.c of this BSP, add the following data structure:
+
+   struct intrCtlrCpu mpicCpu[] = {
+       { INUM_FEMAC_DMA, 0 },
+       ...
+   };
+
+   User can reroute the Ethernet interface interrupt to other CPUs by changing 0
+   to 1 or other CPU index.
+
+6. CPU number
+
+   VxWorks project parameter, VX_SMP_NUM_CPUS, is used to represent the CPUs
+   which get involved in the SMP system, as VxWorks supports part of all the
+   CPUs to participate the SMP system and the rests keep reset or idle. The CPU
+   number we are discussing here includes all the hardware units which have the
+   same behavior as CPU, for example, the thread, hyper-thread, etc.
+
+   The maximum CPU numbers of LSI ACP34XX ELPASO board & LSI ACP34XX JUNCTION 
+   are 4 & 2.
+
+   Note: The default value of VX_SMP_NUM_CPUS is 2, for LSI ACP34XX ELPASO board
+   VX_SMP_NUM_CPUS need to be changed to 4. 
+
+7. SMP M-N support
+
+   One SMP M-N image is one special SMP image that part of all the CPUs are
+   involved in the SMP system. When physical CPU 0 is involved, it can load
+   other vxWorks AMP/SMP M-N image on the rest cores; otherwise, it can  be
+   loaded by another AMP/SMP M-N image which physical CPU 0 is involved in.
+
+   SMP M-N image is similar with AMP, So except '-smp' option, some components
+   related with AMP need be included. For example, INCLUDE_WRLOAD and
+   INCLUDE_AMP_CPU_00 need be included for SMP M-N image which physical CPU 0 is
+   involved in, and INCLUDE_WRLOAD_IMAGE_BUILD and INCLUDE_AMP_CPU_02 need be
+   included for SMP M-N image which physical CPU 2 and 3 are involved in. For
+   more details, please refer to the description about AMP.
+
+   Note: LSI ACP34XX ELPASO board supports SMP M-N feature, LSI ACP34XX JUNCTION 
+   board does NOT support SMP M-N feature due to only own 2 cores.
+   
+\sh AMP with wrload and MIPC
+
+AMP support, and usage of wrload() to load and start AMP CPUs, are discussed in
+detail in "VxWorks Kernel Programmer's Guide".  This man page only discusses
+some of the BSP-specific configuration, porting and maintenance issues.
+
+The default bootrom provided from the lsi_acp34xx_elpaso BSP may be used to boot
+the board with UP or AMP images.  But AMP images must be built with Workbench or
+vxprj.
+
+Each AMP image must have its own, separate memory space.  Refer to the 20bsp.cdf
+file for examples of RAM_LOW_ADRS, LOCAL_MEM_LOCAL_ADRS and LOCAL_MEM_SIZE
+definitions.  All three definitions must be coordinated for each image.
+
+Care must be taken when considering how to assign hardware resources, including
+memory and devices, across the entire system of AMP images.  Most hardware
+resources must be owned by a single OS image, e.g. the behavior of a UART is
+undefined if the same UART is assigned to multiple OS images running on separate
+CPUs.  (It happens that the last image to boot will probably reset and own it,
+but this should not be counted upon.)
+
+Now only one ethernet interface - 100MB-ETHERNET is supported, so it is assigned
+to CPU 0 by default, and the images for other CPUs must use the built-in symbol
+table by including INCLUDE_STANDALONE_SYM_TBL.
+
+4 AXIS timer are supported when UART1 is not in use. If UART1 is assigned to the
+core, AXIS UART1 timer can't be used as one GP-Timer.
+
+Currently there are 4 default AMP UP configurations defined 20bsp.cdf:
+    INCLUDE_AMP_CPU_00  - defines wrload, the multi image base, 100MB-ETHERNET
+    INCLUDE_AMP_CPU_01
+    INCLUDE_AMP_CPU_02  - this is not available for LSI ACP34XX JUNCTION
+    INCLUDE_AMP_CPU_03  - this is not available for LSI ACP34XX JUNCTION
+
+The image built with INCLUDE_AMP_CPU_00 has some special properties.  It can be
+built with any image type, but the image for other CPUs can be built with RAM
+based image type (vxWorks) only.  It owns the network(UART0 or UART1 can be
+assigned to it by INCLUDE_AMP_UART_0 or INCLUDE_AMP_UART_1).  More importantly,
+CPU 0 is typically the first CPU to boot, initialize the board hardware, and
+then CPU 0 is used to start the remaining CPUs.  As such, CPU 0 behaves
+differently on reboot than all other CPUs:  Rebooting, via ^X or "reboot", CPU 0
+will reset the entire board (since it's going to reset SDRAM, the board
+interrupt controller and other unique resources, probably making all the other
+CPUs unstable), and then proceed with a standard reboot sequence.  Rebooting any
+other CPU will only put that particular CPU into a state such that wrload can
+reload and restart it.  If some other CPU must be used to initialize the board,
+then sysToMonitor() and wrload support in sysLib.c should be modified to match.
+
+Default Configuration elements defined in 20bsp.cdf:
+\ts
+Component           | RAM_LOW    | LOCAL_MEM  | MEM_SIZE   | SIO | AXIS Timer | NETWORK | WRLOAD
+------------------------------------------------------------------------------------
+INCLUDE_AMP_CPU_00  | 0x00100000 | 0x00000000 | 0x10000000 | no  | no         | yes     | yes
+INCLUDE_AMP_CPU_01  | 0x10100000 | 0x10000000 | 0x10000000 | no  | no         | no      | no
+INCLUDE_AMP_CPU_02  | 0x20100000 | 0x20000000 | 0x10000000 | no  | no         | no      | no
+INCLUDE_AMP_CPU_03  | 0x31000000 | 0x30000000 | 0x0F000000 | no  | no         | no      | no
+\te
+
+Note: Components INCLUDE_AMP_CPU_02 & INCLUDE_AMP_CPU_03 are not available for 
+LSI ACP34XX JUNCTION board due to only owns 2 cores.
+
+SIO = yes => component INCLUDE_AMP_UART_0 or INCLUDE_AMP_UART_1 has been added
+
+NETWORK = yes => component INCLUDE_AMP_LSI_END_DRIVER has been added
+
+AXIS Timer = yes => any component of INCLUDE_AMP_AXIS_TIMER5,
+INCLUDE_AMP_AXIS_TIMER6, INCLUDE_AMP_AXIS_TIMER7 and
+INCLUDE_AMP_AXIS_TIMER_UART1 has been added
+
+WRLOAD = yes => component INCLUDE_WRLOAD  has been added
+WRLOAD = no => component INCLUDE_WRLOAD_IMAGE_BUILD  has been added
+
+NOTE:  INCLUDE_AMP_UART_1 and INCLUDE_AMP_AXIS_TIMER_UART1 are
+mutually-exclusive. In other words, if one of them is included, another one that
+has been include will be removed automatically.
+
+AMP images must be configured with exactly one INCLUDE_AMP_CPU_nn component,
+where nn is between 00 and the number of available CPUs.  INCLUDE_AMP_CPU_nn
+also determines the memory available to the system; see RAM_LOW_ADRS and
+LOCAL_MEM_LOCAL_ADRS in 20bsp.cdf.  Memory use of different images must not
+overlap, or images will corrupt each other.  As shipped, the first 3 CPUs each
+take 256MB memory; the bootrom will be copy to 0x3FF00000, so the last CPU
+takes 255MB memory.
+
+Note: The MIPC will use one 512Kb memory region from 0x30010000 to 0x30090000.
+
+This memory configuration is sufficient for demonstration purposes, but can be
+reworked to better meet application needs.
+
+For more detailed information about AMP, please refer to the
+\tb VxWorks Kernel Programmer's Guide.
+
+Note: The secondary CPU image uses the DEFAULT_BOOT_LINE by default, so you can
+set this parameter in your vxWorks Image Project:
+
+$ vxprj parameter set DEFAULT_BOOT_LINE "\"lsiMac(<netUnit>, <procNum>)host:<image_dir>/vxWorks
+h=192.168.1.1 e=192.168.1.2 u=vxworks pw=vxworks f=0x0\""
+
+or in the parameter of wrload.
+
+Boot the image created with INCLUDE_AMP_CPU_00 from the bootrom, then execute
+wrload using the following either add as part of the usrAppInit or call from a
+shell such as the kernel shell.
+
+For Example:
+
+-> wrload "-file <image dir>/vxWorks -cpu 1"
+
+or
+
+-> wrload "-file <image dir>/vxWorks -cpu 1 -tsym \"*sysBootLine=lsiMac(<netUnit>, <procNum>) f=0x0\" "
+
+The image you load should be the image built with INCLUDE_AMP_CPU_01.
+
+Note: <procNum> must be identical with CPU index, such as 1 for CPU 1, 2 for CPU
+2.
+
+\sh SPI and SPI Flash Support
+The Lsi SPI Controller and SPI Flash M9501 are supported (only in polled mode)
+in this release. To enable this function, please define the following macro in
+config.h:
+\cs
+    #define INCLUDE_LSI_SPI
+\ce
+Flash data can be dumped using the Dump function:
+\cs
+void sysSpiFlashDump
+    (
+    UINT32  nbytes,
+    UINT32  offset
+    )
+\ce
+Data can be written to the flash with the Write function:
+\cs
+STATUS sysSpiFlashWrite
+    (
+    UINT8 *  pSrc,
+    INT32    nbytes,
+    INT32    offset
+    )
+\ce
+Flash data can be read using the Read function:
+\cs
+STATUS sysSpiFlashRead
+    (
+    UINT8 *  pDst,
+    INT32    nbytes,
+    INT32    offset
+    )
+\ce
+
+\sh I2C and I2C EEPROM Support
+The Serial EEPROM used on the board is the ATMEL semiconductor AT24C01. The
+AT24C01 provides 1024 bits of serial electrically erasable and programmable
+read only memory (EEPROM) organized as 128 words of 8 bits each. It is accessed
+via a Two-Wire (I2C) serial interface. To test the device, define INCLUDE_I2C and
+INCLUDE_AT24C_MEM in config.h first. Then type the following commands in the
+vxWorks target shell.
+
+\cs
+    -> at24cMemSet "Hello World!",13,16
+    value = 0 = 0x0
+    -> at24cMemDump 20,16
+    000: 48 65 6c 6c 6f 20 57 6f *Hello Wo*
+    008: 72 6c 64 21 00 ff ff ff *rld!....*
+    010: ff ff ff ff 6f 00 00 00 *....o...*
+    value = 12 = 0xc
+\ce
+
+\sh USB Host Support
+USB Enhanced Host Controller (EHCD) driver has been integrated into this BSP,
+to enable it, you should modify as follows:
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, add INCLUDE_EHCI_INIT component, which will
+automatically include EHCI host controller driver, then add USB class drivers
+which you want, then rebuild your project. For example:
+
+To support USB mass storage device, you need include the following components:
+
+\cs
+    INCLUDE_FS_MONITOR
+    INCLUDE_ERF
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_XBD_PART_LIB
+\ce
+
+And the following components for GEN1 mass storage driver:
+
+\cs
+    INCLUDE_USB_MS_BULKONLY
+    INCLUDE_USB_MS_BULKONLY_INIT
+\ce
+
+or the following components for GEN2 mass storage driver:
+
+\cs
+    INCLUDE_USB_GEN2_STORAGE_INIT
+    INCLUDE_USB_GEN2_STORAGE
+    INCLUDE_USB_GEN2_HELPER
+\ce
+
+Note: if you want to use GEN2 usb boot, the below components are necessary:
+
+\cs
+    INCLUDE_BOOT_USB_FS_LOADER
+    INCLUDE_BOOT_FILESYSTEMS
+    INCLUDE_IO_SYSTEM
+\ce
+
+Then add the following components if you want to use the DOSFS file system with
+U-Disk:
+
+\cs
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_DOSFS_CHKDSK
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_DIR_VFAT
+\ce
+
+or the following components for the HRFS file system:
+
+\cs
+    INCLUDE_HRFS
+    INCLUDE_HRFS_CHKDSK
+    INCLUDE_HRFS_HISPEED_WRITE_MODE
+    INCLUDE_HRFS_FORMAT
+\ce
+
+Note: only Mass storage device has been verified on the target.
+
+NOTE: for command line build, you must include the components manually in
+config.h.
+
+For more information, please refer to
+\tb Wind River USB for VxWorks 6 PROGRAMMER'S GUIDE
+
+\sh Make Targets
+The make targets are listed as the names of object-format files. Append `.hex'
+to each to derive a hex-format file name. Other images not listed here may not
+be tested.
+
+\ts
+    `bootrom'
+    `bootrom.bin'
+    `bootrom.hex'
+    `vxWorks' (with `vxWorks.sym')
+    `vxWorks.st'
+\te
+
+\sh BSP Bootloaders and Bootroms
+
+\ts
+Bootloader/Bootrom     | Status
+-------------------------------
+U-Boot (pre-flashed)   | SUPPORTED
+bootrom                | SUPPORTED
+bootrom_uncmp          | SUPPORTED
+bootrom_res            | UNSUPPORTED
+vxWorks                | SUPPORTED
+vxWorks_rom            | UNSUPPORTED
+vxWorks_romCompress    | SUPPORTED
+vxWorks_romResident    | UNSUPPORTED
+\te
+
+\sh BSP Validated Tools
+
+\ts
+Tool                          | Connection/Type   | Status
+----------------------------------------------------------
+Workbench Debugger            | ETHERNET/WDB      | SUPPORTED
+Workbench System Viewer       | ETHERNET/WDB      | SUPPORTED
+Workbench MemScope            | ETHERNET/WDB      | SUPPORTED
+Workbench ProfileScope        | ETHERNET/WDB      | SUPPORTED
+Workbench StethoScope         | ETHERNET/WDB      | SUPPORTED
+Workbench CoverageScope       | ETHERNET/WDB      | SUPPORTED
+Workbench Core File Analysis  | ETHERNET/WDB      | SUPPORTED
+Workbench Sensor Points       | ETHERNET/WDB      | SUPPORTED
+Workbench OCD Debugger        | JTAG              | UNSUPPORTED
+Workbench OCD Flash           | JTAG              | UNSUPPORTED
+\te
+
+\sh Known Issues
+
+The size of default vxWorks_rom images is grater than 1 MB, and thus will not
+fit in the default ROM_SIZE.  ROM_SIZE and the corresponding link addresses can
+be adjusted to make vxWorks_rom work, however it is an unsupported
+configuration.
+
+The PCIe physical link down issue may occur often and will cause the whole system
+hang forever. In this situation the ATX power for the 2-slot backplane should be
+checked and an existing workaround is to connect an extra Hard Disk Drive(HDD) to
+the ATX power to share the load.
+
+The FIT/WDT driver (in vxbPpc440Timer.c) is implemented using interrupts
+provided by FIT/WDT interrupt divider taps.  This means there are several rates
+available, in multiples of 16 apart. The lowest rate can be a number less than
+10 and, due to integer rounding error, may refer to an actual rate corresponding
+to nearly a full integer larger. So if FIT is used as the Auxiliary Clock, or
+WDT is used as the Watchdog Clock, the Validation Test Suite expects the
+Auxiliary Clock and Watchdog Clock to be able to reproduce arbitrary rates with
+an accuracy of 10%. It will log these results as errors, and they can be safely
+ignored.
+
+The LSI ACP3448 REV2 and LSI ACP3423 REV2 have a USB issue (33678) after reset, 
+which may keep the USB devices from being identified correctly.  The fix/workaround 
+is documented in defect record WIND00262536, which can be viewed on the Wind River 
+Online Support web site.
+
+When attempting to debug RTPs with INCLUDE_MMU_OPTIMIZE enabled, the
+target may reset or hang (WIND00277689). So this component and the related
+INCLUDE_PAGE_SIZE_OPTIMIZATION component are not included by default.
+
+SEE ALSO
+
+\tb VxWorks Kernel Programmer's Guide
+
+\tb VxWorks for PowerPC Architecture Supplement
+
+\tb Wind River Workbench User's Guide
+
+BIBLIOGRAPHY
+
+\tb Axxia Communication Processor ACP3448 Evaluation Kit User Guide
+
+\tb Axxia Communication Processor ACP3423 Evaluation Kit User Guide
+
+\tb Axxia Multicore Reference Manual
+
+\tb IBM PPC476 Embedded Processor User's Manual

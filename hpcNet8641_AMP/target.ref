@@ -1,0 +1,543 @@
+\" target.ref - HPC-NET target specific documentation
+\"
+\" Copyright (c) 2006-2009 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01l,01jun09,e_d  Fix program the flash command error.(WIND00139261)
+\" 01k,28jan09,kxb  Fix AMP documentation.
+\" 01j,05nov08,dcc  removed legacy AMP support.
+\" 01i,20oct08,d_l  add auxclk and timestamp in supported feature.
+\" 01h,14jul08,l_z  update IPNET native driver description
+\" 01g,08jul08,pmr  ULI PCI update
+\" 01f,21nov07,kk   added information regarding power management
+\" 01e,25may07,dtr  Modified dual core AMP build info.Rev 1.3 AMP/SMP switch.
+\" 01d,10feb07,dtr  Added PCI Express support. 
+\" 01c,05jan07,rlp  Updated the -Flashing the Boot ROM Image Using Workbench-
+\"		    section.
+\" 01b,26dec06,dtr  Added info for dual core config and Rev2 board.
+\" 01a,24feb06,dtr  Created from sp7447 bsp
+\"
+\TITLE HPCNET - Freescale HPC-NET
+
+NAME 
+`Freescale HPC-NET 8641D '
+
+INTRODUCTION
+
+This document describes the features of the HPC-NET reference host board
+with 8641D processor.
+
+The board supports some of the 8641D on-chip devices as well as a PCIexpress
+bridge to other peripherals.
+
+This BSP is early on in development and therefore only standard on-chip 
+devices are supported.
+ 
+\sh Bootrom
+
+The ROM device is an AMD AM29LV641D, or equivalent. It is addressed from 
+0xFF800000 to 0xFFFFFFFF 8MB.  It resides on the local bus.  
+
+\ml
+\m -
+
+Passwords
+\m -
+
+Boot record
+\m -
+
+Global environment parameters
+\m -
+
+Language data
+\me
+
+To load VxWorks, and for more information, follow the instructions in the
+\tb Wrokbench User's Guide: Getting Started. 
+
+\sh Jumpers and Switches
+
+The HPC-NET  allows flexible operating configuration based on the
+settings of jumpers and switches on the base board.
+Note that the meaning of a jumper position or switch setting changes
+from revision to revision of the base board.
+Refer to the HPC-NET System Documentation for correct interpretation of
+various configurations for the exact revisions of the board in focus.
+
+This configuration is for rev V1.0 of the argo navis board. 
+
+Quick config: 1-on 0-off
+\ts
+SW3 | SW6 | SW5
+00110000 | 10000111 | 11001101
+SW2 | SW4 |
+10101110 | 11110011 | 
+SW1 | SW8 | 
+01100001 | 11100110 | 
+\te
+\sh Jumpers:
+
+J14 pins 1-2 
+
+\sh Switch Details:
+\cs
+SW1(1-5) = corepll = 0110 == 2.5 == 1GHz
+SW1(6-8) = sysclk = 001 == 40Mhz
+SW2(1-4) = ccbpll = 1010 = 10x ssyclk == 400Mhz
+SW2(5-8) = bootloc = 1110 == 16-bit local bus
+SW3(1-7) = cfg vid = 0011000 == 1.2V
+SW3(8)   = vcc_plat = 0 == 1.2V
+SW7(1-2) = hostmode = 11 == bothports host/root
+SW7(3-4) = bootseq = 11 == no boot sequence
+SW7(5-8) = cfg ioport = 0011 == both PEX
+SW5(1)   = cfg flashmap = 1 == boot from flash
+SW5(2)   = cfg flashbank = 1 == normal
+SW5(3)   = flashwp = 0 == not protected
+SW5(4)   = portdiv = 0 == 2:1 PD4, 1:1 for PD6
+SW5(5-6) = cfg pixisopt = 11 == sw determined
+SW5(7-8) = cfg ladopt = 01 == sw detemined
+SW6(1)   = cfg cpuboot = 1 == no boot holdoff
+SW6(3-5) = cfg refclksel = 000 == 100Mhz
+SW6(6)   = serrom addr = 1
+SW6(7)   = memdebug = 1
+SW6(8)   = ddrdebug = 1
+SW8(1)   = acz sync = 1 == 48 Mhz on TP49 (don't care)
+SW8(2)   = acb sync = 1 == thernal trip disabled
+SW8(3)   = acz sdout = P4
+SW8(4)   = acb sdout = 1 PATA freq.== 133Mhz
+SW8(5)   = susled = 0 == southbridge mode
+SW8(6)   = spread = 0 == refclk sscg disabled
+SW8(7)   = ac pwr = 1 == no battery
+SW8(8)   = cfg idwp == 0 write enabled
+\ce
+
+This configuration is for rev V1.2 V1.3 of the argo navis board. 
+Note you can increase the clock speed if you CPU/board supports it.
+
+Quick config: 1-on 0-off
+\ts
+SW3 | SW6 | SW5
+01001001 | 11000111 | 11010101
+SW2 | SW7 |
+10001110 | 11110011 | 
+SW1 | SW8 | 
+01100010 | 11111010 | 
+\te
+\sh Jumpers:
+
+J14 pins 1-2 
+
+\sh Switch Details:
+\cs
+SW1(1-5) = corepll = 0110 == 2.5 == 1GHz
+SW1(6-8) = sysclk = 010 == 50Mhz 
+SW2(1-4) = ccbpll = 1000 = 8 x ssyclk == 400Mhz
+SW2(5-8) = bootloc = 1110 == 16-bit local bus
+SW3(1-7) = cfg vid = 0100100 
+SW3(8)   = vcc_plat = 1
+Sw7(1-2) = hostmode = 11 == bothports host/root
+SW7(3-4) = bootseq = 11 == no boot sequence
+SW7(5-8) = cfg ioport = 0011 == both PEX
+SW5(1)   = cfg flashmap = 1 == boot from flash
+SW5(2)   = cfg flashbank = 1
+SW5(3)   = flashwp = 0 
+SW5(4)   = portdiv = 1
+SW5(5-6) = cfg pixisopt = 01 (SMP/normal mode)
+SW5(5-6) = cfg pixisopt = 00 (Rev 1.3 board only AMP/low memory offset mode)
+SW5(7-8) = cfg ladopt = 01
+SW6(1)   = cfg cpuboot = 1 == no boot holdoff
+SW6(3-5) = cfg refclksel = 000 == 100Mhz
+SW6(6)   = serrom addr = 1
+SW6(7)   = memdebug = 1
+SW6(8)   = ddrdebug = 1
+SW8(1)   = acz sync = 1 == 48 Mhz on TP49 (don't care)
+SW8(2)   = acb sync = 1 == thernal trip disabled
+SW8(3)   = acz sdout = P4
+SW8(4)   = acb sdout = 1 PATA freq.== 133Mhz
+SW8(5)   = susled = 1
+SW8(6)   = spread = 0 == refclk sscg disabled
+SW8(7)   = ac pwr = 1 == no battery
+SW8(8)   = cfg idwp == 0 write enabled
+\ce
+
+IMPORTANT: rev1.3 board For AMP/low memory offset mode mode - SW5 pin6 needs 
+to be set to the off position. Prior revs need board modification for low 
+memory offset mode.
+
+\sh BOOT DEVICES
+The supported boot devices are:
+\cs
+	motetsec - 10/100/1000 Enhanced Triple Speed Ethernet Controller
+\ce
+
+FEATURES
+This section describes the supported and unsupported features of the hpcNet8641
+
+\sh Supported Features
+
+The supported features of the board are:
+\cs
+	DUAL CORE (Asynchronous MP)
+	MMU support
+	Cache support
+	L2 cache support
+	Decrementer timer, used to implement a system clock
+	MPC8641 DUART
+	on-chip 10/100/1000 TSEC 1/2/3/4
+	on-chip programmable interrupt controller
+	DDR1 SDRAM (up to 512 MB memory)
+	PEX controller
+	Flash (8 MB)
+	PCI slots on ULI Southbridge
+	OpenPic timer, used to implement a auxclk and timestamp clock.
+\ce
+
+\sh Unsupported Features
+
+The following devices are unsupported by this BSP:
+\cs
+	ULI Southbridge and all devices other than PCI slots.
+	DMA controller.
+	DDR2 - second controller not supported.
+	I2C controller - untested
+
+	Serial RapidIO.
+\ce
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Devices
+The chip drivers included are:
+
+\cs
+    sysEpic.c           - embedded interrupt controller driver
+    ppcDecTimer.c 	- PowerPC decrementer timer library (system clock)
+    altiVecLib.c        - AltiVec support
+    etsecHEnd.c 	- TSEC ethernet controller.
+    ns16550Sio.c 	- Serial driver.
+    geiHEnd.c           - GEI Intel 82573  
+\ce
+
+
+\sh Flashing the Boot ROM Image Using Workbench
+
+   This section describes how to program a VxWorks bootrom image onto 
+   a flash bank using Workbench 2.6 (or later) and the Wind River ICE 
+   plugin. Note that the Wind River Probe (USB) is also supported and 
+   uses the same basic instructions as the Wind River ICE but does not 
+   require an IP address.
+
+
+   Using Workbench, complete the following steps to flash your boot ROM image:
+          
+	a) Create a bootrom.hex image.
+
+	Create a VxWorks boot loader project based on the hpcNet8641 BSP.
+	You can use the default compressed image. However, use hex 
+	format in place of the elf format.
+	After the project is created, build the default image.
+ 
+	b) Install the WindRiver ICE and power it on.
+
+	Connect the JTAG interface cable from the Wind River ICE to the 
+	HPC-NET 8641 board JTAG connector (located on the CPU card). When all 
+	of the connections have been made, power up the HPC-NET 8641 board 
+	and create a Wind River ICE connection in Workbench.
+
+	c) Configure the Workbench connection.
+
+	When creating the connection, specify the board file with either
+	MPC8641D_Core_0.brd or MPC8641D_Dualcores.brd which are in the
+	PowerPC 86xx group.
+	Enter the IP address of the Wind River ICE when requested.
+
+	d) Load the proper hpcNet8641 register setting for WindRiver ICE.
+
+	Once you have connected the probe to the board, right-click on the 
+	U1_1 CPU core in the target manager and attach to it. At this point,
+	you can go to the main Workbench Window tab at the top of the view
+	and select "show view". Browse the view list and select OCD Command
+	Shell. This launches the original BKM command shell.
+	Right-click again on core (U1_1), select reset and download. You can
+	now put the register file for this BSP provided by the Workbench
+	installation in "play register file". The register file is either
+	HPCNet 8641D_Uboot.reg or HPCNet 8641D_Both_Cores.reg which are in
+	the PowerPC 86xx group. Select the Reset checkbox with the IN option
+	then click Apply followed by Debug. You have now loaded the target
+	board with enough settings to program the boot ROM. Select
+	"Window > show view" again and select Flash Programmer.
+	
+	e) Select the hpcNet8641 flash.
+
+	Select the configuration tab and choose the following device:
+	AMD -> 29LV64xDx -> 4096 x 16 -> 1 Device.
+
+	Set the base address of Flash Bank Addresses to 0xff800000.
+	Set the last address of Flash Bank Addresses to 0xffffffff.
+
+	Set the Start address of the RAM Workspace to 0x2000.
+	Set the size of the RAM Workspace to 20000.
+
+	Select programming tab.
+
+	f) Converting the bootrom.hex file to bootrom.bin.
+
+	Click "convert file" and navigate to the boot loader project you
+	created previously e.g. WindRiver\workspace\hpcNet8641Boot\bootrom.hex. 
+	Select the project. The start adress should be 0x0 and the end 
+	address should be set to 0xffffffff. Click "convert and add" to convert 
+	the file. At this point, the file is added to the list. Click on the
+	start address entry (should be 0x0) and change it to 0xfff00000. The
+	file is now ready for programming.
+
+
+	g) Program the hpcNet8641 flash.
+
+	Select the "Override erase sector selection" checkbox.
+	Set the Lower boundary Address to 0xfff00000.
+	Set the Upper boundary Address to 0xffffffff.
+
+	Click Erase/Program
+
+	Wait for the programmer to complete.
+	You can now run the VxWorks boot ROM by going back to the OCD command 
+	shell and typing "INN" followed by "GO". Alternatively, you can 
+	disconnect the ICE and proceed to Step 3 "Running the VxWorks Boot 
+	ROM Program".
+
+\sh Flashing the Boot ROM Image Using the on-board boot loader        
+   
+	The HPC-NET reference board is shipped with a
+	factory-programmed UBOOT boot loader capable of downloading a
+	Boot ROM image using its tftp client and programming it in the
+	alternate flash bank. A tftp server is required. In the following
+	instructions, the tftp server IP address is 128.224.146.96.
+
+	The following instructions describes all the steps that must
+	be performed. You are only required to type in the line following
+	the "=>" UBOOT prompt.
+	
+	a) set the target ip address.
+   
+	=> setenv ipaddr 128.224.147.196
+   
+	b) set the tftp server ip address
+   
+	=> setenv serverip 128.224.146.96
+   
+	Note: Additional environment changes may be required for
+	your network.
+   
+	c) save the environment
+   
+	=> saveenv
+
+	d) get the bootrom image from the tftp server and store
+	it in RAM at address 0x1000000.
+   
+	=> tftp 1000000 bootrom_uncmp.bin
+   
+	e) erase the alternate Flash bank
+   
+	=> erase ffb00000 ffbfffff
+   
+	f) program the flash at location 0xffb00000.
+   
+	=> cp.b 1000000 ffb00000 $filesize
+   
+	At this point, the Boot ROM image is programmed and is ready
+	to be used once these additional steps are complete.
+   
+	g) Turn off the target
+   
+	h) Toggle switch 5 position 2 to swap the flash banks
+   
+	i) If  you have not changed the any default baud rates, it is
+	necessary to change it as the Boot ROM defaults to 9600.
+
+	j) Turn on the target.
+   
+\sh Running the VxWorks Boot ROM Program
+
+	To run the VxWorks boot ROM program, complete the following steps:
+
+	a) If you have not already done so, disconnect the Wind River ICE.
+	Note that if the ICE remains connected, it can stop the processor at 
+	the first instruction in certain cases.
+
+	b) Connect the Ethernet and serial channels.
+	
+	i) Connect the serial port in the carrier card to the host 
+	using the supplied serial cable.
+	ii) Connect the RJ45 Ethernet cables to the TSEC ports which 
+	are next to the serial port. The top left next to/above serial is
+        TSEC1. 
+
+	c) Launch a terminal program on the host and configure as follows:
+
+	8 data bits
+	1 stop bit
+	no hardware handshaking 
+	parity disabled
+	baud rate = 9600 bps
+
+	d) Power cycle the board.
+
+	If the board is not already powered off, turn it off momentarily. 
+	Then, power the board on. At this point, you should see characters 
+	being printed to the terminal window signaling the boot countdown. 
+	Press any key to stop the count down. If not you should press reset 
+        button next to the power button and then wait for the boot prompt. 
+        You are now ready to configure VxWorks. For detailed instructions, 
+        see the VxWorks Kernel Programmer's Guide.
+
+The user configurable options are in config.h.
+
+\sh Boot Process
+
+The boot ROM for the hpcNet8641 allows you to load VxWorks with four ETSEC 
+Ethernet channels. In the boot dialog, these channels correspond to the 
+"motetsec0","motetsec1" etc devices. To switch between the boot devices 
+after a load is attempted, a hard reset or power cycle is necessary in order 
+for the device to function properly. After the reset, press a key to stop 
+the count down and use the "c" command to change the boot device to the 
+desired network device. 
+
+Note the ETSEC devices need to have stored a valid MAC address.
+To configure the MAC address of the ETSEC devices you must use the M command:
+
+\cs
+[VxWorks Boot]: M
+Set device MAC address
+
+  0  quit
+  1  motetsec0  00:a0:1e:92:31:31
+  2  motetsec1  00:a0:1e:93:31:31
+  3  motetsec2  00:a0:1e:94:31:31
+  4  motetsec3  00:a0:1e:95:31:31
+  Selection : 1
+Mac address for motetsec0 invalid. Using a reproducible random address.
+motetsec0 current Ethernet Address is: 00:a0:1e:92:31:31
+Modify only the last 3 bytes (board unique portion) of Ethernet Address.
+The first 3 bytes are fixed at manufacturer's default address block.
+00- 00
+a0- a0
+1e- 1e
+92- 
+31- 
+31- 
+
+Address unchanged
+New Ethernet Address is: 00:a0:1e:92:31:31
+[VxWorks Boot]: 
+
+\ce
+
+The hpcNet8641 boot ROM also supports loading VxWorks using the Intel 82573
+gigabit Ethernet controller. An Intel 82573-based PEX NIC can be plugged into 
+an empty PCIEX slot. The config.h must be modified to define.
+INCLUDE_GEI825XX_VXB_END. Then, you will need to rebuild the boot ROM with
+the above chamges in config.h. At this point, you can re-flash the boot ROM
+to flash memory. The boot device for Intel 8254X gigabit controllers is "gei".
+
+\sh Boot Methods
+
+The network support available for booting includes:
+ftp, tftp, and rsh.
+
+\sh AMP with wrload and MIPC
+
+You must use the Workbench or vxprj to build the BSPs.
+You can build any AMP image for either core0 or core 1 from the 
+hpcNet8641_AMP BSP, but each image must be configured manually 
+with the appropriate components.
+
+The image for core 0 must be configured with
+BUNDLE_AMP_PRI (Primary core bundle) which adds all required MultiOS components, including wrload, MIPC and MSD (MIPC Serial Device), and the optional but very useful WDB proxy.
+
+The image for core 1 must be configured with 
+BUNDLE_AMP_SEC (Secondary core bundle), which adds 
+all required secondary core MultiOS components, including MIPC and MSD 
+(configured as client), 
+and INCLUDE_WRLOAD_IMAGE_BUILD, which provides the correct image offset for wrload.  
+Additionally, the secondary core must be configured with INCLUDE_AMP_CPU_01
+(Kernel configurations: hardware -> BSP configuration variants -> vxWorks AMP core build).
+
+For core1 you can build a RAM based image (vxWorks) and it is configured 
+to be loaded using wrload and to route the console to core0. 
+See documentation on MIPC/wrload and MIPC Serial Device for details. 
+
+When in AMP mode, the ETSEC interfaces can be allocated to either core.
+The default configuration assigns motetsec0 and motetsec1 to the first
+core and motetsec2 and motetsec3 to the second. This configuration can
+be changed by editing the hwconf.c file and changing the "coreNum"
+and "physMask" properties in the ETSEC resource entries. When operating
+in UP or SMP mode, all 4 ETSEC interfaces are available together.
+
+Note that while there are 4 separate ETSEC controllers, only the MDIO
+registers on ETSEC0 are actually functional, and all 4 ethernet PHYs
+are wired to this port. In AMP mode, the TSEC_MDIO driver must be used
+in conjunction with the ETSEC driver to access the MDIO registers: the
+TSEC_MDIO driver includes an inter-core synchronization mechanism to
+prevent both cores from touching the MDIO registers at the same time.
+
+\sh ROM Considerations
+
+
+\sh ROM Programs
+
+\ml
+\m -
+
+bootrom.hex
+\m -
+
+bootrom_uncmp.hex
+\m -
+
+vxWorks.st_rom.hex
+\me
+
+\sh Network Configuration
+
+The ETSEC ports allows 10/100/1000T connection.
+The driver will auto-negotiate and configure the port accordingly.
+
+The following END and corresponding END2 drivers are supported in this BSP.
+However, only END driver is enabled by default.
+
+\ts
+Driver | END                      | END2
+----------------------------------------
+TSEC   | INCLUDE_ETSEC_VXB_END    | INCLUDE_ETSEC_VXB_END2
+\te
+
+To enable the END2 driver, you should modify as follows:
+
+For command line build, add INCLUDE_END2 into config.h right after the
+definition of INCLUDE_END. Also replace the END driver name with corresponding
+END2 driver name, then rebuild the bootrom and vxWorks image.
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, add INCLUDE_END2 component and corresponding END2
+component, this will un-define END automatically. Then rebuild your project.
+
+SPECIAL CONSIDERATIONS
+
+\sh Known Problems
+
+On VxWorks 6.6, with power management (INCLUDE_CPU_PWR_MGMT and 
+INCLUDE_CPU_LIGHT_PWR_MGR components) configured, i.e. NAP mode enabled, 
+and heavy interrupt rates, potential board lock-ups have been encountered 
+on this board.  For more information regarding the issues and workarounds, 
+please refer to the VxWorks 6.6 Release Notes and defect WIND00104713 (SMP) 
+and defect WIND00111630 (UP).

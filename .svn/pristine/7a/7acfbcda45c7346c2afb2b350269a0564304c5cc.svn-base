@@ -1,0 +1,3 @@
+#ifdef INCLUDE_GEI825XX_VXB_END
+    geiRegister();
+#endif

@@ -1,0 +1,3 @@
+#ifdef INCLUDE_RAPIDIO_BUS
+IMPORT STATUS rapidIoRegister (void);
+#endif /* INCLUDE_RAPIDIO_BUS */

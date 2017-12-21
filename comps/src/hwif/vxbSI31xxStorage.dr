@@ -1,0 +1,4 @@
+#ifdef DRV_STORAGE_SI31XX
+    vxbSI31xxStorageRegister ();
+#endif
+

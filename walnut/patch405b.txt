@@ -1,0 +1,294 @@
+
+
+The patch405b utility is used to work around PPC405GP Rev B (PVR=0x40110040)
+(also known as Pass 2) errata items #14 and #16.
+
+History:
+
+     Version 2.01   02/15/00    Ported from 405GP pass1 patch tool
+     Version 2.04   03/03/00    Added more data-in-text patterns, -r,
+                                  -exclude=
+
+
+Syntax:
+
+     patch405b  input_file [-p] [-r] [-exclude=0xab] [-v]
+
+   Where:
+     input_file is a PowerPC EABI ELF executable file or a
+        PowerPC XCOFF executable file.
+
+     -p controls patching of data which appears inside text sections. See
+        the file patch405b_data.txt for more details.
+
+     -r is for code linked at one address but which runs at another address.
+        ELF file format only. patch405b searches the ELF program headers
+        for information on how to map the code from the address it was
+        linked at to the address it will be executed from.
+
+     -exclude=0xab specifies that text sections which are located at 
+        addresses whose 8 most significant address bits match
+        the 0xab parameter are excluded from being patched. 'ab' are 
+        any 2 hex digits. Useful when text sections are more than 
+        32M apart, so only one of them can use the patch table.
+
+     -v is the verbose option. It is most useful when a patch table
+        is not present, or is too small, in the executable file. It will
+        print out a list of addresses which would be patched if a suitable
+        size patch table were present.
+
+     A PowerPC EABI ELF executable is created by the linker of most
+     PowerPC embedded tool suites. A PowerPC XCOFF executable is created by the
+     IBM AIX linker (ld). The patch405b utility modifies input_file and also
+     creates an ASCII file in the same directory called patch405b.out which 
+     contains detailed information about the modifications made to input_file.
+     The size and format of input_file are not changed by patch405b.
+
+
+Function:
+
+     patch405b scans the .text sections of input_file looking for
+     the situations described in 405GP errata items #14 and #16.
+     If a one if the situations is found, patch405b uses a patch table
+     that is reserved in the executable at link time to modify the
+     the instruction stream to circumvent potential hardware problems.
+     Patches for errata #16 and the main situation of errata #14
+     each require 12 bytes (3 instructions) of the patch table, 
+     and patches for the secondary situation of errata #14 (rfi and rfci
+     instructions) each take 8 bytes (2 instructions).
+
+     For errata #14 patch405b does the following:
+
+          1) Inserts the appropriate nop instruction in the first
+             available 4 byte location in the patch table.
+
+          2) Copies the shift or rotate instruction
+             to the following location in the patch table.
+
+          3) Replaces the shift or rotate instruction at its original location
+             with a relative branch instruction (b) to the nop just
+             placed in the patch table.
+
+          4) Places a relative branch instruction immediately following the
+             copied instruction in the patch table.  This branch will
+             cause the processor to return to the normal flow of execution.
+
+          An example is shown below.  Note that no registers are modified by the
+          instructions that are inserted into the flow of execution by patch405b
+          Errata item #14 is avoided because there is a nop instruction 
+          immediately before the shift or rotate instruction.
+
+          An example:
+
+          BEFORE
+
+                 slw  r3, r4, r5
+                 addi r7, r7, 0x10
+
+          AFTER
+
+                 b  patch_entry  --------->  patch_entry:  or  r5,r5,r5
+          back:  addi r7, r7, 0x10                         slw r3,r4,r5
+            A--------------------------------------------  b  back
+
+
+    patch405b will also patch any rfi or rfci instruction to ensure
+    it has a sync instruction before it. To do this, patch405b does:
+
+          1) Inserts the sync instruction in the first
+             available 4 byte location in the patch table.
+
+          2) Copies the rfi or rfci instruction
+             to the following location in the patch table.
+
+          3) Replaces the rfi or rfci instruction at its original location
+             with a relative branch instruction (b) to the sync just
+             placed in the patch table.
+
+          4) Replacement is complete. No branch back to the original
+             flow of execution is needed, as the execution does not
+             continue sequentially after the rfi/rfci.
+
+          An example:
+
+          BEFORE
+
+                 rfi
+
+          AFTER
+
+                 b  patch_entry  --------->  patch_entry:  sync
+                                                           rfi
+
+
+          The following is the list of instructions that patch405b searches for
+          in the text section.  If any of the instructions appear
+          patch405b will make a modification similar to above. The variations
+          of the instructions ending with "." (with bit 31, rc, set) are
+          also detected.
+
+
+                                PRIMARY   EXTENDED
+            INSTRUCTION         OPCODE     OPCODE
+
+            rlwnm RA,RS,RB,MB,ME  23
+            slw   RA,RS,RB        31         24
+            sraw  RA,RS,RB        31        792
+            srw   RA,RS,RB        31        536
+            rfi                   19         50
+            rfci                  19         51
+
+
+            Opcodes above are decimal.  The primary opcode occupies bits 0:5
+            of the instruction, and the extended opcode occupies bits 21:30
+            in the indexed form of the instructions.
+
+
+     For errata #16 patch405b does the following:
+
+          1) Copies the load, store or cache operation instruction to the
+             first available 4 byte location in the patch table.
+
+          2) Replaces the load/store/cache op at its original location with 
+             a branch instruction (b) to the copy of itself just placed in the
+             patch table.
+
+          3) Places a branch instruction immediately following the
+             copied instruction in the patch table.  This branch will
+             cause the processor to return to the normal flow of execution.
+
+          4) Places a nop instructions immediately following the branch 
+             instruction in the patch table.
+
+          An example:
+
+          BEFORE
+
+                 lwz  r3,8(r5)
+                 bl   func1   
+                 b    label2      
+
+          AFTER
+
+                 b  patch_entry  --------->  patch_entry:  lwz r3,8(r5) 
+          back:  bl func1           <--------------------  b    back
+                 b  label2                                 nop
+
+          The following is the list of storage instructions that patch405b
+          searches for in the text section to correct errata #16.
+
+
+                              PRIMARY   EXTENDED
+            INSTRUCTION       OPCODE     OPCODE
+
+            lbz    RT,D(RA)     34           
+            lbzu   RT,D(RA)	35	     
+            lbzux  RT,RA,RB	31	  119
+            lbzx   RT,RA,RB	31	   87
+            lha    RT,D(RA)	42	     
+            lhau   RT,D(RA)	43	     
+            lhaux  RT,RA,RB	31	  375
+            lhax   RT,RA,RB	31	  343
+            lhbrx  RT,RA,RB	31	  790
+            lhz    RT,D(RA)	40	     
+            lhzu   RT,D(RA)	41	     
+            lhzux  RT,RA,RB	31	  311
+            lhzx   RT,RA,RB	31	  279
+            lmw    RT,D(RA)	46	     
+            lswi   RT,RA,NB	31	  597
+            lswx   RT,RA,RB	31	  533
+            lwarx  RT,RA,RB	31	   20
+            lwbrx  RT,RA,RB	31	  534
+            lwz    RT,D(RA)	32	     
+            lwzu   RT,D(RA)	33	     
+            lwzux  RT,RA,RB	31	   55
+            lwzx   RT,RA,RB	31	   23
+            stb    RS,D(RA)	38	     
+            stbu   RS,D(RA)	39	     
+            stbux  RS,RA,RB	31	  247
+            stbx   RS,RA,RB	31	  215
+            sth    RS,D(RA)	44	     
+            sthbrx RS,RA,RB	31	  918
+            sthu   RS,D(RA)	45	     
+            sthux  RS,RA,RB	31	  439
+            sthx   RS,RA,RB	31	  407
+            stmw   RS,D(RA)	47	     
+            stswi  RS,RA,NB	31	  725
+            stswx  RS,RA,RB	31	  661
+            stw    RS,D(RA)	36	     
+            stwbrx RS,RA,RB	31	  662
+            stwcx. RS,RA,RB	31	  150
+            stwu   RS,D(RA)	37	     
+            stwux  RS,RA,RB	31	  183
+            stwx   RS,RA,RB	31	  151
+            dcba   RA,RB   	31	  758
+            dcbf   RA,RB   	31	   86
+            dcbi   RA,RB   	31	  470
+            dcbst  RA,RB   	31	   54
+            dcbt   RA,RB   	31	  278
+            dcbtst RA,RB   	31	  246
+            dcbz   RA,RB   	31	 1014
+            dccci  RA,RB   	31	  454
+            dcread RA,RB   	31	  486
+            icbi   RA,RB   	31	  982
+            icbt   RA,RB   	31	  262
+            iccci  RA,RB   	31	  966
+            icread RA,RB   	31	  998
+
+	    
+            Opcodes above are decimal.  The primary opcode occupies bits 0:5
+            of the instruction, and the extended opcode occupies bits 21:30.
+	    
+
+Limitations:
+
+     1) Due to the limitation of the branch relative instruction, 
+        the patch table must reside within 32MB of all instructions 
+	which are patched.
+
+     2) A compiler may insert data into the text section such as a branch table.
+        If a word of the data happens to have the same appearance
+        as one of the instructions which will be patched, it will be modified
+        by patch405b. If you suspect this may have happened, use the 
+        patch405b.out file and a linker map file.
+        Also, be aware that some linkers will create a small data area section
+        with the same attributes as a text section.
+
+        A compiler may place other data, such as constants, in the text 
+        section, which will increase the likelihood of this problem. 
+        Therefore, use compiler options to eliminate this possibility.
+        For the Diab compiler, use option:
+
+                      -Xconst_in_text=0
+
+To Use:
+
+     In order to make space for the patch table in the text section,
+     an assembler file patchtblb.s is provided with patch405b.  Each patch
+     entry requires 12 bytes (errata #16 and shift/rotate patches for 
+     errata #14) or 8 bytes (rfi's for errata #14) of
+     space.  patchtblb.s must be assembled and linked together with the
+     application code to create input_file before patch405b is run.
+
+     1) Compile and assemble application code.
+     2) Assemble patchtblb.s
+     3) Link application plus patchtblb.o to create input_file
+     4) Run "patch405b input_file"
+     5) If patch405b displays a message about not finding enough space in
+        patchtblb to hold all necessary load/store with update instruction pair
+        modifications:
+           a) Increase the value of the constant "PATCH_ENTRIES" patchtblb.s
+              to a number at least as large as the number of entries specified
+              by patch405b.
+           b) Go back to step 2.
+
+
+Source Level Debug:
+
+     Use of patch405b impacts RISCWatch C source level line step.  When a 
+     patched instuction is encountered, it will appear to the debugger that 
+     there was an unexpected branch to function "patchtblb".  Simply press 
+     the assembly step button twice to return the program to the original 
+     C context.
+
+

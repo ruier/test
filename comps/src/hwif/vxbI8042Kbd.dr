@@ -1,0 +1,3 @@
+#ifdef DRV_KBD_I8042
+    i8042vxbRegister ();
+#endif /* DRV_KBD_I8042 */

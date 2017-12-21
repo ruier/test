@@ -1,0 +1,4 @@
+#ifdef DRV_TIMER_IA_TIMESTAMP
+extern void vxbIaTimestampDrvRegister(void);
+#endif
+

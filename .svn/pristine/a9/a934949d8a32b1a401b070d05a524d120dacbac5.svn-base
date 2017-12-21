@@ -1,0 +1,3 @@
+#ifdef INCLUDE_DRV_STORAGE_AHCI
+    vxbAhciStorageRegister ();
+#endif /* INCLUDE_DRV_STORAGE_AHCI */

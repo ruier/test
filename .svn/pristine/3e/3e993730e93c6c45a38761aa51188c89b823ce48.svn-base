@@ -1,0 +1,3 @@
+#ifdef INCLUDE_SPI4000_PHY
+    spi4000PhyRegister();
+#endif

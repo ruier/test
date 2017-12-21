@@ -1,0 +1,476 @@
+ 405 Patch tool utility                         Version 3.05, 28 April 2000
+ ----------------------                         ---------------------------
+
+The patch405c utility is used to work around PPC405GP Rev C (PVR=0x40110082)
+errata items:
+       #36, case 1
+       #41
+       #42
+       #43
+
+Errata #36, case 1, is not patched by default and must be enabled 
+with the -mmu flag.
+
+History:
+
+     Version 3.00   03/23/00    Ported from 405GP rev B patch tool
+     Version 3.03   03/30/00    Add errata #41
+     Version 3.04   04/07/00    Add errata #42
+     Version 3.05   04/27/00    Add errata #43
+
+
+Syntax:
+
+     patch405c  input_file [-r] [-p] [-exclude=0xab] 
+                           [-exrange=0x1234-0xabcd] [-v]
+
+   Where:
+     input_file is a PowerPC EABI ELF executable file or a
+        PowerPC XCOFF executable file.
+
+     -mmu specifies that errata which only affect MMU operation will be
+        patched. If you use the MMU, specify this flag.
+
+     -p controls patching of data which appears inside text sections. See
+        the file patch405c_data.txt for more details.
+
+     -r is for code linked at one address but which runs at another address.
+        ELF file format only. patch405c searches the ELF program headers
+        for information on how to map the code from the address it was
+        linked at to the address it will be executed from.
+
+     -exclude=0xab specifies that text sections which are located at 
+        addresses whose 8 most significant address bits match
+        the 0xab parameter are excluded from being patched. 'ab' are 
+        any 2 hex digits. Useful when text sections are more than 
+        32M apart, so only one of them can use the patch table.
+
+     -exrange=0x1234-0xabcd where 0x1234 and 0xabcd are any hex addresses,
+        specifies that any code in the specified range is excluded
+        from being patched
+
+     -v is the verbose option. It is most useful when a patch table
+        is not present, or is too small, in the executable file. It will
+        print out a list of addresses which would be patched if a suitable
+        size patch table were present.
+
+     A PowerPC EABI ELF executable is created by the linker of most
+     PowerPC embedded tool suites. A PowerPC XCOFF executable is created by the
+     IBM AIX linker (ld). The patch405c utility modifies input_file and also
+     creates an ASCII file in the same directory called patch405c.out which 
+     contains detailed information about the modifications made to input_file.
+     The size and format of input_file are not changed by patch405c.
+
+
+Function:
+
+     patch405c scans the .text sections of input_file looking for
+     the situations described in 405GP errata items listed above.
+     If one of the situations is found, patch405c uses a patch table
+     that is reserved in the executable at link time to modify the
+     instruction stream to circumvent potential hardware problems.
+     Patches for errata #36 require 64 bytes (16 instructions) of the 
+     patch table. 
+     Patches for errata #41 require no space in the patch table. 
+     Patches for errata #42 require 8 bytes (2 instructions).
+     Patches for errata #43 require 12 bytes (3 instructions).
+
+
+     For errata #36, case 1, patch405c will patch any rfi or rfci 
+     instruction to ensure there is no executable code in the 
+     15 words following it.  Patching for this errata is only done
+     when enabled by using the -mmu flag. To perform the patching,
+     patch405c does the following:
+
+          1) Copies the rfi or rfci instruction to the 
+             first available 4 byte location in the patch table.
+
+          2) Replaces the rfi or rfci instruction at its original location
+             with a relative branch instruction (b) to the instruction
+             just placed in the patch table.
+
+          3) Fills the following 15 words in the patch table with
+             0's (non-executable).
+
+          4) Replacement is complete. No branch back to the original
+             flow of execution is needed, as the execution does not
+             continue sequentially after the rfi/rfci.
+
+          An example:
+
+          BEFORE
+
+                 rfi
+
+          AFTER
+
+                 b  patch_entry  --------->  patch_entry:  rfi
+                                                           0x0
+                                                           0x0
+                                                           0x0
+                                                           0x0
+                                                           0x0
+                                                           0x0
+                                                           0x0
+                                                           0x0
+                                                           0x0
+                                                           0x0
+                                                           0x0
+                                                           0x0
+                                                           0x0
+                                                           0x0
+                                                           0x0
+
+          The following is the list of instructions that patch405c searches for
+          in the text section.  If any of the instructions appear
+          patch405c will make a modification similar to above.
+
+                                PRIMARY   EXTENDED
+            INSTRUCTION         OPCODE     OPCODE
+
+            rfi                   19         50
+            rfci                  19         51
+
+
+            Opcodes above are decimal.  The primary opcode occupies bits 0:5
+            of the instruction, and the extended opcode occupies bits 21:30.
+
+
+     For errata #41, patch405c will patch any conditional bcctr or
+     bclr instruction which has its BO[4] bit set, and which
+     follows a CR-updating instruction.  The BO[4] bit is the
+     Prediction Reversal Bit, also known as the y bit.
+     To do this, patch405c does:
+
+          1) Replaces the bcctr or bclr instruction with a  
+             version which is identical except that BO[4] bit 
+             is set to 0.
+
+          An example:
+
+          BEFORE
+
+                 add.    r4,r5,r6         ! Instruction sets CR
+                 beqctr+                  ! Branch has BO[4] bit set
+
+          AFTER
+
+                 add.    r4,r5,r6         ! Instruction sets CR
+                 beqctr                   ! Branch has BO[4] bit cleared
+
+          The following is the list of instructions that patch405c searches for
+          in the text section.  If any of the instructions appear
+          patch405c will make a modification similar to above.
+
+                                PRIMARY   EXTENDED
+            INSTRUCTION         OPCODE     OPCODE
+
+            bcctr+                19        528
+            bclr+                 19         16
+
+            Note that these instructions have many extended mnemonics.
+            Opcodes above are decimal.  The primary opcode occupies bits 0:5
+            of the instruction, and the extended opcode occupies bits 21:30.
+            The plus sign (+) in the mnemonic indicates that the Prediction
+            Reversal Bit, BO[4], is set. The BO[4] bit is bit 10.
+
+          CR-updating instructions are all instruction mnemonics which 
+          end with a period (.), plus the following instructions:
+
+                                PRIMARY   EXTENDED
+            INSTRUCTION         OPCODE     OPCODE
+
+            cmp                   31          0
+            cmpi                  11	        
+            cmpl                  31         32
+            cmpli                 10	        
+            crand                 19        257
+            crandc                19        129
+            creqv                 19        289
+            crnand                19        225
+            crnor                 19         33
+            cror                  19        449
+            crorc                 19        417
+            crxor                 19        193
+            mcrf                  19          0
+            mcrxr                 31        512
+            mtcrf                 31        144
+      
+
+     For errata #42 patch405c does the following:
+
+          1) Copies the second multiply instruction
+             to the first available location in the patch table.
+
+          2) Replaces the multiply instruction at its original location
+             with a relative branch instruction (b) to the instruction just
+             placed in the patch table.
+
+          3) Places a relative branch instruction immediately following the
+             copied instruction in the patch table.  This branch will
+             cause the processor to return to the normal flow of execution.
+
+          An example is shown below.  
+
+          BEFORE
+
+                 mulhw. r3,r4,r5
+                 mulli  r6,r7,r8
+                 bne    target    
+
+          AFTER
+
+                 mulhw. r3,r4,r5
+                 b  patch_entry  --------->  patch_entry:  mulli  r6,r7,r8
+          back:  bne    target                             b  back      
+            A----------------------------------------------|
+
+          The following is the list of instructions that patch405c searches for
+          in the text section.  If any of the instructions appear
+          patch405c will make a modification similar to above.
+
+          The first instruction must be any of the following instructions,
+          with bit 31 (RC) set - that is, the instruction mnemonic ends
+          with a period (.).
+
+                                PRIMARY   EXTENDED
+            INSTRUCTION         OPCODE     OPCODE
+
+            multiply/mac.          4        (any)
+            mulhwu.               31         11
+            mulhw.                31         75
+            mullw.                31        235
+
+          The second instruction must be any of the following instructions,
+          without bit 31 (RC) set - that is, the instruction mnemonic does
+          not end with a period (.).
+
+                                PRIMARY   EXTENDED
+            INSTRUCTION         OPCODE     OPCODE
+
+            multiply/mac           4        (any)
+            mulhwu                31         11
+            mulhw                 31         75
+            mullw                 31        235
+            mulli                  7
+
+          The second instruction must be any of the following instructions,
+          which are dependant on the condition register, that is BO[0]=0.
+          BO[0] is bit 6 in the instruction.
+
+                                PRIMARY   EXTENDED
+            INSTRUCTION         OPCODE     OPCODE
+
+            bc                    16
+            bcctr                 19        528
+            bclr                  19         16
+
+            Opcodes above are decimal.  The primary opcode occupies bits 0:5
+            of the instruction, and the extended opcode occupies bits 21:30.
+
+
+     For errata #43 patch405c does the following:
+
+          1) Places a sync instruction in the first available location 
+             in the patch table.
+
+          2) Copies the load/store word/halfword with update instruction
+             to the patch table, following the sync.
+
+          3) Replaces the instruction at its original location
+             with a relative branch instruction (b) to the sync just
+             placed in the patch table.
+
+          4) Places a relative branch instruction immediately following the
+             copied instruction in the patch table.  This branch will
+             cause the processor to return to the normal flow of execution.
+
+          An example is shown below.  
+
+          BEFORE
+
+                 stwux  r3,r4,r5
+                 next instruction
+
+          AFTER
+
+                 b  patch_entry  --------->  patch_entry:  sync           
+          back:  next instruction                          stwux  r3,r4,r5
+            A                                              b  back      
+            |----------------------------------------------|
+
+          The following is the list of instructions that patch405c searches for
+          in the text section.  If any of the instructions appear
+          patch405c will make a modification similar to above. There are
+          3 possibles cases that will be patched.
+
+          CASE 1:
+          The instruction must be any of the following instructions,
+
+                                PRIMARY   EXTENDED
+            INSTRUCTION         OPCODE     OPCODE
+
+            sthu   RS,D(RA)	45	     
+            sthux  RS,RA,RB	31	  439
+            stwu   RS,D(RA)	37	     
+            stwux  RS,RA,RB	31	  183
+
+          CASE 2:
+          The first instruction must be a store instruction, immediately
+          followed by a load word/halfword with update instruction. 
+
+          Store instructions:
+
+                                PRIMARY   EXTENDED
+            INSTRUCTION         OPCODE     OPCODE
+
+            stb    RS,D(RA)	38	     
+            stbu   RS,D(RA)	39	     
+            stbux  RS,RA,RB	31	  247
+            stbx   RS,RA,RB	31	  215
+            sth    RS,D(RA)	44	     
+            sthbrx RS,RA,RB	31	  918
+            sthu   RS,D(RA)	45	     
+            sthux  RS,RA,RB	31	  439
+            sthx   RS,RA,RB	31	  407
+            stmw   RS,D(RA)	47	     
+            stswi  RS,RA,NB	31	  725
+            stswx  RS,RA,RB	31	  661
+            stw    RS,D(RA)	36	     
+            stwbrx RS,RA,RB	31	  662
+            stwcx. RS,RA,RB	31	  150
+            stwu   RS,D(RA)	37	     
+            stwux  RS,RA,RB	31	  183
+            stwx   RS,RA,RB	31	  151
+
+          Load word/halfword with update instructions:
+
+                                PRIMARY   EXTENDED
+            INSTRUCTION         OPCODE     OPCODE
+
+            lhau   RT,D(RA)	43	     
+            lhaux  RT,RA,RB	31	  375
+            lhzu   RT,D(RA)	41	     
+            lhzux  RT,RA,RB	31	  311
+            lwzu   RT,D(RA)	33	     
+            lwzux  RT,RA,RB	31	   55
+
+          CASE 3:
+          The first instruction must be a store instruction (see above),
+          immediately followed by an instruction which is NOT on the 
+          following list, which is itself then followed by a load  
+          word/halfword with update instruction (see above). 
+
+          Example:
+             stw    r5,0(r6)        ! Store instruction
+             ori    r7,r8,r9        ! Instruction not on the following list
+             lhzu   r10,0(r11)      ! load halfword with update
+
+          Second instruction in the sequence for CASE 3 is NOT one of
+          the following:
+
+                                PRIMARY   EXTENDED
+            INSTRUCTION         OPCODE     OPCODE
+
+            lbz    RT,D(RA)     34          
+            lbzu   RT,D(RA)     35	      
+            lbzux  RT,RA,RB     31         119
+            lbzx   RT,RA,RB     31          87
+            lha    RT,D(RA)     42	      
+            lhax   RT,RA,RB     31         343
+            lhbrx  RT,RA,RB     31         790
+            lhz    RT,D(RA)     40	      
+            lhzx   RT,RA,RB     31         279
+            lmw    RT,D(RA)	46	      
+            lswi   RT,RA,NB     31         597
+            lswx   RT,RA,RB     31         533
+            lwarx  RT,RA,RB     31          20
+            lwbrx  RT,RA,RB     31         534
+            lwz    RT,D(RA)     32	      
+            lwzx   RT,RA,RB     31          23
+            stb    RS,D(RA)     38	      
+            stbu   RS,D(RA)     39	      
+            stbux  RS,RA,RB     31         247
+            stbx   RS,RA,RB     31         215
+            sth    RS,D(RA)     44            
+            sthbrx RS,RA,RB     31         918
+            sthx   RS,RA,RB     31         407
+            stmw   RS,D(RA)     47            
+            stswi  RS,RA,NB     31         725
+            stswx  RS,RA,RB     31         661
+            stw    RS,D(RA)     36            
+            stwbrx RS,RA,RB     31         662
+            stwcx. RS,RA,RB     31         150
+            stwx   RS,RA,RB     31         151
+            b      target       18            
+            bcctr  BO,BI        19         528
+            bclr   BO,BI        19          16
+            sc                  17           1
+            rfi                 19          50
+            rfci                19          51
+            any MAC instruction  4            
+            mulhwu RT,RA,RB     31          11
+            mulhw  RT,RA,RB     31          75
+            mullw  RT,RA,RB     31         235
+            mulli  RT,RA,IM      7          
+            tw     TO,RA,RB     31           4
+            twi    TO,RA,IM      3            
+            divw   RT,RA,RB     31         491
+            divwu  RT,RA,RB     31         459
+            tlbia               31         370
+            tlbre  RT,RA,WS     31         946
+            tlbsx  RT,RA,RB     31         914
+            tlbsync             31         566
+            tlbwe  RS,RA,WS     31         978
+
+
+Limitations:
+
+     1) Due to the limitation of the branch relative instruction, 
+        the patch table must reside within 32MB of all instructions 
+	which are patched using the patch table.
+
+     2) A compiler may insert data into the text section such as a branch table.
+        If a word of the data happens to have the same appearance
+        as one of the instructions which will be patched, it will be modified
+        by patch405c. If you suspect this may have happened, use the 
+        patch405c.out file and a linker map file.
+        Also, be aware that some linkers will create a small data area section
+        with the same attributes as a text section.
+
+        A compiler may place other data, such as constants, in the text 
+        section, which will increase the likelihood of this problem. 
+        Therefore, use compiler options to eliminate this possibility.
+        For the Diab compiler, use option:
+
+                      -Xconst_in_text=0
+
+To Use:
+
+     In order to make space for the patch table in the text section,
+     an assembler file patchtblc.s is provided with patch405c.  Each patch
+     entry requires 64 bytes.
+     patchtblc.s must be assembled and linked together with the
+     application code to create input_file before patch405c is run.
+
+     1) Compile and assemble application code.
+     2) Assemble patchtblc.s
+     3) Link application plus patchtblc.o to create input_file
+     4) Run "patch405c input_file"
+     5) If patch405c displays a message about not finding enough space in
+        patchtblc to hold all necessary modifications:
+           a) Increase the value of the constant "PATCH_ENTRIES" patchtblc.s
+              to a number at least as large as the number of entries specified
+              by patch405c.
+           b) Go back to step 2.
+
+
+Source Level Debug:
+
+     Use of patch405c impacts RISCWatch C source level line step.  When a 
+     patched instuction is encountered, it will appear to the debugger that 
+     there was an unexpected branch to function "patchtblc".  Simply press 
+     the assembly step button twice to return the program to the original 
+     C context.
+
+

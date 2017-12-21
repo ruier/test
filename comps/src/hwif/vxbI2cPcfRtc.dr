@@ -1,0 +1,3 @@
+#ifdef DRV_I2C_PCFRTC
+    vxbI2cPcfRtcRegister ();
+#endif /* DRV_I2C_PCFRTC*/

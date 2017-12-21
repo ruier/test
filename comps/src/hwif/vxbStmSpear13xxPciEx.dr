@@ -1,0 +1,3 @@
+#ifdef DRV_PCIBUS_SPEAR13XX_EX
+    spear13xxPcieRegister ();
+#endif /* DRV_PCIBUS_SPEAR13XX_EX */

@@ -1,0 +1,567 @@
+\" Lite5200B/target.ref - Freescale Lite5200B target specific documentation
+\"
+\" Copyright (c) 2007-2009, 2013 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01h,27apr13,ylu  Detail how to add a pci network card.(WIND00414307)
+\" 01g,26apr13,ylu  Unsupport bootrom_res_high.(WIND00414310)
+\" 01f,05apr13,ylu  Added description about using TrueFFS on a new flash 
+                    for the first time and added description of the 
+                    known compatibility issue.
+\" 01e,25jun09,z_l  Added description of SDA issue for BestComm library.
+                    (WIND00156789)
+\" 01d,21aug08,d_l  remove ENET_DEFAULT description.(WIND00121398)
+\" 01c,16apr08,b_m  remove legacy driver descriptions.
+\" 01b,07aug07,agf  Remove AuxClock errata mention, does not apply to vxW6.6
+\" 01a,26jan07,b_m  Created based on lite5200 bsp.
+\"
+\"
+.TH "Lite5200B" T "Freescale Lite5200B" "VXWORKS REFERENCE MANUAL"
+
+\sh NAME
+`Freescale Lite5200B'
+
+INTRODUCTION
+
+This note provides board-specific information necessary to run VxWorks on
+Freescale's Lite5200B Evaluation Board. Before running VxWorks, verify that
+the board runs in the factory configuration and check with Freescale for the
+latest silicon errata for your particular revision/device.
+
+This BSP is configured for Lite5200B Version 1.0 Rev.K boards with 32MB Flash
+(2 x Spansion S29GL128N).
+
+The board is supplied with U-Boot running from the Flash. The default VxWorks
+kernel conflicts with the U-Boot memory map so the VxWorks bootrom must be
+flashed using a Wind River ICE, or using the on-board backup U-Boot. There is
+an option to run the VxWorks kernel directly from U-Boot. The optional build
+is selected by defining the macro BOOT_FROM_UBOOT in config.h.
+
+\sh Board Jumper Settings
+
+The board's factory-default jumper configuration is shown below. VxWorks in
+this BSP has been configured and tested to run with the factory-default jumper
+configuration. See "Freescale Lite5200B Board Diagram" for jumper locations.
+
+The BSP supports dynamic adaptation to the frequency setting of the board/CPU.
+The settings given below are the values that were used for testing of this BSP.
+
+\sh SW1
+
+\ts
+Identifier | Jumper | Setting
+-
+     1     |  XLB   | Low
+     2     |  SYS   | Low
+     3     |  FVCO  | Low
+     4     |  MG    | Low
+     5     |  LF    | Low
+     6     |  HI/LO | High
+     7     |  WAIT  | High
+     8     |  SWAP  | Low
+     9     |  WIDE  | Low
+     10    |  MUXED | Low
+\te
+
+\sh SW3
+
+\ts
+Identifier |   Jumper  | Setting
+-
+     1     | PLL CFG 0 | Low
+     2     | PLL CFG 1 | High
+     3     | PLL CFG 2 | High
+     4     | PLL CFG 3 | High
+     5     | PLL CFG 4 | Low
+\te
+
+Note: This is the factory default configuration yielding:
+
+CPU Frequency of 462 MHz
+XLB Frequency of 132 MHz
+IPB Frequency of 132 MHz
+PCI Frequency of 33 MHz
+
+The function sysInfo() will print the actual values in use by
+the target.
+
+\sh Boot ROM
+
+The image 'bootrom.hex' is provided with this BSP and is configured to a ROM
+base address of 0x0. When programming the bootrom to the Flash, an offset of
+0xFFF00100 (the location of the reset exception) needs to be given.
+'bootrom.hex' is configured to execute from the Flash ROM using the onboard
+10/100BaseT FEC Ethernet port as the default boot device, and the onboard serial
+port as the default console device.
+
+The Wind River ICE may be used to program the bootrom. Alternately, the
+lite5200b has a backup U-Boot which also may be used to program the bootrom
+image. Instructions for programming Flash with U-Boot are provided below.
+
+\sh Program a vxWorks bootrom image with U-Boot
+
+  1. Connect a terminal or terminal emulator to the board (the 9 pin
+connector closest to the printed circuit board). Ensure the terminal emulator
+parameters match CONSOLE_BAUD_RATE as defined in config.h.
+
+  2. Set the "BOOT SEL" jumper to B/U. Power on the board, before U-Boot
+starts to autoboot, interrupt it by hitting return.
+
+  3. Set the target network environment.
+\cs
+    => setenv ipaddr xxx.xxx.xxx.xxx
+    => setenv netmask xxx.xxx.xxx.xxx
+    => setenv gatewayip xxx.xxx.xxx.xxx
+    => setenv serverip xxx.xxx.xxx.xxx
+\ce
+    or if using a DHCP server, one need only type:
+\cs
+    => dhcp
+    => setenv serverip xxx.xxx.xxx.xxx
+\ce
+    note: "xxx.xxx.xxx.xxx" represent appropriate ip addresses for your network.
+          "serverip" should be the host machine where the bootrom is stored.
+
+  4. Erase the flash sectors where the bootrom will be stored. It is necessary
+     to type 'flinfo' twice prior to the 'erase' command for U-Boot to
+     initialize the base address of the flash sectors. It is not known why that
+     step is required of U-Boot.
+\cs
+    => flinfo
+    => flinfo
+    => erase fff00000 ffffffff
+\ce
+
+  5. Setup the host tftp server by running the tftpd32.exe delivered in the
+     Workbench installation tree.
+
+  6. Download the bootrom image to the board.
+\cs
+    => tftpboot 1d00000 bootrom.bin
+\ce
+
+  7. Burn the flash.
+\cs
+    => cp.b 1d00000 fff00100 <filesize>
+\ce
+    note: <filesize> should be the bootrom size in hex format.
+
+  8. Power off. Set the "BOOT SEL" jumper back to Main, then power on.
+
+FEATURES
+This section describes the supported and unsupported features of the Lite5200B.
+
+\sh Supported Features
+
+The supported features of the Lite5200B board are:
+    MPC5200B CPU running at 462 MHz
+    256 MB DDR SDRAM
+    32 MB Spansion S29GL128N Flash (2 x 16MB)
+    Boot from U-Boot or from vxWorks bootrom
+    MPC5200B MMU support
+    MPC5200B Interrupt Controller
+    MPC5200B on-chip BestComm DMA I/O control
+    Peripheral Serial Controller (PSC1) with transceiver
+    Fast Ethernet Controller (FEC) supporting 10/100 BaseT protocol
+    PowerPC Decrementer Timer, used for System Clock
+    MPC5200B General Purpose Timer, used for Auxiliary Clock
+    2 PCI Interfaces with standard PC-type connector
+    TrueFFS using one 16MB flash
+    NVRAM using one sector of flash to simulate an EEPROM
+    MPC5200B IDE/ATA controller
+    MPC5200B USB host controller (master-only compatibility)
+    MPC5200B Dual CAN 2.0A/B controller
+    MPC5200B on-chip RTC (not battery backed up)
+    Multiple, reconfigurable GPIO
+
+\sh Unsupported Features
+
+None
+
+HARDWARE DETAILS
+This section documents the details of the device drivers and board
+hardware elements for the Lite5200B.
+
+\sh Devices
+The device drivers included are:
+
+\cs
+    m5200Intr.c        - MPC5200B Interrupt Controller driver
+    m5200Sdma.c        - MPC5200B Smart DMA driver
+    m5200FecEnd.c      - MPC5200B Fast Ethernet Controller driver
+    flashMem.c         - Flash memory device driver
+    pciConfigLib.c     - PCI configuration library
+    pciAutoConfig.c    - PCI device auto-configuration library
+    s29glMtd.c         - Flash MTD driver for TrueFFS
+    ataDrv.c           - MPC5200B ATA driver
+    motMsCan.c         - MPC5200B CAN driver
+\ce
+
+
+\sh Memory Map
+
+\cs
+ 0xffff_ffff   +--------------+
+               |              |
+               |     CS0      |
+               |  Flash 16MB  |
+               |              |
+ 0xff00_0000   +--------------+
+               |              |
+               |     CS1      |
+               |  Flash 16MB  |
+               |              |
+ 0xfe00_0000   +--------------+
+               |              |
+               ~              ~
+               |              |
+               +--------------+
+               |   Internal   |
+               |    Memory    |
+               |    (MBAR)    |
+ 0xf000_0000   +--------------+
+               |              |
+               ~              ~
+               |              |
+ 0x0fff_ffff   +--------------+
+               |              |
+               |     CS1      |
+               |   DDR 128MB  |
+               |              |
+ 0x07ff_ffff   +--------------+
+               |              |
+               |     CS0      |
+               |   DDR 128MB  |
+               |              |
+ 0x0000_0000   +--------------+
+\ce
+
+
+\sh Serial Configuration
+PSC1 is configured as a UART device at 115200 baud, 8 data bits, 1 stop bit,
+hardware handshaking, and parity disabled.
+PSC1 is the default console channel, accessed via the onboard RS232 port.
+
+\sh Network Configuration
+The MPC5200B Fast Ethernet Controller (FEC) is configured as a 10/100 BaseT
+protocol channel. The FEC is the supported network device, using the END-style
+network driver. The FEC boot device name is "fec0" and is accessed via the
+onboard Ethernet port.
+
+\sh Setting the Ethernet Address
+A unique 6 byte address is absolutely necessary if the board will be connected
+to a network. The first 3 bytes are a Freescale specific prefix. The last 3
+bytes are unique. A set of default Ethernet addresses are specified in config.h
+as:
+\cs
+    /@ Ethernet MAC Address Parameters @/
+    #define CUST_ENET0    0x01  /@ Customer portion of MAC address @/
+    #define CUST_ENET1    0x02
+    #define CUST_ENET2    0x03
+\ce
+The first three bytes (0x00, 0x04, 0x9f) are a Freescale specific prefix that
+should not typically be changed. If they do need changed, the following
+macros are in config.h:
+\cs
+    #define FS_ENET0  0x00  /@ Freescale specific portion of MAC (MSB->LSB) @/
+    #define FS_ENET1  0x04
+    #define FS_ENET2  0x9f
+
+    #define ENET_DEFAULT0 FS_ENET0
+    #define ENET_DEFAULT1 FS_ENET1
+    #define ENET_DEFAULT2 FS_ENET2
+\ce
+
+If these MAC address parameters are changed, a new boot ROM must be programmed
+and a new vxWorks image must be built.
+
+The definition of macro ETHERNET_MAC_HANDLER in config.h indicates the MAC
+address is stored in NVRAM and alterable via the "M" bootrom command. This
+option allows only the last three bytes to be changed. To use this option,
+open a console window and reset the hardware. When the bootrom banner appears
+and the countdown starts, press any key to get the "[VxWorks Boot]:" prompt.
+Type 'M' and follow the instructions.
+
+\sh PCI Access
+
+Support is included for the MPC5200B on-chip PCI controller, enabled by default
+with the INCLUDE_PCI macro in config.h.
+
+\sh Inbound PCI Address Translation
+Inbound translation windows are configured for:
+
+\cs
+                             MPC5200B Space    PCI Space
+                             ------------      ---------
+- SDRAM                      0x00000000        0xC0000000
+- Internal MPC5200 memory:   0xF0000000        0x90000000
+
+\ce
+
+\sh Outbound PCI Address Translation
+Outbound translation windows are configured for:
+
+\cs
+                             MPC5200B Space    PCI Space
+                             ------------      ---------
+- Prefetchable memory:       0x40000000        0x40000000
+- Non-prefetchable memory:   0x50000000        0x50000000
+- I/O memory:                0x70000000        0x00000000
+
+\ce
+
+The standard VxWorks drivers are included and tested for the following PCI
+network cards:
+
+\cs
+fei82557End.c      - Intel Fast Ethernet PCI driver
+gei8254xEnd.c      - Intel Gigabit Ethernet PCI driver
+\ce
+
+If you add the PCI network driver in your vxWorks, at the same time,
+you should also define two component INCLUDE_GENERICPHY, INCLUDE_MII_BUS in
+config.h, when you make "vxWorks","bootrom" under this bsp.
+
+\sh SmartDMA and Freescale BestComm API
+
+The MPC5200B SmartDMA module is supported by utilizing Freescale's BestComm
+API. This BSP release supports the Freescale Bestcomm API release directly.
+
+The Bestcomm source has been integrated with the BSP build facility
+and can be found in the following directory:
+
+$WIND_BASE/target/config/lite5200b/bestComm
+
+The BestComm source has been built using a standard configuration and
+archived in the library:
+
+$WIND_BASE/target/config/lite5200b/bestComm/libBestComm.a
+
+Although the BestComm library will be built with the BSP, if necessary, it is
+possible to recompile only the BestComm API from the vxWorks 6.x Development
+Shell.
+
+First use the bestcomm ins bsp, we need to rebuild the bestcomm libraries in 
+WIND_BASE/target/config/lite5200b/bestcomm,From the directory, use the command
+
+\cs
+    make CPU=PPC603 TOOL=diab clean
+    make CPU=PPC603 TOOL=diab
+ OR
+    make CPU=PPC603 TOOL=gnu clean
+    make CPU=PPC603 TOOL=gnu
+\ce
+
+\sh SDA issue about BestComm library
+The kernel library and BSP image are built with SDA(small data area) property 
+by default, and BestComm library(libBestComm.a) released along with the BSP is 
+not built with SDA. Therefore, if you are invoking some BestComm API to use 
+SmartDMA module, you may see some build failing information such as 
+"Symbol xxx is out of address range". To resolve this problem, you must run 
+\cs
+    make ADDED_CFLAGS+=-Xdata-absolute-far 
+\ce
+to get the vxWorks image for command line build or add "-Xdata-absolute-far" 
+in "Build Tools"(eg: right click project, select property, and switch to 
+"Build Tools" tab) for VIP build in Workbench.
+
+\sh AuxClock
+The MPC5200B general purpose timer driver is used to implement the aux clock.
+It is not included in the default kernel configuration.  To enable it, define
+INCLUDE_AUX_CLK and DRV_TIMER_M5XXX_GPT in config.h.
+
+\sh NVRAM
+This BSP implements non-volatile RAM via the onboard Flash device.
+The non-volatile memory area is described by macros NV_RAM_ADRS and NV_RAM_SIZE
+in config.h. It normally contains boot parameters and the FEC's MAC address.
+
+\sh TrueFFS
+This BSP uses one 16MB S29GL128M flash as the TrueFFS media.
+To use it, define INCLUDE_TFFS in config.h, vxprj for lite5200b,
+add the component INCLUDE_TL_FTL.
+When using TrueFFS on a new flash for the first time, you should format the
+flash using
+\cs
+    sysTffsFormat();
+\ce
+Then
+\cs
+    usrTffsConfig(0, 0, "/tffs0");
+\ce
+
+If you are using DOSFS, please use
+\cs
+    dosfsDiskFormat ("/tffs0");
+\ce
+
+If you want to know the current format process when calling the sysTffsFormat,
+define TFFS_FORMAT_PRINT in sysTffs.c.
+
+\sh ATA
+To use it, define INCLUDE_ATA in config.h.
+If you have two hard disks, define ATA_DEV0_STATE as ATA_DEV_PRESENT in
+lite5200b.h. This makes the driver probe 2 disks.
+
+\sh CAN
+To use it, define INCLUDE_CAN in config.h.
+
+\sh USB
+The system-specific PCI USB stub functions (usbPciStub.c) is included.
+To use it, define INCLUDE_USB and INCLUDE_OHCI in config.h.
+To work with an normal u-disk, define INCLUDE_USB_MS_BULKONLY.
+
+\sh GPIO
+A "WakeUp" GPIO driver (sysGpioDemux.c) is included.
+To use it, define INCLUDE_GPIO in config.h.
+
+\sh Delivered Objects
+The delivered objects are: `bootrom', `vxWorks', `vxWorks.sym',
+and `vxWorks.st'.
+
+\sh Make Targets
+The make targets are listed as the names of object-format files.
+Append `.hex' to each to derive a hex-format file name.
+
+\ts
+`bootrom'
+`bootrom_uncmp'
+`vxWorks' (with vxWorks.sym)
+`vxWorks_rom'
+`vxWorks.st'
+`vxWorks.st_rom'
+\te
+
+vxWorks.res_rom and vxWorks.res_rom_nosym do not build due to ROM addressing
+constraints.
+
+WORKAROUNDS FOR KNOWN CPU ERRATA
+The FEC driver:
+
+$WIND_BASE/target/src/drv/end/m5200FecEnd.c
+
+contains a workaround for a known issue with BestComm.  For the workaround
+to be enabled, the variable:
+
+m5200FecForceCopy
+
+must be set to TRUE. This is the default setting.
+
+
+SPECIAL CONSIDERATIONS
+This section describes miscellaneous information that the user needs
+to know about the BSP.
+
+\sh Force Default Boot Line Option
+If the FORCE_DEFAULT_BOOT_LINE is defined in config.h, then the
+DEFAULT_BOOT_LINE parameters are used as boot parameters regardless of the
+NVRAM values previously specified. Recall that boot parameters are stored in
+the NVRAM device so boot parameters are not lost during a power cycle.
+
+Defining FORCE_DEFAULT_BOOT_LINE is useful for debugging emulator downloaded
+RAM-based vxWorks images. It is considered a DEBUG option, so it should be
+#undef'ed for the final image.
+
+Normally the boot parameters are specified at the bootrom prompt and stored
+in NVRAM. When a downloaded image executes, the boot parameters are retrieved
+from the NVRAM device.
+
+This can sometimes cause undesired results. For example, if the NVRAM has been
+previously initialized, then changing the DEFAULT_BOOT_LINE in the config.h
+does not result in the new settings being used. The reason is the
+initialization code always takes the boot parameters from the NVRAM device.
+If there are valid values in the NVRAM device, these boot parameters are used.
+
+If you intend to debug an image by downloading with Wind River tools and plan
+on changing the DEFAULT_BOOT_LINE parameters a number of times, it might be
+convenient to define this FORCE_DEFAULT_BOOT_LINE parameter.
+
+As a note, an uninitialized NVRAM device is initialized automatically with
+the DEFAULT_BOOT_LINE parameters specified in the config.h file.
+
+As an alternate solution for the above scenario, the boot parameters can be
+changed via the bootrom. This stores the values in NVRAM and subsequently
+used by the download image. This would require a valid bootrom and would
+require the target board to run via the bootroms to set the values and then
+halted to download the image to be debugged via Wind River tools.
+
+\sh Known Problems
+1) component INCLUDE_PCI_BUS is incompatible with DRV_PCI_VIRTUAL.
+When including a VxBus PCI driver and the DRV_PCI_VIRTUAL component at the 
+same time, for example, define INCLUDE_FEI8255X_VXB_END and INCLUDE_PCI in 
+config.h, and then create a VIP based on the BSP, vxprj build failed.
+Workaround 1: define INCLUDE_PCI and the VxBus driver in config.h of the BSP, 
+then build the kernel image from the BSP directory with: make vxWorks
+Workaround 2: remove from target\config\comps\vxWorks\40vxbLegacyPciAdaptor.cdf 
+the following line: EXCLUDES  INCLUDE_PCI_BUS, recreate the project and build.
+
+\sh Freescale Lite5200B Board diagram
+
+\bs
+  +------------------------------------------------------------------------+
+  |                    +------------------------------------+              |
+  |                    |       PCI1                ||       | J13          |
+  |                    +------------------------------------+              |
+  |                                                                        |
+  |                    +------------------------------------+              |
+  |                    |       PCI2                ||       | J14          |
+  |                    +------------------------------------+              |
+  |                                                                        |
+  |                                                         || J10         |
+  |                                                                        |
+  |--+                                                                +----+
+  |  |-                                                               ---  |-+
+  |  |-                                                           J1  ---  | |
+  |  |-                                                               ---  | |
+  |  |-                                                          CAN2 ---  | |
+  |  |-                                                               ---  |-+
+  |  |- J33                                                           +----+
+  |  |-                                                                    |
+  |  |- ATA                                                           +----+
+  |  |-                           ___________                         ---  |-+
+  |  |-                          |           |                    J2  ---  | |
+  |  |-                          |           |                        ---  | |
+  |  |-                          |           |                   CAN1 ---  | |
+  |  |-                          |  MPC5200B |                        ---  |-+
+  |--+                           |           |                        +----+
+  |                              |           |                             |
+  |                              |__________/A1                            |
+  |                                   U17                         +---------+
+  |         SW3                                                   |   J6    |
+  |      . x x x . H                                              |   ETH   |
+  |      x . . . x L                             SW1              +---------+
+  |                                    H . . . x x . . . . .               |
+  |                                    L x x x . . x x x x x               |
+  |                                                                   +----+
+  |-----+                                                             ---  |-+
+  |     | J35                                                     J3  ---  | |
+  |-----+                                                             ---  | |
+  |                                                              UART ---  | |
+  |+---+                                                              ---  |-+
+  ||ATX| J36                                                          +----+
+  ||   |                                                                   |
+  ||PWR|                                                                +---+
+  |+---+ [O]                       [O]                  ____  ____   J4 |USB|
+  |      PWR                       POR             COP | :::::::: |     +---+
+  +----------------------------------------------------+----------+--------+
+\be
+
+BIBLIOGRAPHY
+
+\tb Freescale PowerPC Microprocessor Family: The Programming Environments
+
+\tb Freescale MPC5200B User's Manual
+
+\tb Freescale MPC5200B Hardware Specification
+
+\tb Freescale Lite5200B EVB Schematics
+
+\tb BestComm API Reference
+
+\tb BestComm API User Guide
+
+\tb Peripheral Component Interconnect (PCI) Local Bus Specification, Rev 2.2

@@ -1,0 +1,27 @@
+
+                 README: Freescale QorIQ P5040 DS
+
+This file contains board-specific information for the Freescale QorIQ P5040DS.
+Specifically, this file contains information on any BSP interface changes from 
+previous software or hardware versions, and contains caveats that the user 
+must be aware of before using this BSP.
+
+------------------------------------------------------------------------------
+
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    Remove default_rom/default_romResident support. (WIND00427646)
+
+RELEASE 6.9/x
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Update memory space for AMP cores. (WIND00344670)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+    
+    Initial release.

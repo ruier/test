@@ -1,0 +1,3 @@
+#ifdef DRV_GPIO_OMAP35XX
+    vxbOmap35xxGpioDrvRegister ();
+#endif /* DRV_GPIO_OMAP35XX  */

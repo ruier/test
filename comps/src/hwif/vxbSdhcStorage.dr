@@ -1,0 +1,3 @@
+#ifdef DRV_STORAGE_SDHC
+    sdhcStorageRegister ();
+#endif /* DRV_STORAGE_SDHC */

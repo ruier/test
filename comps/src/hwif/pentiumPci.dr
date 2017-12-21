@@ -1,0 +1,3 @@
+#ifdef INCLUDE_PENTIUM_PCI
+    pentiumPciRegister();       /* pcPentium PCI host controller */
+#endif /* INCLUDE_PENTIUM_PCI */

@@ -1,0 +1,628 @@
+\" ads827x/target.ref - Motorola MPC827XADS target specific documentation
+\"
+\" Copyright (c) 2003, 2005, 2007-2008 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01d,25apr08,l_g  Add vxBus support
+\" 01c,20feb07,rec  Add workbench instructions for flashing board.
+\" 01b,19sep05,dtr  Update for 2.0/1.
+\" 01a,18dec03,dtr  Adapted from ADS826x BSP target.nr
+\"
+\TITLE ads827x - Motorola MPC827XADS
+
+NAME
+`Motorola ADS827X - HIP7'
+
+INTRODUCTION
+This reference entry provides board-specific information necessary to run
+VxWorks for the ads8272 BSP.
+
+The BSP will work with the rev PROTOTYPE of the ADS8272 board.
+
+Board Switch Settings
+The board must have the switch and jumpers set to appropriate values before
+software can be loaded into the memory, or before flash memory can be programmed
+as described below.
+
+   1. Setting the board Jumpers & Switches:
+   In order to get the board running with the default configuration, the
+   switches can be set as follows:
+
+   NOTE:  The MODCK and MODCKH switches affect the hard reset configuration word
+          that the processor reads during hard reset time.  The bsp reads internal
+          SIU registers and obtains all the necessary pll multiplier and divider
+          values to self configure the clock, CPM and baudrate clocks.  The following
+          settings for MODCK and MODCKH are the default values as specified in
+          the board manual.  The user is free to pick and choose any acceptable
+          combination of these values that will allow the core frequencies to not
+          exceed the allowable ranges as described in the MCP8260 manual.
+
+\ts
+  Dip SW1 | Dip SW2 |  Dip SW4 | 
+- | | |  
+  SWOPT0 ON | Reserved ON | MODCKH0 OFF | 
+  SWOPT1 ON | PCI DLL OFF | MODCKH1 ON | 
+  SWOPT2 ON | PCI Arbiter ON | MODCKH2 OFF | 
+  Reserved ON | BOOT SOURCE ON | MODCKH3 ON | 
+   |  |  PCIMODCK ON | 
+   |  |  MODCK1 ON | 
+   |  |  MODCK2 OFF | 
+   |  |  MODCK3 OFF | 
+
+\te
+
+Jumper JP9 2-3  BCSR is hard reset word source (factory default)
+
+BOOT ROMS
+No VxWorks Boot ROM is provided with this BSP release. Nevertheless VxWorks
+boot code is working if downloaded into the SIMM Flash ROM.
+
+VxWorks boot code can be programmed in to Flash using one of the following
+methods:
+
+\sh 
+
+\sh Using Probe with Workbench 2.3 or later.
+1. Setting the board Jumpers & Switches:
+   In order to get the board running with the default configuration, the
+   switches need to be set as follows:
+
+2. Creating a bootrom_uncmp.hex:
+   2.1 Launch vxWorks development shell and go to BSP directory.
+   2.2 Type>make bootrom_uncmp.hex
+   2.3 Once the build process finish successfully you will find the file
+       "bootrom_uncmp.hex" in the BSP directory
+       "$(WIND_BASE)/target/config/ads827x".
+
+   2.4 Alternatively create a bootloader project and build a uncompressed
+       hex image. The image will be 
+       "$(WIND_BASE)workspace\<project name>\bootrom_uncmp.hex"
+ 
+3. Programming bootrom_uncmp to the MPC8272ADS FLASH:
+   Support for Hip 7 part is available in visionClick 8.0.1 
+   
+   3.1 Using Workbench:
+   
+   WARNING: These instructions were written using Workbench 2.6. 
+            Directory names, menu selections and field names associated with   
+            Workbench may change in future versions.  
+
+       3.1.1 Install Wind Power Probe or Wind Power ICE and power it on.
+             Connect the JTAG interface cable from the Wind Power Probe or Wind 
+             Power ICE to the ads827x board's JTAG connector (JP21).
+             Once the connections have been made, power up the ads827x board 
+             and launch Workbench on the host.
+   
+       3.1.2 Configure the Wind Power Probe or Wind Power ICE connection.
+             In Workbench on the left pane, there is a "Target Manager" window. 
+             Click on the "New Connection". Select the "Connection type" as 
+	     "WindRiver OCD ICE Connection" for Wind Power ICE and "WindRiver 
+	     OCD Probe Connection" for Wind Power Probe. If the Wind Power ICE 
+	     is connected via serial port, specify the configuration else select
+	     "Specify all communication settings manually". 
+
+	     In the "Wind River ICE Settings" or "Wind River Probe Settings", 
+	     select the processor by clicking on the "Select" tab. For example: 
+	     "PowerPC->MPC82xx->MPC8272". On the next dialog box, select "Booted
+             Target OS on selected CPU" as "None".  Continue selecting Next on
+             subsequent dialog boxes until the Finish button is displayed. 
+             Select "Finish".  The target manager will launch the target.  In
+             the Target Manager list, select the newly created target.  
+             
+             
+       3.1.3 Program Wind Power Probe / Wind Power ICE with the proper register 
+             settings for the ads827x board.
+   	     
+             After the target connects, select the red circular arrow button in
+             the Target Manager window.  This will open the "Modify attributes 
+             and launch" window.  Select the Reset tab.  Click the "Play 
+             register file" box, then to the right select "Browse"  In the 
+             bottom pane, select the full path name to the register file for 
+             this chip. (e.g.
+             $WIND_DFW_PATH/host/registers/PowerPC/82xx/Motorola/ADS8272.reg). 
+             NOTE: substitute the fill path name for symbol $WIND_DFW_PATH. 
+             Click OK to dismiss the window.  Back in the "Modify attributes and 
+             launch" window, click "Apply", then click "Debug".  
+             
+             Observe the register playing in the OCD Command Shell window.  The
+             command prompt should display as ">BKM>".  If instead you see the
+             ">ERR> prompt, execute the "IN" command to reset the board and 
+             restart the debugger.
+             
+             After the register file finishes playing (takes a minute or two),  
+             select the red circular arrow button in the Target Manager window
+             again.  This will again open the "Modify attributes and
+             launch" window.  Select the Reset tab.  Uncheck the "Play register
+             file" box and then select "Apply".  The register file needs to be
+             played only once at the beginning of a session.  Close the window.
+             
+       3.1.4 Convert bootrom_uncmp.hex to bootrom_uncmp.bin.
+   
+	     In "Flash Programmer", choose "Programming" tab. Click 
+	     "Convert files" to open the "Choose file for Flash Download" 
+	     browser window. Navigate to the file "bootrom_uncmp.hex" located 
+	     in:"$(WIND_BASE)/target/config/ads827x/bootrom_uncmp.hex" and 
+	     press "OK". The "bootrom_uncmp.bin" is available in the same 
+	     location of "bootrom_uncmp.hex".
+                 
+               
+       3.1.5 Program the ads827x Flash.
+   
+             In WindRiver OCD, Select the "Flash Programmer". The 
+	     "Flash Programmer" view has three tabs: "Configuration", 
+             "Programming" and "Memory/Diagnostics".
+
+             3.2.5.1 Select the "Configuration" tab. In the "Device Selection' 
+		     field, select the "INTEL 28F016/16S (2048 x 8) 4 Devices".
+                     Select the base address to be "0xff800000".  
+		     Select the "RAM Workspace" start address to be "0x00000000"
+		      and set the "size" to "30000".
+		     To set a program or erase timeout, use "Set/Edit Timeouts".
+		     The value can be entered in seconds.
+
+       	     3.2.5.2 Click on the "Programming" tab. Select the "Add File" 
+	             button to add the boot file.  Browse to "bootrom.hex". 
+                     Select "Convert and Add File".  Click "OK" to dismiss
+                     the browse window.  In the programming tab, change the
+		     "Start Address" to "0xfff00000", "End Address" will be 
+		     selected automatically. The "Start Address" includes the 
+		     "Offset bias".
+		     Enable a file by clicking on the checkbox under the 
+		     "Enabled" heading.
+	     3.1.5.3 In the Erase Sector Selection pane, select addresses
+                     fff00000 through fffc0000.  Press the "Erase/Program" 
+                     button to erase the flash and then program the flash with 
+                     selected "bootrom_uncmp.bin" file. A window pops up to 
+                     show the progress of the Flash device programming.  When 
+                     it is complete, the Flash should contain the new boot 
+                     program.
+	     3.1.5.4 Check the "Send IN before each operation.  
+                     Click "Erase and Program".
+
+\sh Jumpers on PROTOTYPE board revision
+
+The baud rate generator assumes a 100 MHz system clock and a
+CPM multiplication factor of 2. Although the PROTOTYPE board
+supports reading the Hard Reset Configuration Word from Flash
+or from the BCSR it does not support reading
+the Flash at Power-on or Hard reset and so must be set to
+use BCSR. 
+
+FEATURES
+
+\sh Supported Features (PROTOTYPE board revisions)
+
+SCC1 and SCC4 as a UART
+
+FCC1 FCC2 as an Ethernet device supporting 10BaseT and 100BaseT protocol
+
+Interrupt Controller
+
+System Clock
+
+Baud Rate Generators as required for SCC1 and SCC4
+
+64MB on board SDRAM
+
+DMA as required only for SCC1, SCC4, FCC1 & FCC2
+
+Auxiliary clock and timestamp clock
+
+8 MByte Flash module (16 and 32 MByte configurations have not been tested)
+
+Flash read and write capability
+
+Instruction and Data caches
+
+On-chip PCI bridge for 82xx chips.
+
+PCI Bridge Direct DMA 
+
+PCI Error Handling 
+
+\sh Unsupported Features (PROTOTYPE board revisions)
+
+virtual DMA
+
+Parallel Ports
+
+Baud Rate Generators not used by supported devices
+
+SPI
+
+Reset capability or options
+
+SCC1 and SCC4 in any mode other than UART
+
+SCC2 and SCC3
+
+ATM, Transparent, or HDLC protocols on FCC1 and FCC2
+
+FCC3
+
+MCC1 and MCC2
+
+SMC1 or SMC2
+
+USB 
+
+Any of the eight TDM interfaces
+
+Support for the two 96 DIN connectors
+(Voyager Tools Board connector and Expansion connector)
+which bring out all pins on the MPC8272 chip
+
+\sh Feature Interactions
+None known
+
+HARDWARE DETAILS
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Devices
+The chip drivers included are:
+
+    m8260Flash.c - flash memory driver
+    m8260Sio.c - serial driver
+    m8260IntrCtl.c - interrupt controller driver
+    m8260Timer.c - timer driver
+    fccVxbEnd.c - FCC Ethernet vxBus END driver
+    mot82xxPci.c - On-chip PCI Bridge library/interrupt handler.
+
+The BSP configures both SCC1 and SCC4 as UART devices.
+SCC1 is used as a console device.
+FCC1/2 are used as ethernet ports.
+
+\sh Memory Maps
+
+The memory map is described in the Motorola board documentation.  The
+memory map is completely configurable by the bsp, however we have
+kept the map as described.  However there is a remapping of the IMMR
+(internal memory map register) provided.  During debugging it can be
+desireable to leave the internal memory map as defined by the hard
+reset configuration word.  This makes using a visionICE or visionPROBE
+simpler because the emulator always knows where the internal map is.
+
+The bsp defaults to leaving the memory map as defined by the hard
+reset config word.  If you want to map it to the value as described in
+the board manual, simply define IMMAP_REMAP in config.h.
+
+
+
+The following table describes the ads8260 default memory map:
+\ts
+
+
+Start | Size | End | Access to
+------------------------------
+0x0000_0000 | 16MB | 0x03FF_FFFF | Soldered SDRAM 
+0x0440_0000 | 1MB | 0x044F_FFFF | Unused
+0x0450_0000 | 32KB | 0x0450_7FFF | Board Control and Status Registers
+ | | | (BCSR0 through BCSR7 on PROTOTYPE revision)
+0x0450_8000 |  | 0x045F_FFFF | Unused
+0x0460_0000 | 32KB | 0x0460_7FFF | ATM (unsupported)
+0x0460_8000 |  | 0x046F_FFFF | Unused
+0x0470_0000 | 64KB | 0x0471_FFFF | MPC 8260 Internal Memory
+ | | | (see MPC8260 PowerQUICC II User's Manual,
+ | | | Chapter 3, Memory Map, and
+ | | | Chapter 13, CPM Overview, for further details,
+ | | | and see Parameter Ram below)
+0x0472_0000 |  | 0xFCFF_FFFF | Unused
+0xFF80_0000 | 8MB | 0xFFFF_FFFF | Flash SIMM
+\te
+
+
+
+
+
+
+The following table describes the default VxWorks macros which
+are used to address memory
+\ts
+
+
+Macro Name | Macro Definition | Description
+------------------------------
+LOCAL_MEM_LOCAL_ADRS | 0x0000_0000 | Base of RAM
+RAM_LOW_ADRS | LOCAL_MEM_LOCAL_ADRS + 0x0001_0000
+ | VxWorks image loaded here. Stack grows down from this address.
+RAM_HIGH_ADRS | LOCAL_MEM_LOCAL_ADRS + 0x00d0_0000
+ | VxWorks bootrom loaded here.
+LOCAL_MEM_SIZE | 0100_0000 | Default 16 MBytes of RAM
+BCSR_BASE_ADRS | 0450_0000 | Default location of Board Control and Status Registers on PROTOTYPE rev
+BCSRS_SIZE | 0001_0000 | 64 KBytes on PROTOTYPE rev
+DEFAULT_IMM_ADRS | 0F00_0000 | Default location of MPC 8260 Internal Memory Map
+DEFAULT_IMM_ADRS | 0470_0000 | Remapped location of MPC 8260 Internal Memory Map
+IMM_SIZE | 0x20000 | 128K Internal Memory Map Size
+ROM_BASE_ADRS | 0xFFF0_0000 | Base address of ROM on PROTOTYPE rev
+ROM_TEXT_ADRS | ROM_BASE_ADRS + 0x100
+ | Text must start after vector table
+ROM_WARM_ADRS | ROM_TEXT_ADRS + 8
+ | Warm Reboot Entry Address
+ROM_SIZE | 0x0010_0000 | Default 1 MByte of ROM on PROTOTYPE rev (see ROM considerations)
+\te
+
+
+\sh Shared Memory
+NA
+
+\sh PCI Support
+
+
+The support include PCI DMA and PCI Error Handling.
+The standard mapping for PCI is described in config.h of this BSP and uses
+outbound translation to access. This means PCI space usage is configurable by
+the user in config.h.
+INCLUDE_PCI_DMA intialises the interrupt and handlers for PCI Bridge DMA
+INCLUDE_PCI_ERROR_HANDLING intialises the interrupt and handlers for PCI
+Bridge Error handling interrupts and a show routine (pciErrorShow) detailing
+which errors have occured and how many.
+
+
+\sh Interrupts
+
+
+The following table describes the relationship between the interrupt
+number, interrupt vector, and the interrupt bit position in the SIU
+Interrupt Mask Register (SIMR_H and SIMR_L). Also described is the
+mask to use to enable all interrupts of a higher priority. See m8260IntrCtl.c
+for usage. This is compatible with previous 8260 parts. 
+\ts
+Default |  |  |  | Mask to Enable|
+Interrupt | Interrupt | Interrupt | SIMR | Higher Priority Interrupts | Interrupt
+Priority | Number | Vector | Mask | SIMR_H | SIMR_L | Source
+ |  |  |  |  |  | HIGHEST PRIORITY
+1 | 16 | 0x10 | H 0x00000004 | 0000_0000 | 0000_0000 | TMCNT
+2 | 16 | 0x10 | H 0x00000004 | 0000_0000 | 0000_0000 | TMCNT
+3 | 17 | 0x11 | H 0x00000002 | 0000_0004 | 0000_0000 | PIT
+4 | 18 | 0x12 | H 0x00000001 | 0000_0006 | 0000_0000 | PCI
+5 | 19 | 0x13 | H 0x00004000 | 0000_0006 | 0000_0000 | IRQ1
+6 | 27 | 0x20 | L 0x80000000 | 0000_4006 | 0000_0000 | FCC1
+7 | 28 | 0x21 | L 0x40000000 | 0000_4006 | 8000_0000 | FCC2
+8 | 29 | 0x22 | L 0x20000000 | 0000_4006 | C000_0000 | FCC3
+9 | inactive
+10 | unused
+11 | 31 | 0x24 | L 0x08000000 | 0000_4006 | E000_0000 | MCC1
+12 | 32 | 0x25 | L 0x04000000 | 0000_4006 | E800_0000 | MCC2
+13 | inactive
+14 | inactive
+15 | 20 | 0x13 | H 0x00002000 | 0000_4006 | EC00_0000 | IRQ2
+16 | 21 | 0x14 | H 0x00001000 | 0000_6006 | EC00_0000 | IRQ3
+17 | 22 | 0x15 | H 0x00000800 | 0000_7006 | EC00_0000 | IRQ4
+18 | 23 | 0x16 | H 0x00000400 | 0000_7806 | EC00_0000 | IRQ5
+19 | unused
+20 | 35 | 0x28 | L 0x00800000 | 0000_7C06 | EC00_0000 | SCC1
+21 | 36 | 0x29 | L 0x00400000 | 0000_7C06 | EC80_0000 | SCC2
+22 | 37 | 0x2A | L 0x00200000 | 0000_7C06 | ECC0_0000 | SCC3
+23 | 38 | 0x2B | L 0x00100000 | 0000_7C06 | ECE0_0000 | SCC4
+24 | inactive
+25 | inactive
+26 | inactive
+27 | inactive
+28 | unused
+29 | 40 | 0x30 | H 0x00010000 | 0000_7C06 | ECF0_0000 | PC15
+30 | 12 | 0x0C | L 0x00000010 | 0001_7C06 | ECF0_0000 | Timer 1
+31 | 41 | 0x31 | H 0x00020000 | 0001_7C06 | ECF0_0010 | PC14
+32 | unused
+33 | 42 | 0x32 | H 0x00040000 | 0003_7C06 | ECF0_0010 | PC13
+34 | 10 | 0x0A | L 0x00000040 | 0007_7C06 | ECF0_0010 | SDMA Bus Error
+35 | 6 | 0x06 | L 0x00000400 | 0007_7C06 | ECF0_0050 | IDMA1
+36 | unused
+37 | 43 | 0x33 | H 0x00080000 | 0007_7C06 | ECF0_0450 | PC12
+38 | 44 | 0x34 | H 0x00100000 | 000F_7C06 | ECF0_0450 | PC11
+39 | 7 | 0x07 | L 0x00000200 | 001F_7C06 | ECF0_0450 | IDMA2
+40 | 13 | 0x0D | L 0x00000008 | 001F_7C06 | ECF0_0650 | Timer 2
+41 | 45 | 0x35 | H 0x00200000 | 001F_7C06 | ECF0_0658 | PC10
+42 | unused
+43 | unused
+44 | 3 | 0x03 | L 0x00002000 | 003F_7C06 | ECF0_0658 | RISC Timer Table
+45 | 1 | 0x01 | L 0x00008000 | 003F_7C06 | ECF0_2658 | I2C
+46 | unused
+47 | 46 | 0x36 | H 0x00400000 | 003F_7C06 | ECF0_A658 | PC9
+48 | 47 | 0x37 | H 0x00800000 | 007F_7C06 | ECF0_A658 | PC8
+49 | 24 | 0x18 | H 0x00000200 | 00FF_7C06 | ECF0_A658 | IRQ6
+50 | 8 | 0x08 | L 0x00000100 | 00FF_7E06 | ECF0_A658 | IDMA3
+51 | 25 | 0x19 | H 0x00000100 | 00FF_7E06 | ECF0_A758 | IRQ7
+52 | 14 | 0x0E | L 0x00000004 | 00FF_7F06 | ECF0_A758 | Timer 3
+53 | unused
+54 | unused
+55 | 48 | 0x38 | H 0x01000000 | 00FF_7F06 | ECF0_A75C | PC7
+56 | 49 | 0x39 | H 0x02000000 | 01FF_7F06 | ECF0_A75C | PC6
+57 | 50 | 0x3A | H 0x04000000 | 03FF_7F06 | ECF0_A75C | PC5
+58 | 15 | 0x0F | L 0x00000002 | 07FF_7F06 | ECF0_A75C | Timer 4
+59 | unused
+60 | 51 | 0x3B | H 0x08000000 | 07FF_7F06 | ECF0_A75E | PC4
+61 | unused
+62 | 9 | 0x09 | L 0x00000080 | 0FFF_7F06 | ECF0_A75E | IDMA4
+63 | 2 | 0x02 | L 0x00004000 | 0FFF_7F06 | ECF0_A7DE | SPI
+64 | 52 | 0x3C | H 0x10000000 | 0FFF_7F06 | ECF0_E7DE | PC3
+65 | 53 | 0x3D | H 0x20000000 | 1FFF_7F06 | ECF0_E7DE | PC2
+66 | 4 | 0x04 | L 0x00001000 | 3FFF_7F06 | ECF0_E7DE | SMC1
+67 | unused
+68 | 5 | 0x05 | L 0x00000800 | 3FFF_7F06 | ECF0_F7DE | SMC2
+69 | 54 | 0x3E | H 0x40000000 | 3FFF_7F06 | ECF0_FFDE | PC1
+70 | 55 | 0x3F | H 0x80000000 | 7FFF_7F06 | ECF0_FFDE | PC0
+71 | unused
+72 | unused
+73 | reserved
+ |  |  |  |  |  | LOWEST PRIORITY
+
+\te
+
+\sh Serial Configuration
+SCC1 and SCC4 are configured as UART devices with 8 data bits, 1 stop
+bit, hardware handshaking, and parity disabled.
+
+\sh SCSI Configuration
+There is no SCSI interface on this board.
+
+\sh Network Configuration
+FCC1 and FCC2 is configured as an Ethernet port
+
+\sh VME Access
+NA
+
+\sh PCI Access
+PCI interface is available.
+
+\sh Boot Devices
+motfcc
+
+\sh Boot Methods
+Ethernet
+
+SPECIAL CONSIDERATIONS
+This section describes miscellaneous information that the user needs
+to know about the BSP.
+
+\sh Delivered Objects
+
+\sh Make Targets
+Bootrom_uncmp, vxWorks and vxWorks.st are delivered. All other
+make targets are untested. For PROTOTYPE revision of board, bootrom
+(compressed) is also tested.
+
+\sh Special Routines
+None
+
+\sh Serial Connections
+Most VxWorks BSPs do not use hardware handshaking in the serial
+interface, and thus a simple 3 wire connection is commonly used.  The
+MPC8260 ADS BSP does use hardware handshaking and this requires
+a full 8 pin interface. Standard molded RS-232 cables have been shown
+to work, possibly requiring a null modem adapter.
+
+See also "Known Problems" below.
+
+\sh Ethernet Address
+The MPC82xx ADS boards do not have a unique Ethernet hardware
+address assigned to each board.  A unique address is absolutely necessary if
+the user wishes to connect the board to a network.  Thus, the user
+must provide a suitable 6 byte Ethernet address for each board used
+on a network. The MAC address is setup in the bootrom using the 'M' command.  
+The user must change the last three bytes to three unique bytes
+(i.e., bytes not used by any other Wind River board on your net).
+Check with your system administrator if you do not know this information.
+This means a new bootrom must programmed if this feature wasn't already 
+implemented in the last bootrom image programmed and 'M' must be called for 
+both FCC devices.
+
+\sh Known Problems
+vxWorks does not implement support of critical/machine check exceptions.
+
+When an FCC port is initialized and there is no active connection to it, the
+message "(tRootTask): miiPhyInit check cable connection" is printed on
+the console.  To prevent this message from appearing for unused FCC ports,
+perform one of the following steps:
+- make an active connection to the port (two unused FCC ports may be connected
+to each other using a crossover/null modem cable);
+- in configNet.h, set the 'initialized' flag for unused FCC ports to TRUE
+(from the default FALSE value) in the endDevTbl[] array and rebuild; or
+- in configNet.h, remove the unused FCC ports from the endDevTbl[] array and
+rebuild.
+
+\sh SYSCLK Frequency
+Most Motorola sample code and documentation refers to a default system clock
+frequency of 100 MHz
+
+BOARD LAYOUT
+The diagram below shows jumpers and connectors relevant to
+VxWorks configuration for ADS8272 PROTOTYPE revision of the board.
+
+\bs
+___________________________________________________________________________
+|  	                   SW3/6/7 Reset/Power   SW5 - Modck              |
+|                                                                         |
+|                                                                         |
+|                                                                         |
+|                                                                         |
+|                                                                         |
+|                                                                         |
+|                                                                         |
+|                                                                         |
+|                                                                         |
+| P23 - FETH 2 (FCC2)        P21 - COP/JTAG                               |
+|                                                                         |
+|                                                                         |
+|                                                                         |
+|                                         SW2 - PCI/Boot Source           |
+|                                                                         |
+|                                                                         |
+|                                                                         |
+|                                                                         |
+| P13 - Serial SCC1 & 4                                                   |
+|       Top SCC1/RS232-1                                                  |
+|       Bottom SCC4/RS232-2                                               |
+|                                                                         |
+|                                                                         |
+|                                                                         |
+|                                                                         |
+|                                                                         |
+| P10 - FETH 1 (FCC1)                                                     |
+|                                                                         |
+|                                                                         |
+|                                                                         |
+|                                                                         |
+|                            -------------                        ________|
+|     P4 - CPM expansion     |            |  P16 - SYS expansion  |
+|____________________________|            |_______________________|
+\be
+    Key:
+    X  vertical jumper installed
+    :  vertical jumper absent
+    -  horizontal jumper installed
+    "  horizontal jumper absent
+    0  switch off
+    1  switch on
+    U  three-pin vertical jumper, upper jumper installed
+    D  three-pin vertical jumper, lower jumper installed
+    L  three-pin horizontal jumper, left jumper installed
+    R  three-pin horizontal jumper, right jumper installed
+
+SEE ALSO
+\tb Tornado User's Guide: Getting Started, 
+
+\tb VxWorks Programmer's Guide: Configuration, 
+
+\tb VxWorks Programmer's Guide: Architecture Appendix 
+
+BIBLIOGRAPHY
+
+\tb MPC8272 Reference Manual 
+
+\tb MPC8272ADS Board Manual 
+
+\tb MPC8266ADS-PCI User's Manual
+
+\tb MPC826x PowerQUICC II Errata 
+
+\tb MPC8260 ADS User's Manual 
+
+\tb MPC8260ADS User's Manual, for PILOT revision bd, 11/1999 
+
+\tb PowerQUICC II User's Manual, rev. 0 
+
+\tb MPC8260 PowerQUICC II User's Manual Errata, rev. 0 
+
+\tb MPC8260 Design Checklist 
+
+\tb PowerPC Microprocessor Family: The Programming Environments for 32-bit Microprocessors MPCFPE32B/AD 
+
+\tb MPC603e & EC603e RISC Microprocessors User's Manual MPC603EUM/AD 
+
+\tb VBUG PowerQUICC II Debugger 
+
+
+WEB RESOURCES
+
+Much of the Motorola documentation can be found on line. The following
+URL was correct at the time of writing for semiconductor area. You'll have to search the documentation using processor name for specific documentation.
+
+http://e-www.motorola.com/
+
+

@@ -1,0 +1,3 @@
+#ifdef INCLUDE_SMSCLAN91C111_VXB_END
+    smscRegister();
+#endif

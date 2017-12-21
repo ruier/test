@@ -1,0 +1,3 @@
+#ifdef DRV_ARM_GIC
+extern void vxbArmGenIntCtlrRegister(void);
+#endif /* DRV_ARM_GIC */

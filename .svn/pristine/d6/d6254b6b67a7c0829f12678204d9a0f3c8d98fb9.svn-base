@@ -1,0 +1,3 @@
+#ifdef DRV_SRIO_FSL
+    fslRioRegister();
+#endif /* DRV_SRIO_FSL */

@@ -1,0 +1,5 @@
+---- sysPrintf Matches (4 in 2 files) ----
+rioDrv.c (d:\windriver\vxworks-6.8\target\config\vpx6-ssd-14\riolib):        sysPrintf("malloc device print buf failed\n");
+rioDrv.c (d:\windriver\vxworks-6.8\target\config\vpx6-ssd-14\riolib):            sysPrintf("0x%-2x    0x%-8x       0x%8x     0x%2x\n",
+rioDrv.c (d:\windriver\vxworks-6.8\target\config\vpx6-ssd-14\riolib):            sysPrintf("0x%-2x    0x%-8x       0x%8x     0x%2x\n",
+rioFsl.c (d:\windriver\vxworks-6.8\target\config\vpx6-ssd-14\riolib):		sysPrintf("gstSrioMport[0].astOW[%d].uiMemLoc: 0x%x, tran: 0x%x, id: %d, size: 0x%x\n",

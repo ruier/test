@@ -1,0 +1,636 @@
+\" amcc440ep/target.ref - AMCC PowerPC 440EP Evaluation Board (Embedded Planet 440C) target specific documentation.
+\"
+\" Copyright 2004, 2006-2008, 2012 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01f,12apr12,c_l  Update information on flashing bootrom.bin with 
+                    workbench. (WIND00232731)
+\" 01e,02sep08,x_f  Remove sysDcr.s description
+\" 01d,21aug08,d_l  remove ENET_DEFAULT description.(WIND00121398)
+\" 01c,07Mar07,rec  Fix workbench flash instructions
+\" 01b,15oct06,rec  Add workbench flash instructions
+\" 01a,08jan04,dr   Written
+\"
+\TITLE AMCC440EP - AMCC PowerPC 440EP Evaluation Board (Embedded Planet 440C)
+
+NAME
+AMCC PowerPC 440EP Evaluation Board (Embedded Planet 440C) - AMCC440EP
+
+INTRODUCTION This manual entry provides board-specific information necessary to
+run VxWorks on the AMCC PowerPC 440EP Evaluation Board (Embedded Planet 440C),
+using the AMCC440EP board support package. Before using a board with VxWorks,
+verify that it runs correctly in the factory configuration by using
+vendor-supplied ROMs and factory jumper settings.
+
+This BSP supports the AMCC PowerPC 440EP Evaluation Board (Embedded Planet
+440C) equipped with the PowerPC 440EP Rev 2.0 parts.  Prior releases of the
+evaluation board or the PowerPC 440EP processor are not supported.  This BSP is
+not compatible with VxWorks 5.x or earlier versions.
+
+Note: At the time of this writing, AMCC provides two PowerPC 440EP
+development boards; 'Bamboo' and 'Yosemite'. This document applies only to
+'Yosemite'.
+
+\sh Boot ROMs 
+
+The AMCC PowerPC 440EP Evaluation Board (Embedded Planet 440C) uses a single
+Spansion S29GL512 (512Mb - 64MB).
+
+For more information about the VxWorks bootloader and self-booting
+VxWorks images refer to the VxWorks Kernel Programmer's Guide and the Wind
+River Workbench User's Guide.
+
+
+\sh Switch Settings 
+
+All switch and jumper settings are described in details in the
+Embedded Planet 440C User Manual.  
+
+Dipswitch 2 (SW2) is used for boot configuration and should not be changed
+as it is factory set.
+
+Dipswitch 3 (SW3) is available to userapplications. It is not used for
+board configuration.
+
+
+The following switch settings apply:
+
+\ts
+
+Part |  | Setting | Description
+------------------------------
+SW2, S1 |  | ---------- | Leave to factory setting
+SW2, S2 |  | ---------- | Leave to factory setting
+SW2, S3 |  | ---------- | Leave to factory setting
+SW2, S4 |  | ---------- | Leave to factory setting
+SW3, S1 |  | Don't care | For use by application 
+SW3, S2 |  | Don't care | For use by application 
+SW3, S3 |  | Don't care | For use by application 
+SW3, S4 |  | Don't care | For use by application 
+\te
+
+Note: Switch OFF=Open=1 switch ON=Closed=0
+
+
+\sh Jumpers
+
+All jumpers are dedicated for test purposes only.  See the
+Embedded Planet 440C User Manual for more details.
+
+
+FEATURES 
+
+\sh Supported Features
+
+The supported features of the AMCC PowerPC 440EP Evaluation Board (Embedded
+Planet 440C) are:
+
+   - System Timer using PPC440EP Decrementer via external or internal clock
+   - Auxiliary Timer using PPC440EP FIT hardware timer
+   - Watchdog Timer using PPC440EP WDT hardware timer
+   - Timestamp driver using Auxiliary Timer
+   - Network connectivity using PPC440EP integrated dual 10/100 Ethernet MAC 
+     devices or Intel PRO/100+ Ethernet or AMD 79C97x family of Ethernet 
+     controller.
+   - Serial connectivity using the PPC440EP integrated Quad 16550-style 
+     serial ports with external or internal clock
+   - Nested interrupt handling using PPC440EP integrated Dual Universal
+     Interrupt Controllers (UIC).
+   - Cache Support
+   - MMU Support.
+   - Static TLB setup allowing operation without the MMU library if desired 
+   - TLB and L1 Cache Parity Error Recovery via Critical Machine
+     Check Handler
+   - 440EP MAL integrated Memory Access Layer packet DMA device, using
+     malLib driver
+   - media independent interfaces
+   - 440EP PCI controller and autoconfiguration for PCI conventional
+     devices
+   - Saving boot parameters in Serial EEPROM that is functionally equivalent to
+     the Atmel AT24C04 part.  
+   - 64 MBytes of Flash (Spansion: S29GL512N11FAIR1x)
+   - ED&R Error Logging
+   - USB 1.1 host controller 
+
+
+\sh Unsupported Features
+   - 440EP DMA
+   - 440EP General Purpose Timers (GPTs)
+   - SPI Interface
+   - Boot from Nand Flash
+   - TFFS 
+   - USB 2.0
+   - USB 1.1 Devices
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and board hardware
+elements.
+
+
+\sh Devices
+The chip drivers used by this BSP are:
+
+    byteNvRam.c - byte-oriented generic NVRAM driver
+    emacEnd.c - END style AMCC EMAC Ethernet driver
+    fei82557End.c - END style Intel 82557/82559 Ethernet driver
+    ln97xEnd.c - END style AMD Am79C97X PCnet-PCI Ethernet driver
+    malLib.c - AMCC Memory Access Layer (MAL) driver
+    ns16550Sio.c - 16550 serial driver
+    pciAutoConfigLib.c - PCI bus scan and resource allocation facility
+    pciConfigLib.c - PCI Configuration space access support for PCI drivers
+    pciIntLib.c - PCI Interrupt support
+
+This BSP also provides the following chip drivers:
+
+    iicLib.c - IIC support for PPC440 ppc440Timer.c - timer driver for PPC440
+    sysCpcr.c - Generic PPC440EP Chip Control DCR register access routines
+    uicIntr.c - Universal Interrupt Controller (UIC) driver
+
+
+\sh Memory Maps
+
+Immediately following a reset, the processor hardware initializes a
+temporary entry in the shadow TLB to map a 4KB block of memory at
+0xFFFFF000 to the physical boot device address space at 0x0.FFFFF000.
+The processor commences execution at address 0xFFFFFFFC.  A branch
+instruction there jumps to the resetEntry function at address 0xFFFFF000.
+
+resetEntry initializes a static MMU mapping of the processor's virtual
+address space. 25 or 27 memory regions are mapped, covering most of the
+4GB addressable program memory space.  This map is in force until the MMU
+library is initialized:
+
+
+
+\sh Bootrom Static MMU Memory Map (with TLB Parity Support)
+
+\ts
+Program Addr | Physical Addr | Access Mode | TLB | Use
+------------------------------
+00000000 | 0.00000000 | -I-G RWX | 01 | System RAM
+40000000 | 0.00000000 | -I-G RWX | 18 | System RAM (uncached)
+80000000 | 0.a0000000 | -I-G RWX | 05 | PCI Memory
+90000000 | 0.b0000000 | -I-- RWX | 06 | PCI Memory 
+a0000000 | 0.c0000000 | -I-G RWX | 07 | PCI Memory
+b0000000 | 0.d0000000 | -I-G RWX | 08 | PCI Memory
+c0600000 | 0.ef600000 | -I-G RW- | 02 | Peripherals
+c1000000 | 0.e8000000 | -I-G RW- | 07 | PCI I/O
+c2800000 | 0.e8800000 | -I-G RW- | 10 | PCI Extra I/O
+c3800000 | 0.e9800000 | -I-G RW- | 11 | PCI Extra I/O
+c4800000 | 0.ea800000 | -I-G RW- | 12 | PCI Extra I/O
+c5800000 | 0.eb800000 | -I-G RW- | 13 | PCI Extra I/O
+c6c00000 | 0.eec00000 | -I-G RW- | 14 | PCI Config Regs
+c7d00000 | 0.eed00000 | -I-G RW- | 15 | PCI Interrupt Ack/special cycle
+c8400000 | 0.ef400000 | -I-G RW- | 16 | PCI Config Regs
+c9000000 | 0.50000000 | -I-G RW- | 09 | USB Peripherals
+cfff0000 | 0.00000000 | -I-G R-X | 1a | Exception Vectors
+cfff4000 | 0.00004000 | -I-G RWX | 00 | Machine Check Handler
+d0000000 | 0.80000000 | -I-G RW- | 04 | CPLD
+f0000000 | 0.f0000000 | -I-- RWX | 03 | Boot Space
+------------------------------
+\te
+
+If INCLUDE_440X5_TLB_RECOVERY_MAX has been unconfigured, then the following
+map will apply:
+
+
+\sh Bootrom Static MMU Memory Map (no TLB Parity Support)
+
+\ts
+Program Addr | Physical Addr | Access Mode | TLB | Use
+------------------------------
+00000000 | 0.00000000 | -I-G RWX | 00 | System RAM
+40000000 | 0.00000000 | -I-- RW- | 01 | Machine Check Handler
+80000000 | 0.a0000000 | -I-G RWX | 05 | PCI Memory
+90000000 | 0.b0000000 | -I-- RWX | 06 | PCI Memory 
+a0000000 | 0.c0000000 | -I-G RWX | 07 | PCI Memory
+b0000000 | 0.d0000000 | -I-G RWX | 08 | PCI Memory
+c0600000 | 0.ef600000 | -I-G RW- | 02 | Peripherals
+c1000000 | 0.e8000000 | -I-G RW- | 10 | PCI I/O
+c2800000 | 0.e8800000 | -I-G RW- | 11 | PCI I/O
+c3800000 | 0.e9800000 | -I-G RW- | 12 | PCI I/O
+c4800000 | 0.ea800000 | -I-G RW- | 13 | PCI I/O
+c5800000 | 0.eb800000 | -I-G RW- | 14 | PCI I/O
+c6c00000 | 0.eec00000 | -I-G RW- | 15 | PCI Config Regs
+c7d00000 | 0.eed00000 | -I-G RW- | 16 | PCI Interrupt Ack/special cycle
+c8400000 | 0.ef400000 | -I-G RW- | 17 | PCI Config Regs
+c9000000 | 0.50000000 | -I-G RW- | 09 | USB Peripherals
+d0000000 | 0.80000000 | -I-G RW- | 04 | External Peripherals part1
+f0000000 | 0.f0000000 | -I-- RWX | 03 | Boot Space
+------------------------------
+\te
+
+The guarded attribute is not specified on one of the PCI Memory address
+regions (0x90000000) to signal to the PCI controller that prefetching
+is allowed when this region is accessed. Furthermore, the actual extent
+of the PCI access windows into Memory and I/O space are controlled by PTM
+and PMM configuration settings -- see the config.h for details.
+
+Following this initialization, resetEntry jumps to romInit to continue the
+boot procedure.
+
+The VxWorks kernel supports 4KB page size dynamic TLB mapping and access
+mode control of the address space.  To accomplish this, configure
+INCLUDE_MMU_BASIC and one or both of USER_D_MMU_ENABLE and
+USER_I_MMU_ENABLE.  During MMU library initialization, the kernel uses the
+sysStaticTlbDesc[] array to reinitialize the static TLB entry registers,
+with cache and access modes as identified by the array.  The default
+configuration establishes this memory map:
+
+
+\sh VxWorks Static MMU Memory Map (with TLB Parity Support)
+
+\ts
+Program Addr | TS | Physical Addr | Access Mode | TLB | Use
+------------------------------
+00000000 | 0 | 0.00000000 | ---- RWX   | 01 | System RAM
+40000000 | 0 | 0.00000000 | -I-- RW-   |  | System RAM (uncached)
+80000000 | 0 | 0.a0000000 | -I-G RWX   | 05 | PCI Memory
+90000000 | 0 | 0.b0000000 | -I-- RWX   | 06 | PCI Memory 
+a0000000 | 0 | 0.c0000000 | -I-G RWX   | 07 | PCI Memory
+b0000000 | 0 | 0.d0000000 | -I-G RWX   | 08 | PCI Memory
+c0600000 | 0 | 0.ef600000 | -I-G RW-   | 02 | Peripherals
+c1000000 | 0 | 0.e8000000 | -I-G RW-   | 10 | PCI I/O
+c2800000 | 0 | 0.e8800000 | -I-G RW-   | 11 | PCI I/O
+c3800000 | 0 | 0.e9800000 | -I-G RW-   | 12 | PCI I/O
+c4800000 | 0 | 0.ea800000 | -I-G RW-   | 13 | PCI I/O
+c5800000 | 0 | 0.eb800000 | -I-G RW-   | 14 | PCI I/O
+c6c00000 | 0 | 0.eec00000 | -I-G RW-   | 15 | PCI Config Regs
+c7d00000 | 0 | 0.eed00000 | -I-G RW-   | 16 | PCI Interrupt Ack/special cycle
+c8400000 | 0 | 0.ef400000 | -I-G RW-   | 17 | PCI Config Regs
+c9000000 | 0 | 0.50000000 | -I-G RW-   | 09 | USB Peripherals
+cfff0000 | 0 | 0.00000000 | ---- RWX   | 18 | Exception Vectors
+cfff4000 | 0 | 0.00004000 | -I-- RWX   | 00 | Machine Check Handler
+d0000000 | 0 | 0.80000000 | -I-G RW-   | 04 | External Peripherals
+f0000000 | 0 | 0.f0000000 | W--- RWX   | 03 | Boot Space
+------------------------------
+\te
+
+If INCLUDE_440X5_TLB_RECOVERY_MAX has been unconfigured, then the following
+map will apply:
+
+
+\sh VxWorks Static MMU Memory Map (no TLB Parity Support)
+
+\ts
+Program Addr | TS | Physical Addr | Access Mode | TLB | Use
+------------------------------
+00000000 | 0 | 0.00000000 | ---- RWX   | 00 | System RAM
+40000000 | 0 | 0.00000000 | -I-- RW-   | 01 | System RAM (uncached)
+80000000 | 0 | 0.a0000000 | -I-G RWX   | 05 | PCI Memory
+90000000 | 0 | 0.b0000000 | -I-- RWX   | 06 | PCI Memory 
+a0000000 | 0 | 0.c0000000 | -I-G RWX   | 07 | PCI Memory
+b0000000 | 0 | 0.d0000000 | -I-G RWX   | 08 | PCI Memory
+c0600000 | 0 | 0.ef600000 | -I-G RW-   | 09 | Peripherals
+c1000000 | 0 | 0.e8000000 | -I-G RW-   | 10 | PCI I/O
+c2800000 | 0 | 0.e8800000 | -I-G RW-   | 11 | PCI I/O
+c3800000 | 0 | 0.e9800000 | -I-G RW-   | 12 | PCI I/O
+c4800000 | 0 | 0.ea800000 | -I-G RW-   | 13 | PCI I/O
+c5800000 | 0 | 0.eb800000 | -I-G RW-   | 14 | PCI I/O
+c6c00000 | 0 | 0.eec00000 | -I-G RW-   | 15 | PCI Config Regs
+c7d00000 | 0 | 0.eed00000 | -I-G RW-   | 16 | PCI Interrupt Ack/special cycle
+c8400000 | 0 | 0.ef400000 | -I-G RW-   | 17 | PCI Config Regs
+c9000000 | 0 | 0.50000000 | -I-G RW-   | 09 | USB Peripherals
+cfff4000 | 0 | 0.00004000 | -I-- RWX   | 00 | Machine Check Handler
+d0000000 | 0 | 0.80000000 | -I-G RW-   | 04 | External Peripherals 
+f0000000 | 0 | 0.f0000000 | W--- RWX   | 03 | Boot Space
+------------------------------
+\te
+
+In addition, the sysPhysMemDesc[] array is used to map arbitrary program
+addresses to physical address spaces, with a 4KB page size.  The following
+table describes the region of memory mapped via the 4KB page descriptors
+managed by the virtual memory library (vmLib). Note that the
+sysPhysMemDesc[] array only supports 32-bit physical addresses, so
+fine-grained MMU support could be supported by amcc440ep.  The memory map for
+the vmBaseLib-managed area is as follows:
+
+
+\sh VxWorks Dynamic MM Memory Map
+
+\ts
+Program Addr | Physical Addr | Access Mode | Size | Use
+------------------------------
+00000000 | 0.00000000 | ---- RWX | SDRAM0 Size | System RAM
+80000000 | 0.a0000000 | -I-G RWX | 0x02000000 | PCI MEMORY 1 w/o prefetch
+90000000 | 0.b0000000 | -I-G RWX | 0x02000000 | PCI MEMORY 2 with prefetch
+c0600000 | 0.ef600000 | -I-G RW- | 0x00004000 | Internal peripherals
+c1000000 | 0.e8000000 | -I-G RW- | 0x00010000 | PCI IO REGION 1
+c2800000 | 0.e8800000 | -I-G RW- | 0x00100000 | PCI IO REGION 2
+c6c00000 | 0.eec00000 | -I-G RW- | 0x00001000 | PCI CFGADDR Registers
+c7d00000 | 0.eed00000 | -I-G RW- | 0x00001000 | PCI INTERRUPT/ACK Registers
+c8400000 | 0.ef400000 | -I-G RW- | 0x00001000 | PLB PCI BRIDGE Control Registers
+c9000000 | 0.50000000 | -I-G RW- | 0x00001000 | USB 2.0/1.1 Device
+d0002000 | 0.80002000 | -I-G RW- | 0x00001000 | CPLD registers
+f0000000 | 0.f0000000 | -I-- RWX | 0x00040000 | Boot Flash
+------------------------------
+\te
+
+\sh Default Cache Mode
+
+The BSP's default cache mode may be used to globally change the
+attributes of the caching areas in the VxWorks Memory Map. The default
+cache mode may be changed by using the USER_D_CACHE_MODE and
+USER_I_CACHE_MODE configuration parameters. USER_D_CACHE_MODE is used by
+sysLib.c to set cache attributes on individual memory regions described by
+the sysStaticTlbDesc[] and sysPhysMemDesc[] arrays.
+
+Valid values are CACHE_DISABLED, CACHE_WRITETHROUGH, and CACHE_COPYBACK.
+The I-Cache default mode is CACHE_WRITETHROUGH, and the D-Cache default
+mode is CACHE_COPYBACK.  If you set USER_D_CACHE_MODE to CACHE_COPYBACK,
+the cache attributes for each VxWorks kernel memory region will appear
+exactly as in the VxWorks Static and Dynamic Memory Map tables above. If
+you set it to CACHE_WRITETHROUGH, regions in the tables above that do not
+already have the Inhibit bit set will have the Writethrough bit set.  If
+you set it to CACHE_DISABLED, all regions will have the Writethrough bit
+clear, and the Inhibit bit set.
+
+In practice, even if you configure USER_D_CACHE_MODE to CACHE_COPYBACK,
+setting certain other configuration parameters will cause it to be
+downgraded to CACHE_WRITETHROUGH. The parameter
+INCLUDE_440X5_DCACHE_RECOVERY (which is normally configured, to support
+full D-Cache Parity Error recovery) changes your USER_D_CACHE_MODE to
+CACHE_WRITETHROUGH. 
+
+Due to design limitations in the VxWorks loader and vmBaselib, if the cache
+is enabled for D-cache, it must be enabled for I-cache; and if it is
+disabled for D-cache, it must be disabled for I-cache. sysLib.c enforces
+these requirements.
+
+\sh General Configuration
+
+\sh Serial Configuration
+
+The default configuration of the serial ports are 9600bps, 8 data bits,
+no parity, 1 stop bit. Both ports are configured as Data Terminal Equipment
+(DTE). A null-modem cable is therefore required to connect to another DTE
+such as a PC host.
+
+\sh Network Configuration
+
+Three types of network devices are supported by this BSP: the EMAC core in
+the processor chip itself, AMD Am79C97X PCnet-PCI devices, and Intel
+82557/8/9 PCI devices.
+
+The Enhanced Network Driver (END) used with the dual integrated EMAC
+Ethernet cores is "emac".
+
+The EMAC devices share use of a single on-chip Memory Access Layer (MAL)
+device and multichannel ZMII controller.
+
+The EMAC controllers provide a variety of PHY interfaces available to
+communicate with different type of PHYs. Both EMAC0 and EMAC1 have 10/100
+Mbps mode supported, and they could be configured to be MII (in this case
+only EMAC0 is selected), RMII, or SMII modes.    
+
+Since MAL is a Processor Local Bus (PLB) master, its accesses to system
+memory are unknown to the processor's L1 cache because there is no hardware
+enforced cache coherency in the 440EP.  The ibmEmacEnd driver maintains
+coherency for both buffer descriptors and buffers.
+
+Polled mode operation which allows "system" level debug is supported.
+
+The following features are not supported in the current driver:
+
+	 - wake-on-LAN
+
+
+\sh Changing the Ethernet Address
+
+The ETHERNET_MAC_HANDLER is a value that indicates the MAC address is stored in
+NVRAM and alterable via the 'N' bootrom command.
+
+ The Ethernet hardware addresses used by the EMACs are configurable at
+ run-time.  The first three bytes of the address are always assumed to be
+ 0x0004AC (IBM) and the last three bytes are configurable and stored in NVRAM
+ starting at address EEPROM1 via I2C.  To make the ethernet hardware address match
+ the address printed on the decal attached to the board use the following
+ example as a guide.
+
+Ethernet hardware addresses on the board decals:
+
+	0004AC3E4B22, 0004AC3E4B23
+
+
+	- boot VxWorks
+	- execute the following commands from the shell:
+
+
+The amcc440ep boards do not have a unique Ethernet hardware (or MAC) address
+assigned to each board. A unique address is absolutely necessary if the
+user wishes to connect the board to a network.  Thus, the user must
+provide a suitable 6 byte Ethernet address for each board used 
+on a network.  The default Ethernet Address is specified in the "config.h".
+The first 3 bytes are a Wind River-specific prefix. The last 3 bytes are unique.
+A set of default Ethernet addresses are specified in config.h as:
+
+    /@ Ethernet MAC Address Parameters @/
+    #define CUST_ENET3 0x01 /@ Customer specific portion of MAC address @/
+    #define CUST_ENET4 0x02
+    #define CUST_ENET5 0x03
+
+The first three bytes (0x00, 0xa0, 0x1e) are a Wind River specific prefix
+that should be kept as-is. If for some reason you need to change them, in
+"amcc440ep.h" change the following macros:
+
+    #define ENET_DEFAULT0 0x00
+    #define ENET_DEFAULT1 0xA0
+    #define ENET_DEFAULT2 0x1E
+
+The user must change the last three bytes from 0x03, 0x02, 0x01 to three unique
+bytes (i.e., bytes not used by any other Wind River Ethernet connection on your
+net).  Check with your system administrator if you do not know this information.
+If these bytes need changing (they often will not), a new boot ROM must be
+burned, and a new image must be built.
+
+The MAC addresses can be set by writing them directly to NVRAM using the
+'M' command from the boot ROM prompt.  This option allows only the last three
+bytes to be changed.  To use this option, open a console window and reset the
+hardware.  When the bootrom banner appears and the countdown starts, press any
+key to get the "[VxWorks Boot]:" prompt.  Type 'M' and follow the instructions.
+
+Note: The "N" command is replaced by the "M" command.
+
+\sh PCI
+
+The PCI clock frequency is automatically selected between 33MHz and 66MHz
+based on the M66EN signal on the PCI expansion connector (P8, pin B49).
+
+The selected PCI clock frequency can be read from register BCSR5, bit 0.
+
+Refer to the Embedded Planet 440C User Manual PCI section for more information.
+
+
+\sh Supported bootloader images
+
+The following VxWorks bootloader image types are supported:
+
+	- bootrom
+	- bootrom_uncmp
+
+\sh Creating a bootrom, and bringing up VxWorks
+
+ a) Connect a terminal or terminal emulator to the board (P2 PortA 9 pin
+    connector).  Emulator parameters
+    should be set to 9600bps, 8 data bits, no parity, 1 stop bit.
+
+ b) Build a hex file from the amcc440ep BSP directory
+
+    - make bootrom.hex
+
+ c) program it into the AMD S29GL512N flash parts and power up the board,
+    OR if you have a Wind Power ICE, see below.
+
+ d) After the boot banner, you may get an error because the default boot
+    line in config.h is not 100% correct for your environment.  Type in new
+    configuration parameters using the bootrom menu.
+
+\sh Workbench bootrom flash programming utility
+
+    a) Install the WindRiver ICE and power it on.
+
+    Connect the JTAG interface cable from the Wind River ICE to the 
+    amcc440ep board JTAG connector (J24 located on the CPU card). When all 
+    of the connections have been made, power up the target board and 
+    create a Wind River ICE connection in Workbench.
+
+    b) Configure the Workbench connection.
+
+    When creating the connection, specify the AMCC440EP CPU.
+    Enter the IP address of the Wind River ICE when requested.
+
+    c) Load the proper amcc440ep register setting for WindRiver ICE.
+
+    Once you have connected the probe to the CPU, right-click on the 
+    connection in the target manager and attach to the CPU core. At 
+    this point, you can go to the main Workbench Window tab at the top 
+    of the view and select "show view". Browse the view list and select 
+    OCD Command Shell. This launches the original BKM command shell.
+    Navigate to the target manager and right-click on core(U1). Select 
+    reset tab. 
+    
+    After the target connects, open the OCD Command Shell window and
+    open the OCD Command Shell Settings window by clicking on the yellow 
+    and green icon at the top of the pane.  In the PlayBack File selection
+    browse to the register file (e.g. $WIND_DFW_PATH/ \
+    host/registers/PowerPC/4xx/IBM/AMCC_EmbeddedPlanet_YOSEMITE_440EP_34609.reg
+    Replace the full path name for $WIND_DFW_PATH.
+    Press the black right arrow icon in the same pane to playback the register
+    file.
+
+    Reset with IN then click the reset download button. You have now 
+    loaded the target board with enough settings to program the boot ROM. 
+    Select "Window > show view" again and select Flash Programmer.
+
+    d) Converting the bootrom.hex file to bootrom.bin.
+
+    Select the Add/Remove tab in the flash programmer. Click 
+    "convert file" and navigate to the boot loader project you created 
+    previously e.g. WindRiver\workspace\PPC405BootProj\bootrom.hex. 
+    Select the project. The start address should be 0x0 and the end 
+    address should be set to 0xffffffff. Click "convert and add" to convert 
+    the file. 
+    At this point, the file is added to the list. Click on the start 
+    address entry (should be 0x0) and change it to 0xfff00000. The file 
+    is now ready for programming.
+
+
+    e) Program the amcc440ep  flash.
+
+    Select the configuration tab and choose the following device:
+    AMD -> s29GL512N -> (32768 x 16 ) 1 Device. 
+ 
+    Set the base address to 0xfc000000.
+    Set the start address to 0x0000. 
+    Set the size to 65516.
+
+    Select programming tab.  Select Add file.  Browse to the boot hex image 
+    (bootrom.hex or bootrom_uncmp.hex).  Select "convert and add file."  After
+    the conversion utility completes, dismiss the File Conversion Utility
+    window.  Change the Start Address to 0xfff00000.  In Erase Sector Selection,
+    select sectors 0xfff00000 through 0xfffe0000.  Check "Send IN before each 
+    operation", then click "Erase/Program".
+
+    Go to OCD command shell and type IN. Be sure this returns the BKM 
+
+\sh Wind Power ICE bootrom flash programming instructions.
+
+Requirements:
+ - Wind Power ICE
+ - Vision Click 7.11a or better
+ - Assumes the existence of a 440EP project
+
+
+1) Start Vision Click, open the project file window and click on the 
+   "Load Options" tab.
+
+2) convert the input file to a binary file
+    - Click on "convert..." button
+    - Select your bootrom.hex file in 
+      "Select Input Object Module To Convert" box
+    - Check the "Create Flat BIN File For Flash Programming" checkbox
+    - Enter 0 in the "In Range Of 0x" input box
+    - Enter FFFFFFFF in the "To 0x" input box
+    - Click on the "Convert" button
+   A window will pop up to print the conversion result. Close it when done.
+    - Click the "Ok" button
+
+3) Set up the flash configuration
+    - Click the "Flash Setup..." button
+    - Select the "AMD    s29GL512N (32768 x 16 )  1 Device" in the 
+      "Programming Algorithm (Flash Device(s) and Configuration)" box
+    - Check the "Initialize Target Prior to Erase and/or Program" checkbox
+    - Set the "Base Address" to FFF00000
+    - Click on the "Erase to 0x" button
+    - Enter FFFFFFFF in the text box besides "Erase to 0x"
+    - Click on the "Erase Only" button
+   Monitor the progress in the terminal window.
+    - Click on the "Ok" button.
+
+4) Program the flash memory
+    - Select your "bootrom.bin" image in the 
+      "Downloadable Module (BDX/BIN/HEX Format)" box
+    - check "Apply +/- Bias" and enter 0xFFF00000 in the text box.
+    - check "Load to Target Flash" 
+    - Optionally check the "Read Verify All Data Packets"
+    - Click the "Load" button besides the 
+      "Downloadable Module (BDX/BIN/HEX Format)" box.
+   Monitor the progress. Close all windows when done.
+
+5) Reset the target. The bootrom should now be executing.
+
+
+SPECIAL CONSIDERATIONS
+
+\sh Supported application builds
+Either the project facility or the command line, using 'make', may be
+used to build amcc440ep projects.
+
+The standard uncompressed ROM and ROM-resident project configuration are not
+supplied because they will not fit in the bootrom.
+
+\sh Known Problems
+
+SEE ALSO 
+
+\tb VxWorks Kernel Programmer's Guide 
+
+\tb VxWorks for PowerPC Architecture Supplement 
+
+\tb Wind River Workbench User's Guide
+
+BIBLIOGRAPHY
+
+Please refer to the following documents for further information on the
+AMCC PowerPC 440EP Evaluation Board (Embedded Planet 440C).
+
+\tb Embedded Planet 440C User Manual 
+
+\tb PPC440EP Processor User's Manual
+

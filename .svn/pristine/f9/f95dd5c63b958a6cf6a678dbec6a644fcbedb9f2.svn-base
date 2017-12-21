@@ -1,0 +1,4 @@
+#ifdef DRV_I2C_AM35XX
+    am35xxI2cRegister ();
+#endif /* DRV_I2C_AM35XX */
+

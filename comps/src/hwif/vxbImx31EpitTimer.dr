@@ -1,0 +1,3 @@
+#ifdef DRV_TIMER_IMX31EPIT
+    vxbImx31EpitTimerDrvRegister ();
+#endif /* DRV_TIMER_IMX31EPIT */  

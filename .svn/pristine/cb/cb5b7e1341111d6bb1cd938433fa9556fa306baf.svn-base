@@ -1,0 +1,4 @@
+#ifdef INCLUDE_OCTEON_MDIO
+#include "../src/hwif/h/mii/vxbOcteonMdio.h"
+#endif
+

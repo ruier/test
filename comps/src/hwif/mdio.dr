@@ -1,0 +1,4 @@
+#ifdef INCLUDE_MDIO
+    mdioRegister();
+#endif /* mdioRegister */
+

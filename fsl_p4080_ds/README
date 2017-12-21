@@ -1,0 +1,141 @@
+
+                 README: Freescale QorIQ P4080 DS/Simics
+
+This file contains board-specific information for the Freescale QorIQ P4080DS
+and Simics target model.  Specifically, this file contains information on any 
+BSP interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+
+------------------------------------------------------------------------------
+RELEASE 6.9/6
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    Remove default_rom/default_romResident support. (WIND00427646)
+
+RELEASE 6.9/5
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Update BSP_REV for vxWorks 6.9.2 to support Rev F board / Rev 3 cpu silicon.
+    Update DPAA famn ucode version from 101.8 to 102.4 for Rev 3 silicon.
+    Add support for eSDHC feature and SATA.
+    Update the target.ref and config.h to maintain compatibility.
+
+RELEASE 6.9/4
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Add BSP bootloaders and bootroms description. (WIND00306910)
+    Removed RESERVED_ATOMICS functionality, which is introduced in
+    VxWorks 6.9.2 UP2, from BSP and PPC arch-specific libraries.
+    Fixed reboot failure on non-primary OS in AMP. (WIND00344093)
+    Restricted enabling and disabling L3 cache only on physical Core0 for
+    multi-core solutions. (WIND00341977)
+    Added missing L2 cache flush on non-primary core at reboot in SMP.
+    (WIND00341662)
+    Removed optional components, redundant definitions and undefinitions from
+    config.h. (WIND00334904)
+    Removed the TBEN bit operation for HID0 register. (WIND00282419)
+    Fixed wrong bank offset passed to SRDS_BK_SETBIT(). (WIND00348932)
+    Updated Freescale FMAN microcode. (WIND00349107)
+    Added workaround for Freescale A-004529. (WIND00350649)
+    Added descripton for remapping of the Ethernet ports. (WIND00351704)
+    Fixed potential memory corruption caused by sysNvRamGet(). (WIND00101057)
+    Added Errata implementation A-004510(CCF) and A-004511(CCF).
+    (WIND00352077) (WIND00349563)
+    Added workaround for Freescale A-004529. (WIND00350649)
+    Added Errata implementation A-003474(DDR) and A-003999(FPU) (WIND00331187).
+    Correct the information for flashing bootrom. (WIND00291527)
+    Used low priority LAWs for DDR. (WIND00357618)
+
+RELEASE 6.9/3
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    CQ297094: Updates to L3 cache to support access by multiple cores.
+    CQ329621: SYSTEM_GLOBALS have been removed. They are replaced with the
+              RESERVED_ATOMICS functionality which is implemented in the
+              PPC arch-specific libraries.
+
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    CQ253685: Replaced INCLUDE_DYNAMIC_WRLOAD with an architecture independant
+              wrload initialization and memory mapping/unmapping.
+
+              Changed bootrom and runtime to execute secondary uAMP kernels
+              with a physical bias on any 64MB boundary.
+
+              Reorganized romInit to make it common across QorIQ targets and
+              to functionalize the TLB and cache initialization.
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.1
+ 
+    CQ262613: SerDes code fixed to not disturb Aurora lanes. Move code from 
+              sysLib.c into the separate file p4080SerdesErrata.c.
+    CQ264966: Fixed PCIe EHCI USB card not working on P4080.
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+    CQ214297: change interrupt to driver assignment of DUART2 in hwconf.c
+    CQ239454: remove blocking call inside critical region in sysCpuEnable()
+    CQ240610: set PIR correctly when initializing secondary cores
+    CQ241106: flush L2 cache before disabling
+    CQ246398: restore SYS_CLK_RATE_MIN to 1, 20 was a work-around for 
+              a bug in MIPC_SM, since fixed 
+    CQ247891: add PTEs for QMAN & BMAN's private memory buffers, restore
+              LOCAL_MEM_SIZE default to 512MB, better document reserved
+              space of the private memory buffers
+    CQ242091: modify sysToMonitor SMP shutdown sequence so each CPU flushes
+              its data cache before resetting. 
+    CQ253127: document U-Boot loading of vxWorks is restricted to SDK 2.1
+              in target.ref
+
+RELEASE 2.0/4
+
+    Released from Wind River for General Purpose Platform 3.8, vxWorks 6.8.2
+
+    CQ238230: correct link addresses for BOOTAPP builds under vxprj
+    CQ247891: set LOCAL_MEM_SIZE for BOOTAPP builds to 4GB (work-around only)
+    CQ249098: fix addressing secondary cores monitored for release from boot
+              when built from vxprj for certain kernel configurations
+
+RELEASE 2.0/3
+
+	Released for vxWorks 6.8.2
+
+	Added support for P4080DS Rev. B board.
+
+EAR Version 2.0/2
+
+	Released for vxWorks 6.8.
+
+	Supports P4080DS board.
+
+	Supports Simics 4.2.
+
+	Supports dTSEC and power management.
+
+	KNOWN ISSUES
+	When booting from U-Boot, only UP images are supported.
+	When booting from U-Boot, L2 and L3 cache must be disabled.
+	When booting from CodeWarrior, power management must be disabled.
+
+
+EAR Version 2.0/1
+
+	Released for vxWorks 6.7.
+
+	Supports UP, SMP, and AMP.
+	AMP with VxWorks or Linux as primary.
+	Tested with Simics 4.0.27, P4080-R1 4.0.pre10.
+	
+	KNOWN ISSUES
+	This BSP does not support dTSEC, but rather eTSEC.
+	Power management not supported.  This impacts SMP performance.

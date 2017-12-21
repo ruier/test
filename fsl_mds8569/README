@@ -1,0 +1,52 @@
+
+                README: Freescale MDS8569 (fsl_mds8569)
+
+This file contains board-specific information for the Freescale MDS8569
+target board.  Specifically, this file contains information on any BSP
+interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+Additionally, the target board's reference entry (i.e., 'man fsl_mds8569')
+provides board-specific information necessary to run VxWorks, and
+should be read before this BSP is used.
+
+--------------------------------------------------------------------------------
+RELEASE 6.9/3
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    remove DRV_PCIBUS_M85XX in config.h by default to reduce footprint. 
+    (WIND00416916)
+
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Update security engine description. (WIND00331832)    
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platfrom 6.9, VxWorks 6.9.2
+
+    Moved L1 cache parity error handling to the arch library.  L1 cache parity
+       checking is now enabled by default. L1 parity errors now generate
+       (in many cases recoverable) machine check exceptions.  (WIND00309426)
+    Fixed potential memory corruption caused by sysNvRamGet(). (WIND00101057)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platfrom 6.9, VxWorks 6.9.2
+
+    Support VxWorks native bootrom. (WIND00240155)
+    Support QE UART as serial console.
+    Support SD/MMC card.
+    Update for new QUICC Engine driver and UCC driver.
+    Add support for QE UART.
+    Fix sysPciExAutoconfigIntrAssign() routine.
+
+RELEASE 2.0/0
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Support Freescale MDS8569 board.
+
+    Initial release.

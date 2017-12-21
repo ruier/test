@@ -1,0 +1,5 @@
+#ifdef INCLUDE_MSC01_PCI
+    vxbMsc01PciRegister ();
+#endif
+
+

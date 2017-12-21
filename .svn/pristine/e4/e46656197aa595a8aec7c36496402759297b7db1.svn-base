@@ -1,0 +1,3 @@
+#ifdef INCLUDE_MOT_ETSEC_HEND
+    motEtsecHEndRegister();
+#endif /* INCLUDE_MOT_ETSEC_HEND */

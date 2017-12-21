@@ -1,0 +1,4 @@
+#ifdef INCLUDE_SCC_VXB_END
+   sccRegister();
+#endif /* INCLUDE_SCC_VXB_END */
+

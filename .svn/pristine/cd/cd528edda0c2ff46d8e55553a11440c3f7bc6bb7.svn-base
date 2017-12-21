@@ -1,0 +1,7 @@
+#ifdef INCLUDE_DRV_STORAGE_INTEL_AHCI
+    extern void vxbIntelAhciStorageRegister (void);
+#endif /* INCLUDE_DRV_STORAGE_INTEL_AHCI */
+
+#ifdef INCLUDE_DRV_STORAGE_INTEL_AHCI_SHOW
+    extern STATUS ahciShowInit (void);
+#endif /* INCLUDE_DRV_STORAGE_INTEL_AHCI_SHOW */

@@ -1,0 +1,748 @@
+\" fsl_mpc830x_mitx/target.ref - Freescale MPC830X_MITX target specific documentation
+\"
+\" Copyright (c) 2011 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01c,12oct11,e_d add UART2 description. (WIND00308198)
+\" 01b,12oct11,e_d modified wrong description. (WIND00306900)
+\" 01a,30jun11,e_d created
+\"
+\TITLE fsl_mpc830x_mitx - Freescale MPC830X_MITX
+
+INTRODUCTION
+This reference entry provides board-specific information necessary to run
+VxWorks for the fsl_mpc830x_mitx BSP.
+
+\sh Jumpers & Switches
+
+There is no Switches to need be configured.
+
+Default Jumpers Settings
+
+\ts
+Jumpers Number  | Description                      | Setting
+--------------------------------------------------------------
+J3              | NOR Chip select                  | Position 1-3 4-6
+J3              | NAND Chip select                 | Position 2-4 3-5 
+\te
+
+\sh Getting the board running VxWorks
+This section will guide you how to run vxWorks on the Freescale MPC830x mitx
+board.
+
+1. Setting the board Jumpers 
+
+   Set J3 PIN with Position 1-3 4-6, selected boot from NOR flash.
+   Set J3 PIN with Position 2-4 3-5, selected boot from NAND flash.
+       
+2. Creating a bootrom:
+
+   2.1 Boot from NOR flash:
+
+       2.1.1 Define ROM_EXTRA and BOOT_EXTRA as following in Makefile
+       
+\cs
+       ROM_EXTRA    = sysI2cBootSet.o
+       BOOT_EXTRA   = sysI2cBootSet.o
+\ce 
+
+\cs
+       ROM_TEXT_ADRS = fe000100 # ROM entry address
+       ROM_SIZE      = 00100000 # number of bytes of ROM space
+       ROM_WARM_ADRS = fe000108 # ROM warm entry address 
+       ROM_LINK_ADRS = fe000000
+\ce
+
+       2.1.2 Undefine BOOT_FROM_NAND in config.h. For MPC8309 board,
+             need define MPC8309_BOARD in config.h.
+
+       2.1.3 Launch VxWorks Development Shell, go to the BSP directory
+                   "$(WIND_BASE)/target/config/fsl_mpc830x_mitx".
+
+       2.1.4 Type "make bootrom.bin" and press ENTER.
+
+       2.1.5 Once the make process finish successfully, you will find
+                   the file "bootrom.bin" in the BSP directory
+                   "$(WIND_BASE)/target/config/fsl_mpc830x_mitx".
+
+   2.2 Boot from NAND flash:
+
+       2.2.1 Define ROM_EXTRA and BOOT_EXTRA as following in Makefile
+       
+\cs
+       ROM_EXTRA    = bootInit_nand.o sysI2cBootSet.o
+       BOOT_EXTRA   = bootInit_nand.o sysI2cBootSet.o
+\ce 
+       For 8306 board:
+\cs
+       ROM_TEXT_ADRS    = 07f00100 # ROM entry address
+       ROM_SIZE         = 00100000 # number of bytes of ROM space
+       ROM_WARM_ADRS    = 07f00108 # ROM warm entry address 
+       ROM_LINK_ADRS    = 07f00000
+\ce
+       For 8309 board:
+\cs
+       ROM_TEXT_ADRS    = 0ff00100 # ROM entry address
+       ROM_SIZE         = 00100000 # number of bytes of ROM space
+       ROM_WARM_ADRS    = 0ff00108 # ROM warm entry address 
+       ROM_LINK_ADRS    = 0ff00000
+\ce              
+
+       2.2.2 Define BOOT_FROM_NAND in config.h. For MPC8309 board,
+             need define MPC8309_BOARD in config.h.
+
+       2.2.3 Launch VxWorks Development Shell, go to the BSP directory
+                   "$(WIND_BASE)/target/config/fsl_mpc830x_mitx".
+
+       2.2.4 Type "make bootrom.bin" and press ENTER.
+
+       2.2.5 Once the make process finish successfully, you will find
+                   the file "bootrom.bin" in the BSP directory
+                   "$(WIND_BASE)/target/config/fsl_mpc830x_mitx".
+
+3. Flashing the Boot ROM Image Using CodeWarrior IDE
+
+This section describes how to program a VxWorks bootrom image onto 
+a nand flash or nor flash using CodeWarrior IDE. 
+
+   3.1 Install the CodeWarrior IDE.
+
+       3.1.1 Install the CodeWarrior Development Studio software, After install
+             finished, you will find CodeWarrior IDE. Make sure the CodeWarrior
+             IDE support MPC8306/9 board,or update your IDE.
+
+             path: Start->All Programs->Freescale CodeWarrior->CW for Power
+                   Architecture(TM) VX.X->CodeWarrior IDE.
+
+       3.1.2. Connect the USB_TAP JTAG cable to the MPC8306/9 board JTAG connector
+              and power on.
+
+   3.2 Program the MPC8306/9 nand flash or nor flash.
+
+       3.2.1. open CodeWarrior IDE
+
+       3.2.2. Select the Tools tab-> Flash Programmer
+
+       3.2.3. Select Target Configuration from the left pane.
+
+4. Click Load Settings and Select 830xSOM_NAND_flash.xml or 830xSOM_NOR_flash.xml(x = 8306 or 8309). 
+    These files can be found at tools\nor_flashing(nand_flashing) in 8306/8309
+    DVD. More description, please see NOR Flash Programming User Manual.doc or
+    NAND Flash Programming User Manual.doc in 8306/9 DVD.
+
+5. Select Erase/Blank Check.
+
+    Select the first 1M size sectors you want to erase. Click on erase button.
+    (option )After erasing is complete, run a Blank Check on the selected sectors to 
+    make sure that erase operation was successful. If the ROM image is more than 1M size,
+    please select the correct erase size.
+
+6. Go to Program/Verify.
+
+    Browse and select the bootrom.bin file which needs to be flashed on the NAND Flash/NOR Flash.
+    Specify the appropriate address offset(NAND Flash:0x00000000 and
+    Nor Flash:Flash start address).Click on Program.
+    (option)After programming completes click on Verify to confirm whether Flash programming was successful.
+
+7  Running the VxWorks bootrom
+
+    Power on the board, you will get VxWorks bootrom running.
+
+    Note: If you are programming VxWorks bootrom for the first time,
+    it's strongly recommended that you should use the 'M' command
+    provided by VxWorks bootrom to check and configure the ethernet MAC
+    address, see the section "Ethernet Address" below for more details.
+
+FEATURES
+
+This section describes all features of the board, supported or not.
+It documents all configurations of the board and the interaction between
+features and configuration items.
+
+\sh List of Hardware Features (Freescale MPC830x mitx board)
+
+\ts
+Hardware Interface  | Controller | Driver/Component            | Status
+----------------------------------------------------------------------------
+UART:0              | on-chip    | DRV_SIO_NS16550             | SUPPORTED
+UART:1              | on-chip    | DRV_SIO_NS16550             | UNVALIDATED
+NOR-FLASH           | S29GL064N  | sysTffs.c/sysMtd.c          | SUPPORTED
+NAND-FLASH          | K9F5608U0D | sysNandFlash.c              | SUPPORTED
+100MB-UEC:1         | on-chip    | vxbUccEnd.c                 | SUPPORTED
+100MB-UEC:2         | on-chip    | vxbUccEnd.c                 | SUPPORTED
+100MB-UEC:3         | on-chip    | vxbUccEnd.c                 | SUPPORTED
+TIMER               | on-chip    | DRV_TIMER_DEC_PPC           | SUPPORTED
+TIMER               | on-chip    | DRV_TIMER_QUICC_PPC         | SUPPORTED
+DMA                 | on-chip    | DRV_DMA_M512X               | SUPPORTED
+PCI-HOST            | on-chip    | DRV_PCIBUS_M83XX (8309 only)| SUPPORTED
+USB-HOST            | on-chip    | INCLUDE_EHCI (8306 only)    | SUPPORTED
+USB-TARGET          | on-chip    | INCLUDE_FSL_TCD (8306 only) | SUPPORTED
+eSDHC               | on-chip    | DRV_STORAGE_FSL_SDHC        | SUPPORTED
+GPIO                | on-chip    | DRV_RESOURCE_FSLGPIO        | UNVALIDATED
+SPI                 | on-chip    | sysFslSpi.c                 | UNVALIDATED
+I2C                 | on-chip    | sysMotI2c.c                 | SUPPORTED
+I2C DAC             | AD5301     | 'N/A'                       | UNSUPPORTED
+I2C EEPROM          | M24256     | sysMotI2c.c                 | SUPPORTED
+I2C expander        | PCA9536    | sysMotI2c.c                 | SUPPORTED
+I2C MCU             | MC9S08QG8  | 'N/A'                       | UNSUPPORTED
+\te
+
+Note: The second UART is configured as RS485. 
+
+\sh Feature Interactions
+Refer to the board vendor's documentation.
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Verified Hardware
+
+This BSP has been verified on Rev C of Freescale MPC8306 SOM and MPC8309 REV B SOM 
+board. Other revisions of the board are untested and unwarranted. The default clock speed
+for MPC8306 is 266MHz for core, 133MHz for CCB.
+
+\sh Memory Maps
+
+The following table describes the fsl_mpc8306 memory map:
+
+\ts
+   Start    | Size  |    End      | Access to
+---------------------------------------------
+0x0000_0000 | 128MB | 0x07FF_FFFF | DDR SDRAM
+0xE000_0000 |   1MB | 0xE00F_FFFF | IMMR
+0xE060_0000 |  32KB | 0xE060_7FFF | NAND Flash
+0xFE00_0000 |   8MB | 0xFE7F_FFFF | NOR Flash
+\te
+
+The following table describes the fsl_mpc8309 memory map:
+
+\ts
+   Start    | Size  |    End      | Access to
+---------------------------------------------
+0x0000_0000 | 256MB | 0x0FFF_FFFF | DDR SDRAM
+0x8000_0000 |  64MB | 0x83FF_FFFF | PCI Mem
+0x8400_0000 |  64MB | 0x87FF_FFFF | PCI MemIO
+0x8800_0000 |  64MB | 0x8BFF_FFFF | PCI IO
+0xE000_0000 |   1MB | 0xE00F_FFFF | IMMR
+0xE060_0000 |  32KB | 0xE060_7FFF | NAND Flash
+0xFE00_0000 |   8MB | 0xFE7F_FFFF | NOR Flash
+\te
+
+\sh Serial Connections
+Most VxWorks BSPs do not use hardware handshaking in the serial interface,
+and thus a simple 3 wire connection is commonly used.
+
+The MPC830x mitx board has two RS-232 standard UART ports.
+\sh Serial Configuration
+No special configuration needed.
+Default configuration is:
+    Baud Rate: 9600
+    Data: 8 bit
+    Parity: None
+    Stop: 1 bit
+    Flow Control: None
+
+\sh Ethernet Address
+The MPC830x_mitx boards do not have unique Ethernet hardware addresses assigned
+to each qefcc port. A unique address is absolutely necessary if the user wishes
+to connect the board to a network. Thus, the user must provide suitable
+6 byte Ethernet addresses for each qefcc port used on a network. An address is now
+stored in flash with the bootline. Use the 'M' command to modify for a distinct
+MAC address.
+
+\sh Network Configuration
+Each qefcc port allows 10/100 connection. The driver will auto-negotiate
+and configure the port accordingly.
+
+The following END driver is supported in this BSP.
+
+\ts
+Driver | END                    
+----------------------------
+qefcc  | INCLUDE_UCC_VXB_END   
+\te
+
+Note because the qefcc1 is connected with switch. So we can't get phy status with
+mdio interface. The status of qefcc1's phy always set UP RUNNING 100M mode.
+
+\sh Boot Devices
+The supported boot devices are:
+
+\ts
+    `qefcc0'    | UCC1
+    `qefcc2'    | UCC3
+    `fs'        | USB
+    `tffs'      | TFFS
+\te
+
+\sh Boot Methods
+The boot methods are affected by the boot parameters. If no password is
+specified, RSH (remote shell) protocol is used. If a password is specified,
+FTP protocol is used, or, if the flag is set to 0x80, TFTP protocol is used.
+
+\sh Special Routines
+None
+
+\sh DMA
+Freescale DMAC Controller is supported in this release.
+To enable DMA controller support, please define the following macro in config.h:
+\cs
+    #define DRV_DMA_M512X
+\ce
+Hardware SNOOP is not supported by MPC8308's DMAC, so when the DMA channel
+is used, CACHE_SNOOP_ENABLE shouldn't be defined as USER_D_CACHE_MODE in config.h.
+\ts
+    #ifdef  DRV_DMA_M512X
+    #    define USER_D_CACHE_MODE    CACHE_COPYBACK
+    #else
+    #    define USER_D_CACHE_MODE    (CACHE_COPYBACK | CACHE_SNOOP_ENABLE)
+    #endif
+\te
+
+\sh I2C and EEPROM device
+The EEPROM device, connected to the MPC8308's I2C interface, is supported in this
+release. To enable this function, please define the following macro in config.h:
+
+\cs
+    #define INCLUDE_I2C
+\ce
+
+The data values can be written to the EEPROM with the set function:
+\cs
+void i2cEepromWrite
+    (
+    unsigned char reg,
+    unsigned char val
+    )
+\ce
+The EEPROM's current values can be read using:
+\cs
+unsigned char i2cEepromRead
+    (
+    unsigned char reg
+    )
+\ce
+
+\sh USB
+MPC8306/9 has one high-speed USB controllers. This BSP supports either USB host
+mode or USB target mode through mini-AB on front panel. The two modes can't be
+enabled at the same time.
+
+\sh 1. Host mode
+USB Enhanced Host Controller (EHCD) driver has been integrated into this BSP,
+to enable it, you should modify as follows:
+
+For command line build, define INCLUDE_EHCI in config.h, this will include
+the following items automatically: the EHCI host controller, bulk only mass
+storage class driver and DOS file system. You can also add other USB class
+drivers in config.h, then rebuild the bootrom or vxWorks image.
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, add INCLUDE_EHCI component, which will
+automatically include EHCI host controller driver, then add USB class drivers
+which you want, then rebuild your project. For example:
+
+To support USB mass storage device, you can include the following components:
+
+\cs
+    INCLUDE_USB_MS_BULKONLY
+    INCLUDE_USB_MS_BULKONLY_INIT
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_DOSFS_CHKDSK
+    INCLUDE_DOSFS_FMT
+    INCLUDE_FS_MONITOR
+    INCLUDE_ERF
+    INCLUDE_XBD
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_XBD_PART_LIB
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_XBD_BLK_DEV
+\ce
+
+Note: Mass storage device has been verified on the target.
+
+For more information, please refer to
+\tb Wind River USB for VxWorks 6 PROGRAMMER'S GUIDE
+
+\sh 2. Target mode
+To enable the board to operate as a USB mass storage target, perform the
+following steps:
+
+2.1 Define INCLUDE_FSL_TCD in the BSP's config.h file. This will cause other
+related macros to be defined automatically
+
+2.2 Adjust the USB TCD and mass storage parameter definitions as needed:
+
+\cs
+
+    /@ Defines for USB Device support @/
+
+    #define INCLUDE_FSL_TCD
+
+    #ifdef INCLUDE_FSL_TCD
+    #   ifndef _ASMLANGUAGE
+    IMPORT void fslUsbDrDeviceHwInit (void);
+    #   endif
+    #   define FSL_USB_DR_DEVICE_IO_BASE      USB_DR_BASE
+    #   define FSL_USB_DR_DEVICE_INT_NUM      INUM_USB_DR
+    #   define FSL_USB_DR_DEVICE_HW_INIT      fslUsbDrDeviceHwInit
+    #   define FSL_USB_DR_DEVICE_BE_REG       FALSE
+    #   define FSL_USB_DR_DEVICE_BE_DESC      FALSE
+    #   define FSL_USB_DR_DEVICE_BE_SETUP     TRUE
+    #   define FSL_USB_DR_DEVICE_SYS_CONF     TRUE
+    #   define FSL_USB_DR_DEVICE_BUFFER_ES    FALSE
+    #   define FSL_USB_DR_DEVICE_PHY_MODE     FSL_USB_DR_PHY_ULPI
+    #   define INCLUDE_USB_TARG
+    #   define INCLUDE_MS_EMULATOR
+    #   define INCLUDE_MS_EMULATOR_INIT
+    #endif  /@ INCLUDE_FSL_TCD @/
+
+    #ifdef INCLUDE_MS_EMULATOR
+    #   define INCLUDE_DOSFS
+    #   define INCLUDE_XBD_RAMDRV
+    #endif /@ INCLUDE_MS_EMULATOR @/
+\ce
+
+\sh TrueFFS
+This BSP uses the SG29L064N flash as the TrueFFS media.
+To use it, define INCLUDE_TFFS in config.h.
+
+The standard Wind River TrueFFS product is supported in this release.
+
+This BSP uses 6 MBytes of the SG29L064N flash as the TrueFFS media.
+The overall FLASH address space is subdivided as:
+
+\ts
+Start       | Size     | End         | Comment
+------------------------------------------------
+0xFE00_0000 | 2MB      | 0xFE1F_FFFF | bootrom and NVRam
+0xFE20_0000 | 6MB      | 0xFE7F_FFFF | TureFFS
+\te
+
+To use TrueFFS, define INCLUDE_TFFS in config.h. When using TrueFFS on a new FLASH
+for the first time, you should format and configure the FLASH by using:
+
+\cs
+    sysTffsFormat ();
+    usrTffsConfig (0, 0, "/tffs0");
+\ce
+
+If you are using DOSFS, please use
+
+\cs
+    dosfsDiskFormat ("/tffs0");
+\ce
+
+Note: If you are running these commands in the VxWorks kernel shell, you may
+prefer to run the format operations as separate tasks, e.g.
+\cs
+    sp sysTffsFormat
+\ce
+since they can take a long time to complete.
+
+You should now be able to use VxWorks I/O and file system commands to access
+the FLASH device as if it were a disk.  For example, you can copy a vxWorks
+image from your host to TFFS by using file system 'copy'.  Of course, you should
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/tffs0/vxWorks");
+\ce
+
+If you want to use "/tffs0" as a boot device, you should follow the instructions:
+
+For command line mode, make sure INCLUDE_TFFS is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the flash chip.  Also make sure you have all the necessary file system
+components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_TFFS_MOUNT
+    INCLUDE_BOOT_FILESYSTEMS
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a default_romCompress.bin in the project directory, program
+it into the flash chip as a bootrom.
+
+Below is an example by using /tffs as a boot device:
+
+\cs
+    boot device          : tffs=0,0
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /tffs0/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : user
+    ftp password (pw)    : pass
+    flags (f)            : 0x0
+    target name (tn)     : 
+    other (o)            : qefcc0
+\ce
+
+\sh SD memory card controller (eSDHC)
+The MPC830x had one enhanced SD host controller (eSDHC) on chip.
+To enable eSDHC support, make sure the following feature definitions are
+added in config.h:
+
+\cs
+    #define DRV_STORAGE_SDHC
+    #define INCLUDE_DOSFS
+    #define INCLUDE_ERF
+    #define INCLUDE_DEVICE_MANAGER
+    #define INCLUDE_FS_EVENT_UTIL
+    #define INCLUDE_FS_MONITOR
+    #define INCLUDE_XBD
+    #define INCLUDE_XBD_BLK_DEV
+    #define INCLUDE_XBD_TRANS
+    #define INCLUDE_DOSFS_DIR_FIXED
+    #define INCLUDE_DOSFS_DIR_VFAT
+    #define INCLUDE_DOSFS_FAT
+    #define INCLUDE_DOSFS_FMT
+    #define INCLUDE_DOSFS_CHKDSK
+    #define INCLUDE_DOSFS_MAIN
+\ce
+
+Use of the internal DMA engine, and selection of interrupt vs. polled mode,
+are configured by setting the values of 'dmaMode' and 'polling' in hwconf.c.
+For example, to select interrupt mode and enable use of the internal DMA engine:
+\cs
+    /@ hwconf.c @/
+    ...
+    struct hcfResource fslSdhcResources[] = {
+    ...
+        { "dmaMode",             HCF_RES_INT,    { (void *)1 } },
+        { "polling",             HCF_RES_INT,    { (void *)0 } },
+    ...
+    };
+    ...
+\ce
+
+When using an SD card for the first time, you should format it as a FAT file
+system by using
+\cs
+    dosFsVolFormat ("/sd0:1", 0x20, 0);    /@ FAT32 format @/
+\ce
+or
+\cs
+    dosFsVolFormat ("/sd0:1", 0x10, 0);    /@ FAT16 format @/
+\ce
+
+Now, you can use VxWorks I/O and file system commands to access the SD card
+device as if it were a disk.  For example, you can copy a vxWorks image from
+your host to the SD card by using file system copy. Of course, you should
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/sd0:1/vxWorks");
+\ce
+
+\sh PCI Access
+There is one PCI slot on the Freescale MPC830x mitx board.
+In order to support PCI devices, in this BSP, please define
+following macro in config.h:
+
+\cs
+    #define DRV_PCIBUS_M83XX
+\ce
+
+The Intel Pro100+ (82559) PCI Ethernet adapter is one tested PCI device
+supported in this release. Define INCLUDE_FEI8255X_VXB_END in config.h to
+enable this device.
+
+\sh Make Targets
+The make targets are listed as the names of object-format files.
+Other images not listed here have not been validated.
+
+\ts
+`bootrom'
+`bootrom.bin'
+`bootrom_uncmp'
+`bootrom_uncmp.bin'
+`vxWorks' (with `vxWorks.sym')
+`vxWorks.st'
+\te
+
+\sh BSP Bootloaders and Bootroms
+
+\ts
+Bootloader/Bootrom   | status
+----------------------------------
+bootrom              | SUPPORTED
+bootrom_uncmp        | SUPPORTED
+bootrom_res          | UNSUPPORTED
+vxWorks_rom          | SUPPORTED
+vxWorks_romCompress  | SUPPORTED
+vxWorks_romResident  | UNSUPPORTED
+\te
+
+\sh BSP Validated Tools
+
+\ts
+Tool                         | Connection/Type | Status
+-------------------------------------------------------
+Workbench Debugger           | ETHERNET/WDB    | SUPPORTED
+Workbench System Viewer      | ETHERNET/WDB    | SUPPORTED
+Workbench MemScope           | ETHERNET/WDB    | SUPPORTED
+Workbench ProfileScope       | ETHERNET/WDB    | SUPPORTED
+Workbench StethoScope        | ETHERNET/WDB    | SUPPORTED
+Workbench CoverageScope      | ETHERNET/WDB    | SUPPORTED
+Workbench Core File Analysis | ETHERNET/WDB    | SUPPORTED
+Workbench Sensor Points      | ETHERNET/WDB    | SUPPORTED
+Workbench OCD Debugger       | JTAG            | UNSUPPORTED
+Workbench OCD Flash          | JTAG            | UNSUPPORTED
+\te
+
+\sh Power-on Reset Initialization
+
+The state of the chip post reset is controlled via the HRCW.
+
+The hardware reset configuration word(HRCW) is set via programming a bootrom.
+
+The definitions are in config.h. To change this setting you must modify
+config.h and rebuild and replace the bootrom.
+
+
+\sh SYSCLK Frequency
+33.333 MHz OSC is used.
+
+\sh Known Issues
+
+MPC8309's USB controller has the errata description as below.
+
+USB-A006: READ operation on some USB registers returns an incorrect value.
+Description: When the USB registers in the address space 0x100-0x1C8 with respect to the USB Base
+address are read, an incorrect value is returned. This happens for those read operations that
+require more than one bus clock cycle. This is because of incorrect handling of an internal wait
+signal to allow for the completion of the Read operation. However, a second read operation
+following the first read will return a correct value.
+Impact: Not able to read the USB registers (0x100 -01C8) in single read operation.
+
+According to the description above, some registers won't return correct value if they are read only once. 
+These registers may be accessed by USB protocol stack codes, so MPC8309's USB controller
+is not supported in this BSP.
+
+BOARD LAYOUT
+
+The diagram below shows jumpers and connectors relevant to VxWorks
+configuration for MPC830x mitx board.
+
+\bs
+                      MPC 8306/9 SOM
+   +-----|---|------------------------------+---+--+---+-----------+------+
+   |     |POW|                                                     |MMC   |
+   |     +---+         +----+                                      |      |
+   |                   |J3  |                                      +------+
+   |                   +----+                                             |
+   |         +----+                                                       |
+   |         |JTAG|                                                       |
+   |         |    |                                                       | 
+   |         +----+                                                       |
+   |                                                                      |
+   |                                                                      |
+   |                      +---------+                                     |
+   |                      |         |                                     |
+   |                      |         |                                     |
+   |                      |  MPC8306|                                +----+
+   |                      |     8309|                                |UART|
+   |                      |         |                                +----+
+   |                      +---------+                                     |
+   |                                                               +------+
+   |                                                               |GETH1 |
+   |                                                               +------+
+   |                                                                      |
+   |                                                                      |
+   +----------------------------------------------------------------------+
+\be
+
+\bs
+                           MPC830X CARRIER CARD
++-------------------------------------------------------------------------+
+|                                                                         |
+|                   +-----------------------+                        +----+
+|                   |  PCI SLOT             |                        | P8 | mini USB
+|                   +-----------------------+                        +----+
+|                                                               +---------+
+|                                                               |         | ENET3
+|                                                               |         | 
+|                                                               +---------+
+|                                                             |/|         | 
+|                                                             |||         |
+|                                                             ||+---------+
+|                 +------------------+                        |/|         | ENET2 (top)
+|                 | CONNECT SLOT     |                        /||         |
+|                 +------------------+                        ||+---------+
+|                                                             |/----------|
+|                 +------------------+                        +----------/|
+|                 | CONNECT SLOT     |                               +----+
+|                 +------------------+                              /|    |
+|                                                                  /|| P1 | UART1 (top)
+|                                                                  |||    | UART2 (bottom)
+|                                                                  |||    |
+|                                                                  ||/----/
+|                                                                  |/-----/
+|                                                                  +------/
+|                                                                         |
+|                                                                         | 
+|-+                                                                       |
+|O| RESET                                                                 |
+|-+                                                                       | 
++---+                                                                     |
+|POW|            +------------+  +--------+                               |
+|   |            |LBUS CONNECT|  | GPIO   |                               |
++---+------------+------------+--+--------+-------------------------------+
+\be
+
+BIBLIOGRAPHY
+
+\tb MPC8306/9 PowerQUICC II Pro Processor Reference Manual
+
+\tb PowerQUICC MPC8306/9 mitx User Guide
+
+\tb E300 Core Reference Manual
+
+WEB RESOURCES
+
+Much of the Freescale documentation can be found on line. The following
+URL was correct at the time of writing for semiconductor area. You'll have to
+search the documentation using processor name for specific documentation.
+
+http://www.freescale.com/
+
+SEE ALSO
+
+\tb Workbench User's Guide: Getting Started
+
+\tb VxWorks Programmer's Guide: Configuration
+
+\tb VxWorks Programmer's Guide: Architecture Supplement

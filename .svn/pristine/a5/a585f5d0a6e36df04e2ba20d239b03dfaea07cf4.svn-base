@@ -1,0 +1,3 @@
+#ifdef INCLUDE_IEEE1394_OHCI
+    vxbFwOhciDrvRegister();
+#endif /* INCLUDE_IEEE1394_OHCI */

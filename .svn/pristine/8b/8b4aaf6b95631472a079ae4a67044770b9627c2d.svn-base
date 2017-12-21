@@ -1,0 +1,3 @@
+#ifdef DRV_DMA_FSL
+IMPORT void vxbFslDmaRegister (void);
+#endif  /* DRV_DMA_FSL */

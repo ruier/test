@@ -1,0 +1,3 @@
+#ifdef DRV_TIMER_MIPSR4K
+    extern void vxbR4KTimerDrvRegister (void);
+#endif /* DRV_TIMER_MIPSR4K */

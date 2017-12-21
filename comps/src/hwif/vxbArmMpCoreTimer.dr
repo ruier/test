@@ -1,0 +1,4 @@
+#ifdef DRV_ARM_MPCORE_TIMER
+    armMpCoreTimerDrvRegister ();
+#endif /* DRV_ARM_MPCORE_TIMER */
+

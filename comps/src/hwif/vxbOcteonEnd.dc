@@ -1,0 +1,15 @@
+#ifdef INCLUDE_OCTEON_VXB_END
+
+#ifdef INCLUDE_OCTEON_RGMII_VXB_END
+#error "INCLUDE_OCTEON_VXB_END and INCLUDE_OCTEON_RGMII_VXB_END cannot both be included."
+#endif
+#if !defined (INCLUDE_OCTEON_RGMII) && !defined (INCLUDE_OCTEON_SGMII) \
+&&  !defined (INCLUDE_OCTEON_SPI4000)
+#error "INCLUDE_OCTEON_VXB_END requires at least one of INCLUDE_OCTEON_RGMII, INCLUDE_OCTEON_SGMII, or INCLUDE_OCTEON_SPI4000"
+#endif
+#if !defined (INCLUDE_END2)
+#error "INCLUDE_OCTEON_VXB_END requires INCLUDE_END2"
+#endif
+
+IMPORT void octEndRegister(void);
+#endif

@@ -1,0 +1,4 @@
+#ifdef DRV_INTCTLR_I8259
+extern void vxbI8259IntCtlrRegister (void);
+#endif /* DRV_INTCTLR_I8259 */
+

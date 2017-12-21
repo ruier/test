@@ -1,0 +1,3 @@
+#ifdef DRV_MII_INTEL_GCU
+    vxbIntelGcuRegister ();
+#endif /* DRV_MII_INTEL_GCU */

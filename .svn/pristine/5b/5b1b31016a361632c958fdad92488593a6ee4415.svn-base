@@ -1,0 +1,40 @@
+
+                 README: Freescale QorIQ P3041 DS
+
+This file contains board-specific information for the Freescale QorIQ P3041DS
+target model.  Specifically, this file contains information on any
+BSP interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+
+------------------------------------------------------------------------------
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    Fixed potential memory corruption caused by sysNvRamGet(). (WIND00101057)
+    Fixed time base enable issue on non-zero CPUs. (WIND00403567)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Removed RESERVED_ATOMICS functionality, which is introduced in
+    VxWorks 6.9.2 UP2, from BSP and PPC arch-specific libraries.
+
+    Fixed reboot failure on non-primary OS in AMP. (WIND00344093)
+
+    Restricted enabling and disabling L3 cache only on physical Core0 for
+    multi-core solutions. (WIND00341977)
+
+    Added missing L2 cache flush on non-primary core at reboot in SMP.
+    (WIND00341662)
+
+    Removed optional components, redundant definitions and undefinitions from
+    config.h. (WIND00334904)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+    
+    Added vxBus I2C support. (WIND00243089)
+    Initial release to support Freescale QorIQ P3041 DS Board.

@@ -1,0 +1,7 @@
+#ifdef INCLUDE_DRV_STORAGE_INTEL_ICH
+    vxbIntelIchStorageRegister ();
+#endif
+
+#ifdef INCLUDE_DRV_STORAGE_INTEL_ICH_SHOW
+    ichAtaShowInit ();
+#endif

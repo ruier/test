@@ -1,0 +1,3 @@
+#ifdef INCLUDE_UCC_VXB_END
+    uccRegister();
+#endif /* INCLUDE_UCC_VXB_END */

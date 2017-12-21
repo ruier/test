@@ -1,0 +1,4 @@
+#ifdef DRV_ARM_MPCORE_TIMER
+extern void armMpCoreTimerDrvRegister (void);
+#endif
+

@@ -1,0 +1,3 @@
+#ifdef DRV_SIO_UCC
+    uccSioRegister();
+#endif /* DRV_SIO_UCC */

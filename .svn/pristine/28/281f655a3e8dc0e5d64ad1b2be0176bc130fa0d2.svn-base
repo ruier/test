@@ -1,0 +1,437 @@
+\" walnut/target.ref - Walnut target specific documentation
+\"
+\" Copyright (c) 2000-2002, 2004-2008 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01l,22oct08,pch  CQ135132: describe interaction between bootapp type
+\"		    and maximum VxWorks image size
+\" 01k,25apr08,fao  change serial driver to support vxbus
+\" 01j,22mar07,rec  identify unsupported project build images
+\" 01i,15oct06,rec  update link to reference board manual
+\"		    Add workbench flash instructions
+\" 01h,20dec05,pch  SPR 104330: update obsolete terminology
+\" 01g,29sep04,mdo  Converted from target.nr
+\" 01f,02may02,pch  SPR 73648: common build for both Rev D and Rev E
+\"		    processors
+\" 01e,11jan02,pch  Updated for T2.2
+\" 01d,15aug01,kab  Updated for CP4, ibmEmac, etc
+\" 01c,28aug01,dgp  change manual pages to reference entries per SPR 23698
+\" 01b,01Dec00,s_m  incorporated comments from ibm
+\" 01a,13Nov00,s_m  created
+\"
+\TITLE walnut - IBM PPC405GP EVB
+
+NAME
+IBM PPC405GP EVB
+
+INTRODUCTION
+This reference entry provides board-specific information necessary to run
+VxWorks for the walnut (IBM PPC405GP) BSP. Before using a board with VxWorks,
+verify that the board runs in the factory configuration by using
+vendor-supplied ROMs and jumper settings and checking the RS-232
+connection.
+This BSP supports the PowerPC 405GP Rev D and Rev E parts.
+Rev B and Rev C support is deprecated; support remains as in original
+release, but has not been validated nor upgraded for this release.
+Rev A parts are no longer supported with this release.
+
+
+\sh Boot ROMs
+The IBM 405GP Evaluation Board uses a single AMD Am29F040 ROM
+(total 512KB).  Install the ROM as follows:
+
+\ts
+ROM | Socket
+------------------------------
+ -  | U27
+\te
+
+The BSP supports the NVRAM (Dallas Semiconductor DS1743) on the walnut board.
+The boot parameters will be preserved when the system is powered off.
+
+\sh Jumpers
+Not applicable.
+
+FEATURES
+
+\sh Supported Features
+
+The following features are supported in this release:
+   - MMU on the PPC405GP processor (MMU_BASIC only).
+   - System Timer (uses 405GP PIT hardware timer)
+   - Auxiliary Timer (uses 405GP FIT hardware timer)
+   - Watchdog Timer (uses 405GP WDT hardware timer)
+   - Both 405GP integrated 16550-style serial ports
+   - 405GP integrated Universal Interrupt Controller (UIC)
+   - MAL/EMAC (integrated Memory Access Layer and 10/100 Ethernet MAC)
+   - 405GP PCI controller
+   - AMD 79C97x family of Ethernet controller (using ln97xEnd driver)
+      - Allied Telesyn 2450T  adapter (AMD 79C970) has been tested
+      - Allied Telesyn 2700TX adapter (AMD 79C972) has been tested
+      - other adapters with the same AMD controller may also work.
+   - SDRAM autoconfiguration (the default 32MB SDRAM DIMM can be replaced with
+     up to a 128MB DIMM) using IIC to read the DIMM SEEPROM
+   - ECC SDRAM
+   - NVRAM (Dallas Semiconductor DS1743)
+   - Real-time clock (Dallas Semiconductor DS1743) using ds1643rtc.c driver
+   - JTAG RISCWatch bootrom flash programming tool
+
+HARDWARE DETAILS
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Devices
+The chip drivers used by this BSP are:
+
+    vxbNs16550Sio.c - 16550 serial driver
+    ppc405Timer.c - timer driver for the PPC405GP
+    byteNvRam.c - generic non-volatile RAM driver
+
+This BSP also provides the following chip drivers:
+
+	d1643RTC.c		- RTC DS1643 real time clock driver
+	uicIntr.c		- on-chip Universal Interrupt Controller
+
+It also provides DCR access routines for the following functional
+units:
+	- IBM DMA controller
+	- IBM external bus controller
+	- IBM Memory Access Layer (MAL)
+	- IBM SDRAM controller
+	- IBM Universal Int Controller (UIC)
+
+\sh Memory Maps
+
+This BSP supports MMU on the PPC405GP processor. Memory is mapped using a
+fixed page size of 4K.
+
+The sysPhysMemDesc[] array in sysLib.c is used to initialize the Page Table
+Entry (PTE) array used by the MMU to translate addresses with single page
+(4k) granularity. Address translations for local RAM, memory mapped PCI bus,
+memory mapped IO space and local PROM/FLASH are set here. PTEs are held in a
+2-level page table. There is one Level 1 page table and several Level 2 page
+tables. The size of the Level 1 table is 4K and the size of each Level 2 page
+table is 8K. Each Level 2 table can map up to 4MB of contiguous memory space.
+
+\sh Calculating size of page table required
+
+For the following memory map we can calculate the page table size
+required as follows:
+
+\ts
+Memory Area | Address Range Mapped | Size | Number of Level 2 pages
+-
+Local Memory | 0 - Ram size | 32MB | 8
+PCI Memory | 0x80000000-0x83FFFFFF | 64MB | 16
+PCI IO Regn 1 | 0xE8000000-0xE800FFFF | 64K | 1
+PCI IO Regn 2 | 0xE8800000-0xE88FFFFF | 1MB | 1
+PCI CFG | 0xEEC00000-0xEEC00FFF | 4K | 1
+PCI IACK | 0xEED00000-0xEED00FFF | 4K | 0 *
+PP Bridge | 0xEF400000-0xEF400FFF | 4K | 1
+UART IO Space | 0xEF600000-0xEF600FFF | 4K | 0 *
+NVRAM Space | 0xF0000000-0xF0001FFF | 8K | 1
+Flash | 0xFFF80000-0xFFFFFFFF | 512K | 1
+\te
+
+	* included in previous L2 page
+
+	Total # of L2 pages = 30
+	Total Memory Required for page table = 30 * 8 + 4 = 244 K.
+
+By default, to increase performance the instruction MMU (IMMU) is turned
+off. In this case, instruction cacheability is controlled by ICCR (which
+by default is set to cache all RAM). The IMMU can be re-enabled by defining
+USER_I_MMU_ENABLE in config.h.
+
+\sh Serial Configuration
+The default configuration of the serial ports are 9600bps, 8 data bits,
+no parity, 1 stop bit.
+
+\sh Network Configuration
+
+The Enhanced Network Driver (END) used with the integrated EMAC Ethernet
+core is "ibmEmacEnd": Note that the boot device name is now "emac", rather
+than "ibmEmac". The EMAC works at either 10Mbps or 100Mbps.  EMAC
+gets the results of the PHY's auto-negotiation process over the MII
+interface.
+
+Since MAL is a Processor Local Bus (PLB) master, its accesses to system
+memory are unknown to the processor's L1 cache because there is no hardware
+enforced cache coherency in the 405GP.  The ibmEmacEnd driver maintains
+coherency for both buffer descriptors and buffers.
+
+The following are not supported in the current driver:
+		 - wake-on-LAN
+
+
+If desired, an AMD 79C97x PCI Ethernet card can be plugged into the Walnut
+board.  This controller uses the ln97xEnd driver provided with VxWorks.
+
+The Ethernet hardware address is configurable at run-time.
+The first three bytes of the address are always assumed to be 0x0004AC
+(IBM) and the last three bytes are configurable and stored in NVRAM at
+address 0xF0000500.  To make the ethernet hardware address match the address
+printed on the decal attached to the Walnut board use the following example
+as a guide.
+
+
+Ethernet hardware address on the Walnut board decal:  0004AC3E4B22
+	- boot VxWorks
+	- execute the following command from the shell:
+
+		sysLanIbmEmacEnetAddrSet 0x00, 0x04, 0xAC, 0x3E, 0x4B, 0x22
+
+
+\sh Supported BootRom builds
+
+The following bootrom file types are supported in this release.
+When using a Rev B or Rev C processor (which are deprecated), the
+patch405b.exe or patch405c.exe tool must be run on the entire ELF
+file.  If a compressed bootrom is built, this is not possible.
+
+\ts
+bootrom_uncmp | (405GP Rev B (deprecated), C (deprecated), D, E)
+bootrom_uncmp.hex | (405GP Rev B (deprecated), C (deprecated), or D, E)
+bootrom | (405GP Rev D, E only)
+bootrom.hex | (405GP Rev D, E only)
+\te
+
+
+In this release, bootroms can be built either using the command line
+(e.g. "make bootrom.hex") or by specifying PROFILE_BOOTAPP in the
+project mechanism.
+
+With either build mechanism, a bootrom built using default settings will
+decompress itself to address 0x00D00000, thus the largest VxWorks image
+that can be loaded without overlaying the bootrom's text segment is 13MB.
+This is reduced to 11MB when using a RAM-resident bootapp, whose default
+load address is 0x00B00000.  RAM-resident bootapps are normally built
+using the project mechanism.
+
+For PPC405GP_REVB (deprecated):
+
+A batch file has been provided that will post-process the bootrom_uncmp
+file.  After bootrom_uncmp is built, run the
+bootrrb.bat file.  bootrrb.bat will modify bootrom_uncmp and will create a
+new bootrom_uncmp.hex.
+
+For PPC405GP_REVC (deprecated):
+
+A batch file has been provided that will post-process the bootrom_uncmp
+file.  After bootrom_uncmp is built, run the
+bootrrc.bat file.  bootrrc.bat will modify bootrom_uncmp and will create a
+new bootrom_uncmp.hex.
+
+For PPC405GP_REVD_OR_E:
+
+It is not necessary to post-process the bootrom files when using the 405GP
+Rev D or E processor.
+
+For all processor revisions:
+
+The standard uncompressed ROM and ROM-resident project configuration are not
+supplied because they will not fit in the bootrom.
+
+
+\sh Creating a bootrom, and bringing up vxWorks
+
+Create a bootrom by either
+
+ a) Rebuilding bootrom_uncmp.hex image and programming it into an
+	AMD 29F040 flash part using the following steps:
+
+	- For PPC405GP_REVB
+		- make bootrom_uncmp
+		- run bootrrb.bat to create patched bootrom_uncmp.hex
+		  (bootrrb.bat runs patch405b)
+
+	- For PPC405GP_REVC
+		- make bootrom_uncmp
+		- run bootrrc.bat to create patched bootrom_uncmp.hex
+		  (bootrrc.bat runs patch405c)
+
+	- For PPC405GP_REVD_OR_E
+		- make bootrom_uncmp.hex or bootrom.hex
+
+ b) If you have a JTAG RISCWatch processor probe, you can use
+    vx_rw_flash.cmd to program the flash part (see below).
+
+
+Connect a terminal or terminal emulator to the board (the 9 pin connector
+closest to the printed circuit board).  Emulator parameters should be set
+to 9600bps, 8 data bits, no parity, 1 stop bit.
+Power-up the board, you should get an error because the default boot
+line in config.h is not 100% correct for your environment.  Type in new
+configuration parameters using the bootrom menu
+(set boot device : emac).
+Your new configuration will be stored in the NVRAM.
+
+
+\sh Workbench bootrom flash programming utility
+
+	a) Install the WindRiver ICE and power it on.
+
+	Connect the JTAG interface cable from the Wind River ICE to the 
+	PPC405GP  board JTAG connector (J24 located on the CPU card). When all 
+	of the connections have been made, power up the target board and 
+	create a Wind River ICE connection in Workbench.
+
+	b) Configure the Workbench connection.
+
+	When creating the connection, specify the PPC405GP CPU.
+	Enter the IP address of the Wind River ICE when requested.
+
+	c) Load the proper PPC405GP register setting for WindRiver ICE.
+
+	Once you have connected the probe to the CPU, right-click on the 
+	connection in the target manager and attach to the CPU core. At 
+	this point, you can go to the main Workbench Window tab at the top 
+	of the view and select "show view". Browse the view list and select 
+	OCD Command Shell. This launches the original BKM command shell.
+	Navigate to the target manager and right-click on core(405GP). Select 
+	the reset tab. You can now put the register file provided by 
+        the installation in "play register file" (for example, 
+        registers/PowerPC/4xx/IBM/405gp.reg). Reset with IN then click the 
+        reset download button. You have now loaded the target board with 
+        enough settings to program the boot ROM. Close the Reset and 
+        Download window after the register file playback finishes.
+        Select "Window > show view" again and select Flash Programmer.
+	
+	d) Converting the bootrom.hex file to bootrom.bin.
+
+	Select the Add/Remove tab in the flash programmer. Click 
+	"convert file" and navigate to the boot loader project you created 
+	previously e.g. WindRiver\workspace\PPC405BootProj\bootrom.hex. 
+	Select the project. The start address should be 0x0 and the end 
+	address should be set to 0xffffffff. Click "convert and add" to convert 
+	the file. 
+ 	At this point, the file is added to the list. Click on the start 
+	address entry (should be 0x0) and change it to 0xfff80000. The file 
+	is now ready for programming.
+
+
+	e) Program the PPC405GP  flash.
+
+	Select the configuration tab and choose the following device:
+	AMD -> 29F040 -> (512 x  8) 1 Device.
+
+	Set the base address to 0xfff80000.
+	Set the start address to 0x0000. 
+	Set the size to 65516.
+
+	Select programming tab and in the Erase Sector Selection click on Select
+        All.  Check "Send IN before each operation", then click "Erase/Program".
+
+	Go to OCD command shell and type IN. Be sure this returns the BKM 
+
+\sh RISCWatch bootrom flash programming utility
+
+An IBM RISCWatch based command file (vx_rw_flash.cmd) is provided that
+will program bootrom_uncmp.hex into the AMD Am29F040 flash part on the
+Walnut board. A RISCWatch JTAG processor probe and RISCWatch software
+version 4.5 or newer is required to use this utility.
+
+NOTE: The vx_rw_flash.cmd utility may need modification if you use a
+different SDRAM DIMM than was shipped with the Walnut board (see notes
+inside vx_rw_flash.cmd).
+
+To use this utility,
+  - make bootrom_uncmp via the command line interface (not with the IDE).
+  - Run the bootrr_.bat batch file for the correct processor revision.
+	This step will create a patched version of bootrom_uncmp.hex
+	NOTE: The manual step of adding the branch instruction to
+	bootrom_uncmp.hex is NOT necessary if using this utility!
+  - Start IBM JTAG RISCWatch
+  - Make sure that the RISCWatch search path is set up to find files
+	in the Walnut BSP directory.  One way to do this is to execute the
+	following RISCWatch command:
+	   srchpath add c:\WR\VxWorks\target\config\walnut
+  - Execute the following command to start the flash programming process.
+	This example will place the bootrom_uncmp.hex file into the flash.
+	   exec vx_rw_flash.cmd {"bootrom_uncmp.hex"}
+
+
+SPECIAL CONSIDERATIONS
+\sh PowerPC 405GP Rev A (PVR = 0x40110000)
+
+This initial hardware sample is no longer supported.
+
+\sh PowerPC 405GP Rev B (PVR = 0x40110040) errata
+
+There are errata in the 405GP Rev B chip that affect the operation of
+this Board Support Package.  You should familiarize yourself with them.
+A current 405GP errata list is available from the PowerPC Technical
+support group (ppcsupp@us.ibm.com).  To avoid 405GP Rev B errata a tool
+patch405b.exe has been included.  This tool searches an ELF executable
+file (output of the linker) for certain patterns of instructions
+related to the above errata.  If it finds a potential problem, it uses
+reserved space provided by patchtblb.s to create a "patch" which will
+avoid the errata.  The patch table is allocated inside of sysALib.s
+because it includes patchtblb.s.
+
+If you are using a 405GP Rev B be sure to define PPC405GP_REVB in config.h.
+
+
+\sh PowerPC 405GP Rev C (PVR = 0x40110082) errata
+
+There are errata in the 405GP Rev C chip that affect the operation of
+this Board Support Package.  You should familiarize yourself with them.
+A current 405GP errata list is available from the PowerPC Technical
+support group (ppcsupp@us.ibm.com).  To avoid 405GP Rev C errata a tool
+patch405c.exe has been included.  This tool searches an ELF executable
+file (output of the linker) for certain patterns of instructions
+related to the above errata.  If it finds a potential problem, it uses
+reserved space provided by patchtblc.s to create a "patch" which will
+avoid the errata.  The patch table is allocated inside of sysALib.s
+because it includes patchtblc.s.
+
+If you are using a 405GP Rev C be sure to define PPC405GP_REVC in config.h.
+
+\sh PowerPC 405GP Rev D (PVR = 0x401100C4) errata
+
+There are errata in the 405GP Rev D chip that affect the operation of
+this Board Support Package.  You should familiarize yourself with them.
+A current 405GP errata list is available from the PowerPC Technical
+support group (ppcsupp@us.ibm.com).
+
+If you are using a 405GP Rev D be sure to define PPC405GP_REVD_OR_E in config.h.
+
+\sh PowerPC 405GP Rev E (PVR = 0x40110145) errata
+
+There are errata in the 405GP Rev E chip that affect the operation of
+this Board Support Package.  You should familiarize yourself with them.
+A current 405GP errata list is available from the PowerPC Technical
+support group (ppcsupp@us.ibm.com).
+
+If you are using a 405GP Rev E be sure to define PPC405GP_REVD_OR_E in config.h.
+
+\sh PowerPC 405GPr Rev B (PVR = 0x50910951) errata
+
+There are errata in the 405GPr Rev B chip that affect the operation of
+this Board Support Package.  You should familiarize yourself with them.
+A current 405GPr errata list is available from the PowerPC Technical
+support group (ppcsupp@us.ibm.com).
+
+If you are using a 405GPr Rev B be sure to define PPC405GPR_REVB in config.h.
+
+
+SEE ALSO
+\tb VxWorks Programmer's Guide: Configuration, 
+\tb VxWorks Programmer's Guide: Architecture Appendix 
+
+BIBLIOGRAPHY
+Please refer to the following documents for further information on the
+Walnut board.
+
+\tb PowerPC 405 Reference Board Manual  located at
+405GP_GPR/PPC405GP_EBM2006__v1_00.pdf obtained from http://www.amcc.com
+(also on the PowerPC Embedded Processors, Cores, and Tools CDROM)
+
+\tb 405GP_settings.pdf  included in this BSP.
+
+

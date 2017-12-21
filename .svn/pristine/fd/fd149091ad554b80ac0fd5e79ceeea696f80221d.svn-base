@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND_MYRILANAI
+    myeRegister();
+#endif

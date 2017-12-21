@@ -1,0 +1,4689 @@
+\" mv3100/target.ref - Motorola MVME3100 target specific documentation
+\"
+\" Copyright (c) 2003-2009 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" Copyright 2004-2005 Motorola, Inc. All Rights Reserved
+\"
+\" modification history
+\" --------------------
+\" 02r,10mar09,e_d  Add information for PCB rev (WIND00160008)
+\" 02q,25nov08,syt  Added description about USB EHCI controller working condition.
+\"                  (WIND00142318)
+\" 02p,15oct08,y_w  Fixed USB related description and format update (WIND00135828)
+\" 02o,21aug08,y_w  Fixed NVRAM related description (WIND00131666)
+\" 02n,24jan08,y_w  Fixed description of sysApplInit()
+\" 02m,02aug07,agf  (WRS) Removed Delivered Objects section; fix mod history
+\"                  numbering
+\" 02l,26jul07,agf  (WRS) Renamed BSP mv3100
+\" 02k,19jan06,jch  (WRS) Updated for VxWorks 6.x
+\" 02j,02nov05,cak  Added commentary regarding shared memory in PNE.
+\" 02i,24oct05,cak  Fixed minor bug in sATA sample code.
+\" 02h,26sep05,pjh  Fixed typos and formatting errors, and updated maximum
+\"                   auxClock rate.
+\" 02g,09sep05,cak  Tornado Project support.
+\" 02f,08sep05,pjh  Fixed formatting and sATA commentary.
+\" 02e,02sep05,efb  Added Wind River USB commentary.
+\" 02d,01sep05,cak  TFFS and flash programming support.
+\" 02c,18aug05,pjh  Added AuxClock support info.
+\" 02b,15aug05,efb  Added additional show routine info.
+\" 02a,01aug05,pjh  Support for global and external tick timers. 
+\" 01z,02aug05,efb  Added Watchdog Timer commentary.
+\" 01y,01aug05,cak  Minor modifications to enhance the shared memory 
+\"                  commentary.
+\" 01x,18jul05,cak  Firmware booting support.
+\" 01w,18jul05,cak  Added commentary regarding the memory test suite.
+\" 01v,14jul05,efb  Added performance monitor commentary.
+\" 01u,01jul05,cak  Interrupt Controller commentary.
+\" 01t,21jun05,cak  DS1375 RTC and Alarm support.
+\" 01s,02jun05,pjh  Quad UART support.
+\" 01r,15may05,efb  Added sATA support and configuration commentary.
+\" 01q,26apr05,cak  DS1621 Temperature Sensor support.
+\" 01p,22apr05,cak  Patch 99776: E500 PATCH SPR99776.
+\" 01o,05apr05,cak  Fixed an error in the show routines section.
+\" 01n,01apr05,efb  Added Ethernet commentary.
+\" 01m,25mar05,cak  MPC8540 DMA Support.
+\" 01l,15feb05,cak  L2 Cache/SRAM Error handling.
+\" 01k,08feb05,cak  Cache support and SPR updates.
+\" 01j,31jan05,cak  VPD Support.
+\" 01i,27jan05,cak  NVRAM Support.
+\" 01h,25jan05,cak  Shared memory support.
+\" 01g,20jan05,cak  Added commentary regarding SPR 94153 and downloading
+\"		     and flashing boot code via the firmware.
+\" 01f,24nov04,cak  Added memory controller show routine.
+\" 01e,19nov04,scb  Show routine additions.
+\" 01d,09nov04,scb  I2C support.
+\" 01c,11oct04,scb  Add tlbShow information. 
+\" 01b,23aug04,scb  Starting point for "Big Easy".
+\" 01a,16oct03,dtr  Created
+\"
+\TITLE mv3100 - Motorola MVME3100
+
+NAME
+`Motorola MVME3100'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks.  This BSP is compatible with Wind River's Workbench development 
+environment and VxWorks 6.1 through 6.7.
+
+This BSP encompasses the MVME3100 Single Board Computer.  It consists of the 
+MPC8540 PowerQUICC III integrated processor with serial ATA, USB 2.0,
+2eSST VMEbus interfaces, dual 64-bit/100MHz PMC sites, one flash bank (with
+two boot blocks), dual 10/100/1000 Ethernet, one 10/100 Ethernet, five
+serial ports, and a single SODIMM module.
+
+The MVME3100 has its own transition board, but does not require one.
+
+RUNNING VXWORKS
+
+This section provides guidelines for running VxWorks on the MVME3100 board.
+
+This release supports MVME3100 PCB 01A and PCB 11A board as default.
+
+\sh Jumpers & Switches
+
+The following jumpers and switches are relevant to VxWorks configuration:
+
+\ts
+Switch | OFF                        | ON
+----------------------------------------
+S4-2   | Boot from Bank A           | Boot from Bank B
+S4-3   | Flash not write protected  | Flash write protected
+S4-5   | Auto-SCON mode             | Manual SCON mode
+S4-6   | Non-SCON mode              | Always SCON mode
+S4-7   | Legacy Mode                | SATA DPA Mode
+S4-8   | Normal MPC8540 TRST mode   | MPC8540 emulator is attached
+----------------------------------------
+S3-2   | PCI-X mode(Factory)        | PCI mode
+\te
+
+For more information, please refer to <MVME3100 Single-Board Computer Installation and Use>
+\cs
+    Configuration Switch (S4) Layout     Geographical Address Switch (S3) Layout
+    +----------+                         +----------+
+    |   |-|  8 | TRST Select             |   |-|  8 | GA0
+    |   |-|  7 | SATA Mode               |   |-|  7 | GA1
+    |   |-|  6 | Manual VME SCON Select  |   |-|  6 | GA2
+    |   |-|  5 | VME SCON Mode           |   |-|  5 | GA3
+    |   |-|  4 | Reserved                |   |-|  4 | GA4
+    |   |-|  3 | Flash Bank WP           |   |-|  3 | GAP 
+    |   |-|  2 | Block Boot select       |   |-|  2 | PCI-A Bus mode
+    |   |-|  1 | Safe Start              |   |-|  1 | Not used
+    +----------+                         +----------+
+     ON     OFF                           ON     OFF
+\ce
+
+\sh Boot ROMS
+
+The MVME3100 supports one bank of FLASH memory.  This bank consists of two
+AMD S29GL512/256/128N MirrorBit flash devices.  These devices are configured
+to operate in 16-bit mode to provide a 32-bit FLASH port, and are soldered
+onboard.  The FLASH bank contains two boot blocks which are switch selectable.
+The switch effectively swaps the mapping of the boot blocks so that the
+active boot block is mapped at 0xFFF00000.  The start address of the FLASH
+bank is dependent on the FLASH bank size.  This configuration of the bank's
+start address is handled, dynamically, by the BSP.
+
+\sh Flashing the boot ROM using Motorola MOTLoad:
+
+The MVME3100 single board computer contains two "boot blocks" in its
+FLASH bank.  The boot blocks are each 1MB in size, located in the last
+2MBs of the FLASH bank.  The "boot bank" is located at 0xFFF00000.  Which
+boot block is acting as the boot bank is selectable via the onboard
+configuration switch.  Pin 2 is used to select the boot bank.  If pin 2
+is set to OFF, then boot block A is selected as the boot bank.  If pin 2
+is set to ON, then boot bank B is selected as the boot bank.  Motorola 
+MotLoad firmware is installed in one of the boot banks.  This firmware 
+can be used to download and FLASH the VxWorks bootrom into either of the 
+FLASH boot banks.
+
+First set some MOTLoad global variables to conform to your particular
+operational environment.  This is done via a series of `gevEdit'
+commands: These variables, when set, remain in an EEPROM through power
+cycles and can later be changed, if desired,  with MOTLoad `gevDelete'
+and `gevEdit' commands.  Note: Before using any of the gevXxx routines,
+for the first time, gevInit must be run.  gevInit() need only be run one
+time.  This routine initializes and clears the MotLoad global environmental
+variable area in the EEPROM.
+
+\cs
+    MVME3100> gevEdit mot-/dev/enet0-cipa
+    (Blank line terminates input.)
+    123.111.32.90
+
+
+    Update Global Environment Area of NVRAM (Y/N)? y
+
+    MVME3100> gevEdit mot-/dev/enet0-sipa
+    (Blank line terminates input.)
+    123.111.32.180
+
+
+    Update Global Environment Area of NVRAM (Y/N)? y
+
+
+    MVME3100> gevEdit mot-/dev/enet0-gipa
+    (Blank line terminates input.)
+    123.111.32.1
+
+
+    Update Global Environment Area of NVRAM (Y/N)? y
+
+
+    MVME3100> gevEdit mot-/dev/enet0-file
+    (Blank line terminates input.)
+    mydir/boot.bin
+
+
+    Update Global Environment Area of NVRAM (Y/N)? y
+    MVME3100>
+\ce
+
+The above sequence sets the client IP address (IP address of the MVME3100)
+to 123.111.32.90, the IP address of the server to 123.111.32.180, the
+IP address of the gateway to 123.111.32.1 and the tftp file name to
+"mydir/boot.bin".  Note that we have used "dev/enet0" as the ethernet
+device involved in the download.  You can use another device, such as
+"dev/enet1" if you wish, use of the `netShow' command will display
+which interfaces are "up" and available for use in the download operation.
+
+The file is transferred from the TFTP host to the target board using
+the `tftpGet' command.  IMPORTANT: You must have a TFTP server running
+on your host's subnet for the `tftpGet' command to succeed.  The file
+name must be set to the location of the binary file on the TFTP host.
+The binary file must be stored in the directory identified for TFTP
+accesses, but the file name is a relative path and does not include
+the `/tftpboot' directory name:
+Now that the MOTLoad global variables have been set, you
+can perform the tftp load of the file image with the following
+command:
+
+\cs
+    Be very careful when using
+\ce
+
+Notice that we have specified "/dev/enet0" as the interface.  This is
+the same interface that was specified with the `gevEdit' command.  If
+no interface is specified on the `tftpGet' command line, MOTLoad
+defaults to "dev/enet0".  Also take note that you can override the
+settings previously set via the `gevEdit' command by specifying
+additional MOTLoad options on the `tftpGet' command line.  The "-c"
+option can override the client IP address, the "-s" option can
+override the server IP address, the "-g" option can override the
+gateway IP address, and the "-f" option can override the file name.
+
+After the file is loaded onto the target, the `flashProgram' command is used
+to put it into soldered FLASH parts.
+
+\cs
+    MVME3100> flashProgram -oxxxxxxxx -n100000 -d/dev/flash0
+\ce
+
+The offset "xxxxxxxx" to use in the `flashProgram' command depends upon
+the size of the FLASH bank (it is assumed that the file will be
+flashed into the current non-boot block of the FLASH bank, in order 
+to preserve the firmware in the other boot block).
+
+MotLoad has a command, "flashShow", that presents information
+necessary to calculate offset.  The output looks something like this:
+
+\cs
+    /dev/flash0  F8000000  08000000 ....  Yes  ...
+\ce
+
+In this example, flash0 starts at F8000000 and is 128MB in size.
+
+To determine the offset at which to flash the bootrom the following
+calculation can be used:
+
+(size FLASH bank) - 2MB 
+
+Using the example output above we would get:
+
+0x08000000 - 0x00200000 = 0x07E00000 
+
+This is the offset to use in place of xxxxxxxx in the flashProgram
+command.
+
+When the flashProgram command is finished, power down the board and switch
+boot blocks - this is controlled via the configuration switch.  Then 
+power the board back up.
+
+To flash VxWorks into the current non-boot block, with MotLoad running
+in the boot block: 
+
+\cs
+    MVME3100> flashProgram -o07e00000 -n100000 -v
+\ce
+
+The MotLoad firmware can also be copied from one boot block to another.
+
+To flash MotLoad from the boot block into the non-boot block:
+
+\cs
+    MVME3100> flashProgram -o07e00000 -n100000 -v -sfff00000
+\ce
+
+\sh Boot image Flash programming from VxWorks kernel
+
+This BSP supports FLASH programming of a boot image into either of the boot 
+blocks.  This support is disabled by default.  To enable FLASH bank 
+programming change #undef INCLUDE_BOOT_IMAGE_PROGRAM to 
+#define INCLUDE_BOOT_IMAGE_PROGRAM in config.h.
+
+This will provide two utilities for programming a boot image into the
+boot blocks of the FLASH device. One utility allows you to download
+the boot image via the network, and one utility allows you to specify
+a locally resident boot image (ie. on disk, tffs, etc.).
+
+The device name is /flash0.
+
+\cs
+-> devs
+drv name
+  0 /null
+  1 /tyCo/0
+  7 /flash0
+\ce
+
+The utility to program a file that has been downloaded from a remote host is:
+
+\cs
+ programRemoteBootImage
+    -n  filename to download
+    -d  devicename of FLASH bank to be programmed
+    -b  boot block to be programmed
+    -h  host dotted ip address (optional - boot host as default)
+    -g  gateway dotted ip address (optional - boot gateway as default)
+    syntax: remoteBootImage "-n<fname>","-d<devname>","-h<host>","-g<gateway>"
+\ce
+
+Either RSH, FTP, or TFTP will be used to download the file, based on the
+vxWorks boot parameters that are specified.  If the "flags" boot parameter
+is set to 0x80 (for TFTP) then TFTP will be used.  Otherwise, if a
+"password" is specified, then FTP will be used.  If neither of the previous
+two conditions are met, then RSH will be used to download the file.
+
+The utility to program a "local" file is:
+
+\cs
+ programLocalBootImage
+    -n  filename to open
+    -d  devicename of FLASH bank to be programmed
+    -b  boot block to be programmed
+    syntax: localBootImage "-n<fname>","-d<devname>"
+\ce
+
+The file name specified must be a locally accessible file located on
+a hard disk, a TFFS drive, or another such local medium.
+
+Be very careful when using this utility to not overwrite the
+MOTLoad firmware image, if that is not your intent, as this could be
+troublesome to fix.
+
+\sh Firmware RAM and ROM booting
+
+The definition FIRMWARE_BOOT, in config.h, allows one to use the MOTLoad
+firmware command 'execProgram' to begin execution of VxWorks code rather
+than having the processor, upon powerup, automatically begin executing
+code from the cold boot location (PowerPC reset vector).  This provides
+flexibility in just where the VxWorks image can reside and still be
+invoked for execution.  FIRMWARE_BOOT is #undef'ed by default.
+
+The bootloader or kernel code which is executed via MOTLoad's execProgram
+command must have been previously loaded into RAM or alternatively placed
+into flash memory.  The commentary which follows explains this process.
+
+To execute a RAM-resident VxWorks "boot" image (rather than a flash
+resident "boot" image), perform the following:
+
+(a) Change #undef FIRMWARE_BOOT to #define FIRMWARE_BOOT.
+
+(b) ROM_BASE_ADRS may need to be adjusted.  It is currently
+    set, for RAM booting, based on the assumption that there is 512MB of
+    DRAM.  However, this should be adjusted to the actual amount of DRAM
+    on the board minus 1MB, in order to leave room for the vxWorks boot
+    image at the top of DRAM.
+
+    ie. DRAM - 0x100000  (currently set to 0x1ff00000, if FIRMWARE_BOOT
+                          is #define'd)
+
+(c) Since ROM_TEXT_ADRS, ROM_WARM_ADRS, and ROM_LINK_ADRS are defined
+    in both the Makefile (hard-coded) and config.h (based on the value
+    of ROM_BASE_ADRS) it is necessary to adjust the values of
+    ROM_TEXT_ADRS, ROM_WARM_ADRS, and ROM_LINK_ADRS in the Makefile.
+    The values used are dependent upon the value of ROM_BASE_ADRS as
+    discussed in (b) above.  For a board with 512MB of DRAM they would
+    be 0x1ff00100, 0x1ff00108, and 0x1ff00100 respectively.
+
+Please note that if FIRMWARE_BOOT is defined then USER_RESERVED_MEM will
+be defined as 0x100000 (1MB) in order to preserve the boot image in the top
+1 MB of the DRAM.
+
+To use the firmware to boot vxWorks from DRAM use the following commands
+(substitute the appropriate values where necessary).  The values used for
+the tftp download address and the execP load address are based on a board
+with 512MB of DRAM:
+
+\cs
+    MVME3100> tftpGet -cXXX.XXX.XXX.XXX -fboot.bin -sXXX.XXX.XXX.XXX -d/dev/enetx -a1FF00000
+    MVME3100> execProgram -l1FF00100 -sFFF00
+\ce
+
+If you use this boot method, keep in mind that the bootloader/kernel image
+will need to be downloaded every time the board experiences a "cold reset"
+(ie. power-on reset).  A software reset ("reboot" or "CTRL-X") can still
+be performed, as the image is located in a "protected" region of DRAM
+(protected via USER_RESERVED_MEM).
+
+A "cold boot" (powerup boot) always causes the image flashed into
+the boot block to be executed.  The boot block will always be the last
+megabyte of the flash bank.  There are two boot blocks on the MVME3100,
+and the boot block switch effectively sets which block is physically
+mapped to the last megabyte of the flash bank.  The execution address
+for cold boot start is 0xfffffffc which is the very end of the boot
+block.  We may want to use a flash bank to hold an image for execution
+but we also want to protect the "cold boot" image that is present in
+the current boot block.  We can use the first megabyte of flash memory
+for our executable image and use the MOTLoad "execProgram" command to
+execute that image - thus protecting the "cold boot" image which is
+located in the boot block.  The explanation which follows describes
+how to do this.
+
+Remember that no matter how the flash bank selection switch is set, the
+base address (address of first megabyte) of the flash bank is
+always 0xf8000000.
+
+To execute a vxWorks "boot" image from ROM, perform the following:
+
+(a) Change #undef FIRMWARE_BOOT to #define FIRMWARE_BOOT.
+
+(b) ROM_BASE_ADRS will need to be set to the start address
+    of the flash bank. Since we are specifying the start address
+    (first megabyte) of the flash bank, the image that is resident in
+    the boot block (cold boot image) will be protected.  So, if your
+    image to execute is located in the first megabyte of the flash
+    bank you would set ROM_BASE_ADRS to be 0xf8000000.
+
+(c) Since ROM_TEXT_ADRS, ROM_WARM_ADRS, and ROM_LINK_ADRS are defined
+    in both the Makefile (hard-coded) and config.h (based on the value
+    of ROM_BASE_ADRS) it is necessary to adjust the values of
+    ROM_TEXT_ADRS, ROM_WARM_ADRS, and ROM_LINK_ADRS in the Makefile.
+    The values used are dependent upon the value of ROM_BASE_ADRS as
+    discussed in #2 above.  Based on the example above these values
+    would be 0xf8000100, 0xf8000108, and 0xf8000100, respectively.
+
+(d) If FIRMWARE_BOOT is defined, USER_RESERVED_MEM will be set to 0x100000
+    (1MB).  The reason for this is to setup the firmware booting for DRAM
+    booting by default, rather than ROM booting.  If left as is, the top
+    1MB of DRAM will be reserved, which is not necessary when booting from
+    ROM.  To change this simply change USER_RESERVED_MEM, located near the
+    end of this file, to 0x0.
+
+To use the firmware to boot vxWorks from ROM use the following commands
+(substitute the appropriate values where necessary).  The execP load
+address is dependent upon which flash bank the VxWorks image is located in.
+
+\cs
+    MVME3100> tftpGet -cXXX.XXX.XXX.XXX -fboot.bin -sXXX.XXX.XXX.XXX -d/dev/enetx
+    MVME3100> flashProgram -o0 -n100000 
+    MVME3100> execProgram -lf8000100 -sFFF00
+\ce
+
+FEATURES
+
+\sh Supported features (MVME3100)
+
+\ts
+Feature             | Description
+---------------------------------
+Processor           | MPC8540 PowerQUICC III
+                    | Up to 833MHz bus clock 
+FLASH               | 32MB to 128MB soldered
+TFFS                | True Flash File System support for flash bank.
+                    | Only half of the FLASH bank is used for TFFS as
+                    | the last 2MB of the FLASH has to be reserved for 
+                    | the two boot blocks containing the boot images.
+DRAM                | One SODIMM socket for DDR333MHz, ECC memory.
+NVRAM               | 64KB (Using one of the EEPROMs which are used for configuration data storage)
+Tempe (Tsi148) chip | PCI-X to VMEbus bridge
+                    | Major features:
+                    | A16, A24, A32 and A64 address
+                    | SCT, BLT, MBLT, 2eVME, 2eSST protocols
+                    | DMA controller
+EEPROM              | Two 64KB dual-address serial EEPROMs.
+                    | One 8KB VPD serial EEPROM.
+Peripherals         | One on-board async serial debug port available via front panel RJ45;
+                    | Four async serial debug ports available via rear transition module;
+                    | One 10/100 MPC8540 FEC Ethernet interface;
+                    | Two 10/100/1000 MPC8540 TSEC Ethernet interfaces; 
+                    | One Intel 31244 SATA Controller (three available ports)
+                    | One NEC uPD720101 USB 2.0 Host Controller (OHCI/EHCI)
+PCI Interface       | 64-bit PCI/PCI-X; complies with <PCI Local Bus Specification>,
+                    | Revision 2.1
+Miscellaneous       | RESET switch 
+                    | MPC8540 DMA Controller
+                    | MPC8540 I2C Controller
+                    | MPC8540 Interrupt Controller
+                    | MPC8540 Performance Monitor
+                    | Maxim DS1621 Digital Thermometer and Thermostat
+                    | Maxim DS1375 RTC with Alarm
+\te
+
+\sh Unsupported features (MVME3100)
+
+\ts
+Feature             | Description
+---------------------------------
+L2 Cache/SRAM       | L2 Cache External Write Address Registers/Allocating and locking of
+                    | L2 cache lines from external agents as well as cache locking and unlocking.
+SATA                | SATA native DPA mode.
+                    | SATA Hot Plug.
+\te
+
+\sh Feature Interactions
+None known
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Devices
+
+The device drivers and libraries included with this BSP are:
+
+\ts
+'sysAmdS29GLxxxN.c:'     | Flash memory driver.
+'sysFlashUtil.c:'        | Flash memory utility.
+'sysProgramBootImage.c:' | Boot image programming utility.
+'m85xxTimer.c:'          | Timer driver.
+'sysEpic.c:'             | On chip interrupt controller.
+'mpc8540End.obj:'        | TSEC/FEC Ethernet controller.
+'sysMpc8540Dma.c:'       | On-chip DMA controller.
+'sysDs1621TempSensor.c:' | Maxim DS1621 Digital Thermometer and Thermostat driver.
+'sysAta.c:'              | SATA controller support in legacy IDE mode.
+'ataDrv.c:'              | Modified vxWorks6.3 ataDrv.c for use with on board SATA controller.
+'sysDs1375.c:'           | Maxim DS1375 RTC with Alarm driver.
+'sysMpc8540PerfMon.c:'   | On-chip Performance Monitor utility.
+'sysMpc8540Wdog.c:'      | Watchdog timer.
+'sysMpc8540Tmr.c:'       | External tick timers and MPC8540 global timers.
+'sysMpc8540AuxClk.c:'    | Auxiliary Clock driver.
+'sysMpc8540I2c.c:'       | MPC8540 I2C controller driver.
+'sysDs1375.c:'           | Maxim DS1375 RTC with Alarm driver.
+'sysDs1621TempSensor.c:' | Maxim DS1621 Digital Thermometer and Thermostat driver.
+'Tempe (Tsi148):'        | Tempe PCI-X to VME support, include DMA.
+'pciAutoConfigLib.c:'    | PCI auto-configuration library.
+'pciConfigLib.h:'        | PCI configuration library.
+'pciConfigShow.c:'       | Show routines of PCI bus library.
+'sysMotVpd.c:'           | Vital Product Data Support.
+'sysMotVpdShow.c:'       | Vital Product Data Show routines.
+\te
+
+\sh Memory Map
+
+On-board RAM always appears at address 0x00000000 locally.
+
+Dynamic memory sizing is supported.  By default, LOCAL_MEM_AUTOSIZE is
+defined so memory is auto-sized at hardware initialization time.
+If auto-sizing is not selected, LOCAL_MEM_SIZE must be set to the actual size
+of DRAM memory available on the board to ensure all memory is available.
+The default fixed RAM size is set to 32MB (see LOCAL_MEM_SIZE in config.h).
+
+Note that LOCAL_MEM_SIZE only controls the amount of memory mapped by the MMU.
+It does not control the amount of memory detected and configured by the Bootrom.
+The amount of physical memory indicated by the Serial Presence Detect data
+determines the memory controller configuration.
+
+\cs
+
+ CPU Space                                   PCI (|) or VME (}) Space
+ (default values)
+
+ LOCAL_MEM_LOCAL_ADRS =        -----------------  0x00000000
+              (0x00000000)    |      DRAM       |
+                              :                 :
+                              :                 :
+ VME_A32_MSTR_LOCAL =          -----------------  VME_A32_MSTR_BUS
+              (0x80000000)    |                 } (0x08000000)
+                              | VME A32 space   } .
+                              |    256MB        } . Tempe outbound window 1
+                              | (0x10000000)    } .
+              (0x87ffffff)    |                 } (0x0fffffff)
+                              |.................}
+                              | Unused A32      }
+              (0x8fff0000)    |.................} (0xfb000000)
+                              |                 } .
+                              |                 } . Tempe outbound window 0
+                              |                 } .
+              (0x8fffffff)    |                 } (0xfb00ffff)
+ VME_A24_MSTR_LOCAL =          -----------------
+ VME_A32_MSTR_LOCAL +         |                 } (0x00000000)
+ VME_A32_MSTR_SIZE =          | VME A24 space   } .
+              (0x90000000)    |    16MB         } . Tempe outbound window 2
+                              | (0x01000000)    } .
+              (0x90ffffff)    |                 } (0x00ffffff)
+ VME_A16_MSTR_LOCAL =          -----------------
+ VME_A24_MSTR_LOCAL +         |                 } (0x00000000)
+ VME_A24_MSTR_SIZE =          | VME A16 space   } .
+              (0x91000000)    |    64KB         } . Tempe outbound window 3
+                              | (0x00010000)    } .
+              (0x910fffff)    |                 } (0x0000ffff)
+                               -----------------
+                              :                 :
+                              :  Not used       :
+                              :  239 MB         :
+                              : (0x0ef00000)    :
+                              : Available for   :
+                              : expansion of    :
+                              : VME space       :
+ PCI_MSTR_MEMIO_LOCAL =        ----------------- PCI_MSTR_MEMIO_BUS =
+              (0xa0000000)    |                 |  PCI_MSTR_MEMIO_LOCAL =
+                              | NonPrefetch PCI |  (0xa0000000)
+                              | Memory space    |
+                              |      8MB        |
+                              | (0x00800000)    |
+                              |                 |
+ PCI_MSTR_MEM_LOCAL =          ----------------- PCI_MSTR_MEM_BUS =
+ PCI_MSTR_MEMIO_LOCAL +       |                 |  PCI_MSTR_MEM_LOCAL
+ PCI_MSTR_MEMIO_SIZE =        | Prefetch PCI    |  (0xa0800000)
+              (0xa0800000)    | Memory space    |
+                              |    8MB          |
+                              | (0x00800000)    |
+ ISA_MSTR_IO_LOCAL =           ----------------- ISA_MSTR_IO_BUS =
+ PCI_MSTR_MEM_LOCAL +         |                 |   (0x00000000)
+ PCI_MSTR_MEM_SIZE            |  I/O space      |
+              (0xa1000000)    |    64KB         |
+                              | (0x00010000)    |
+ PCI_MSTR_IO_LOCAL =           ----------------- PCI_MSTR_IO_BUS =
+ ISA_MSTR_IO_LOCAL +          |                 |   (0x00010000)
+ ISA_MSTR_IO_SIZE =           |   I/O space     |
+              (0xa1010000)    |   8MB - 64KB    |
+                              | (0x007f0000)    |
+              (0xa1800000)     ----------------- (0x01000000)
+                              :                 :
+                              : Not used,       :
+                              : Available for   :
+                              : expansion of    :
+                              : PCI spaces      :
+                              :                 :
+                              :                 :
+ CCSBAR =                      -----------------
+              (0xe1000000)    | MPC8540         :
+                              | internal regs.  :
+                              |    64K          :
+                              | (0x00100000)    :
+              (0xe1100000)     -----------------
+                              :     Unused      :
+ MPC8540_L2_SRAM_BASE          -----------------
+            = (0xe1100000)    : Integrated SRAM :
+                              :     256K        :
+                              : (0x00040000)    :
+              (0xe1140000)     -----------------
+                              :     Unused      :
+ LOCAL_BOARD_ACCESS_ADRS       -----------------
+              (0xe2000000)    :   MVME3100      :
+                              : Control/Status  :
+                              :   Registers     :
+                              :   Quad UARTs    :
+			      :  Tick Timers    :
+                              :  (0x01000000)   :
+              (0xe3000000)     -----------------
+                              :     Unused      :
+                              :                 :
+                              :                 :
+ Flash Bank (dynamic) =        -----------------
+              (0xf8000000)    |   Flash Bank    :
+              (0xFc000000)    |  32MB - 128MB   :
+              (0xfe000000)    |                 :
+                              |                 :
+                              |                 :
+              (0xffffffff)     -----------------
+
+\ce
+
+PCI Mapped Memory consists of non-prefetchable and prefetchable.
+
+The maximum amount of non-prefetchable PCI memory is defined by
+the user as PCI_MSTR_MEMIO_SIZE.  The maximum amount of prefetchable 
+PCI memory is defined by the user as PCI_MSTR_MEM_SIZE.  This is a 
+one-to-one mapping.  The address used on the processor bus is the 
+address used on the PCI memory bus.
+
+PCI Mapped I/O consists of 16 and 32 bit I/O. The amount of 16 bit I/O
+is configured by ISA_MSTR_IO_SIZE and defaults to 64KB in size. This is
+not a one-to-one mapping.  This area begins at 0x0 on the PCI I/O
+bus, and ISA_MSTR_IO_LOCAL on the processor bus. The amount of 32 bit 
+I/O is configured by PCI_MSTR_IO_SIZE.
+
+The following definitions, found in config.h, control the sizes of
+the PCI and VME windows:
+
+\cs
+#define VME_A64_MSTR_SIZE       0x00000000      /@ 0 MB @/
+#define VME_A32_MSTR_SIZE       0x10000000      /@ 256 MB @/
+#define VME_A24_MSTR_SIZE       0x01000000      /@ 16 MB @/
+#define VME_A16_MSTR_SIZE       0x00010000      /@ 64 KB @/
+#define PCI_MSTR_MEMIO_SIZE     0x00800000      /@ 8 MB @/
+#define PCI_MSTR_MEM_SIZE       0x00800000      /@ 8 MB @/
+#define ISA_MSTR_IO_SIZE        0x00010000      /@ 64 kbytes @/
+#define PCI_MSTR_IO_SIZE        0x007f0000      /@ 8 MB - 64 KB @/
+\ce
+
+Also, since PCI auto-configuration is performed by the bootroms,
+changing any of these values requires the creation of new bootroms.
+
+\sh Interrupts
+
+The system interrupt vector table has 256 entries.  Vectors for the various
+devices on the buses are assigned hierarchically as follows:
+
+\ts
+Vector#       | Assigned to
+------------------------------
+`0x00 - 0x0B' | external or off-chip sources
+`0x0C - 0x22' | internal or on-chip sources
+`0x23 - 0x26' | global timer sources
+`0x27 - 0x2A' | message register sources
+`0x2B - 0x2E' | inter-processor sources
+`0x60 - 0x76' | Tempe (Tsi148) PCI-X to VMe related interrupts.
+`0xc0 - 0xff' | Available for user application software.
+\te
+
+As the above table shows, the BSP uses interrupt vectors (numbers)
+beginning with 0 and proceeding to numerically higher values.  Interrupts
+such as VME bus interrupts which can be assigned a value by the user
+should be confined to numbers in the range 0xc0 through 0xff to avoid
+conflict with system required interrupts.  It is suggested that
+application software avoid the use of 0xff as an interrupt vector.  Although
+a legal number, 0xff often is associated with a nonresponding PCI read and
+may cause confusion when debugging.
+
+The intConfig table, in config.h, is provided for user configuration of
+various interrupt source parameters.  Each row in the table represents 
+one interrupt source.  The first entry in each row is the register offset 
+for that particular interrupt source's vector/priority register.  The 
+second entry covers the interrupt source's configuration values for 
+priority, polarity, and sense.  The third entry is the interrupt source's 
+vector number.  The priority is the only parameter that is meant to be
+user-configurable.  The priority can have a value between 0 and 15,
+0 is the lowest and 15 is the highest.  Caution: a priority of 0
+will disable interrupts from that source.  The last (or fourth) entry
+is used to specify whether the interrupt is to be configured as a 
+critical interrupt or not.
+
+The tempe interrupts can be prioritized with TEMPE_INT_PRIORITIES in config.h.
+
+The following macros have been provided in order to define the intEnable
+and intDisable routines associated with the user reserved interrupt vectors.
+These are filled with NULL for now but should be filled with a valid
+intEnable and intDisable function pointer when the user actually needs to
+hook functions to these interrupt numbers.  See INT_UTIL_EXTRA inside
+of "xxx8540A.h".
+
+\cs
+#define USR_INT_ENABLE  NULL    /@ Replace with valid intEnable fcn ptr @/
+#define USR_INT_DISABLE NULL    /@ Replace with valid intDisable fcn ptr @/
+
+#define INT_USR_EXTRA ,{ USR_INT_NUM_MIN,USR_INT_NUM_MAX, \
+                         USR_INT_ENABLE, USR_INT_DISABLE }
+\ce
+
+Dealing with VME Bus IRQx interrupts:
+
+The following code fragments illustrate how to connect interrupt handlers
+for VME bus interrupts IRQ1 and IRQ2 to vectors 0xc0 and 0xc2 respectively
+and how to generate the associated VME bus interrupts.
+
+Notice the following: We are using vectors 0xc0 and 0xc2 which are contained
+within the user reserved set of interrupt vectors.  This is because the
+actual interrupt vectors associated with IRQ1, IRQ2 ... IRQ7 are user
+selectable and we don't want to interfere with vector numbers which are already
+specifically assigned.  Also we are confining ourselves to even numbered
+vectors (not using vector 0xc1 for example) because older boards such as the
+MVME5100 (which use the Universe PCI-VME bridge chip) can only deal with even
+numbered bus interrupt vectors.
+
+The functions vmeIrq1Intr() and vmeIrq2Intr() are the actual interrupt service
+routines associated with IRQ1 and IRQ2 interrupts and are not presented below.
+
+Connecting the interrupts:
+
+\cs
+    void irqConnect()
+        {
+
+        /@ Connect IRQ1 interrupt to vector 0xc0 @/
+
+        printf("intConnect(0xc0,vmeIrq1Intr,0xc0);\n");
+        if (intConnect(0xc0,vmeIrq1Intr,0xc0) == ERROR)
+            {
+            printf("Could not intConnect(0xc0,vmeIrq1Intr,0xc0)\n\r");
+            }
+        printf("sysIntEnable(1);\n\r");
+        sysIntEnable(1);        /@ Enable IRQ1 interrupt @/
+
+        /* Connect IRQ2 interrupt to vector 0xc2 @/
+
+        printf("intConnect(0xc2,vmeIrq2Intr,0xc2);\n");
+        if (intConnect(0xc2,vmeIrq2Intr,0xc2) == ERROR)
+            {
+            printf("Could not intConnect(0xc2,vmeIrq2Intr,0xc2)\n");
+            }
+        printf("sysIntEnable(2);\n");
+        sysIntEnable(2);        /@ Enable IRQ2 interrupt @/
+        }
+\ce
+
+The following code fragment works in conjunction with the previous fragment
+which connected the interrupts.  Once the interrupts are connected via the
+irqConnect() routine, the functions vmeIrq1Intr() and vmeIrq2Intr() can be
+activated by actually generating the bus interrupts with the irqGen() routine
+which follows.  Notice that the sysBusIntGen() takes two parameters - the
+first is the IRQ number (1 through 7) and the second is the actual vector 
+number which was used in the previous routine intConnect() calls.
+
+Generating the interrupts:
+
+\cs
+    void irqGen()
+        {
+
+        /@ Generate Bus Interrupt IRQ1 via vector 0xc0 @/
+
+        printf("sysBusIntGen(1,0xc0);\n");
+
+        /@
+         * The interrupt generated via the call which follows
+         * will ultimately cause vmeIrq1Intr() to be activated.
+         @/
+
+        sysBusIntGen(1,0xc0);
+
+        printf("sysBusIntGen(2,0xc2);\n");
+
+        /@
+         * The interrupt generated via the call which follows
+         * will ultimately cause vmeIrq2Intr() to be activated.
+         @/
+
+        sysBusIntGen(2,0xc2);
+        }
+\ce
+
+\sh I2C Support
+
+I2C support is provided by the MPC8540 I2C interface.  The following I2C 
+devices are available on the MVME3100:
+
+\ts
+Address | Device
+------------------------------
+$90 | DS1621 Temperature Sensor
+$A0 | Memory SPD
+$A4 | User EEPROM 1 (64KB) 
+$A6 | User EEPROM 2 (64KB) 
+$A8 | Board resident VPD
+$AA | RTM resident VPD
+$D0 | Maxim DS1337 RTC
+\te
+
+Note that the RTM (rear transition module) contains a switch that can alter
+the device address of the serial EEPROM (VPD) on the RTM.  The BSP is set
+to use $AA as the default address for the RTM VPD.
+
+The "RTM SEEPROM Address Switch" on the RTM can be configured as follows:
+
+\ts
+SW3 | SW2 | SW1 | Device Address
+------------------------------
+ON | ON | ON | $A0
+ON | ON | OFF | $A2
+ON | OFF | ON | $A4 
+ON | OFF | OFF | $A6 
+OFF | ON | ON | $A8
+OFF | ON | OFF | $AA
+OFF | OFF | ON | $AC
+OFF | OFF | OFF | $AE
+\te
+
+The routines sysMotI2cWrite() and sysMotI2cRead() are provided to read 
+from, and write to, the I2C devices.  Below is a description of the 
+arguments that are required for these routines:
+
+\cs
+STATUS sysMotI2cWrite
+    (
+    UINT32 devAddr,     /@ I2C address of target device @/
+    UINT32 devOffset,   /@ offset within target device to write @/
+    UINT32 devAddrBytes,/@ number of address bytes of device @/
+    UINT32 numBytes     /@ number of bytes to write @/
+    UCHAR  *pBfr,       /@ pointer to data to be written @/
+    )
+STATUS sysMotI2cRead
+    (
+    UINT32 devAddr,     /@ I2C address of target device @/
+    UINT32 devOffset,   /@ offset within target device to read @/
+    UINT32 devAddrBytes,/@ number of address bytes of device @/
+    UINT32 numBytes     /@ number of bytes to read @/
+    UCHAR  *pBfr,       /@ pointer to read buffer @/
+    )
+\ce
+
+The macro VALID_I2C_WRT_ADDR is provided as a software protection to 
+prevent inadvertent writes to the I2C devices, such as the SPDs and 
+VPD.  VALID_I2C_WRT_ADDR can be found in "sbc8540A.h".
+
+\sh Timers
+
+Timing functions for Big Easy are provided by four global high resolution
+timers integrated into the MPC8540 plus four additional independent 32-bit
+tick timers in a PLD.
+
+The four global 32-bit MPC8540 timers are clocked by the RTC input which
+is driven by a 1 MHz clock, or by the CCB. Refer to the MPC8540 reference 
+manual for additional details and/or programming information.
+
+The following routines are provided for the tick timers.
+
+\cs
+STATUS sysTickTmrStart (UINT32 timer, UINT32 useconds, UINT32 mode)
+\ce
+
+This routine has three input parameters: the first is the number of the timer,
+the second is the amount of time until the timer expiration, T(us), and the 
+third is the mode of the timer.  The mode of the timer is 0 for periodic 
+interrupts or 1 for a single interrupt.  When the timer is in "one-time" 
+interrupt mode the user is required to restart the timer, which will also 
+enable the interrupt again. When the timer is in "periodic" interrupt mode, 
+the timer will trigger an interrupt every "interval" microseconds.
+
+\cs
+STATUS sysTickTmrDisable (UINT32 timer)
+\ce
+
+This routine will disable the specified tick timer.  The only way to
+restart the timer is to call sysTickTmrStart() again.
+
+\cs
+STATUS sysTickTmrConnectRoutine (FUNCPTR, int arg, int timer)
+STATUS sysTickTmrDisconnectRoutine (UINT32 timer)
+\ce
+
+These two routines are provided for connecting and disconnecting user-defined
+interrupt handlers to the timer interrupts.  Before connecting a new routine, 
+be sure to disconnect the old routine by first calling
+sysMpc8540TmrDisconnectRoutine().
+
+The current (real-time) value of a specified timer can be retrieved using
+the following routine:
+
+\cs
+UINT32 sysTickTmrValueGet (UINT32 timer);
+\ce
+
+The frequency of the tick timers can be set using the following routine:
+
+\cs
+STATUS sysTickTmrFreqSet (UINT32 frequency);
+\ce
+
+When setting the frequency of the 32-bit tick timers specify the frequency
+in Hz.  The minimum frequency allowed is 97656 Hz, and the maximum
+frequency allowed is 25000000 Hz.
+
+The frequency of the tick timers, in Hz,  can be retrieved by using the
+following routine:
+
+\cs
+UINT32 sysTickTmrFreqGet ();
+\ce
+
+The overflow value of each tick timer is used as a counter for the number
+of interrupts the specified timer has received.  The 4-bit overflow value
+increments every time the specified timer generates an interrupt.  This
+overflow value can be retrieved by using the following routine with the
+timer number as the parameter:
+
+\cs
+UINT32 sysTickTmrOverflowValGet (UINT32 timer);
+\ce
+
+The 4-bit overflow value of the specified tick timer can be cleared by using
+the following routine:
+
+\cs
+STATUS sysTickTmrOverflowClear (UINT32 timer);
+\ce
+
+The following routines are provided for the four MPC8540 global timers.
+
+\cs
+STATUS sysMpc8540TmrStart (UINT32 timer, UINT32 useconds)
+\ce
+
+This routine has two input parameters: the first is the number of the timer,
+and the second is the amount of time until the timer expiration, in
+microseconds.  Once the specified timer is started an interrupt will be
+generated every "interval" microseconds until the timer is disabled.
+
+\cs
+STATUS sysMpc8540TmrDisable (UINT32 timer)
+\ce
+
+This routine will disable the specified global timer.  The only way to
+restart the timer is to call sysMpc8540TmrStart() again.  Beware, using this
+routine for the MPC8540_AUXCLK_TIMER will disable the AuxClock, and could
+result in undesirable results.
+
+\cs
+STATUS sysMpc8540TmrConnectRoutine (FUNCPTR, int arg, int timer)
+STATUS sysMpc8540TmrDisconnectRoutine (UINT32 timer)
+\ce
+
+These two routines are provided for connecting and disconnecting user-defined
+interrupt handlers to the timer interrupts.  Before connecting a new routine, 
+be sure to disconnect the old routine by first calling
+sysMpc8540TmrDisconnectRoutine().  Beware, using this routine for the
+MPC8540_AUXCLK_TIMER will disable the AuxClock, and could result in
+undesirable results.
+
+The current (real-time) value of a specified timer can be retrieved using
+the following routine:
+
+\cs
+UINT32 sysMpc8540TmrValueGet (UINT32 timer);
+\ce
+
+The frequency of the global timers, in Hz, can be retrieved by using the
+following routine:
+
+\cs
+UINT32 sysMpc8540TmrFreqGet ();
+\ce
+
+The source of the global timers can be set with the following routine:
+
+\cs
+STATUS sysMpc8540TmrSrcSet (UINT32 rtc);
+\ce
+
+The frequency of the global timers can be changed by changing the source
+for the global timers.  The rtc parameter can have a value of 0 or 1.  If
+rtc is 0, the frequency of the timers is based on the CCB clock frequency,
+and the value of the clock-ratio.  (see sysMpc8540TmrClockRatioSet)
+If rtc is 1, the frequency of the timers is the same as the RTC, 1 MHz.
+Beware, using this function may change the behavior of the AuxClock.
+
+\cs
+STATUS sysMpc8540TmrClockRatioSet (UINT32 ratio);
+\ce
+
+If the global timer source is the CCB as explained above, the clock ratio
+value is used to determine the frequency of the global timers.  The clock
+ratio value can be in the range of 0 - 3.  A clock ratio value of 0
+means that the timer frequency will be the CCB / 8. A clock ratio of 1
+means that the timer frequency will be the CCB / 16. A clock ratio of 2
+means that the timer frequency will be the CCB / 32. A clock ratio of 3
+means that the timer frequency will be the CCB / 64.
+Beware, using this function may change the behavior of the AuxClock.
+
+The global timers can be used as cascading timers as specified in the MPC8540
+reference manual by using the following routine:
+
+\cs
+STATUS sysMpc8540TmrCascade (UINT32 cascadeSetting);
+\ce
+
+The setting for cascading the timers can be in the range 0 - 7, and will
+cause the timers to behave as described below.  Beware, choosing a timer
+for cascading that has been designated as the AuxClock timer will 
+produce undesirable results.
+\cs
+0 Default setting.  Timers not cascaded.
+1 Cascade timers 0 and 1.
+2 Cascade timers 1 and 2.
+3 Cascade timers 0, 1, and 2.
+4 Cascade timers 2 and 3.
+5 Cascade timers 0 and 1; timers 2 and 3.
+6 Cascade timers 1, 2, and 3.
+7 Cascade timers 0, 1, 2, and 3.
+\ce
+The global timers can be used as cascading timers with rollover characteristics
+as specified in the MPC8540 reference manual by using the following routine:
+
+\cs
+STATUS sysMpc8540TmrRolloverSet (UINT32 rolloverSetting);
+\ce
+
+The rollover parameter specifies what rollover behavior the timers will have.
+A timer set to rollover, will reload with all ones when the timer reaches zero. A timer that does not rollover will reload with the value of the Base count 
+register.  The Base count register value is set by the sysMpc8540TmrStart 
+routine, based on the interval of the timer. The following rollover settings
+are available:
+
+0 All timers reload with base count.
+1 Timers 1 and 2 reload with base count, timer 0 rolls over.
+2 Timers 0 and 2 reload with base count, timer 1 rolls over.
+3 Timer 2 reloads with base count, timers 0 and 1 roll over.
+4 Timers 0 and 1 reload with base count, timer 2 rolls over.
+5 Timer 1 reloads with base count, timers 0 and 2 roll over.
+6 Timer 0 reloads with base count, timers 1 and 2 roll over.
+7 Timers 0, 1, and 2 roll over.
+
+When using the global timers as cascaded timers the following routines may
+be useful.
+
+\cs
+STATUS sysMpc8540CascadeTmrStart (UINT32 timer, UINT32 cycles)
+UINT32 sysMpc8540CycleValueCalc (UINT32 useconds)
+\ce
+
+The routine sysMpc8540CascadeTmrStart allows the timer reload value to be set
+directly without specifying an interval in microseconds.  The first parameter
+is the timer number and the second parameter is the number of timer cycles.
+The routine sysMpc8540CycleValueCalc may be used to determine how many 
+timer cycles equate to the specified number of microseconds for the MPC8540 
+global timers.
+
+If INCLUDE_SHOW_ROUTINES is defined, then the following routine can be used
+to display the current state of all 8 timers: (i.e. tick timers and global 
+timers)
+
+\cs
+STATUS sysTmrShow (void)
+\ce
+
+This routine will display the tick timers' frequency, the global timers'
+frequency, each timer's enable status, each timer's interrupt enable status,
+and each timers current count value.
+
+\sh Auxiliary Clock
+
+Support for the AuxClock is provided.  The AuxClock can be implemented with
+any one of the four MPC8540 global timers.  This is user-configurable in
+config.h with the definition MPC8540_AUXCLK_TIMER, it is defined as 0 by
+default, so global timer 0 is used to implement the AuxClock.
+
+AuxClock support can be included in the BSP by defining INCLUDE_AUX_CLK in 
+config.h.  This support is #undef'd by default.  The AuxClock support 
+routines are defined in sysMpc8540AuxClk.c.
+
+The minimum recommended rate setting for the AuxClock is 1 Hz, and the maximum
+rate setting for the AuxClock is 600000 Hz.  This maximum value was determined
+using the MPC8540 global timer 0 as the AuxClock, and starting the other three
+global timers with interrupts enabled.  This maximum value may not be realistic
+in all situations, because the interrupt handlers for the global timers did
+nothing more than clear the interrupt for each timer.
+
+\sh Non-Volatile Memory
+
+The MVM3100 board does not have a true NVRAM chip.  This functionality 
+is implemented via the 64KB EEPROM.  This serial EEPROM is specifically for
+user configuration data storage.
+
+Of the storage area available to VxWorks, the first 0x100 (256 bytes)
+are used to store the VxWorks boot parameters.
+
+\sh DMA Support
+
+To enable support for the MPC8540 DMA controller, change the
+#undef INCLUDE_MPC8540_DMA, in config.h, to #define INCLUDE_MPC8540_DMA.
+
+MPC8540 DMA driver functions are provided to support initialization,
+configuration, start, pause, resume, abort and status retrieval of DMA
+operations on a per channel basis. Both block mode and chain mode are
+supported.
+
+The DMA initialization routine must be called once before any other DMA
+routine is invoked. Failure to do so will result in status error returns
+from all other DMA functions. This initialization is handled by sysHwInit2
+whenever INCLUDE_MPC8540_DMA is defined in config.h.
+
+\cs
+sysMpc8540DmaSetBandwidth - set the bandwidth control for DMA channel
+\ce
+
+By default the bandwidth control is disabled for each DMA channel.  The
+routine sysMpc8540DmaSetBandwidth() can be used to configure the
+bandwidth (arbitration) for each DMA channel independently.
+
+Source and destination address hold is supported, and can be configured
+by way of the DMA_ATTRIBUTES structure.
+
+\cs
+sysMpc8540DmaStart - Configure and start the DMA controller
+\ce
+
+To start DMA for a particular channel, invoke the start routine with
+the desired addresses, byte count, transfer attributes, etc. These
+parameters are specified via separate descriptor (list and link) and
+attribute structures.
+
+DMA is supported between PCI, the Local Bus Controller (LBC), and the
+local address space (including DRAM).  Support for the RapidIO interface
+is not included.
+
+User interrupt handlers can be supplied for each of the three types of
+completion interrupts: EOSI (end-of-segments interrupt), EOLNI (end-of-links
+interrupt), and EOLSI (end-of-lists interrupt), as well as a handler for
+error interrupts (transfer error or programming error).  Interrupt handlers,
+if provided, must conform to the rules for standard VxWorks interrupt
+service routines. They are called with a current channel parameter.
+Since these routines are called by the driver interrupt handler, they are
+not responsible for clearing interrupts. Interrupts are cleared by the
+driver's interrupt service routine (sysMpc8540DmaHandleInt).
+
+The driver enables all three of the completion interrupt types, regardless
+of the mode the channel is running in.  This allows the user to specify
+an interrupt handler for each of the interrupt types.  However, it is not
+until the DMA has completed (successfully) that the DMA channel's status
+is set to OK, versus ERROR.  This is performed by the driver's interrupt
+handler when it detects an interrupt signaling the DMA completion.
+
+Interrupt handlers are specified via the DMA_ATTRIBUTES structure.  The
+parameters are: userEosiHandler, userEolniHandler, userEolsiHandler, and
+userErrorHandler.
+
+The driver can be configured to return only after the DMA transfer has
+completed successfully (waitForCompletion in DMA_ATTRIBUTES is set to
+TRUE), or to return immediately to the caller (waitForCompletion in
+DMA_ATTRIBUTES is set to FALSE).  If waitForCompletion is set to FALSE
+you will need to poll the channel's status to determine when the DMA has
+completed.  In order to do this, a DMA_STATUS structure must be passed
+to the driver's start routine.
+
+\cs
+sysMpc8540ChannelContinueSet - set the CC bit for DMA channel
+\ce
+
+The routine sysMpc8540ChannelContinueSet() is provided to support the
+"Channel Continue Mode for Cascading Transfer Chains" as described in
+section 15.4.1.4 of the MPC8540 Reference Manual (Rev. 1, 07/2004).
+The routine takes the channel number as its only argument.  This feature
+allows the DMA controller to get started on descriptors that have already
+been programmed while software continues to build more descriptors in
+memory.
+
+\cs
+sysMpc8540DmaAbort - Initiate an abort of the current DMA operation
+\ce
+
+This routine is used to initiate an abort of the current DMA operation
+for a given DMA channel.  The channel must actually be busy.  The transfer 
+is aborted after the current minimum transfer segment completes.  The 
+function waits for the abort to complete before returning.
+
+This routine returns OK if the abort succeeded, and ERROR if the driver is not
+initialized or the channel number is invalid or the channel is already stopped.
+
+\cs
+sysMpc8540DmaPause - Initiate a pause of the current DMA operation
+\ce
+
+This routine will initiate a pause of the current DMA operation for the given
+valid channel.  If the channel is busy, pause the channel.  The channel will
+pause after completing any current transfer segment in progress.
+
+This routine returns OK if the pause succeeded, and ERROR if the driver is not
+initialized, or the channel is invalid, or the channel was already paused.
+
+\cs
+sysMpc8540DmaResume - Resume a previously paused DMA operation
+\ce
+
+This routine resumes a previously paused DMA operation for a given valid
+channel.  The channel is verified to not be active and that there are bytes
+remaining to transfer (a non-zero byte count). If so the channel is
+activated to continue with the transfer.
+
+This routine returns OK if the resume succeeded, and ERROR is returned if the
+driver is not initialized, or the channel is invalid, or the channel is not
+paused (paused meaning inactive with a non-zero byte count descriptor register).
+
+\cs
+sysMpc8540DmaStatus - Read and return DMA status
+\ce
+
+For the given channel, the routine will provide status information by placing
+it into a user provided DMA status structure reference by dmaStatus. This
+structure should match the device status structure defined in mpc8540Dma.h.
+and be interpreted as such. Status information can provide an indication of
+successful DMA completion, in-progress, or error conditions along with
+supporting diagnostic information. See the device specific function call for
+details in sysMpc8540Dma.c.
+
+This routine returns OK if the dmaStatus is valid, or ERROR if the driver is
+not initialized, or the channel is invalid or the dmaStatus reference is null.
+The dmaStatus contents will not be valid.
+
+The following structure defines the basic DMA (LINK) transfer parameters:
+
+\cs
+typedef struct sysDmaLinkDesc
+    {
+    UINT32 sourceAttr;          /@ Source Attributes @/
+    UINT32 sourceAddr;          /@ Source Address @/
+    UINT32 destinAttr;          /@ Destination Attributes @/
+    UINT32 destinAddr;          /@ Destination Address @/
+    UINT32 reserved1;           /@ Reserved @/
+    UINT32 nextDescPtrAddr;     /@ Next Descriptor Pointer Address @/
+    UINT32 byteCount;           /@ Number of bytes to transfer @/
+    UINT32 reserved2;           /@ Reserved @/
+    } DMA_LINK_DESCRIPTOR;
+\ce
+
+The following structure defines the basic DMA (LIST) transfer parameters:
+
+\cs
+typedef struct sysDmaListDesc
+    {
+    UINT32 reserved1;           /@ Reserved @/
+    UINT32 nextListDescPtrAddr; /@ Next List Descriptor Pointer Address @/
+    UINT32 reserved2;           /@ Reserved @/
+    UINT32 firstLinkDescPrtAddr;/@ First Link Descriptor Pointer Address @/
+    UINT32 sourceStride;        /@ Source Stride @/
+    UINT32 destStride;          /@ Destination Stride @/
+    UINT32 reserved3;           /@ Reserved @/
+    UINT32 reserved4;           /@ Reserved @/
+    } DMA_LIST_DESCRIPTOR;
+\ce
+
+The following structure defines user controlled attributes for a 
+given DMA transfer:
+
+\cs
+typedef struct sysDmaAttrib
+    {
+    UINT32 sourceStride;        /@ Source stride @/
+    UINT32 destStride;          /@ Destination Stride @/
+    HANDLER userEosiHandler;    /@ User defined EOSI routine @/
+    HANDLER userEolniHandler;   /@ User defined EOLNI routine @/
+    HANDLER userEolsiHandler;   /@ User defined EOLSI routine @/
+    HANDLER userErrorHandler;   /@ User defined error handling routine @/
+    BOOL waitForCompletion;     /@ FLAG to wait for DMA completion @/
+    BOOL holdSourceAddr;        /@ Do not increment the source address @/
+    UCHAR holdSourceAddrSize;   /@ source address hold transfer size @/
+    BOOL holdDestAddr;          /@ Do not increment the destination address @/
+    UCHAR holdDestAddrSize;     /@ destination address hold transfer size @/
+    } DMA_ATTRIBUTES;
+\ce
+
+The following structure defines DMA result information for the last
+successful DMA transfer or the last error for a particular channel:
+
+\cs
+typedef struct mpc8540DmaStatus
+    {
+    UINT32 modeReg;             /@ Mode Register @/
+    UINT32 statusReg;           /@ Status Register @/
+    UINT32 currLinkDescAddrReg; /@ current link descriptor address register @/
+    UINT32 srcAttrReg;          /@ source attributes register @/
+    UINT32 srcAddrReg;          /@ source address register @/
+    UINT32 destAttrReg;         /@ destination attributes register @/
+    UINT32 destAddrReg;         /@ destination address register @/
+    UINT32 byteCountReg;        /@ byte count register @/
+    UINT32 nextLinkDescAddrReg; /@ next link descriptor address register @/
+    UINT32 currListDescAddrReg; /@ current list descriptor address register @/
+    UINT32 nextListDescAddrReg; /@ next list descriptor address register @/
+    UINT32 srcStrideReg;        /@ source stride register @/
+    UINT32 destStrideReg;       /@ destination stride register @/
+    STATUS dmaStatus;           /@ OK when DMA completes successfully @/
+    } DMA_STATUS;
+\ce
+
+This driver supports four modes of operation for each channel.  The
+mode is determined by the parameters passed to the sysMpc8540DmaStart()
+routines in the DMA_ATTRIBUTES, DMA_LIST_DESCRIPTOR, and
+DMA_LINK_DESCRIPTOR structures.
+
+1. Basic Direct
+
+In basic direct mode descriptors are not utilized, and striding is not
+available.  To utilize basic direct mode DMA_LIST_DESCRIPTOR must be NULL
+and nextDescPtrAddr in the DMA_LINK_DESCRIPTOR must be set to 0x0.
+
+In basic direct mode DMA completion is indicated with an EOSI interrupt.
+
+2. Extended Direct Mode
+
+In extended direct mode descriptors are not utilized but striding is
+available.  To utilize extended direct mode, DMA_LIST_DESCRIPTOR must be
+NULL, DMA_ATTRIBUTES must not be NULL, and either sourceStride or
+destStride must not be equal to 0x0.
+
+In extended direct mode DMA completion is indicated with an EOSI interrupt.
+
+3. Basic Chain Mode
+
+In basic chain mode descriptors are utilized and striding is not
+available.  To utilize basic chain mode, DMA_LIST_DESCRIPTOR must be
+NULL and nextDescPtrAddr in DMA_LINK_DESCRIPTOR must not be 0x0.
+
+In basic chain mode DMA completion is indicated with an EOLNI interrupt.
+The completion of each link descriptor will be indicated with an EOSI interrupt.
+
+4. Extended Chain Mode
+
+In extended chain mode both list and link descriptors are utilized and
+striding is available.  To utilize extended chain mode DMA_LIST_DESCRIPTOR
+must not be NULL.
+
+In extended chain mode DMA completion is indicated with an EOLSI interrupt.
+The completion of each link descriptor will be indicated with an EOSI
+interrupt, and the completion of each list descriptor will be indicated
+with an EOLNI interrupt.
+
+Note: Single-write start and external control mode are not supported with
+this driver.  In all modes, the channel is activated by clearing and setting
+MRn[CS].  This is done by the driver itself in the sysMpc8540DmaStart()
+routine.
+
+For code examples of all supported features and modes see the routine
+sysMpc8540DmaTest() in sysMpc8540Dma.c.
+
+The amount of parameter checking in this driver has been kept to a minimum
+in order to allow greater flexibility for the application developer.  It
+could be fairly easy to pass parameters to the driver, via the link
+descriptors, list descriptors, and attribute structure, that in combination
+would prove illegal for the DMA controller.  Ensure that parameters meet
+device specifications as outlined in the MPC8540 Reference Manual.  Also,
+see the above mentioned test routine for examples of legal configurations.
+
+The DMA driver makes use of the BSP's error handling suite to log DMA errors.
+To enable the logging of DMA errors it is necessary to #define
+INCLUDE_ERROR_HANDLING in config.h.  The DMA controller detects and reports
+two types of errors: (1) Transfer error (TE), and (2) Programming errors
+(PE).  See section 15.4.3 in the MPC8540 Reference Manual for a
+discussion of there errors.  If error handling is enabled and an error
+is detected the error will be logged (ie. saved) in the internal error log.
+
+\sh MAXIM DS1621 Digital Thermometer and Thermostat Support
+
+This driver is not (in and of itself) intended to be safe for
+multi-threaded environments.  That support is intended for the
+application software that overlays this driver.
+
+The DS1621 measures temperatures from -55C to +125C.
+Data is read from/written via a 2-wire serial interface
+(I2C).  The temperature reading is provided in a 9-bit, two's
+complement reading by issuing the READ TEMPERATURE command.  The first
+byte transmitted is the MSB.  We will not use the LSB.  Instead, higher
+precision temperature readings will be obtained using the counter and
+slope registers.
+
+The DS1621 can be programmed to perform continuous consecutive
+conversions (continuous-conversion mode) or to perform single
+conversions on command (one-shot mode).  This is user-selectable.
+Note that the DS1621 always powers up in a low power
+idle state, and the Start Convert T command must be used to
+initiate conversions.
+
+The DS1621 can also operate in two different modes: thermostat
+and thermometer.  In thermometer mode the DS1621's interrupts
+will be disabled, and TH and TL will be set to their
+absolute maximum and minimum, respectively.  In this mode
+application software can poll the chip for current temperature
+using the supplied interface routines.
+
+In thermostat mode the DS1621's interrupts will be enabled
+and TH and TL will be set to user-specified values.
+When the DS1621's temperature meets or exceeds the value stored
+in the high temperature trip register (TH), the output becomes active
+and will stay active until the temperature falls below the
+temperature stored in the low temperature trigger register (TL).
+For this reason the interrupt handler for the DS1621 will disable
+the interrupt and then call a user-specified interrupt handler,
+if an interrupt handler has been connected.  The interrupts will
+not be enabled again until the DS1621's enable routine is called.
+This will allow the user's application code to poll the chip to
+obtain the temperature, perhaps until it falls below the value
+contained in TL, and then re-enable the DS1621 once it does.  If
+the interrupt were not disabled the chip would continue to signal
+an interrupt until the temperature drops below TL.
+
+The active state for the output is programmable so that the active
+state may either be a logic "1" or a logic "0".  This is done with
+the POL (1) bit in the configuration register, and is board
+dependent.
+
+The DS1621 contains the following registers: Configuration Register,
+Temperature Register, Temperature High Register, Temperature Low Register,
+Counter Register, and Slope Register.
+
+This library provides the following routines:
+
+\cs
+STATUS sysDs1621Show (void)
+\ce
+
+This routine will display the current board temperature, the value of
+the Temperature High register, the value of the Temperature Low register,
+and a few configuration options of the DS1621.  INCLUDE_SHOW_ROUTINES must
+be defined in order to use this routine.
+
+\cs
+STATUS sysDs1621Connect (FUNCPTR)
+\ce
+
+This routine can be called to connect a user-specified interrupt handler
+to the DS1621's interrupt.  sysDs1621Connect() allows only one routine
+to be connected and multiple calls to sysDs1621Connect result in
+only the last call being the effective one.
+
+\cs
+STATUS sysDs1621ConversionStart (void)
+\ce
+
+This routine can be used to start the DS1621's temperature conversion.
+
+\cs
+STATUS sysDs1621ConversionStop (void)
+\ce
+
+This routine can be used to stop the DS1621's temperature conversion.
+
+\cs
+STATUS sysDs1621THRegWrite (UINT8, UINT8)
+\ce
+
+This routine can be used to write to the Temperature High register.
+
+\cs
+STATUS sysDs1621THRegRead (UINT8 *, UINT8 *)
+\ce
+
+This routine can be used to read from the Temperature High register.
+
+\cs
+STATUS sysDs1621TemperatureHighShow (void)
+\ce
+
+This routine can be used to display the temperature programmed in the
+Temperature High register.
+
+\cs
+STATUS sysDs1621TLRegWrite (UINT8, UINT8)
+\ce
+
+This routine can be used to write to the Temperature Low register.
+
+\cs
+STATUS sysDs1621TLRegRead (UINT8 *, UINT8 *)
+\ce
+
+This routine can be used to read from the Temperature Low register.
+
+\cs
+STATUS sysDs1621TemperatureLowShow (void)
+\ce
+
+This routine can be used to display temperature programmed in the
+Temperature Low register.
+
+\cs
+UINT8 sysDs1621ConfigRegRead (void)
+\ce
+
+This routine can be used to read from the Configuration register.
+
+\cs
+STATUS sysDs1621ConfigRegWrite (UINT8)
+\ce
+
+This routine can be used to write to the Configuration register.
+
+\cs
+UINT8 sysDs1621CounterRegRead (void)
+\ce
+
+This routine can be used to read from the Counter register.
+
+\cs
+UINT8 sysDs1621SlopeRegRead (void)
+\ce
+
+This routine can be used to read from the Slope register.
+
+\cs
+STATUS sysDs1621TempRegsInterpret (UINT32, UINT8, UINT8, DS1621_TEMP *)
+\ce
+
+This routine is used to convert the temperature register values into
+"real" temperatures.
+
+\cs
+STATUS sysDs1621TemperatureGet (DS1621_TEMP *)
+\ce
+
+This routine can be used to obtain the temperature of the board.
+
+\cs
+STATUS sysDs1621TemperatureShow (void)
+\ce
+
+This routine is used to display the temperature of the board.
+
+\cs
+STATUS sysDs1621Config (UINT32, UINT32, DS1621_TEMP *, DS1621_TEMP *)
+\ce
+
+This routine is used to configure the DS1621.  The parameters required for
+this routine are: the conversion mode to be used (DS1621_CONV_MODE_CONT or
+DS1621_CONV_MODE_1SHOT), the operating mode (DS1621_MODE_THERMOSTAT or
+DS1621_MODE_THERMOMETER), and the values for Temperature High and for
+Temperature Low.  The structure for Temperature High and Temperature Low are
+as follows:
+
+\cs
+typedef struct ds1621Temp
+    {
+    int integer;        /@ integer portion of temperature @/
+    UINT32 fraction;    /@ fraction (1/1000th) portion of temperature @/
+    } DS1621_TEMP;
+\ce
+
+This routine must be called before enabling the DS1621.  Once the DS1621 has
+been enabled it is possible to reconfigure without explicitly calling the
+sysDs1621Disable() routine.  However, the routine will call sysDs1621Disable()
+in order to temporarily disable the DS1621 while it reconfigures it.  After
+which it will call sysDs1621Enable to re-enable it.
+
+\cs
+STATUS sysDs1621Enable (void)
+\ce
+
+This routine is used to enable (ie. start) the DS1621 once it has been
+configured by calling sysDs1621Config() above.
+
+\cs
+STATUS sysDs1621Disable (void)
+\ce
+
+This routine is used to disable (ie. stop) the DS1621.
+
+The routine sysDs1621Test() located in sysDs1621TempSensor.c shows some
+examples of how these routines can be used.
+
+\sh DS1375 RTC With Alarm
+
+Support for the Maxim DS1375 RTC with Alarm is provided with this BSP.
+RTC support is not enabled by default.  To include RTC support change
+#undef INCLUDE_RTC, in config.h, to #define INCLUDE_RTC.
+
+This driver is safe for multi-threaded environments.  That is, a semaphore 
+is used to limit access to the chip while registers are being read and 
+written, this includes the SRAM.
+
+The RTC (real-time clock) counts seconds, minutes, hours, day, date,
+month, and year with leap-year compensation valid up to 2100.  The
+chip also contains two programmable alarms.  Alarm 1 can be configured
+to alarm once per second, once per minute, once per hour, once per day,
+once per week, and once per month.  Alarm 2 can be configured to alarm
+once per minute, once per hour, once per day, once per week, and once
+per month.  In addition to the RTC and the alarms the chip also has
+16 bytes of SRAM.
+
+'Real-Time Clock (RTC)'
+
+The following is the definition for the structure used to configure
+the real-time clock, as well as retrieve the RTC settings:
+
+\cs
+typedef struct rtcdt
+    {
+    int  century;               /@ century @/
+    int  year;                  /@ year @/
+    int  month;                 /@ month @/
+    int  day_of_month;          /@ day of month @/
+    int  day_of_week;           /@ day of week @/
+    int  hour;                  /@ hour @/
+    int  minute;                /@ minute @/
+    int  second;                /@ second @/
+    BOOL clock;                 /@ 12 or 24 hour clock @/
+    BOOL pm;                    /@ If 12-hour clock, AM or PM @/
+    } RTC_DATE_TIME;
+\ce
+
+\cs
+STATUS sysDs1375RtcGet (RTC_DATE_TIME * rtc_time)
+\ce
+
+This routine will capture the settings for the RTC.  <rtc_time> will be
+populated with the current RTC settings.
+
+\cs
+STATUS sysDs1375RtcSet (RTC_DATE_TIME * rtc_time)
+\ce
+
+This routine will configure the RTC.  The RTC is configured based
+on the parameters specified with <rtc_time>.
+
+\cs
+STATUS sysDs1375RtcShow (void)
+\ce
+
+This routine will display the current RTC settings to the console with
+a carriage return at the end.
+
+\cs
+STATUS sysDs1375ClockStop (void)
+\ce
+
+This routine will stop the RTC, that is, the timekeeping registers will
+not be allowed to advance.  This routine is provided to assist in
+synchronizing the DS1375 time to a reference.  It is to be used in
+conjunction with the sysDs1375ClockStart() routine.
+
+\cs
+STATUS sysDs1375ClockStart (void)
+\ce
+
+This routine will start the RTC, that is, the timekeeping registers will
+be allowed to advance.  This routine is provided to assist in
+synchronizing the DS1375 time to a reference.  It is to be used in
+conjunction with the sysDs1375ClockStop() routine.
+
+\cs
+STATUS timeSet (void)
+\ce
+
+This routine is a command-line utility for setting the RTC from the
+VxWorks kernel prompt.  The user will be prompted for the appropriate
+input.
+
+\cs
+STATUS sysDs1375RtcPrintString (void)
+\ce
+
+This routine will print the current settings of the RTC to the console,
+without a carriage return.
+
+\cs
+STATUS sysDs1375RtcRegShow (void)
+\ce
+
+This routine will display the current values in the RTC registers.
+
+'Alarm Clocks'
+
+The following is the definition for the structure used to configure
+the alarm clocks, as well as retrieve the alarm clock settings:
+
+\cs
+typedef struct alarmdt
+    {
+    int  day_of_month;          /@ day of month @/
+    int  day_of_week;           /@ day of week @/
+    int  hour;                  /@ hour @/
+    int  minute;                /@ minute @/
+    int  second;                /@ second @/
+    int  alarm;                 /@ number of the alarm @/
+    BOOL clock;                 /@ 12 or 24 hour clock @/
+    BOOL pm;                    /@ If 12-hour clock, AM or PM @/
+    HANDLER userAlarmHandler;   /@ interrupt handler for alarm @/
+    } ALARM_DATE_TIME;
+\ce
+
+The following methods are valid for programming the alarm clocks.
+Any routine that has <method> as a parameter is referring to the
+following macros, which are defined and available for use:
+\cs
+ALARM_EVERY_MONTH       1       /@ Alarm to recur once a month @/
+ALARM_EVERY_WEEK        6       /@ Alarm to recur once a week @/
+ALARM_EVERY_DAY         2       /@ Alarm to recur once a day @/
+ALARM_EVERY_HOUR        3       /@ Alarm to recur once an hour @/
+ALARM_EVERY_MINUTE      4       /@ Alarm to recur once a minute @/
+ALARM_EVERY_SECOND      5       /@ Alarm to recur every second @/
+\ce
+\cs
+STATUS sysDs1375AlarmSet (UCHAR method, ALARM_DATE_TIME * alarm_time)
+\ce
+
+This routine will configure the given alarm, as indicated by the <alarm>
+field in the ALARM_DATE_TIME structure.  The alarm is configured based
+on the parameters specified with <method> and <alarm_time>.
+
+\cs
+STATUS sysDs1375AlarmCancel (int alarm)
+\ce
+
+This routine will cancel the given alarm as indicated with <alarm>.
+It simply disables the alarm's interrupt.  The alarm settings are
+left as is.
+
+\cs
+STATUS sysDs1375AlarmGet (UCHAR * method, ALARM_DATE_TIME * alarm_time)
+\ce
+
+This routine will capture the settings for the alarm that is indicated by
+the <alarm> field in the ALARM_DATE_TIME structure that is passed into
+the routine.  <method> and <alarm_time> will be populated with the
+current alarm settings.
+
+\cs
+STATUS sysDs1375AlarmShow (void)
+\ce
+
+This routine will display the current alarm settings to the console with
+a carriage return at the end.
+
+\cs
+STATUS alarmSet (void)
+\ce
+
+This routine is a command-line utility for setting the alarms from the
+VxWorks kernel prompt.  The user will be prompted for the appropriate
+input.
+
+\cs
+STATUS sysDs1375AlarmPrintString (int alarm)
+\ce
+
+This routine will print the settings for the alarm as indicated by
+<alarm> to the console, without a carriage return.
+
+\cs
+STATUS sysDs1375AlarmRegShow (void)
+\ce
+
+This routine will display the current values in the alarm registers.
+
+'General Purpose Routines'
+
+\cs
+STATUS sysDs1375ControlRegShow (void)
+\ce
+
+This routine will display the current values in the control registers.
+
+\cs
+STATUS sysDs1375RegShow (void)
+\ce
+
+This routine will display the current values in the RTC, alarm and control
+registers.
+
+'SRAM'
+
+\cs
+STATUS sysDs1375SramRead (int offset, int numBytes, UINT8 *pBfr)
+\ce
+
+This routine will read from the DS1375's SRAM.  You must provide the
+<offset> into the SRAM, the number of bytes to be read <numBytes>, and
+a buffer to hold the data that is read <pBfr>.
+
+\cs
+STATUS sysDs1375SramWrite (int offset, int numBytes, UINT8 *pBfr)
+\ce
+
+This routine will write to the DS1375's SRAM.  You provide the <offset>
+into the SRAM, the number of bytes to be written <numBytes>, and a
+buffer pointing to the data to be written <pBfr>.
+
+\cs
+STATUS sysDs1375SramShow (void)
+\ce
+
+This routine will display the contents (all 16 bytes) to the console.
+
+'Debug Support'
+
+To aid in debug a local variable `verbose' has been created.  To enable
+log messages while debugging set `verbose' to TRUE.
+
+\sh MPC8540 Performance Monitor
+
+The performance monitor allows various cyclical system functions to
+be counted. Up to nine events can be counted at one time using
+configurable counter registers. The performance monitor driver and API
+provides a convenient way to manage event monitoring through the use
+of custom event monitors that are created for each desired event 
+needing monitoring.
+
+Because there are approximately 300 events that can be chosen for
+monitoring with only 9 available counters many events are mutually
+exclusive for monitoring. Many events are specifically assigned to 
+particular counters when in use and cannot be changed. Other events
+can be assigned to any available counter resource. The performance 
+monitor driver manages this resource contention and allocation. 
+
+New monitor objects are created via the "create" function in an
+initially suspended state. Monitors can be created using any number
+of free counters to increase the available counting bit width. Using
+more counters to cover a particular event, reduces the number of
+events that can be monitored simultaneously. As many event monitors as 
+desired can be created, one monitor per event. 
+
+While suspended, no counter resources are reserved or assigned to 
+the monitor. A monitor can be suspended as required by the application
+at any time. A suspended monitor can be further configured with 
+burst characteristics, threshold, scaling, interrupt enable, etc. 
+When a monitor becomes suspended, its last count value is saved and
+can be used as the starting value when monitor activity is resumed. 
+
+To reserve and assign counter register resources, the monitor must be 
+made active. The number of active monitors is limited by the 
+available resources up to a maximum of 9. The "activate" 
+routine places the monitor into the active state with all needed 
+resources reserved and configured. If the required resources are
+in use by other monitors, specifying "override" will automatically
+suspend those monitors to free their resources for use by the newly
+activated monitor. Monitors can lock resources to prevent automatic
+suspension. Locked monitors must be explicitly suspended by their
+creating tasks to free their resources. If no resources are available 
+due to being locked or no desire to override, an error condition is
+returned, and the monitor remains suspended and unchanged.
+
+Actual monitoring is started after successful activation by 
+explicitly calling the "go" function. Monitoring can be stopped
+by calling the "stop" function. An active stopped monitor still
+has its resources allocated, but can be reconfigured safely.
+A started monitor will accumulate a count of its assigned event 
+as it occurs according to its configuration parameters. 
+
+Event monitoring for a particular event can be triggered to start 
+and/or stop when linked trigger event monitors change count or 
+overflow. To create a triggered event monitor, first create the
+event monitor that will be triggered. Then create a start and/or
+stop event monitor for the events that will be monitored to cause
+the start and/or stop trigger for the first monitor. Set the 
+initial values of all monitors using the "reset" function, if 
+necessary. Then use the "trigger set" function to associate the 
+triggering monitors to the triggered monitor. To conveniently start 
+a triggered monitor and its associated monitors use the "trigger go"
+function on the triggered monitor.
+
+Once created, an event monitor can be configured to count event
+bursts. Burst size, granularity, and burst group spacing can
+be specified. A threshold can also be specified that must be 
+exceeded before an event is counted. The threshold and burst
+spacing can be scaled by specifying a multiplier.
+
+An interrupt service routine may be optionally provided using the
+interrupt "connect" routine. The service routine is invoked whenever
+an interrupt enabled event monitor overflows. The routine can be 
+connected with the option of freezing all event counters at the
+time of interrupt. The interrupting monitors are cleared after the user
+handler returns and before the service routine completes. If counters
+were frozen, the user routine or application must unfreeze the counters
+to resume monitoring.
+
+To ensure the best allocation of counter resources, events that can
+be monitored/counted by "any" counter (per the enumeration list in
+sysMpc8540PerfMonEvent.h), should be activated after all fixed counter 
+event monitors are activated.
+
+\cs
+STATUS perfMonIntConnect (VOIDFUNCPTR handler, int parameter)
+\ce
+
+This routine connects a user interrupt service routine to the performance
+monitor. The handler is invoked when any active event monitor
+reaches an enabled overflow condition. All interrupting and overflowing
+event monitors are reset to zero after returning from the user routine.
+
+The user routine must NOT create/delete or  activate/suspend any event
+monitors. If all monitors were frozen on interrupt, the user routine or
+application must invoke perfMonUnfreezeAll to resume monitoring.
+
+\cs
+STATUS perfMonIntEnable (BOOL freezeAll)
+\ce
+
+This routine enables interrupts for the entire performance monitor.
+If freezeAll is given as true, all monitors will be frozen on interrupt.
+
+\cs
+STATUS perfMonInttDisable (void)
+\ce
+
+This routine disables interrupts for the entire performance monitor.
+Freezing of counters on interrupt will be cleared.
+
+\cs
+void perfMonFreezeAll (void)
+\ce
+
+This routine freezes all event counters regardless of task ownership
+or lock status. No other states are changed. Call perfMonUnfreezeAll
+to allow counting to continue. Frozen event monitors behave as
+if no events are occuring.
+
+\cs
+void perfMonUnfreezeAll (void)
+\ce
+
+This routine allows event counters to continue counting. No other
+states are changed. Must be called after a perfMonFreezeAll or when
+an interrupt with freeze occurs to continue event counting. Previously
+active event monitors will count their events starting at their
+last counts.
+
+\cs
+STATUS perfMonEventMonitorCreate (EVENT_MONITOR **eventMonitor,
+                                  PERFMON_EVENT   theEvent, 
+                                  UINT32          countBitWidth) 
+\ce
+
+This routine creates an event monitor object that is used for status
+and control of the specified event. It is created in suspended mode
+pending further optional configuration. The counterBitWidth parameter
+specifies the number of bits needed to count the event. The bit count is
+rounded up to next 32-bit boundary. Minimum bit width is 32. Maximum bit
+width is 256. Bit widths outside the bounds are adjusted to the
+respective limit internally. Each additional 32-bit block reduces by
+one, the number of event monitors that can be concurrently monitoring.
+The event monitor is created with its interrupt disabled by default.
+
+If an event monitor exists for the given event already (it will be either
+in the active or suspend list), it will be suspended if active and its
+bit width will be adjusted to the value now given. All trigger, burst, and
+threshold properties are also cleared/reset. Only one event monitor
+can exist for a particular event.
+
+\cs
+STATUS perfMonEventMonitorActivate (EVENT_MONITOR *eventMonitor, 
+                                    COUNTER_VALUE  initialValue,
+                                    BOOL           override,
+                                    BOOL           resume,  
+                                    BOOL           lock)
+\ce
+
+This routine activates the given event monitor with its existing
+configuration. It should be called AFTER configuring threshold,
+burstiness, interrupts, and trigger events. If override is specified
+as TRUE, then any other active event monitors using the same counter
+resources that are not locked are suspended so this event can be actively
+monitored. If resume is TRUE, then counting starts at the last count,
+otherwise the count is reset to zero. If lock is TRUE, then the
+activated monitor is locked and cannot be overridden by another
+activation without explicitly suspending the active monitor first. This
+is useful to prevent tasks from overriding monitors in other tasks.
+
+If there are not enough resources available, even with override specified,
+ERROR is returned and the event monitor is left suspended. If override
+was specified, previously active monitors may have been suspended even
+if ERROR is returned.
+
+If OK is returned the monitor is ready (but stopped) with all resources
+needed configured.  A perfMonEventMonitorGo command must be issued to
+the monitor to start it counting.
+
+\cs
+STATUS perfMonEventMonitorTrigGo (EVENT_MONITOR *eventMonitor, 
+                                  BOOL           override,
+                                  BOOL           lock)  
+\ce
+
+This routine activates and starts all event monitors associated with
+triggering the given event monitor. The event monitor must have its
+trigger events previously setup using perfMonEventMonitorTrigSet.
+Each associated event monitor is activated according to the rules described
+above in perfMonEventMonitorActivate. If any event monitor cannot be
+activated and started successfully, ERROR will be returned and all
+associated monitors will remain suspended. No additional "go" commands
+are required. An OK return means all trigger monitors are enabled for
+counting their assigned events. Monitors resume from previous values, so
+the perfMonEventMonitorReset function should be used to set any
+starting values prior to calling this function.
+
+\cs
+STATUS perfMonEventMonitorSuspend (EVENT_MONITOR *eventMonitor)
+\ce
+
+This routine suspends the given event monitor freeing the counter
+resources for use by other event monitors. If the monitor has locked
+resources, the resources are unlocked. The count at the time of
+suspension is preserved as well as the event monitor's configuration. The
+event monitor can be resumed using the activate function. Suspended
+event monitors can still be read, displayed, etc. Monitors using 
+locked resources must be suspended before another monitor can use its 
+counter resource regardless of override.
+
+\cs
+STATUS perfMonEventMonitorReset (EVENT_MONITOR *eventMonitor, 
+                                 COUNTER_VALUE  initialValue) 
+\ce
+
+This routine resets an event monitor to the given value. If the event
+monitor is active, the count resource is immediately set. If the monitor is
+suspended, its last count value is set. No resources are freed and
+the monitor remains active or suspended.
+
+\cs
+STATUS perfMonEventMonitorDelete (EVENT_MONITOR *eventMonitor)
+\ce
+
+This routine deletes an event monitor and immdediately frees any counter
+resources that it may have been using. To monitor the event again, the
+create routine must be called. 
+
+\cs
+STATUS perfMonEventMonitorRead (EVENT_MONITOR *eventMonitor,
+                                COUNTER_VALUE  value)       
+\ce
+
+This routine returns the current value of the given event monitor.
+Because a single event monitor can be many 32-bit words wide a multi-word
+value is returned. The number of significant words depends on the
+bit width specified at creation. The least significant word is at index
+zero.
+
+\cs
+BOOL perfMonEventMonitorIsActive (EVENT_MONITOR *eventMonitor)
+\ce
+
+This routine returns the active status of the event monitor. An active
+monitor is still considered active even when all counters have been
+frozen. An active monitor is always in the active list.
+
+\cs
+void perfMonEventMonitorActiveGet (EVENT_MONITOR  *currentEventMonitor,
+                                   EVENT_MONITOR **nextEventMonitor) 
+\ce
+
+This routine returns the next active event monitor. If the given
+currentEventMonitor is null, then the first active event monitor is
+returned in nextEventMonitor. If the currentEvent is not active, then
+nextEventMonitor will be null. If nextEventMonitor is null, then all
+active event monitors have been retrieved, or there are no active
+event monitors. To retrieve all active event monitors,
+the nextEventMonitor returned should be used in the subsequent call to
+this routine as currentEventMonitor iterating until nextEventMonitor
+returns null.
+
+\cs
+void perfMonEventMonitorSuspendedGet (EVENT_MONITOR  *currentEventMonitor, 
+                                      EVENT_MONITOR **nextEventMonitor)
+\ce
+
+This routine returns the next suspended event monitor. If the given
+currentEventMonitor is null, then the first suspended event monitor is
+returned in nextEventMonitor. If the currentEvent is not suspended then,
+nextEventMonitor will be null. If nextEventMonitor is null, then all
+suspended event monitors have been retrieved, or there are no suspended
+event monitors. To retrieve all suspended event monitors,
+the nextEventMonitor returned should be used in the subsequent call to
+this routine as currentEventMonitor iterating until nextEventMonitor
+returns null.
+
+\cs
+PERFMON_EVENT perfMonEventMonitorGetEvent (EVENT_MONITOR *eventMonitor) 
+\ce
+
+This routine returns the event type that is assigned to this monitor.
+
+\cs
+BOOL perfMonEventMonitorIsAvailable (PERFMON_EVENT   theEvent,  
+                                     UINT32          countBitWidth,
+                                     BOOL           *rsrcIsLocked,  
+                                     EVENT_MONITOR **otherUser)
+\ce
+ 
+This routine returns TRUE if the resources for a given type are free
+to be used for monitoring. This can be called before creating or
+activating a particular event monitor to help manage previously created
+monitors that may need suspension. If FALSE is returned, the counter
+resource is being used by another active event monitor. 
+
+\cs
+STATUS perfMonEventMonitorIntEnable (EVENT_MONITOR *eventMonitor)
+\ce
+
+This routine enables an event monitor's interrupt such that an
+overflow interrupt occurs when the event monitor's increment sets the
+msb of the counter resource. An event monitor is created with its
+interrupt disabled. If freezeAll is true, all counters will be
+unconditionally frozen when an interrupt occurs.
+
+\cs
+STATUS perfMonEventMonitorIntDisable (EVENT_MONITOR *eventMonitor)
+\ce
+
+This routine disables an event monitor's interrupt such that an overflow
+will not cause an interrupt.
+
+\cs
+STATUS perfMonEventMonitorThresholdSet (EVENT_MONITOR *eventMonitor, 
+                                        UINT32         threshold,  
+                                        UINT32         scaleFactor)
+\ce
+
+The routine sets a threshold which must be exceeded by event occurrences
+before actual event counting begins. The scale factor multiplies 
+the threshold and can be varied using the scale change routine.
+Scale cannot be set for event SYSTEM_CYCLES (counter 0).
+
+\cs
+STATUS perfMonEventMonitorScaleChange (EVENT_MONITOR *eventMonitor, 
+                                       UINT32         scaleFactor)
+\ce
+
+This routine changes the scale factor that is multiplied with the
+threshold value or burst distance value to modify the effective
+threshold or burst distance values. If the monitor is active, the change
+is effective immediately.  Scale cannot be set for event 
+SYSTEM_CYCLES (counter 0).
+
+\cs
+STATUS perfMonEventMonitorBurstSet (EVENT_MONITOR *eventMonitor,
+                                    UINT32         burstSize,  
+                                    UINT32         burstGran, 
+                                    UINT32         burstDist,
+                                    UINT32         scaleFactor)
+\ce
+
+This routine sets the burst characteristics for the event monitor. The
+burst size specifies the number of events per burst that must occur
+before the burst is counted. The burst granularity specifies the
+maximum clocks to occur between events in a particular burst. The
+burst distance is the number of clocks that must occur between bursts. The
+burst distance must be a value larger than the burst size. The scale
+factor is multiplied by the burst distance to obtain the effective
+burst distance. The scale factor can be modified independently via the
+scale change routine. Burst properties cannot be set for event 
+SYSTEM_CYCLES (counter 0).
+
+\cs
+STATUS perfMonEventMonitorTrigSet (EVENT_MONITOR *eventMonitor, 
+                                   EVENT_MONITOR *startTrigger,
+                                   EVENT_MONITOR *stopTrigger,
+                                   UINT32         trigOnType,
+                                   UINT32         trigOffType) 
+\ce
+
+This routine sets the start and stop trigger event for the given event
+monitor. The start and/or stop trigger is another event monitor that
+will, upon overflow or count change, trigger the given event monitor to
+start counting. The trigger type specifies no trigger, count change, or
+overflow. The triggering event monitors must not have their interrupt
+enabled for proper triggering to occur. This routine should be called
+before activating any of event monitors involved. Activating an event
+monitor with triggering enabled will NOT automatically activate
+the start and/or stop trigger event monitors. Each trigger
+monitor should be activated individually after activating the monitor
+to be triggered. Monitors should then be issued Go commands, first to
+the triggered monitor, then the stop trigger, then the start trigger.
+
+\cs
+BOOL perfMonEventMonitorHasOverflowed (EVENT_MONITOR *eventMonitor) 
+\ce
+
+This routine returns true if the event monitor has overflowed. The
+event monitor must be active for the return result to be meaningful.
+
+\cs
+STATUS perfMonEventMonitorGo (EVENT_MONITOR *eventMonitor) 
+\ce
+
+This routine starts an active event monitor that has been stopped. No
+resources are changed or taken. The specified event monitor must already
+be active and configured.
+
+\cs
+STATUS perfMonEventMonitorStop (EVENT_MONITOR *eventMonitor) 
+\ce
+
+This routine stops an active event monitor without freeing any resources.
+No resources are changed or freed. The specified event monitor must
+already be active and configured. It remains active (in the active list),
+and can be started using perfMonEventMonitorGo.
+
+\cs
+STATUS perfMonEventMonitorShow (EVENT_MONITOR *eventMonitor) 
+\ce
+
+This routine prints detailed event monitor information including
+name, current count, activation status, locked status, counter resources
+used (bitwidth), interrupt enable status, etc, in a readable format for
+the given event monitor.
+
+\cs
+void perfMonEventMonitorShowAll (BOOL activeOnly);
+\ce
+
+This routine prints detailed event monitor information including
+name, current count, activation status, locked status, counter resources
+used (bitwidth), interrupt enable status, etc, in a readable format for
+all of the existing event monitors. If activeOnly is TRUE only the
+currently active monitors are displayed.
+
+\cs
+typedef UINT32 COUNTER_VALUE[PERFMON_NUM_RESOURCES];
+typedef UINT32 COUNTERS_USED[PERFMON_NUM_RESOURCES];
+
+typedef struct eventMonitor EVENT_MONITOR;
+
+struct eventMonitor
+    {
+    PERFMON_EVENT   theEvent;      /@ Event ID of this monitor @/
+    UINT32          numCounters;   /@ Number of counter registers used @/
+    BOOL            isActive;      /@ The event is being counted @/
+    BOOL            isFrozen;      /@ Monitor is active, but not counting @/
+    BOOL            isIntEnabled;  /@ Enabled to interrupt on overflow @/
+    BOOL            isLocked;      /@ Has its resources locked @/
+    COUNTERS_USED   countersInUse; /@ Counters indexed in increasing order @/
+    COUNTER_VALUE   savedCount;    /@ Count snapshot taken when suspended @/
+    UINT32          threshold;     /@ Threshold to exceed to start counting @/
+    UINT32          scaleFactor;   /@ Power of 2 multiplier for thresh/burst @/
+    UINT32          burstSize;     /@ Events per burst @/
+    UINT32          burstGran;     /@ Cycles between each event in a burst @/
+    UINT32          burstDist;     /@ Cycles between each burst group @/
+    EVENT_MONITOR  *trigOnEvent;   /@ Event monitor to trigger count start @/
+    EVENT_MONITOR  *trigOffEvent;  /@ Event monitor to trigger count stop @/
+    UINT32          trigOnCtrl;    /@ Trigger on overflow/change or disable @/
+    UINT32          trigOffCtrl;   /@ Trigger on overflow/change or disable @/
+    EVENT_MONITOR  *nextEvent;     /@ Next event monitor in list @/
+    EVENT_MONITOR  *prevEvent;     /@ Previous event monitor in list @/
+    };
+\ce
+
+The structure defines the event monitor created for event to be monitored.
+ 
+\sh Watchdog Timer
+
+The MPC8540's watchdog timer is a low-resolution timer that operates
+in two stages, providing first an interrupt and then an optional
+system reset. To use the watchdog timer define INCLUDE_WDOG_TIMER in
+config.h.
+
+The timer uses the zero-to-one transition of any one of the 64 bit
+positions from the upward counting time base register to detect a
+timeout. The user specified time interval is necessarily rounded to 
+the nearest power-of-two value. The effect of this rounding is a very
+coarse interval granularity requiring progressive doubling of time 
+values to increase the actual timeout. This also increases the 
+timeout error proportionately as well. These limitations are imposed
+entirely by the hardware implementation in MCP8540 and cannot be
+altered. 
+
+It is also important to note that if system reset is specified to 
+occur (always on the second watchdog timeout) when the timer is 
+started, the timer CANNOT be disabled. When reset mode is active, the 
+timer must be periodically serviced without exception. The 
+sysMpc8540WdogStop routine has no effect and will return an error. 
+Again the hardware implementation drives this behavior and it cannot
+be altered. The only way to clear the reset mode is to invoke a system 
+reset.
+
+\cs
+STATUS sysMpc8540WdogStart (seconds, reset)
+\ce
+
+This routine has two input parameters: the first is the number of seconds
+until watchdog expiration for each stage, and the second is the watchdog
+timer reset mode. If reset is true, the watchdog timer will reset the
+system on the second stage timeout of the timer. If reset is false and no
+interrupt handler has been connected, then ERROR is returned as there
+is no action to take on timeout. Once set for reset, the reset mode
+cannot be changed per hardware restriction. To clear the reset mode, a
+system reset must occur. Specifying reset without an interrupt service
+routine will result in a system reset after twice the specified time
+period elapses unless the wdogService routine is called periodically.
+The wdogStop routine has no effect if reset has been selected.
+Hardware does not allow different timeouts for each stage. Minimum seconds
+is one. Maximum seconds is 8640 (24 hours). Actual timeout value is 
+an even power-of-two and can be obtained using wdogPeriodGet.
+
+\cs
+STATUS sysMpc8540WdogStop ()
+\ce
+
+This routine will stop the watchdog timer by disabling it.  The only way to
+restart it is to call sysMpc8540WdogStart() again. If reset was
+previously specified, the timer cannot be stopped without a system reset
+occurring. This is a hardware restriction.
+
+\cs
+STATUS sysMpc8540WdogService ()
+\ce
+
+This routine will service the watchdog timer.  Servicing the watchdog
+periodically will prevent it from expiring and triggering an interrupt or
+issuing a system reset. Servicing sets the watchdog to its initial state
+regardless of its current stage. The timer continues to run after
+servicing.  It can be serviced as often as desired, but at least once 
+before each timeout interval expires.
+
+\cs
+BOOL sysMpc8540WdogIsRunning ()
+\ce
+
+This routine will return true if the watchdog timer is armed and running.
+
+\cs
+UINT32 sysMpc8540WdogPeriodGet ()
+\ce
+
+This routine returns the actual watchdog timer period in seconds. This 
+value is derived by rounding the user value to the nearest power-of-two 
+value that is supported by the hardware. The period is for one stage and 
+applies to both stages.
+
+\cs
+STATUS sysMpc8540WdogIntConnect (routine, arg)
+\ce
+
+This routine connects a user service routine w/argument, that will be
+invoked on the first stage of watchdog timer timeout. The routine is
+invoked within the driver's service routine's wrapper, so interrupt
+clearing and timer management does not need to be performed by the user
+routine. This routine should be called with watchdog in a stopped state.
+
+\sh Workbench Project Considerations
+
+A component description file (01bsp.cdf) is included with this BSP to
+allow configuration of the following items, from within the Workbench
+Project facility:
+
+(1) Signal Processing Engine (SPE) Support
+
+Allows the signal processing engine support to be enabled/disabled.
+
+(2) Error Handling Suite
+
+Allows the error handling suite support to be enabled/disabled.
+
+(3) Flash Boot Image Programming
+
+Allows the boot image programming support to be enabled/disabled.
+In order for sysFlashDevsMount() to be called at start up, it
+is necessary to call sysApplInit() in usrAppInit(). sysFlashDevsMount() 
+mounts the FLASH devices and makes them available to the VxWorks IO system.
+
+(4) AuxClock Timer/Counter Selection
+
+This allows the user to select which of the mpc8540's timer/counters
+to use for the vxWorks Aux Clock.  This parameter can be found under
+the "AUX Clock" component in Project.
+
+(5) MPC8540 DMA Support
+
+Allows the MPC8540 DMA support to be enabled/disabled.
+
+(6) Maxim DS1621 Temp Sensor Support
+
+This allows the support for the Maxim DS1621 Temperature sensor
+to be enabled/disabled.
+
+(7) Maxim DS1375 Real-Time Clock
+
+Allows the real-time clock support to be enabled/disabled.
+
+(8) MPC8540 Watchdog Timer Support
+
+This allows the mpc8540's watchdog timer support to be enabled/disabled.
+
+(9) MPC8540 Timer Support
+
+This allows the support for the MPC8540s timers to be enabled/disabled.
+
+(10) Tick Timer Support
+
+This allows the support for the tick timers to be enabled/disabled.
+
+There are a number of other user-configurable items available in this
+BSP, in config.h.  However, components have not been created for these
+other items because of the restriction that these items must be configured
+the same way in the bootloader as they are in the VxWorks kernel.  Since
+the Project components are not used when building the bootloader, and
+therefore have no effect on it, these items must be configured within
+config.h prior to the creation of your Project.  Once that is done the
+Project facility can be used to create both the bootloader and kernel
+images.
+
+\sh System Control and Status Registers
+
+Definitions are provided for access to the MVME3100's system control and 
+status registers.  These definitions are located in sbc8540A.h and are as
+follows:
+
+\cs
+#define BRD_SYSTEM_STATUS_REG 
+#define BRD_SYSTEM_CONTROL_REG
+#define BRD_SYSTEM_STATUS_INDICATOR_REG
+#define BRD_FLASH_CONTROL_REG
+#define BRD_PCI_BUS_A_STAT_REG
+#define BRD_PCI_BUS_B_STAT_REG
+#define BRD_PCI_BUS_C_STAT_REG
+#define BRD_INTERRUPT_DETECT_REG
+#define BRD_PRESENCE_DETECT_REG
+#define BRD_PLD_REVISION_REG
+#define BRD_PLD_DATE_CODE_REG
+#define BRD_TEST_1_REG
+#define BRD_TEST_2_REG
+\ce
+
+The following routines are provided to display current information
+from all of the board level system status registers. Each register
+is displayed by its own show routine in a formatted output describing 
+each used bit. These routines are available only if #INCLUDE_SHOW_ROUTINES
+is defined in config.h.
+
+\cs
+void sysStatusRegShow (void)
+\ce
+
+This function displays to the console the system status indicator register
+and interprets the bit values.
+
+\cs
+void sysStatusIndicatorRegShow (void)
+\ce
+
+This function displays to the console the system status indicator register
+and interprets the bit values.
+
+\cs
+void sysFlashStatusRegShow (void)
+\ce
+
+This function displays to the console the system FLASH status register
+and interprets the bit values.
+
+\cs
+void sysPciBusStatusRegShowA (void)
+void sysPciBusStatusRegShowB (void)
+void sysPciBusStatusRegShowC (void)
+\ce
+
+These functions display to the console the system status registers for
+PCI buses A, B or C, and interprets their bit values.
+
+\cs
+void sysPresenceDetectRegShow (void)
+\ce
+
+This function displays to the console the system presence detect
+register and interprets the bit values.
+
+\cs
+void sysPldInfoShow (void)
+\ce
+
+This function displays to the console the system PLD revision and date
+code information.
+
+\cs
+void sysStatusRegShowAll (void)
+\ce
+
+This function displays to the console all of the board system status
+registers and interprets their bit values.
+
+The following utility routines allow control and status of several board 
+level functions in the system control and status registers. These 
+routines are in sysLib.c and are always available.
+
+\cs
+void sysUserLedSet (UINT8 whichLed, BOOL setOn) 
+\ce
+ 
+This function turns the specified user LED (whichLED = 1, 2, or 3) 
+to on (setOn = TRUE) or off (setOn = FALSE).  Any other LED number 
+results in all three LEDs being acted upon. User LED 1 is on the 
+front panel. User LEDs' 2 and 3 are on the board surface 
+(non-component side) near the front panel edge.
+
+\cs
+void sysBrdHardReset (void)
+\ce
+
+This function forces an immediate and complete hard reset of the board.
+
+\cs
+BOOL sysBootBlkAIsSelected (void)
+\ce
+
+This function returns TRUE when boot block A is the active
+boot block. If FALSE is returned the selected boot is necessarily B.
+
+\cs
+void sysEepromWriteProtectSet (BOOL setOn)
+\ce
+
+This function sets the EEPROM write protection to on (setOn = TRUE)
+or off (setOn = FALSE).
+
+\cs
+BOOL sysFlashIsHwWriteProtected (void)
+\ce
+
+This function returns TRUE when the FLASH bank is hardware
+write protected.
+
+\cs
+void sysFlashSwWriteProtectSet (BOOL setOn)
+\ce
+
+This function sets the FLASH software write protection to on 
+(setOn = TRUE) or off (setOn = FALSE).
+
+\cs
+UINT32 sysPciBusASpdGet (void)
+UINT32 sysPciBusBSpdGet (void)
+UINT32 sysPciBusCSpdGet (void)
+\ce
+
+These functions return the frequency (speed) of PCI Buses A, B, 
+or C in Hertz.
+
+\sh Shared Memory
+
+On all boards, shared memory across the backplane can also be used as a
+network interface.  The name of the shared memory interface is `sm'.
+The BSP can be configured for shared memory support by
+#define'ing INCLUDE_SM_NET in config.h.  To enable the shared memory interface
+in a system which uses a VxWorks bootrom, the bootrom must also be built with
+this symbol defined.
+
+Shared memory network communications requires a signaling method and a method
+of mutually exclusive memory resource access.  Signaling can be done using
+software polling or interrupts.  By default, mailbox interrupts are used and
+SM_INT_TYPE is set to SM_INT_MAILBOX_1.  To use polling, `#define'
+SM_INT_TYPE as SM_INT_NONE.
+
+There are master and slave windows into VME address space to access the VME
+mailbox registers so that each CPU can send and receive shared memory
+interrupts using single-byte mailboxes.
+The windows map a 4KB region in A32 space at address 0xFB000000 + (0x1000 *
+CPU #) into the Tempe chip registers.  This configuration allows one
+processor to generate a mailbox interrupt in another processor by accessing the
+other processor's mailbox register.  Each CPU has a
+master window covering the A32 addresses 0xFB000000 through 0xFB00ffff
+representing CPU numbers 0 through 15.  Each CPU's slave window maps the
+appropriate address for that CPU to the Tempe chip's register set.
+
+On the processor node compiled with SM_OFF_BOARD set to FALSE, an inbound
+window is opened using Tempe's inbound window 0 to map the shared-memory
+anchor and shared-memory pool.
+
+The inbound access is shown here (obtained from sysTempeInWinShow(0)):
+
+\cs
+Inbound window 0: ENABLED,  Size = 00000000_00040000
+
+raw: 00000000 08000000 00000000 0803fff0 ffffffff f8000000 80000faf
+VME Base:  00000000_08000000    PCI Base:  00000000_00000000
+VME Limit: 00000000_0803ffff    PCI Limit: 00000000_0003ffff
+  Attributes:
+  Read-ahead threshold - when FIFO completely empty
+  Virtual FIFO size    - 64 bytes
+  2eSST Mode           - 160 MB/s
+  Cycle response       - 2eSSTB (Two Edge Source Synchronous Broadcast)
+ 2eSST (Two Edge Source Synchronous nonBroadcast)
+ 2eVME (Two Edge VMEbus)
+ MBLT (Multiplexed Block Transfer)
+ BLT (Block Transfer)
+  Address space        - A32
+  VME AM response      - Supervisor, nonSupervisor, Program, Data
+\ce
+
+The algorithm for Tempe (Tsi148) window configuration is as
+follows:
+
+\cs
+If this is not the anchor node (SM_OFF_BOARD == TRUE)
+Then
+  No A32 inbound mappings are programmed for access to DRAM.
+  Note that all nodes must have inbound mapping to reach their mailbox's
+  so that shared memory doorbells can be hit by any other node.  This is
+  taken care of by the RAI register programming on Universe equipped
+  boards and the CRG programming by Tempe equipped boards.
+Else (this is the anchor node ...)
+  A single inbound mapping through Tempe window 0 is configured, mapping
+  DRAM address 0x00000000 through 0x0003ffff to VME bus address
+  0x08000000 through 0x0803ffff.
+\ce
+
+Shared memory resource mutual exclusion is implemented in the sysBusTas
+function.  Two modes of hardware assist are available to implement
+the test and set function across the VME bus.  They are: bus locking
+and RMW cycle generation.  The method used is selected in config.h
+via the #define/#undef state of ANY_BRDS_IN_CHASSIS_NOT_RMW.
+
+The following is taken from config.h:
+
+\cs
+#undef ANY_BRDS_IN_CHASSIS_NOT_RMW  /@ required for Rev 1 of Tempe chip @/
+
+#undef VME_TAS_HW_ASSIST
+#ifdef ANY_BRDS_IN_CHASSIS_NOT_RMW
+#   define VME_TAS_HW_ASSIST    VME_BUS_LOCK
+#else
+#   define VME_TAS_HW_ASSIST    VME_BUS_RMW
+#endif
+\ce
+
+\sh PCI Support
+
+The standard mapping for PCI is described in config.h of this BSP and uses 
+outbound translation to access. This means PCI space usage is configurable by
+the user in config.h. 
+
+\sh PCI Auto-Configuration
+
+To simplify the addition of PCI-based add-in cards, the BSP provides a PCI
+auto-configuration library.
+
+The auto-configuration is called from sysHwInit to discover and configure
+the installed PCI devices and bridges. Device configuration includes the
+following PCI information:
+
+\is
+\i Base Address Registers (BARs)
+Space in the address map is dynamically allocated to each valid BAR detected.
+Allocation pools are maintained for the following PCI address spaces:
+
+16-Bit PCI I/O
+
+32-Bit PCI I/O
+
+PCI Memory I/O (non-prefetchable memory)
+
+PCI Memory (pre-fetchable memory)
+
+\i Interrupt Routing
+The correct interrupt vector number is placed in the intLine register of the
+device's PCI header. To connect to the device's interrupt, simply call
+intConnect with the value read from intLine.
+
+\i PCI Header Completion
+The PCI auto-configuration library fills in the remainder of the PCI header as
+follows:
+
+Cache Line Size = _CACHE_ALIGN_SIZE/4
+
+Latency Timer = PCI_LAT_TIMER
+
+Command Register = I/O enabled, Memory enabled and Bus Master enabled.
+
+\ie
+
+\sh Serial Configuration
+
+The MVME3100's on-board asynchronous serial interface is provided by the
+MPC8540 DUART.  COM0 is wired to the front panel RJ45 connector.  The four
+asynchronous serial interfaces are provided by the EXAR ST16C554D Quad UART
+device connected to the MPC8540 device controller bus.  The Quad UART's
+four ports, COM1, COM2, COM3, and COM4, are routed to the P2 connector.
+The TTL-level signals of RX, TX, CTS, and RTS from each port are routed
+through on-board RS-232 drivers and receivers to the P2 connector where the
+signals can be picked up by a rear transition module.
+COM0 is the default serial port.  COM1, COM2, COM3, and COM4 are enabled by
+defining INCLUDE_QUAD_UART in config.h.
+
+The VTS baud console test will fail for rates below 600 baud. 
+This is because the 16 bit divisor in the UART cannot be set large enough
+to divide the CCB clock value appropriately. The divisor essentially 
+overflows its maximum value. There is no way to fix or work around this. 
+It's limited by the large CCB clock value and the 16 bit width of the 
+divisor registers.
+
+\sh SCSI Configuration
+
+There is no SCSI interface on this board.
+
+\sh Network Configuration
+
+Three Ethernet ports are available. The two TSEC ports support 10/100/1000
+speeds. The single FEC port supports 10/100 speeds.
+
+TSEC port 1 is available at the front panel and is available as 
+mottsec0. To enable TSEC port 1 define INCLUDE_PRIMARY_TSEC_END in config.h.
+
+TSEC port 2 is routed to the backplane and is available via the RTM as 
+mottsec1. To enable TSEC port 2 define INCLUDE_SECONDARY_TSEC_END in config.h.
+
+The FEC port is routed to the backplane and is available via the RTM as motfec0.
+To enable the FEC Ethernet define INCLUDE_MOT_FEC_END in config.h.
+
+For optimal Ethernet performance it may be necessary to increase the
+"default data pool ", by editing the following parameters in
+target/h/netBufLib.h:
+
+\cs
+#define NUM_NET_MBLKS   1600    /@ no. mBlks to initialize @/
+#define MAX_MBLK_TYPES  256     /@ max number of mBlk types @/
+#define NUM_64          160     /@ no. 64 byte clusters @/
+#define NUM_128         160     /@ no. 128 byte clusters @/
+#define NUM_256         140     /@ no. 256 byte clusters @/
+#define NUM_512         140     /@ no. 512 byte clusters @/
+#define NUM_1024        125     /@ no. 1024 byte clusters @/
+#define NUM_2048        125     /@ no. 2048 byte clusters @/
+\ce
+
+Note that enabled ports that do not have a wire connection at boot will extend 
+the boot time as each non-connected port will wait for auto-negotiation
+to timeout before continuing to the next port. This is typical VxWorks 
+operation. Enabled ports that are connected will autonegotiate the best 
+link mode immediately, adding little delay to the boot time. Connections can
+be made/changed before or after boot without issue.
+
+\sh USB 2.0 Support
+
+USB 2.0 support was verified using Bulk Memory Devices, keyboard and mouse
+peripherals.
+
+The on-board NEC uPD720101 USB 2.0 Host Controller provides USB ports 
+with integrated transceivers for connectivity with any USB compliant 
+device or hub. USB channel 1 is routed to a single USB connector located 
+at the front panel. Channel 2 is routed to the VME P0 connector for RTM 
+access. 
+
+To enable USB OHCI/EHCI software support for the controller,
+define INCLUDE_USB in config.h. Also in config.h define the needed
+device class drivers. USB mouse and keyboard are defined by default. 
+
+Wind River's usbTool may also be optionally included to perform
+command line initialization and testing of the host controller and USB
+devices. Define INCLUDE_USBTOOL in config.h if desired. If usbTool is 
+included, then automatic initialization of USB devices will NOT be performed 
+as the kernel starts. All USB initialization will be totally manual
+via usbTool commands only. Execute "usbTool" at the kernel prompt.
+Enter "help" for a list of commands available. 
+
+See Wind River's USB Host Stack Programmer's Guide and USB Peripheral Stack
+Programmer's Guide for additional information and descriptions of the
+available class drivers that are supported by Wind River.
+
+\sh SATA Support and Configuration
+
+SATA support is limited to IDE legacy mode ONLY for SATA compatible disk 
+drives. In IDE mode, SATA Hot Plug is not supported. It is not 
+recommended that SATA devices be disconnected/reconnected after booting.
+While this may conditionally work when there is no read/write activity to 
+the device at disconnect/reconnect or at anytime to disconnected port 
+having a previously connected/configured device, the legacy driver does not 
+ensure a safe situation for disconnect.
+
+DIP switch #7 (S4-7) in the board configuration switch bank must be set to OFF 
+(default) to enable IDE mode. SATA DPA mode is NOT currently supported in 
+VxWorks 6.x. If DPA mode is selected (switch #7 set to ON), a repeating 
+error notification is displayed that will prevent completion of startup 
+of the bootrom and/or kernel. 
+
+Three SATA ports are available on the MV3100. Port 0 is accessed via a front
+panel connector. Port 1 is accessed from the board surface via a planar 
+connector (J28). Port 2 is accessed from the backplane via the RTM connector.
+
+The standard Wind River ATA driver and its supporting structures are used 
+to implement legacy IDE support for SATA drives. In legacy mode the SATA 
+controller operates as a typical dual IDE controller. The primary controller 
+provides master and slave drives on SATA ports 0 and 1 respectively; 
+likewise for the secondary controller with master and slave drives on SATA 
+ports 2 and 3. 
+
+On the MV3100 port 3 (the secondary's slave) is NOT available. Only directly
+connected SATA disk drives have been validated. 
+
+To enable SATA support change #undef INCLUDE_ATA to define #INCLUDE_ATA 
+in config.h. This will include Wind River's ATA support. The ports will be 
+probed for connected devices at start-up.  Modify the sysLib.c ataResources[]
+structure cylinder member to be 0 for ports not used.
+
+Supported configuration consists of a true SATA drive connected to the
+mc3100 which will operate the SATA in legacy mode.  Use of a 
+sata->ide converter connected to a IDE drive has been tested but is
+not supported in this BSP.  Use of a converter produced mixed results 
+depending on the vendor.  If a converter is to be used (unsupported), define 
+MV3100_ATA_CTRL_FIX in ataDrv.c.  When using a SATA disk in legacy mode
+directly connected to the mv3100 using standard SATA cable, leave
+MV3100_ATA_CTRL_FIX undefined.
+
+vxWorks 6.3 SATA controller 0, drive 1, testing was performed using 
+a Serial ATA Converter (made by "i2s")  connected to a WD300 IDE drive
+jumper'ed as Master.  Controller 0, port 0 was tested using a direct 
+SATA connected external Seagate ST30000xs SATA disk. 
+
+After booting, the disk devices can be configured with the
+following commands (example for ctrl/drive 0/0):
+
+\cs
+        usrAtaConfig(0,0,"/ata0")
+\ce
+
+If a dosFs file system has previously been set up on the device:
+
+\cs
+        dosFsVolFormat("/ata0")
+\ce
+
+
+To boot a kernel image from a SATA disk drive on port 0,
+configure the file system on controller 0, drive 0 as above. Then
+use the copy command to place the kernel file on the disk drive.
+
+\cs
+        copy "host:/myDir/vxWorks.st","/ata0/vxWorks.st"
+\ce
+
+Enter "reboot" to return to the bootrom. Stop any autoboot.
+Change the boot device to: ata=0,0
+Change the file name to: /ata0/vxWorks.st
+Return to the bootrom prompt and enter "@" to boot the kernel image from disk.
+
+\sh TEMPE (TSI148) DMA Configuration
+
+The Tempe PCI-VME bridge chip contains a DMA controller.  This BSP provides
+a driver for that DMA controller.  No special configuration switches need
+to be modified to configure Tempe (Tsi148) DMA support.
+
+The following is a synopsis of the driver routines:
+
+\cs
+sysTempeDmaStart()
+\ce
+
+A Tempe DMA is started by calling sysTempeDmaStart with a channel specified,
+DMA descriptor structure, DMA attribute structure and a DMA status structure
+which will receive the status of the DMA.
+
+\cs
+  STATUS sysTempeDmaStart
+      (
+      UINT32 chan,                    /@ channel number (0 or 1) @/
+      TEMPE_DMA_DESCRIPTOR * dmaDesc, /@ descriptor @/
+      TEMPE_DMA_ATTRIBUTES * dmaAttr, /@ attributes @/
+      TEMPE_DMA_STATUS     * dmaStat  /@ DMA status, (or NULL) @/
+      )
+\ce
+
+The channel parameter (chan) must contain either 0 or 1, depending on which
+channel the DMA is to run.  The two channels can be run concurrently.
+
+The DMA descriptor parameter (dmaDesc) specifies the information which can
+change for each link-list block.  This includes a source address, destination
+address, byte count and VME bus attributes along with a 'next' pointer which
+optionally points to another dmaDesc type parameter.  If the 'next' field
+of the DMA descriptor parameter is NULL (0) then a "direct mode" DMA
+transaction is performed.  If the 'next' field is non-NULL then it must point
+to another valid DMA descriptor parameter which will be the second in a
+linked-list chain.  The second DMA descriptor in a linked-list chain can
+point to yet another DMA descriptor and so on, the last DMA descriptor in the
+chain will contain NULL in its 'next' pointer.  A linked-list chain can be as
+long as desired.
+
+The DMA Attribute parameter (dmaAttr) specifies the information needed to
+program the DMA control register for the particular channel.  Once the
+attributes are set for a particular call, they remain unaltered for the
+duration of the DMA operation, even if it is a chained-mode operation.  The
+information in this parameter includes bus usage information (DMA block
+sizes and back-off timers are flushed on aborted read options) as well as an
+optional 'userHandler' field which points to a user-written function which
+gains control when the DMA finishes.  Use of the 'userHandler' field is
+optional, if it contains NULL then the sysTempeDmaStart() function returns
+to the caller immediately after the DMA is initiated, allowing for
+concurrent processing while the DMA is underway.  If the 'userHandler' field
+contains WAIT_FOREVER then the sysTempeDmaStart() function will not return
+until the DMA operation has completed (successfully or with an error).
+While the function is waiting for the DMA to finish it is blocked on a
+semaphore so that other tasks may run during DMA operation.  If 'userHandler'
+contains something other than NULL or WAIT_FOREVER, it is assumed to be a
+pointer to a user written function.  In this case sysTempeDmaStart() will
+return immediately after initiating the DMA and the user written handler
+will be called after the DMA completes.  The user written handler will be
+operating in the context of an interrupt service routine so it is important
+that this function not perform any blocking calls.  It should execute as
+quickly as possible since other interrupt service processing is held off
+while it executes.
+
+The DMA status parameter will be returned containing information about the
+current state of the DMA, including current source address, current
+destination address, current link address, decrementing byte counter and a
+current upper and lower time base register capture.  The status information
+is returned immediately after the DMA is started and can be subsequently
+obtained via calls to sysTempeDmaStatus().  The dmaStat parameter can be
+NULL when calling sysTempeDmaStart(), in which case no status is returned.
+
+\cs
+sysTempeDmaStatus()
+\ce
+
+A Tempe DMA status can be obtained by calling sysTempeDmaStatus with a channel
+specified and a structure parameter which receives the status data.
+
+\cs
+  STATUS sysTempeDmaStatus
+      (
+      UINT32       chan,               /@ Channel to get status @/
+      TEMPE_DMA_STATUS *dmaStatus      /@ Current status of channel @/
+      )
+\ce
+
+The status is read from the Tempe chip at the time of the call to
+sysTempeDmaStatus().  Included in the status are values of the channels
+status register, current source address, current destination address, current
+link address, remaining byte count and an upper and lower timebase register
+value.
+
+\cs
+sysTempeDmaAbort()
+\ce
+
+An active DMA operation can be terminated by a call to sysTempeDmaAbort().
+The only parameter is a channel number which must be 0 or 1.  Once a channel
+has been aborted it cannot be resumed.  A new call to sysTempeDmaStart()
+must be made to initiate a new DMA.
+
+\cs
+  STATUS sysTempeDmaAbort
+      (
+      UINT32   chan             /@ Channel to be aborted @/
+      )
+\ce
+
+\cs
+sysTempeDmaPause()
+\ce
+
+A link-list DMA operation can be paused after the current link-list descriptor
+portion of the DMA has completed and before the next descriptor in the list
+begins processing.  The only parameter is the channel which is to be paused.
+
+\cs
+  STATUS sysTempeDmaPause
+      (
+      UINT32   chan             /@ Channel to be paused @/
+      )
+\ce
+
+After the channel has been paused, it can be "resumed" via a call to
+sysTempeDmaResume().
+
+\cs
+sysTempeDmaResume()
+\ce
+
+A link-list DMA operation which has previously been paused can be resumed
+with a call to sysTempeDmaResume().  A channel number is the only required
+parameter.
+
+\cs
+  STATUS sysTempeDmaResume
+      (
+      UINT32   chan             /@ Channel to be resumed @/
+      )
+\ce
+
+Below is a template for setting up a call to sysTempeDmaStart(). See
+"tempe.h" for a breakdown of these structures.
+
+\cs
+TEMPE_DMA_DESCRIPTOR dmaDescSample =
+    {
+    0x01000000,        /@ Source Address 'sourceAddr' @/
+    0x81000000,        /@ Destination Address 'destAddr'  @/
+    0x00010000,        /@ Number of bytes to transfer 'byteCount' @/
+    0,                 /@ 2eSST Broadcast select 'bcastSelect2esst' @/
+
+        /@ The following apply to the source of the DMA @/
+
+        {
+        VME_DMA_PCI,   /@ Bus 'srcVmeAttr.bus' @/
+        VME_SST320,    /@ 2eSST rate 'srcVmeAttr.vme2esstRate' @/
+        VME_MODE_A32,  /@ address mode 'srcVmeAttr.addressMode' @/
+        VME_D32,       /@ data width 'srcVmeAttr.dataWidth' @/
+        VME_2eSST_OUT, /@ xfer out protocol 'srcVmeAttr.xferProtocolOut' @/
+        TRUE,          /@ supervisor access type 'srcVmeAttr.superAccessType' @/
+        TRUE           /@ program access type 'srcVmeAttr.pgmAccessType' @/
+        },
+
+        /@ The following apply to the destination of the DMA @/
+
+        {
+        VME_DMA_VME,   /@ Bus 'dstVmeAttr.bus' @/
+        VME_SST320,    /@ 2eSST rate 'dstVmeAttr.vme2esstRate' @/
+        VME_MODE_A32,  /@ address mode 'dstVmeAttr.addressMode' @/
+        VME_D32,       /@ data width 'dstVmeAttr.dataWidth' @/
+        VME_2eSST_OUT, /@ xfer out protocol 'dstVmeAttr.xferProtocolOut' @/
+        TRUE,          /@ supervisor access type 'dstVmeAttr.superAccessType' @/
+        TRUE           /@ program access type 'dstVmeAttr.pgmAccessType' @/
+        },
+    NULL               /@ Next descriptor if chained mode 'next' @/
+    };
+
+TEMPE_DMA_ATTRIBUTES dmaAttribSample =
+    {
+        {
+        4096,   /@ PCI bus max block size 'busUsg.maxPciBlockSize' @/
+        64,     /@ PCI bus back-off timer (usec) 'busUsg.pciBackOffTimer' @/
+        4096,   /@ VME bus max block size 'busUsg.maxVmeBlockSize' @/
+        64,     /@ VME bus back-off timer 'busUsg.vmeBackOffTimer' @/
+        FALSE,  /@ VME flush on aborted read? 'busUsg.vmeFlshOnAbtRead' @/
+        FALSE   /@ PCI flush on aborted read? 'busUsg.pciFlshOnAbtRead' @/
+        },
+    NULL        /@ User-defined completion routine 'userHandler' @/
+    };
+\ce
+
+To start the DMA on channel 0 with the above parameters (turning on the
+"don't return until done" option), put the following into your code:
+
+\cs
+    TEMPE_DMA_DESCRIPTOR dmaDesc;
+    TEMPE_DMA_ATTRIBUTES dmaAttr;
+    TEMPE_DMA_STATUS     dmaStat;
+    int                  chan;  /@ channel number @/
+
+    dmaDesc = dmaDescSample;
+    dmaAttr = dmaAttrSample;
+    chan = 0;
+    dmaAttr.userHandler = WAIT_FOREVER; /@ Don't return till DMA done @/
+
+    if (sysTempeDmaStart (chan, &dmaDesc, &dmaAttr, &dmaStat) == ERROR)
+        printf("channel 0: DMA start error\n");
+\ce
+
+To change the source, destination and byte count and start another DMA,
+this time on channel 1 do the following:
+
+\cs
+    dmaDesc.sourceAddr = 0x02000000;
+    dmaDesc.destAddr   = 0x81000000;
+    dmaDesc.byteCount  = 0x00020000;
+    chan = 1;
+
+    if (sysTempeDmaStart (chan, &dmaDesc, &dmaAttr, &dmaStat) == ERROR)
+        printf("channel 1: DMA start error\n");
+\ce
+
+\sh Boot Devices
+The supported boot devices are:
+
+\ts
+    `sm0'      | - shared memory
+    `mottsec0' | - Front Ethernet (10baseT, 100baseTX, or 1000baseT)
+    `mottsec1' | - Rear Ethernet  (10baseT, 100baseTX, or 1000baseT)
+    `tffs'     | - TFFS
+    `ata=controller#,dev#'   | - SATA Drive, controller 0, dev 1 is SATA Port 1 (on board)
+\te
+
+\sh Boot Methods
+The boot methods are affected by the boot parameters.  If no password is
+specified, RSH (remote shell) protocol is used.  If a password is specified,
+FTP protocol is used, or, if the flag is set to 0x80, TFTP protocol is used.
+
+These protocols are used for both Ethernet and shared memory boot devices.
+
+SPECIAL CONSIDERATIONS
+
+This section describes miscellaneous information that the user needs
+to know about the BSP.
+
+\sh TrueFFS
+
+This BSP supports TrueFFS Flash File System. TFFS is disabled by default.  
+To enable TFFS change #undef INCLUDE_TFFS, in config.h, to
+#define INCLUDE_TFFS.  The size is dynamically set to be half of the flash
+bank.  We do this to protect the boot blocks located in the last 2MB of the
+flash bank, and also conform to the TFFS restriction that the flash bank 
+size must be a power of 2 (1,2,4,8,16,32,...).
+
+After enabling TFFS support and rebuilding the kernel, the TFFS drive
+will be available as "RFA0", as support is provided to automatically 
+mount the TFFS drive during kernel initialization.  If you wish to use 
+TFFS to boot the VxWorks kernel you will need to rebuild the bootrom.
+
+\sh L2 cache/SRAM support
+
+The MPC8540 chip contains a total of 256 Kbytes of L2 Cache/SRAM.
+It can be configured in six possible ways:
+
+\cs
+(1) Configure all 256 Kbytes as one block of cache.
+(2) Configure one block (block 1, 128 Kbytes) as cache, block
+    0 remains unused.
+(3) Configure one block (block 0) as SRAM, and one block (block 1)
+    as cache, each 128 Kbytes in size.
+(4) Configure all 256 Kbytes as one block of SRAM.
+(5) Configure both 128 Kbyte blocks as SRAM, for a total of
+    256 Kbytes of SRAM.
+(6) Configure one block (block 0, 128 Kbytes) as SRAM, block
+    1 remains unused.
+\ce
+
+The choice of configuration is controlled in config.h, via the
+L2_CACHE_SRAM_CONFIG definition.  See config.h for the list of
+legal values this definition can be set to.
+
+When using all, or a portion of the L2 cache/SRAM, as cache you may
+configure the mode - data, instruction, or both data and instruction.  
+The definition L2_MODE, in config.h, is used to configure the mode.  
+Legal values are L2_MODE_INST_AND_DATA, L2_MODE_I_ONLY, and L2_MODE_D_ONLY.
+
+The SRAM is available at the address MPC8540_L2_SRAM_BASE, which is
+defined as 0xE1100000.
+
+Support for "allocating and locking of L2 cache lines from external
+agents" (MPC8540 Reference Manual, page 7-10) is not included, as
+this would conflict with VxWorks L2 cache support/libraries.
+
+When INCLUDE_ERROR_HANDLING is defined, the L2 Cache/SRAM interface
+is configured to generate an interrupt when any of the following errors
+occur:
+
+(1) Tag Parity Error
+(2) Multiple - Bit ECC Error
+(3) Single - Bit ECC Error
+(4) L2 Configuration Error
+
+The L2 Cache interrupt handler will subsequently disable the L2 cache/SRAM
+interface and log an error message via the BSP's error handling subsystem.
+
+\sh Make Targets
+The make targets are listed as the names of object-format files. Append `.hex'
+to each to derive a hex-format file name. Other images not listed here may not
+be tested.
+
+\ts
+    `bootrom'
+    `bootrom.bin'
+    `bootrom.hex'
+    `vxWorks' (with `vxWorks.sym')
+    `vxWorks.st'
+\te
+
+\sh TLB Information
+
+VxWorks makes use of TLBs to assist in address translations.  The MPC8540
+PowerQUICC III manual documents details of TLBs.  The following
+paragraphs present information regarding TLB usage in VxWorks.
+
+TLB stands for "Translation Lookaside Buffer".  It is an integrated
+part of the memory management system and is used to translate the
+address of an access (instruction or data) from an "effective" address
+(the address the actual machine instruction sees) to a "real" address
+(the one that is actually used for accessing the external unit).
+In VxWorks, the translation is not biased, meaning that the effective
+address is always numerically equal to the real address.
+
+There are two different TLBs (TLB0 and TLB1).
+
+TLB0 is also referred to as the "dynamic" TLB.  It supports
+translations which operate on a 4K (0x1000) page size granularity.  It
+cannot support any granularity other than 4K.  It has 256 entries, is
+unified (supports both instructions and data) and is 2-way set
+associative.  The MMU tables which are built from sysPhysMemDesc []
+array interact only with TLB0, not TLB1.  TLB0 entries do not
+have a functioning IPROT (protection) bit, meaning that they cannot be
+protected from a TLB flash invalidate operation.  Note that TLB1
+entries can be so protected.
+
+TLB1 is a 16-entry fully associative set.  It is also unified, just
+like TLB0.  Unlike TLB0, it supports 9 different page sizes: 4KB,
+16 KB, 64 KB, 256 KB, 1 MB, 4 MB, 16 MB, 64 MB, and 256 MB.  TLB1 is
+sometimes referred to as the "static" TLB to contrast it from TLB0
+which is the "dynamic" TLB.  You can have different page sizes
+active at the same time with TLB1.  For example, you could have an
+entry programmed for 256MB covering the address range for flash from 
+0xf0000000 through 0xffffffff (flash), and another one covering the
+CCSBAR register set (1MB), address range 0xe1000000 through 0xe1ffffff.
+You can cover a lot of ground with just few TLB1 entries.  TLB1
+has a functioning IPROT bit, one for each if its 16 entries.  When
+this bit is set that entry is protected from a flash invalidate
+operation.  As mentioned earlier, TLB0 does not have this capability.
+TLB1 takes over (and actually enhances) the role that
+BATs (Block Address Translations) filled on other chips such as
+the MPC7457.  Note that the E500 core does not contain BATs at all.
+
+In VxWorks, we will be using TLB0 to map access from the kernel, and 
+TLB1 to map access from the bootrom.  Both bootrom and kernel access
+to the CCSBAR register set will be available via TLB1. 
+
+One of the many tests that is performed to determine if an address 
+can be translated by a specific TLB entry (either TLB0 or TLB1), 
+is an instruction/data access test.  A single TLB entry can be
+set up so that it translates both instruction and data accesses
+or it can be set up to translate only one of these and be ineligible
+for translation of the other.  The method for doing this is not
+straightforward, here it is:
+
+  If the access is an instruction access
+  then
+      if (MAS1[TS] == MSR[IS])
+	  'translation space' test passes
+      else
+	  'translation space' test fails
+  else (must be data access)
+      if (MAS1[TS] == MSR[DS]
+	  'translation space' test passes
+      else
+	  'translation space' test fails
+
+Here MSR is the machine state register and IS and DS are bits inside
+of this register.  MAS1 is the 2nd word of the TLB which would reside
+in the MAS1 register if a 'tlbre' (tlb read entry) instruction were
+executed to read that register.  TS is the 'translation space' bit
+which is a single bit in this word.
+
+ The following table summarizes this:
+
+\cs
+                                Translation space validity 
+				(* = valid, . = not valid)
+
+MAS1[TS]   MSR[IS]   MSR[DS]    Instruction  Data
+  0         0          0           *          *
+  0         0          1           *          .
+  0         1          0           .          *         
+  0         1          1           .          .
+  1         0          0           .          .
+  1         0          1           .          *
+  1         1          0           *          .
+  1         1          1           *          *
+
+\ce
+
+VxWorks dynamically changes the MSR and as such, the interaction
+with TLBs.  Here is what happens: 
+
+\cs
+
+--- running in bootrom:
+0x00001200      Entry to SysHwInit   
+0x00001200      Exit from sysHwInit 
+
+--- running in kernel:
+0x00029200      Just prior to mmuInit 
+0x00029230      Just after mmuInit   (in usrConfig.c)
+0x00029230      Entry to sysHwInit2
+0x00029230      Exit from sysHwInit2
+
+\ce
+
+Now the interesting thing about these changes to the MSR involve the
+flipping of the DS and IS bits (bits 4 and 5 in the conventional
+bit numbering scheme).  From the above list one can see that the
+MSR[IS] and MSR[DS] bits are zero while running in the bootrom but
+change to 1 when the kernel comes up and executes mmuInit().  This
+has implications as to how addresses are translated.  Remember that
+a TLB entry must have a TS bit which matches the associated bit
+in the MSR in order to be a candidate for translation.  Because the
+MSR bits flip we have to have two TLB1 entries mapping the same
+address regions, one entry has the TS bit set to zero the other has
+it set to 1.  An example of such situation is the flash bank mapping.
+In order to access the flash bank with data accesses from the kernel
+prompt, we must have the TS bit set to 1 in the flash bank TLB1 entry
+because the mmuInit() portion of kernel initialization made the MSR
+IS and DS bits both 1, and the TLB1 translation entries TS but must
+match the DS bit for data access.  When we execute 'reboot' or ctl-x, 
+we clear the MSR (changing the IS and DS bits therein to zero).  We 
+then jump to the flash bank.  Thus we must also have a TLB entry which 
+allows for instruction accesses and it must have a zero in its TS bit.
+You will notice these duplicate entries inside of sysLib.c in the
+sysStaticTlbDesc [] table, which is the table which contains the
+TLB1 entry information.
+
+\sh Memory Test Suite
+
+This BSP provides a memory test suite (sysMemoryTest.c) which contains
+a data bus test, an address bus test, and a device test.  Once the memory
+controller is initialized in romInit.s, and the memory is scrubbed (for ECC),
+the memory test suite is executed to verify the functionality of the memory.
+Before the tests are run, the board's three user LEDs are illuminated.
+When the data bus test passes, user LED 1 is extinguished.  When the address
+bus test passes, user LED 2 is extinguished.  And, when the device test
+passes, user LED 3 is extinguished.  If your board fails to boot, and any
+of the user LEDs are still illuminated, it can be assumed that there is a 
+problem with the system memory.
+
+\sh Error Handling Suite
+
+`Introduction'
+
+This error handling suite is included via #define of INCLUDE_ERROR_HANDLING.
+
+This module implements generic error handling support.  Software which
+detects an error, either through interrupts or via soft scan of
+hardware can make use of this module to "dispose" of the error.
+Disposition can consist of displaying an immediate indication of the
+error and/or saving the information about the error in a log which can
+be queried later.  An optional user-written function can also be
+called upon occurrence of a particular error.  This module does not
+itself detect errors but instead offers supporting functions which
+allow for handling of errors, which are detected elsewhere in the
+system, in a uniform way.
+
+`Connecting to the Error Handling Module'
+
+Before making use of the error handling services software must
+"connect" with the error handling module.  This is a two-step process
+consisting first of (1) Domain Initialization and secondly of (2)
+Error Registrations.  After these two steps are completed actual
+logging of specific errors can be performed.
+
+Before proceeding a distinction must be made between error
+"registration" and error "logging".
+
+Error "registration" is done once for each possible error.  It is
+through "registration" that the error handling module is presented
+with a unique error ID which will be monitored by application software
+as the system runs.  Note that "registering" an error does not mean
+that the error has occurred, it just means that this particular error
+is being monitored and could potentially be logged.
+
+Error "logging" is what is done when application software detects an
+error and informs the error handling module that the error has
+actually occurred.  The error handling module then disposes of the
+error according to rules which were established when the error was
+registered.  Thus it can be seen that to successfully log an error,
+that error must first have been registered.
+
+`(1) Domain Initialization'
+
+The error handling module considers a "domain" to be a software
+subsystem which deals with a major component of the system.  Examples
+of domains would be "CPU", "Host Bridge", "PCI", "VME Bridge"
+etc.  The user has some flexibility in defining these domains.  A
+domain need not necessarily be confined to actual hardware on the board,
+it could be a user application such as "Widget".   It is anticipated
+that there will be at most a small handful of domains associated with
+a specific system.
+
+A "domain" is identified by two things:
+
+`a)'  An error domain ID.  Such an ID consists of a 32-bit identifier,
+of which only the top byte actually identifies the domain.
+For example the host bridge might have a domain ID of 0x02000000.
+(Here the high order byte "0x02" identifies this as the host
+bridge domain,  the CPU domain might have an ID of 0x01000000).
+The domain ID is important because every error which is eventually
+logged and has an error ID of the form 0x02xxxxxx will be assumed
+to be associated with the host bridge domain because of "0x02" as
+the high order byte.
+
+       and
+
+`b)'  A string e.g. "MPC8540" (which will be used in display of
+subsequently logged errors).  This string can be a maximum
+of 8 characters in length.
+
+Each domain can contain three functions important to the error handling
+module:
+
+`1)' An error scanning function - 'errorScan (errorId)':
+This function, when called with a specific error ID, will "scan"
+for the assertion of the error associated with this ID.  This
+is useful for errors which are not associated with interrupts and
+must be "polled" via soft read of a hardware register.
+
+`2)' An error clearing function - 'errorClear (errorId)':
+This function, when called with a specific error ID, will "clear"
+an asserted error.  Again this could be used in association with
+non-interrupt generating errors to clear status bits which
+were set when the error was asserted.
+
+`3)' An error formatting function - 'errorFormat (errorId)'
+This function is called by the error handling module to format
+an error message associated with a particular error.  This
+function would be called by the error handling module in
+preparation to display the message on the console.
+
+A domain can have all three of these functions but it is not required
+to have any of them.
+
+Each separate domain (e.g. "CPU", "PCI", "Widget") must separately
+establish initialization with the error handling module.
+
+A single function call from application code into the error handling
+module will initialize a specific domain.  An example of how to do
+this for a VME bridge domain called "Tsi148" is presented below in
+the following code fragment:
+
+\cs
+    /@ Forward references to this domain's helper functions @/
+
+    char * tsi148ErrorFormat (ERROR_ID id);
+    BOOL   tsi148ErrorScan   (ERROR_ID id);
+    BOOL   tsi148ErrorClear  (ERROR_ID id);
+
+    /@ Error module tells me about his functions in here @/
+
+    ERROR_UTILS * myErrorUtils;
+
+    /@
+     * I, "Tsi148" domain, tell error module about
+     * my helper functions in here.
+     @/
+
+    ERROR_USR_FUNCS tsi148ErrorFuncs;
+
+    ...
+
+    /@ Initialize pointers to my format, scan, and clear functions @/
+
+    tsi148ErrorFuncs.myErrorFormat = tsi148ErrorFormat;
+    tsi148ErrorFuncs.myErrorScan = tsi148ErrorScan;
+    tsi148ErrorFuncs.myErrorClear = tsi148ErrorClear;
+
+    if (_func_errorHandlerInit == NULL)
+        {
+        logMsg ("Error Handling Suite not linked\n",0,0,0,0,0,0);
+        return(FALSE);
+        }
+
+    /@ Here's the call which initializes the domain !!! @/
+
+    myErrorUtils = (* _func_errorHandlerInit) (0x03000000,"Tsi148",
+                                               &tsi148ErrorFuncs);
+
+    /@ Now test to see if domain initialization actually worked @/
+
+    if (myErrorUtils.errorLog == NULL)
+        {
+
+        /@
+         * myErrorUtils.errorLog == NULL is the error handling module's
+         * way of telling me the the domain initialization failed.
+         @/
+
+        printf ("Tsi148 error domain initialization FAILED\n")
+        }
+    else
+        {
+
+        /@
+         * Domain initialization succeeded:
+         * Now myErrorUtils.errorRegister points to the error handling
+         * module's error registration function and
+         * myErrorUtils.errorLog points to the error handling module's
+         * error logging function
+         @/
+
+        printf ("Tsi148 error domain initialization SUCCEEDED\n");
+
+        }
+
+        ...
+
+   /@ Here are my actual helper functions - more on this later @/
+
+   char * tsi148ErrorFormat (ERROR_ID id)
+       {
+       ... /@ More said about this later @/
+       }
+
+   BOOL tsi148ErrorScan   (ERROR_ID id)
+       {
+       ...  /@ More said about this later @/
+       }
+
+   BOOL widgetErrorClear  (ERROR_ID id)
+       {
+       ... /@ More said about this later @/
+       }
+
+
+\ce
+
+Notice the information that is exchanged during this domain
+initialization.  The application (domain) code informs the error
+handling module of its domain ID, domain ASCII string, error
+formatting function, error scanning function and error clearing
+function.  The error handling module in turn informs the application
+(domain) code of its error registration function and error logging
+function.
+
+`(2) Error Registrations'
+
+After a domain has initialized as described above, it must "register"
+each error that it is going to monitor and could potentially "log".
+This is done by calling the "error registration" function, whose
+pointer was given to the domain initialization code in the
+previous step.
+
+The following code fragment (a continuation of the fragment
+illustrating domain initialization) accomplishes this:
+
+\cs
+        /@
+         * Forward reference to error handler function
+         * and declaration of error handler function parameter
+         @/
+
+        void tsi148ErrorHandler (int param);
+        int errorParam = 0x1234;
+
+        /@
+         * This tells how we wish to "dispose" of the error whenever
+         * it is logged.
+         @/
+
+        ERROR_DISPOSITION disposition;
+
+        ...
+
+        disposition = ( ERROR_DISP_SAVE |
+                        ERROR_DISP_IMMEDIATE_DISPLAY |
+                        ERROR_DISP_FUNCTION_CALL );
+
+        /@ Here is the call that actually registers an error @/
+
+        if (* myErrorUtils.errorRegister)(0x03010201,
+                                          disposition,
+                                          tsi148ErrorHandler,
+                                          errorParam);
+
+        ...
+
+
+   /@
+    * This function will be executed when the 0x03010201 error
+    * is actually "logged" because 'disposition' included
+    * ERROR_DISP_FUNCTION_CALL and we did provide a nonNull
+    * function pointer: tsi148ErrorHandler
+    @/
+
+   void tsi148ErrorHandler     (int param)
+       {
+       logMsg("tsi148 error handler called with argument %d\n",param);
+       }
+
+\ce
+
+Note several things about the above example:
+
+The function call which actually performs the registration is done
+through a function pointer which was given to the domain code during
+domain initialization (myErrorUtils.errorRegister).
+
+There are four parameters used in this function call: An error ID
+(0x03010201), a "disposition", a pointer to an error handling
+function, and an error handling function parameter.
+
+The error code in this example is 0x03010201.  Notice that the high
+order byte 0x03 matches the high order byte used to initialize the
+"Tsi148" domain.  This is important because the error handling module
+will refer to that domain's error formatting, error scanning and/or
+error clearing function when it is asked to deal with this error.
+
+The disposition in this example enables all of the active
+possibilities: "save", "immediate display" and "function call".
+"Save" (ERROR_DISP_SAVE) means that any future calls into the error
+module to "log" an occurrence of this error will cause the information
+about the error to be saved in an internal error log, which can later
+be displayed.  "Immediate display" (ERROR_DISP_IMMEDIATE_DISPLAY)
+means that when an error is logged, an immediate display (to the
+console) of this error occurrence will be performed by the error
+module.  "Function call" (ERROR_DISP_FUNCTION_CALL) means that
+when this particular error is "logged", the last two parameters in the
+registration call will be used to construct a function call with a
+specified parameter.  That function can be anything that the user
+desires.
+
+The third parameter (function pointer) can be NULL if no function
+is to be called when the error is logged.  In that case, even if
+ERROR_DISP_FUNCTION_CALL is part of the "disposition" no function
+will be called.
+
+There is one other possible "disposition".  If the registration
+"disposition" is ERROR_DISP_IGNORE, then no action is taken by the
+error handling module when the error is logged.
+
+An error can be registered more than one time.  Each error is uniquely
+identified by an error ID so if a call is made to register an error ID
+which has been previously registered, the information saved from the
+previous registration is overwritten.  This can be useful if
+application code wants to change the disposition of an error at
+run time.
+
+An error can be registered any time after the system is up, even
+after error logging has begun.
+
+`Error Logging'
+
+Once the domain has been initialized, and a particular error has
+been registered it is possible that the error will assert itself.
+If the software is written so that it can detect the assertion of
+the error, it can call the error handling module to "log" the
+error.  The following code fragment continues the example:
+
+\cs
+
+   ERROR_MSG myErrorMsg;
+
+   ...
+
+   /@ Tsi148 code detects a "bus" error and wishes to log it @/
+
+   myErrorMsg.id = 0x03010201   /@ ID of bus error, previously registered @/
+
+   myErrorMsg.params[0] = <status reg value, read from HW = 0x00002000>
+   myErrorMsg.params[1] = <access address, read from HW = 0xc000ffff>
+
+   (* myErrorUtils.errorLog) (&myErrorMsg);
+
+\ce
+
+That's it.  Logging the error simply involves loading an ERROR_MSG
+structure with the ID of the error to log (that ID must have
+previously been registered).  Also up to six parameters are available
+to provide additional information about the error.  In this example,
+two of those parameters are loaded with HW register values.  The
+function called to actually log the error is pointed to by a function
+pointer which we learned about during domain initialization.
+
+`What Happens When an Error is Logged?'
+
+The error logging is initiated when the application code makes a call
+to the error handling module's error logging function.  The application
+code knows which function to call because the logging function pointer
+was passed to it during domain initialization.
+
+The error handling module first attaches a "time tag", to the error
+message.  This tag indicates the date and time that the error log
+request was received.
+
+The error handling module then checks to see if the error ID has been
+previously registered.  If it has not then the logging request is
+rejected and ERROR is returned to the logging requestor.
+
+Now that the error handling module knows that the error is registered,
+it checks the disposition of the error that was set during the last
+registration call for that particular error ID.  If the error
+disposition is ERROR_DISP_IGNORE, there is no more work to do and the
+error handling module returns OK.
+
+The error disposition is not "ignore" so the next disposition
+possibility checked is ERROR_DISP_FUNCTION_CALL.  If this disposition
+is set, and the error function pointer which was presented at
+registration time is not NULL, the user function is called with the
+parameter that was registered.  Note that execution is still in the
+same thread as the error logging call, so if the function that is
+doing the error logging, is an interrupt service routine, it should be
+careful to obey ISR rules (don't do any blocking calls).
+
+Once the disposition of "function call" has been handled, the error
+logging request is posted to a message queue which is being read by a
+separate execution thread called the "error task".  The error logging
+execution thread then returns OK to the caller.
+
+The error task will read the message queue to obtain the error logging
+request.  The error task will check the registration disposition to see 
+if it includes ERROR_DISP_IMMEDIATE_DISPLAY.  If it does, then an 
+indication that the error occurred is displayed at this time (more 
+about how this error display is formatted is presented later).
+
+Once the "display immediately" disposition has been handled by the
+error task, it checks to see if the disposition also includes
+ERROR_DISP_SAVE.  If it does, then the information included in the
+original error message (along with the time tag which was added) is
+saved in a circular error logging table.  The size of this table is
+governed by ERROR_LOG_TABLE_SIZE.  The entry is placed at the end of
+the table.  If the table is full and there is no room for this entry
+to be saved, the oldest saved entry is replaced by this one.  Thus the
+table will contain only the latest errors logged.
+
+The handling of the logging request is now complete.
+
+`Formatting Error Messages For Display'
+
+During the domain initialization, the application code presents to
+the error handling module three function pointers.  One of these
+is the error message formatting pointer.  Continuing our example,
+here is how the formatting function might look for the "Tsi148"
+domain:
+
+\cs
+    char * tsi148ErrorFormat (ERROR_ID id);
+        {
+        switch (id)
+            {
+            case 0x03010201:
+                return ("Bus error: status = 0x%08x, addr = 0x%08x");
+            case 0x03010202:
+                ....
+            default:
+                return (NULL);
+            }
+        }
+\ce
+
+Notice that the formatting string does NOT include actual parameters
+for the formatting specifiers.  This is intended.  Also it does not
+include newline characters, these are not needed either.
+
+Here we see the Tsi148 domain's error message formatting function.
+Since a pointer to this very function was passed to the error handling
+module during domain initialization for "Tsi148" and the error ID
+of the error being logged begins with "0x03", the error handling
+module knows to call this function to assist it in formatting a
+displayable message.  In the error logging example above, we logged
+a Tsi148 bus error (error ID = 0x03010201).  Now our registration
+disposition for this particular error included
+ERROR_DISP_IMMEDIATE_DISPLAY.  Here is how the error handling module
+might display this error.
+
+\cs
+        ErrLog:  JUL 21 15:36:38 "Tsi148  " (03010201):
+                Bus error: status = 0x00002000, addr = 0xc000ffff
+\ce
+
+Notice the components of the error message:
+
+ErrLog: Preface is always part of the message to identify this as
+an "error log" message.
+
+"JUL 21 15:36:38" - is obtained from the "time tag" which the
+error handling module attached to the error message when it was
+logged.
+
+"Tsi148  " - Is the ASCII domain string which was saved by the
+error handling module during domain initialization of error type
+0x03000000.
+
+"(03010201)" - Is the error ID which was passed to the error handling
+module by the application when the error was logged.
+
+"Bus error: status = 0x00002000, addr = 0xc000fffff" is constructed
+from two components:  When the error was logged, two parameters
+(out of a possible maximum of six) were presented to the error handling
+module in the logging message parameter elements, errorMsg.params[0],
+and errorMsg.params[1].  The errorTask checks the domain initialization
+for this error and sees that an error formatting function had
+been specified.  It calls this function with the error ID to obtain
+the formatting string which it uses, along with the parameters passed
+in errorMsg.params[0-1] to construct the string to display.
+
+Notice that if a formatting function had not been specified, then
+the error task would have only displayed the first line:
+
+\cs
+        ErrLog:  JUL 21 15:36:38 "Tsi148  " (03010201):
+\ce
+
+If certain errors in the domain do not require a formatted message
+component to be displayed, the formatting function should simply
+return NULL for those particular error IDs.
+
+`Error handling Show Routines'
+
+When INCLUDE_SHOW_ROUTINES is #define'd the following functions
+are available:
+
+\cs
+sysErrorDomainShow (void)
+sysErrorRegisterShow (mask, compare)
+sysErrorLogShow (mask, compare)
+\ce
+
+Examples of use are:
+
+\cs
+
+-> sysErrorDomainShow ()
+
+Error Domain Initializations: sysErrorDomainShow ()
+
+No.     Domain        Error ID      FmtFcn     ScanFcn    ClearFcn
+------------------------------------------------------------------
+ 2      CPU           01xxxxxx           0           0           0
+ 3      Tsi148        03xxxxxx      114c40      114c90      114cbc
+ 4      PCI           04xxxxxx           0           0           0
+ 5      Widget        0fxxxxxx      114a2c      114a4c      114a8c
+
+\ce
+
+The above example shows four different domains have initialized.
+Two of these domains ("Tsi148" and "Widget") have registered formatting
+scanning and clearing functions.  The other domains ("CPU" and "PCI") 
+have initialized but they have specified NULL pointers for their 
+formatting, scanning and clearing functions.
+
+\cs
+
+-> sysErrorRegisterShow (0,0)
+
+Error Registrations: sysErrorRegisterShow (0x00000000, 0x00000000)
+
+No.  Error ID              Disposition   Fcn       Param
+--------------------------------------------------------
+  1  03010201("Tsi148")    dsp.sav.      0         0
+       Msg: "Bus error: status = 0x%08x, addr = 0x%08x"
+  2  0f010101("Widget")    dsp.sav.      0         0
+  3  0f010201("Widget")    fcn.dsp.sav.  114acc    16
+       Msg: "Widget count error, received = %d, actual = %d"
+  4  01010001("CPU")       sav.          0         0
+  5  04010101("PCI")       ignore        0         0
+
+\ce
+
+This shows that five errors have been registered.  The error IDs
+associated with each error are displayed along with the domain name
+string.  Also a disposition field is presented indicating combinations
+"user function call" (fcn), "immediate display" (dsp), and/or "save in
+log file" (sav) or simply "ignore".  In the above table, we see that
+error code 0x03010201 and 0x0f010201 are both associated with a
+formatting string (a format helper function was provided at domain
+initialization and it indeed returns a non-NULL formatting string).
+Also error code 0x0f010201 is associated with a logging function at
+0x114acc which will be called with parameter 16 when this particular
+error is logged.
+
+sysErrorRegisterShow() takes two arguments: 'mask' and 'compare'.
+Several of the functions in the error handling suite take these two
+arguments.  They are used to filter error IDs which appear in a table.
+Only error IDs which pass the filter are acted on by the function.
+
+The filtering operation is:
+
+\cs
+  if ((tableID & mask) == compare)
+      {
+
+      /@ tableID passes through filter @/
+
+      }
+  else
+      {
+
+      /@ tableID is blocked by filter @/
+
+      }
+\ce
+
+So in the above example if we had used 'mask' of 0xff000000 and
+'compare' of 0x03000000 by entering:
+
+\cs
+-> sysErrorRegisterShow (0xff000000, 0x03000000)
+\ce
+
+Only the "Tsi148" error IDs would have been displayed since
+0x03xxxxxx is the only type of ID which will pass this filter.
+Using (0,0) as the mask and compare allows causes everything to
+match.  Since (0,0) is the default VxWorks argument passage when
+no arguments are entered, simply entering:
+
+\cs
+
+-> sysErrorRegisterShow
+
+\ce
+
+Would cause the entire table to be displayed.
+
+\cs
+
+-> sysErrorLogRawShow (0, 0)
+
+Errors currently logged: sysErrorLogRawDisplay (0x0, 0x0)
+
+No.  time     ID       p0       p1       p2       p3       p4       p5
+----------------------------------------------------------------------------
+0001 4100e5d3 01010001 00000000 11111111 22222222 33333333 44444444 55555555
+0002 4100e5d5 0f010201 00000020 00000022 22222222 33333333 44444444 55555555
+0003 4100e5d7 03100015 3dd58898 3dd587e8 00000001 00000000 3dd588a0 3dd588a0
+0004 4100e5d8 03100016 3dd58898 3dd587e8 00000001 00000000 3dd588a0 3dd588a0
+0005 4100e5d9 03100017 3dd58898 3dd587e8 00000001 00000000 3dd588a0 3dd588a0
+0006 4100e5d9 03100018 3dd58898 3dd587e8 00000001 00000000 3dd588a0 3dd588a0
+0007 4100e5da 03100019 3dd58898 3dd587e8 00000001 00000000 3dd588a0 3dd588a0
+\ce
+
+This command displays in "raw" format the errors which have been saved
+in the log file.  Note that this command also uses 'mask' and 'compare'
+filtering.  The display show the time tag, error ID, and the six parameters
+which were part of the ERROR_MSG when the error was logged.
+
+This same display can also be presented in a more readable format via:
+
+\cs
+
+-> sysErrorLogShow (0, 0)
+
+Errors currently logged: sysErrorLogDisplay (0x0, 0x0)
+
+0001:  JUL 23 10:17:55 "CPU     " (01010001):
+0002:  JUL 23 10:17:57 "Widget  " (0f010201):
+       Widget count error, received = 32, actual = 34
+0003:  JUL 23 10:17:59 "Tsi148  " (03100015):
+0004:  JUL 23 10:18:00 "Tsi148  " (03100016):
+0005:  JUL 23 10:18:01 "Tsi148  " (03100017):
+0006:  JUL 23 10:18:01 "Tsi148  " (03100018):
+0007:  JUL 23 10:18:02 "Tsi148  " (03100019):
+
+\ce
+
+Notice that sysErrorLogRawShow and sysErrorLogShow are aliases
+to the functions sysErrorLogRawDisplay and sysErrorLogDisplay.
+The 'Display' functions which display the actual error log are
+considered essential any time INCLUDE_ERROR_HANDLING is #define'd.
+Thus they are included even if INCLUDE_SHOW_ROUTINES is not #define'd.
+Also notice in the formatted display above that error code 0x0f010201
+has an associated formatted string which is displayed as port of the
+table.
+
+\cs
+-> sysErrorHandlerShow
+\ce
+
+performs the following:
+
+\cs
+-> sysErrorDomainShow()
+-> sysErrorRegisterShow (0, 0)
+-> sysErrorLogRawShow (0, 0)
+-> sysErrorLogShow (0,0)
+\ce
+
+`Error Scanning and Clearing Function'
+
+The error scanning function which is optionally presented to the
+error handling module at domain initialization time should scan for
+assertion of an error associated with the parameter error ID.  It's
+up to the user as to what to do if the error is asserted.  Since
+this is a boolean function, it could return TRUE or FALSE depending
+on whether or not the error is asserted.  Another likely thing that
+it might do is to actually make an error logging call if it finds
+that the error is asserted.
+
+The error clearing function is also a boolean function.  It is
+up to the user what this function does but returning TRUE if
+the error was actually cleared might be useful.
+
+`Error Log Table Management Routines'
+
+There are several error log table management routines, which
+are presented below:
+
+sysErrorScan (mask, compare) will go through the error registration
+table and for each registered ID, which passes the 'mask'/'compare'
+filter, it will call the associated scanning routine if such a routine
+exists.
+
+sysErrorClear (mask, compare) is similar to sysErrorScan() except
+it will call the error clearing routine if it exists.
+
+sysErrorDispositionIgnore (mask, compare) will change the disposition
+to 'ignore' for any registered error IDs that pass the filter.
+
+sysErrorDispositionSave (mask, compare) will add 'save' to the
+disposition of any error IDs that pass the filter.
+
+sysErrorDispositionDisplay (mask, compare) will add the 'immediate
+display' disposition to any error IDs that pass the filter.
+
+sysErrorDispositionFunction (mask, compare) will add the 'function
+call' disposition to any error IDs that pass the filter.  Note that
+the already registered error should have a function registered for
+calling prior to use of this command.  If the function pointer is
+NULL, this command has no real functional effect.
+
+sysErrorLogRemove (mask, compare) will remove from the log file,
+any logged errors whose ID passes the filter.  This will free up
+some room in the table for new errors.
+
+\sh Additional Show Routines
+
+In addition to the standard VxWorks "Show" routines, special "Show"
+routines have been added to display specific BSP and board related
+items.  These routines are compiled in to the kernel when INCLUDE_SHOW_ROUTINES
+is #define'd.  A command "mpc8540Show" will display all of the
+additional "show" and "dump" routines:  
+
+\cs
+-> mpc8540Show
+
+AVAILABLE mpc8540 "show" and "dump" routines:
+
+
+mpc8540MemRegDump (): Dumps in raw format the entire mpc8540
+                      Memory mapped register set.  The individual
+                      components registers can be dumped
+                      individually by invoking the following
+                      routines:
+
+  mpc8540CcsDump ():       Mpc8540 Command Control and Status
+  mpc8540LawDump ():       Local Access (LAW)
+  mpc8540EcmDump ():       e500 Coherence Module
+  mpc8540DdrCtlDump ():    DDR Memory Controller
+  mpc8540I2cDump ():       I2C
+  mpc8540DuartDump ():     DUART
+  mpc8540LbcDump ():       Local Bus Controller
+  mpc8540PciAccDumpi ():   PCI Configuration Access
+  mpc8540PciATMUDump ():   PCI Address Translation Mapping
+  mpc8540PciErrDump ():    PCI Error
+  mpc8540L2SramDump ():    L2 SRAM
+  mpc8540DmaDump ():       DMA
+  mpc8540PicGlblDump ():   Programmable Interrupt Controller Global
+  mpc8540PicIntlDump ():   Programmable Interrupt Controller Internal
+  mpc8540PicPerCPUDump (): Programmable Interrupt Controller per-CPU
+  mpc8540RapidIoDump ():   RapidIO
+  mpc8540GlblUtilDump ():  Global Utilities
+  mpc8540PerfMonDump ():   Performance Management
+  mpc8540DbugWpDump ():    Debug/Watchpoint
+
+The following are formatted "show" routines:
+
+
+coreLbcShow ():    Local Bus Controller
+coreShow ():       Various "core" features
+mpc8540DdrCtlShow ():    DDR SDRAM Memory Controller
+tlbAllShow ():     Both Translation Lookaside Buffer sets (0 and 1)
+                   Calls the following function:
+
+  tlbShow (n):       One Translation Lookaside Buffer set (n = 0 or 1)
+
+lawAllShow ():     Local Access Windows
+pciAtmuAllShow (): All (in and out) PCI access
+                   Calls the following functions:
+
+  pciAtmuOutShow (): PCI outbound access
+  pciAtmuInShow ():  PCI inbound access
+
+perfMonEventMonitorShow ():    Event Monitor Details and Status
+perfMonEventMonitorShowAll (): All Event Monitors
+
+sysStatusRegShowAll (): Board Level System Status Registers
+
+\ce
+
+In addition, the following show routines are available:
+
+\ts
+`sysTempeShow' | Display and label every Tempe (Tsi148) PCI-X to VME bridge registers.
+`sysTempeWinShow' | Display all Tempe PCI-X to VME bridge window mappings with formatting.
+`sysTempeOutWinShow' | Display a specified Tempe bridge outbound window setting with formatting.
+`sysTempeInWinShow' | Display a specified Tempe bridge inbound window setting with formatting.
+`translationWindowShow' | Display host bridge translation window array used in BusToLocal conversions.
+`vpdShow' | Display the board's VPD (Vital Product Data). If present, display the RTM's VPD.
+`sysDs1375RtcShow' | Display the current date and time.
+`sysDs1375AlarmShow' | Display the current alarm clock settings.
+`sysDs1375RtcRegShow' | Display RTC register settings.
+`sysDs1375AlarmRegShow' | Display alarm register settings.
+`sysDs1375ControlRegShow' | Display control register settings.
+`sysDs1375RegShow' | Display all register settings.
+`sysDs1375SramShow' | Display DS1375 SRAM contents.
+`sysMpc8540SpdShow' | Display contents of DRAM SPD EEPROMs.
+`sysFlashShow'  | Displays flash bank information.
+\te
+
+Below are the console invokable routines which deal with error handling.
+
+\ts
+`sysErrorHandlerHelp' | Display all of the console invokable routines dealing with error handling.
+`sysErrorHandlerShow' | Display all of the error handling tables.
+`sysErrorDomainShow' | Display currently initialized error handling domains.
+`sysErrorRegisterShow' | Display error IDs of currently "registered" errors.
+`sysErrorLogRawShow' | Display currently logged errors in "raw" format.
+`sysErrorLogShow' | Display currently logged errors in full format.
+`sysErrorLogDisplay' | Same as sysErrorLogShow.
+`sysErrorLogRemove' | Remove selected errors from the error logging table.
+`sysErrorDispositionIgnore' | Set disposition of selected errors to "ignore".
+`sysErrorDispositionSave' | Adds disposition of "save" to selected errors.
+`sysErrorDispositionDisplay' | Adds disposition of "display" to selected errors.
+`sysErrorDispostionFunction' | Adds disposition of "function call" to selected errors.
+\te
+
+The following is sample output from some of the show
+routines:
+
+(1) translationWindowShow()
+
+\cs
+-> translationWindowShow
+           sysPhbCpuToPciWin       sysPhbPciToCpuWin
+
+Window 0
+  winType    0x00000000              0x00000000
+  winBase    0xa0000000              0xa0000000
+  winLimit   0xa07fffff              0xa07fffff
+
+Window 1
+  winType    0x00000000              0x00000000
+  winBase    0xa0800000              0xa0800000
+  winLimit   0xa0ffffff              0xa0ffffff
+
+Window 2
+  winType    0x00000001              0x00000001
+  winBase    0xa1000000              0x00000000
+  winLimit   0xa17fffff              0x007fffff
+
+Window 3
+  winType    0x00000000              0x00000000
+  winBase    0x80000000              0x80000000
+  winLimit   0x9fffffff              0x9fffffff
+
+Window 4
+  winType    0x00000000              0x00000000
+  winBase    0x00000000              0x00000000
+  winLimit   0x1fffffff              0x1fffffff
+
+value = 1 = 0x1
+\ce
+
+(2) sysTempeShow()
+
+\cs
+-> sysTempeShow
+
+PCI Configuration: Header
+
+TEMPE_DEVI_VENI            @ 0xA0000000 = 0xE3104801
+TEMPE_STAT_CMMD            @ 0xA0000004 = 0x06003002
+TEMPE_CLAS_REVI            @ 0xA0000008 = 0x01008006
+TEMPE_HEAD_MLAT_CLSZ       @ 0xA000000C = 0x00800000
+TEMPE_MBARL                @ 0xA0000010 = 0x040000A0
+TEMPE_MBARU                @ 0xA0000014 = 0x00000000
+TEMPE_SUBI_SUBV            @ 0xA000002C = 0xE3100000
+TEMPE_CAPP                 @ 0xA0000034 = 0x40000000
+TEMPE_MXLA_MNGN_INTP_INTL  @ 0xA000003C = 0x54010000
+
+PCI Configuration: PCI-X Capabilities
+
+TEMPE_PCIXCAP              @ 0xA0000040 = 0x07007C00
+TEMPE_PCIXSTAT             @ 0xA0000044 = 0x08FF7311
+
+Outbound Functions: Outbound Translation 0
+
+TEMPE_OTSAU0               @ 0xA0000100 = 0x00000000
+TEMPE_OTSAL0               @ 0xA0000104 = 0x8FFF0000
+TEMPE_OTEAU0               @ 0xA0000108 = 0x00000000
+TEMPE_OTEAL0               @ 0xA000010C = 0x8FFF0000
+TEMPE_OTOFU0               @ 0xA0000110 = 0x00000000
+TEMPE_OTOFL0               @ 0xA0000114 = 0x6B010000
+TEMPE_OTBS0                @ 0xA0000118 = 0x00000000
+TEMPE_OTAT0                @ 0xA000011C = 0x80040042
+
+Outbound Functions: Outbound Translation 1
+
+TEMPE_OTSAU1               @ 0xA0000120 = 0x00000000
+TEMPE_OTSAL1               @ 0xA0000124 = 0x80000000
+TEMPE_OTEAU1               @ 0xA0000128 = 0x00000000
+TEMPE_OTEAL1               @ 0xA000012C = 0x800F0000
+TEMPE_OTOFU1               @ 0xA0000130 = 0xFFFFFFFF
+TEMPE_OTOFL1               @ 0xA0000134 = 0x88000000
+TEMPE_OTBS1                @ 0xA0000138 = 0x00000000
+TEMPE_OTAT1                @ 0xA000013C = 0x80000262
+
+Outbound Functions: Outbound Translation 2
+
+TEMPE_OTSAU2               @ 0xA0000140 = 0x00000000
+TEMPE_OTSAL2               @ 0xA0000144 = 0x90000000
+TEMPE_OTEAU2               @ 0xA0000148 = 0x00000000
+TEMPE_OTEAL2               @ 0xA000014C = 0x90FF0000
+TEMPE_OTOFU2               @ 0xA0000150 = 0xFFFFFFFF
+TEMPE_OTOFL2               @ 0xA0000154 = 0x70000000
+TEMPE_OTBS2                @ 0xA0000158 = 0x00000000
+TEMPE_OTAT2                @ 0xA000015C = 0x80000241
+
+Outbound Functions: Outbound Translation 3
+
+TEMPE_OTSAU3               @ 0xA0000160 = 0x00000000
+TEMPE_OTSAL3               @ 0xA0000164 = 0x91000000
+TEMPE_OTEAU3               @ 0xA0000168 = 0x00000000
+TEMPE_OTEAL3               @ 0xA000016C = 0x91000000
+TEMPE_OTOFU3               @ 0xA0000170 = 0xFFFFFFFF
+TEMPE_OTOFL3               @ 0xA0000174 = 0x6F000000
+TEMPE_OTBS3                @ 0xA0000178 = 0x00000000
+TEMPE_OTAT3                @ 0xA000017C = 0x80000240
+
+Outbound Functions: Outbound Translation 4
+
+TEMPE_OTSAU4               @ 0xA0000180 = 0x00000000
+TEMPE_OTSAL4               @ 0xA0000184 = 0x00000000
+TEMPE_OTEAU4               @ 0xA0000188 = 0x00000000
+TEMPE_OTEAL4               @ 0xA000018C = 0x00000000
+TEMPE_OTOFU4               @ 0xA0000190 = 0x00000000
+TEMPE_OTOFL4               @ 0xA0000194 = 0x00000000
+TEMPE_OTBS4                @ 0xA0000198 = 0x00000000
+TEMPE_OTAT4                @ 0xA000019C = 0x00040000
+
+Outbound Functions: Outbound Translation 5
+
+TEMPE_OTSAU5               @ 0xA00001A0 = 0x00000000
+TEMPE_OTSAL5               @ 0xA00001A4 = 0x00000000
+TEMPE_OTEAU5               @ 0xA00001A8 = 0x00000000
+TEMPE_OTEAL5               @ 0xA00001AC = 0x00000000
+TEMPE_OTOFU5               @ 0xA00001B0 = 0x00000000
+TEMPE_OTOFL5               @ 0xA00001B4 = 0x00000000
+TEMPE_OTBS5                @ 0xA00001B8 = 0x00000000
+TEMPE_OTAT5                @ 0xA00001BC = 0x00040000
+
+Outbound Functions: Outbound Translation 6
+
+TEMPE_OTSAU6               @ 0xA00001C0 = 0x00000000
+TEMPE_OTSAL6               @ 0xA00001C4 = 0x00000000
+TEMPE_OTEAU6               @ 0xA00001C8 = 0x00000000
+TEMPE_OTEAL6               @ 0xA00001CC = 0x00000000
+TEMPE_OTOFU6               @ 0xA00001D0 = 0x00000000
+TEMPE_OTOFL6               @ 0xA00001D4 = 0x00000000
+TEMPE_OTBS6                @ 0xA00001D8 = 0x00000000
+TEMPE_OTAT6                @ 0xA00001DC = 0x00040000
+
+Outbound Functions: Outbound Translation 7
+
+TEMPE_OTSAU7               @ 0xA00001E0 = 0x00000000
+TEMPE_OTSAL7               @ 0xA00001E4 = 0x00000000
+TEMPE_OTEAU7               @ 0xA00001E8 = 0x00000000
+TEMPE_OTEAL7               @ 0xA00001EC = 0x00000000
+TEMPE_OTOFU7               @ 0xA00001F0 = 0x00000000
+TEMPE_OTOFL7               @ 0xA00001F4 = 0x00000000
+TEMPE_OTBS7                @ 0xA00001F8 = 0x00000000
+TEMPE_OTAT7                @ 0xA00001FC = 0x00040000
+
+Outbound Functions: RMW
+
+TEMPE_RMWAU                @ 0xA0000220 = 0x00000000
+TEMPE_RMWAL                @ 0xA0000224 = 0x00000000
+TEMPE_RMWEN                @ 0xA0000228 = 0x00000000
+TEMPE_RMWC                 @ 0xA000022C = 0x00000000
+TEMPE_RMWS                 @ 0xA0000230 = 0x00000000
+
+Outbound Functions: VMEbus Control
+
+TEMPE_VMCTRL               @ 0xA0000234 = 0x00000707
+TEMPE_VCTRL                @ 0xA0000238 = 0x00000008
+TEMPE_VSTAT                @ 0xA000023C = 0x00000100
+
+Outbound Functions: PCI control/status
+
+TEMPE_PSTAT                @ 0xA0000240 = 0x0700003E
+
+VME Filters: VME filter
+
+TEMPE_VMEFL                @ 0xA0000250 = 0x00000F00
+
+VME Exception: VME Exception Status
+
+TEMPE_VEAU                 @ 0xA0000260 = 0x00000000
+TEMPE_VEAL                 @ 0xA0000264 = 0x00000000
+TEMPE_VEAT                 @ 0xA0000268 = 0x00000000
+
+PCI Error: PCI Error Status
+
+TEMPE_EDPAU                @ 0xA0000270 = 0x00000000
+TEMPE_EDPAL                @ 0xA0000274 = 0x00000000
+TEMPE_EDPXA                @ 0xA0000278 = 0x00000000
+TEMPE_EDPXS                @ 0xA000027C = 0x00000000
+TEMPE_EDPAT                @ 0xA0000280 = 0x00000000
+
+Inbound Functions: Inbound Translation 0
+
+TEMPE_ITSAU0               @ 0xA0000300 = 0x00000000
+TEMPE_ITSAL0               @ 0xA0000304 = 0x08000000
+TEMPE_ITEAU0               @ 0xA0000308 = 0x00000000
+TEMPE_ITEAL0               @ 0xA000030C = 0x0803FFF0
+TEMPE_ITOFU0               @ 0xA0000310 = 0xFFFFFFFF
+TEMPE_ITOFL0               @ 0xA0000314 = 0xF8000000
+TEMPE_ITAT0                @ 0xA0000318 = 0x80000FAF
+
+Inbound Functions: Inbound Translation 1
+
+TEMPE_ITSAU1               @ 0xA0000320 = 0x00000000
+TEMPE_ITSAL1               @ 0xA0000324 = 0x00000000
+TEMPE_ITEAU1               @ 0xA0000328 = 0x00000000
+TEMPE_ITEAL1               @ 0xA000032C = 0x0000FFF0
+TEMPE_ITOFU1               @ 0xA0000330 = 0x00000000
+TEMPE_ITOFL1               @ 0xA0000334 = 0x00000000
+TEMPE_ITAT1                @ 0xA0000338 = 0x00000000
+
+Inbound Functions: Inbound Translation 2
+
+TEMPE_ITSAU2               @ 0xA0000340 = 0x00000000
+TEMPE_ITSAL2               @ 0xA0000344 = 0x00000000
+TEMPE_ITEAU2               @ 0xA0000348 = 0x00000000
+TEMPE_ITEAL2               @ 0xA000034C = 0x0000FFF0
+TEMPE_ITOFU2               @ 0xA0000350 = 0x00000000
+TEMPE_ITOFL2               @ 0xA0000354 = 0x00000000
+TEMPE_ITAT2                @ 0xA0000358 = 0x00000000
+
+Inbound Functions: Inbound Translation 3
+
+TEMPE_ITSAU3               @ 0xA0000360 = 0x00000000
+TEMPE_ITSAL3               @ 0xA0000364 = 0x00000000
+TEMPE_ITEAU3               @ 0xA0000368 = 0x00000000
+TEMPE_ITEAL3               @ 0xA000036C = 0x0000FFF0
+TEMPE_ITOFU3               @ 0xA0000370 = 0x00000000
+TEMPE_ITOFL3               @ 0xA0000374 = 0x00000000
+TEMPE_ITAT3                @ 0xA0000378 = 0x00000000
+
+Inbound Functions: Inbound Translation 4
+
+TEMPE_ITSAU4               @ 0xA0000380 = 0x00000000
+TEMPE_ITSAL4               @ 0xA0000384 = 0x00000000
+TEMPE_ITEAU4               @ 0xA0000388 = 0x00000000
+TEMPE_ITEAL4               @ 0xA000038C = 0x0000FFF0
+TEMPE_ITOFU4               @ 0xA0000390 = 0x00000000
+TEMPE_ITOFL4               @ 0xA0000394 = 0x00000000
+TEMPE_ITAT4                @ 0xA0000398 = 0x00000000
+
+Inbound Functions: Inbound Translation 5
+
+TEMPE_ITSAU5               @ 0xA00003A0 = 0x00000000
+TEMPE_ITSAL5               @ 0xA00003A4 = 0x00000000
+TEMPE_ITEAU5               @ 0xA00003A8 = 0x00000000
+TEMPE_ITEAL5               @ 0xA00003AC = 0x0000FFF0
+TEMPE_ITOFU5               @ 0xA00003B0 = 0x00000000
+TEMPE_ITOFL5               @ 0xA00003B4 = 0x00000000
+TEMPE_ITAT5                @ 0xA00003B8 = 0x00000000
+
+Inbound Functions: Inbound Translation 6
+
+TEMPE_ITSAU6               @ 0xA00003C0 = 0x00000000
+TEMPE_ITSAL6               @ 0xA00003C4 = 0x00000000
+TEMPE_ITEAU6               @ 0xA00003C8 = 0x00000000
+TEMPE_ITEAL6               @ 0xA00003CC = 0x0000FFF0
+TEMPE_ITOFU6               @ 0xA00003D0 = 0x00000000
+TEMPE_ITOFL6               @ 0xA00003D4 = 0x00000000
+TEMPE_ITAT6                @ 0xA00003D8 = 0x00000000
+
+Inbound Functions: Inbound Translation 7
+
+TEMPE_ITSAU7               @ 0xA00003E0 = 0x00000000
+TEMPE_ITSAL7               @ 0xA00003E4 = 0x00000000
+TEMPE_ITEAU7               @ 0xA00003E8 = 0x00000000
+TEMPE_ITEAL7               @ 0xA00003EC = 0x0000FFF0
+TEMPE_ITOFU7               @ 0xA00003F0 = 0x00000000
+TEMPE_ITOFL7               @ 0xA00003F4 = 0x00000000
+TEMPE_ITAT7                @ 0xA00003F8 = 0x00000000
+
+Inbound Functions: Inbound Translation GCSR
+
+TEMPE_GBAU                 @ 0xA0000400 = 0x00000000
+TEMPE_GBAL                 @ 0xA0000404 = 0x00000000
+TEMPE_GCSRAT               @ 0xA0000408 = 0x00000000
+
+Inbound Functions: Inbound Translation CRG
+
+TEMPE_CBAU                 @ 0xA000040C = 0x00000000
+TEMPE_CBAL                 @ 0xA0000410 = 0xFB000000
+TEMPE_CSRAT                @ 0xA0000414 = 0x000000AF
+
+Inbound Functions: Inbound Translation CR/CSR
+
+TEMPE_CROU                 @ 0xA0000418 = 0x00000000
+TEMPE_CROL                 @ 0xA000041C = 0x00000000
+TEMPE_CRAT                 @ 0xA0000420 = 0x00000000
+
+Inbound Functions: Inbound Translation Location Monitor
+
+TEMPE_LMBAU                @ 0xA0000424 = 0x00000000
+TEMPE_LMBAL                @ 0xA0000428 = 0x00000000
+TEMPE_LMAT                 @ 0xA000042C = 0x00000000
+
+Interrupt Functions: VMEbus Interrupt Control
+
+TEMPE_64BCU                @ 0xA0000430 = 0x00000000
+TEMPE_64BCL                @ 0xA0000434 = 0x00000000
+TEMPE_BPGTR                @ 0xA0000438 = 0x00000022
+TEMPE_BPCTR                @ 0xA000043C = 0x000003E8
+TEMPE_VICR                 @ 0xA0000440 = 0x0000000F
+
+Interrupt Functions: Local Bus Interrupt Control
+
+TEMPE_INTEN                @ 0xA0000448 = 0x03FF3FFE
+TEMPE_INTEO                @ 0xA000044C = 0x00000000
+TEMPE_INTS                 @ 0xA0000450 = 0x00000000
+TEMPE_INTC                 @ 0xA0000454 = 0x00000000
+TEMPE_INTM1                @ 0xA0000458 = 0x00000000
+TEMPE_INTM2                @ 0xA000045C = 0x00000000
+
+DMA Functions: DMA Controller 0
+
+TEMPE_DCTL0                @ 0xA0000500 = 0x00000000
+TEMPE_DSTA0                @ 0xA0000504 = 0x02000000
+TEMPE_DCSAU0               @ 0xA0000508 = 0x00000000
+TEMPE_DCSAL0               @ 0xA000050C = 0x00000000
+TEMPE_DCDAU0               @ 0xA0000510 = 0x00000000
+TEMPE_DCDAL0               @ 0xA0000514 = 0x00000000
+TEMPE_DCLAU0               @ 0xA0000518 = 0x00000000
+TEMPE_DCLAL0               @ 0xA000051C = 0x00000000
+TEMPE_DSAU0                @ 0xA0000520 = 0x00000000
+TEMPE_DSAL0                @ 0xA0000524 = 0x00000000
+TEMPE_DDAU0                @ 0xA0000528 = 0x00000000
+TEMPE_DDAL0                @ 0xA000052C = 0x00000000
+TEMPE_DSAT0                @ 0xA0000530 = 0x00000000
+TEMPE_DDAT0                @ 0xA0000534 = 0x00000000
+TEMPE_DNLAU0               @ 0xA0000538 = 0x00000000
+TEMPE_DNLAL0               @ 0xA000053C = 0x00000000
+TEMPE_DCNT0                @ 0xA0000540 = 0x00000000
+TEMPE_DDBS0                @ 0xA0000544 = 0x00000000
+
+DMA Functions: DMA Controller 1
+
+TEMPE_DCTL1                @ 0xA0000580 = 0x00000000
+TEMPE_DSTA1                @ 0xA0000584 = 0x02000000
+TEMPE_DCSAU1               @ 0xA0000588 = 0x00000000
+TEMPE_DCSAL1               @ 0xA000058C = 0x00000000
+TEMPE_DCDAU1               @ 0xA0000590 = 0x00000000
+TEMPE_DCDAL1               @ 0xA0000594 = 0x00000000
+TEMPE_DCLAU1               @ 0xA0000598 = 0x00000000
+TEMPE_DCLAL1               @ 0xA000059C = 0x00000000
+TEMPE_DSAU1                @ 0xA00005A0 = 0x00000000
+TEMPE_DSAL1                @ 0xA00005A4 = 0x00000000
+TEMPE_DDAU1                @ 0xA00005A8 = 0x00000000
+TEMPE_DDAL1                @ 0xA00005AC = 0x00000000
+TEMPE_DSAT1                @ 0xA00005B0 = 0x00000000
+TEMPE_DDAT1                @ 0xA00005B4 = 0x00000000
+TEMPE_DNLAU1               @ 0xA00005B8 = 0x00000000
+TEMPE_DNLAL1               @ 0xA00005BC = 0x00000000
+TEMPE_DCNT1                @ 0xA00005C0 = 0x00000000
+TEMPE_DDBS1                @ 0xA00005C4 = 0x00000000
+
+GCSR register group
+
+TEMPE_GCSR_DEVI_VENI       @ 0xA0000600 = 0x014810E3
+TEMPE_GCSR_STAT_CMMD       @ 0xA0000604 = 0x50000001
+TEMPE_GCSR_SRMAR0_3        @ 0xA0000608 = 0x00000000
+TEMPE_GCSR_SRMAR4_7        @ 0xA000060C = 0x00000000
+TEMPE_GCSR_MBOX0           @ 0xA0000610 = 0x00000000
+TEMPE_GCSR_MBOX1           @ 0xA0000614 = 0x00000000
+TEMPE_GCSR_MBOX2           @ 0xA0000618 = 0x00000000
+TEMPE_GCSR_MBOX3           @ 0xA000061C = 0x00000000
+
+CR/CSR register group
+
+TEMPE_CSR_CSRBCR           @ 0xA0000FF4 = 0x00000040
+TEMPE_CSR_CSRBSR           @ 0xA0000FF8 = 0x00000040
+TEMPE_CSR_CBAR             @ 0xA0000FFC = 0x000000F0
+value = 53 = 0x35 = '5'
+\ce
+
+(3) sysTempeOutWinShow()
+
+\cs
+-> sysTempeOutWinShow
+
+Outbound window 0: ENABLED,  Size = 00000000_00010000
+
+raw: 00000000 8fff0000 00000000 8fff0000 00000000 6b010000 00000000 80040042
+PCI Base:  00000000_8fff0000    VME Base:  00000000_fb000000
+PCI Limit: 00000000_8fffffff    VME Limit: 00000000_fb00ffff
+     2eSST Broadcast Select: 0x00000
+     Attributes:
+        Memory Prefetch      - disabled
+        Prefetch size        - 2 cache lines
+        2eSST Mode           - 160 MB/s
+        Transfer Mode        - SCT (Single Cycle Transfer)
+        VME Data Bus Width   - 32 bit
+        VME AM code          - nonSupervisor, nonProgram
+        VME Address mode     - A32
+
+value = 1 = 0x1
+\ce
+
+(4) sysTempeInWinShow()
+
+\cs
+-> sysTempeInWinShow
+
+Inbound window 0: ENABLED,  Size = 00000000_00040000
+
+raw: 00000000 08000000 00000000 0803fff0 ffffffff f8000000 80000faf
+VME Base:  00000000_08000000    PCI Base:  00000000_00000000
+VME Limit: 00000000_0803ffff    PCI Limit: 00000000_0003ffff
+     Attributes:
+        Read-ahead threshold - when FIFO competely empty
+        Virtual FIFO size    - 64 bytes
+        2eSST Mode           - 160 MB/s
+        Cycle response       - 2eSSTB (Two Edge Source Synchronous Broadcast)
+                               2eSST (Two Edge Source Synchronous nonBroadcast)
+                               2eVME (Two Edge VMEbus)
+                               MBLT (Multiplexed Block Transfer)
+                               BLT (Block Transfer)
+        Address space        - A32
+        VME AM response      - Supervisor, nonSupervisor, Program, Data
+
+value = 1 = 0x1
+\ce
+
+(5) vpdShow()
+
+\cs
+-> vpdShow
+ Type = VPD Revision (packet type = 0x0f)
+ Size = 0x04
+Value = 00 03 00 00 
+
+ Type = Microprocessor Type (packet type = 0x09)
+ Size = 0x04
+Value = 8540
+
+ Type = Product Identifier (packet type = 0x01)
+ Size = 0x08
+Value = MVME3100
+
+ Type = Factory Assembly Number (packet type = 0x02)
+ Size = 0x0c
+Value = 01-W0893F01A
+
+ Type = Serial Number (packet type = 0x03)
+ Size = 0x07
+Value = 7199274
+
+ Type = EEPROM CRC (packet type = 0x0a)
+ Size = 0x04
+Value = 4CDC2B8A
+
+ Type = Ethernet Address (packet type = 0x08)
+ Size = 0x07
+Value = 00 01 AF 12 BE 98 00 
+
+ Type = Ethernet Address (packet type = 0x08)
+ Size = 0x07
+Value = 00 01 AF 12 BE 99 01 
+
+ Type = Ethernet Address (packet type = 0x08)
+ Size = 0x07
+Value = 00 01 AF 12 BE 9A 02 
+
+ Type = FLASH Memory Configuration (packet type = 0x0b)
+ Size = 0x0c
+Value = 00 01 7E 23 10 02 01 20 
+        20 01 A0 00 
+
+ Type = Termination Marker (packet type = 0xff)
+
+value = 0 = 0x0
+\ce
+
+\sh Known Problems
+
+USB EHCI problem
+
+USB EHCI controller is unsupported when PCI-A bus works on PCI mode.
+The performance penalty for most I/O should be 10% or less when PCI Bus A
+operated on PCI mode. So, USB EHCI doesn't works well on this condition.
+Refer to MVME3100_Errata_Letter for detailed information.
+
+
+BOARD LAYOUT
+
+\bs
+   --                         MVME3100
+   \  \___________________________________________________________________
+    | |                                                                  |
+   /  |                                                                  -==
+   ---|                                                   ||     ||      -==
+      |                                      ------       ||     ||      -==
+      |                                      |    |       ||     ||      -==
+      |             Configuration Switch ->  | S4 |       ||     ||      -==
+      |                                      |    |       ||     ||      -==
+      |                                      ------       ||     ||      -==
+      |                                       PMC         ||     ||      -==
+      |                                    Connector ->   ||     ||      -==
+      |                                                                  -==
+      |                                                   ||             -==
+      |                                                   ||             -==
+      |                                       PMC         ||             -==
+      |                                    Connector ->   ||             -==
+      |                                                   ||             -==
+      |                                         ------    ||             -==
+      |                                         |    |    ||             -==
+      |                                         | S3 |    ||             -==
+      |                                         |    |                   -==
+      |                                         ------                   -==
+      |                                                   ||     ||      |
+      |                                                   ||     ||      |
+      |                                       PMC         ||     ||      |
+      |                                    Connector ->   ||     ||      |
+      |                                                   ||     ||      |
+      |                                                   ||     ||      |
+      |                                                   ||     ||      |
+      |                                                   ||     ||      |
+      |                                                                  |
+      |                                                   ||     ||      |
+      |                                                   ||     ||      |
+      |                                       PMC         ||     ||      |
+      |                                    Connector ->   ||     ||      |
+      |                                                   ||     ||      |
+      |                                                   ||     ||      |
+      |                                                   ||     ||      -==
+      |                                                   ||     ||      -==
+      |---+                                                              -==
+          |                                                              -==
+SATA1     |                                                              -==
+      |---+                                                              -==
+      |                                                                  -==
+      |---+                                                              -==
+USB       |                                                              -==
+      |---+                                                              -==
+      |                                                                  -==
+      |---+                                                              -==
+          |                                                              -==
+COM0      |                                                              -==
+      |---+                                                              -==
+      |                                                                  -==
+      |---+                                                              -==
+GigE      |                                                              -==
+ mottsec0 |                                                              -==
+      |---+                                                              -==
+   ---|                                                                  -==
+   \  |                                                                  |
+    | |__________________________________________________________________|
+   /  /
+   ---
+\be
+
+SEE ALSO
+
+\tb Workbench User's Guide: Introduction
+
+\tb VxWorks Programmer's Guide: Configuration
+
+\tb VxWorks Programmer's Guide: Architecture Appendix
+
+BIBLIOGRAPHY
+
+\tb EMERSON MVME3100 Online Documentation
+
+\tb MVME3100 Single-Board Computer Installation and Use
+
+\tb MVME3100 Single-Board Computer Programmer's Guide
+
+\tb MPC8540 PowerQUICC III Integrated Host Processor Reference Manual
+
+\tb IEEE P1386.1 Draft 2.0 - PCI Mezzanine Card Specification (PMC)
+
+\tb IEEE P1386 Draft 2.0 - Common Mezzanine Card Specification (CMC)
+
+\tb Peripheral Component Interconnect (PCI) Local Bus Specification, Rev 2.1

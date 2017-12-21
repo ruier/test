@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTLR_ALTERA
+    vxbAlteraIntCtlrRegister();
+#endif /* DRV_INTCTLR_ALTERA */

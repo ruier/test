@@ -1,0 +1,70 @@
+
+                 README: Freescale Lite5200B
+
+This file contains board-specific information for the Freescale Lite5200B
+target board. Specifically, this file contains information on any BSP
+interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+Additionally, the target board's manual page entry
+(i.e., lite5200b/target.ref) provides board-specific information necessary to
+run VxWorks, and should be read before this BSP is used.
+
+-------------------------------------------------------------------------------
+
+RELEASE 6.9/0
+        
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    replace '0' with phyaddr in FEC driver. (WIND00197254)
+    Update BSP to support rev 1 silicon and board version rev k.
+    FSL recommendation about BestComm will be integrated. 
+    setting for the XLB arbiter, Snooping settings. 
+
+RELEASE 2.0/4:
+
+    Released from Wind River for General Purpose Platform 3.x, VxWorks 6.x 
+
+    change task IPR number &&
+    set PTD control register to TASK priority mode. (WIND00162040)
+    
+RELEASE 2.0/3
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Add comments for usage of BestComm library. (WIND00156789)
+    Remove BSP version of ATA driver. (WIND00171937)
+    Change __INCm5200h to __INCppc5200h in ppc5200.h file. (WIND00115449)
+    Replace vxSVRGet() with vxSvrGet() of vxALib.s.
+    
+RELEASE 2.0/2:
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Fix the problem of FEC driver doesn't check link status change.(WIND00097032)
+    Fix the problem of vxWorks_romResident.bin doesn't boot.(WIND00108554)
+    Add bootApp support.
+    Add VxBus support, replace legacy drivers with corresponding VxBus versions,
+    including PowerPC decrementer timer, general purpose timer, on-chip PSC as
+    UART, on-chip USB OHCI controller.
+    Correct typo of DRV_SIO_M5XXX_PSC and remove the definitions of RAM_LOW_ADRS
+    and RAM_HIGH_ADRS in config.h. (WIND00128773)
+    Include DRV_TIMER_M5XXX_GPT when INCLUDE_AUX_CLK is included. (WIND00128798)
+    Add virtual PCI driver support and remove legacy fei/gei drivers.
+    Replace the MTD driver with a new one. (WIND00126529)
+
+RELEASE 2.0/1:
+
+    Released from Wind River for General Purpose Platform 3.6, VxWorks 6.6
+
+    Port FEC driver to make use of IPNet network stack
+    Minor warnings clean-up
+    Remove tffsConfig.c from the BSP directory. INCLUDE_MTD_USR macro is
+    defined to enable the custom MTD driver.
+    Fix the problem of BootApp test compilation failure.(WIND00107656)
+    Fix the problem of Nvram test abort in bootapp test.(WIND00107670)
+
+RELEASE 2.0/0:
+
+    Released from Wind River for Workbench 2.6, VxWorks 6.4
+
+    First version, created based on lite5200 bsp.

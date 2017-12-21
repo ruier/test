@@ -1,0 +1,17 @@
+#ifdef INCLUDE_TIMER_SYS
+    vxbSysClkLibInit();
+#  ifdef INCLUDE_AUX_CLK
+    vxbAuxClkLibInit();
+#  endif /* INCLUDE_AUX_CLK */
+#  ifdef INCLUDE_TIMESTAMP
+    vxbTimestampLibInit();
+#  endif /* INCLUDE_TIMESTAMP */
+#  ifdef INCLUDE_TIMER_RTC
+    vxbRtcLibInit();
+#  endif /* INCLUDE_TIMER_RTC */
+    vxbDelayLibInit();
+#else  /* INCLUDE_TIMER_SYS */
+#  ifdef INCLUDE_TIMER_STUB
+    vxbTimerStubInit();
+#  endif /* INCLUDE_TIMER_STUB */
+#endif /* INCLUDE_TIMER_SYS */

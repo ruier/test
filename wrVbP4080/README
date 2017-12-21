@@ -1,0 +1,45 @@
+
+	         README: wrVbP4080
+
+This file contains board-specific information for Wind River Hypervisor Guest
+BSP, wrVbP4080, based on the real target, Freescale QorIQ P4080DS. Specifically,
+this file contains information on any BSP interface changes from previous
+software or hardware versions, and contains caveats that the user must be aware
+of before using this BSP.
+
+------------------------------------------------------------------------------
+RELEASE 6.9/x:
+
+        TODO:
+        Released from Wind River for Guest OS, VxWorks 6.9.x
+
+        Add vbiNsRegister when making use of CONTROL_PLANE_CORE proprocessing.
+        (WIND00281408)
+        Fixed potential memory corruption caused by sysNvRamGet(). (WIND00101057)
+
+RELEASE 6.9/1:
+
+	Released from Wind River for Guest OS, VxWorks 6.9.1
+
+	Add NAP 2.0 support (requires additional product).
+	Add tgec network driver support.
+	Add openPicTimer Group B support.
+	Rewrite & comment sysDeviceFilter routine for Guest OS.
+        Remove the component INCLUDE_AIM_MMU_SHOW for footprint. (WIND00334904)
+
+RELEASE 6.9/0:
+
+	Released from Wind River for Guest OS, VxWorks 6.9
+
+	WIND00241744: Support multiple DTSEC ports on single guest
+	WIND00227349: Corrected mapping of NVRAM space
+	WIND00248622: Corrected dynamic mapping of HV addr ranges
+	WIND00243790: Support up to 8 MIPC buses (from 2)
+
+RELEASE 6.8/0:
+	Released for Guest OS vxWorks 6.8.2
+
+	Added support for P4080DS Rev. B board.
+
+	KNOWN ISSUES
+	Refer to native BSP, fsl_p4080_ds/README file.

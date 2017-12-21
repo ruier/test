@@ -1,0 +1,3 @@
+#ifdef DRV_TIMER_PPC405
+    ppc405TimerRegister ();
+#endif /* DRV_TIMER_PPC405 */

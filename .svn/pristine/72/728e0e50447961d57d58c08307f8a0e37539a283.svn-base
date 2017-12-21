@@ -1,0 +1,121 @@
+       README: Wind River VxWorks BSP for the Wind River SBCPowerQUICCII
+
+This file contains board-specific information for the Wind River SBCPowerQUICCII
+target board.  This file documents BSP interface changes from previous
+software or hardware versions, and notifies the user of serious
+caveats that must be noted before using this BSP.  Additionally, the
+target board's reference entry (i.e. target.nr) provides
+board-specific information necessary to run VxWorks and should be read
+fully before this BSP is used.
+
+--------------------------------------------------------------------------------
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Remove the component INCLUDE_BCM52XXPHY from driver's cdf to bsp's 
+    20bsp.cdf. (WIND00333700)
+    
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.1
+    
+    Delete _MMU_UBAT_VP attribute(WIND00162540)
+
+RELEASE 2.0/14
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Updated target.ref. (WIND00113111)
+    Remove PC card support from target.ref. (WIND00170941)
+
+RELEASE 2.0/13
+
+    Released from Wind River for VxWorks 6.6
+
+    Support vanilla system build  (WIND00094352)
+    Support 3 motfcc device units in VxWorks image file  (WIND00092444)
+    Reduce eeprom delay time from 50 ms to 5 ms in config.h to pass the
+    BSPVTS nvRam test.  (WIND00063266)
+
+RELEASE 2.0/12:
+
+    Release from Wind River for VxWorks 6.5
+        
+    Added support for the IPNet Network Stack.
+
+RELEASE 2.0/11
+
+    Release from Wind River for VxWorks 6.4
+
+    Removed USER_APPL_INIT code from the BSP.
+
+RELEASE 2.0/10
+
+    Release from Wind River for VxWorks 6.3
+
+    Add definition of 'Bsp' to local cdf. There are no longer separate BSPs 
+    required for building scalable and non-scalable kernels. This BSP can
+    be used for either. It supports the scaled-down kernel PROFILES.
+
+RELEASE 2.0/9
+
+    Updated to support the scalable kernel.
+
+RELEASE 2.0/8
+
+    Release for VxWorks 6.1: New in this release: USB 2.1 support 
+    wireless LAN support for Atheros AR521X.
+    Note that WLAN support in the bsp has been merged from T221 to base6. 
+    However, since the WLAN driver has not been released in base6 at the time 
+    of the merge, it has not been tested.
+
+RELEASE 2.0/7
+
+    IDE support for boot Flash and TFFS flash selection (SPRs 103800,103790)
+
+RELEASE 2.0/6
+
+    MAC address modification now done using "M" Command (SPR #93020)
+
+RELEASE 2.0/5
+
+    Released by Wind River for VxWorks 6.0.
+
+RELEASE 2.0/4
+
+    Released by Wind River for Tornado Base 6 TAR2.
+    This release of the wrSbcPowerQuiccII BSP is based on RELEASE 1.2/3.
+    Support for power management has been added.
+
+RELEASE 2.0/3
+
+    Released by Wind River for Tornado Base 6 TAR1.
+
+RELEASE 1.2/3
+
+    This release of the wrSbcPowerQuiccII BSP is to be used with
+    Tornado 2.2.1.
+    Support for PC Cards has been added, including ne2000-compatible
+    Ethernet PC Cards and 802.11b Wireless LAN PC Cards for use with the
+    WindNet 802.11b DDK.  Support for TrueFFS on the on-board 2MB Flash has
+    also been added.  A Wind Power IDE/visionClick script to program the
+    hard reset configuration word into the SIMM Flash is included in the BSP.
+
+RELEASE 1.2/2
+
+    This release is the FCS version of the wrSbcPowerQuiccII BSP
+    to be used with Tornado 2.2.1.
+    Support for more processors, the ATM board build, real-time clock,
+    PCI-PCI bridge and TrueFFS have been added.
+
+RELEASE 1.2/1
+
+    This release is the EAR version of the wrSbcPowerQuiccII BSP
+    to be used with Tornado 2.2.
+
+RELEASE 1.2/0
+
+    This release is the first version of the wrSbcPowerQuiccII BSP
+    to be used with Tornado 2.2.
+

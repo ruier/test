@@ -1,0 +1,9 @@
+#if defined (INCLUDE_TSEC_VXB_END) && defined (INCLUDE_TSEC_VXB_END2)
+#error "INCLUDE_TSEC_VXB_END and INCLUDE_TSEC_VXB_END2 are both defined"
+#endif
+
+#if defined (INCLUDE_TSEC_VXB_END2) && !defined (INCLUDE_END2)
+#error "INCLUDE_TSEC_VXB_END2 requires INCLUDE_END2"
+#endif
+
+IMPORT void tsecEnd2Register(void);

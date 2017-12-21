@@ -1,0 +1,3 @@
+#ifdef INCLUDE_M512XFEC_VXB_END
+    m512xFecRegister();
+#endif

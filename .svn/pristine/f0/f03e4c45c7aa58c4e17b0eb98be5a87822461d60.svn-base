@@ -1,0 +1,3 @@
+#ifdef INCLUDE_ALT_SOC_GEN5_DW_END
+    vxbAltSocGen5DwEndRegister ();
+#endif /* INCLUDE_ALT_SOC_GEN5_DW_END */

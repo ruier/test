@@ -1,0 +1,4 @@
+#ifdef INCLUDE_XLR_PCI
+IMPORT void xlrPciRegister(void); 
+#endif
+

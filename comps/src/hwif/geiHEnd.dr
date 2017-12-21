@@ -1,0 +1,3 @@
+#ifdef INCLUDE_GEI_HEND
+    geiHEndRegister();
+#endif /* INCLUDE_GEI_HEND */

@@ -1,0 +1,8 @@
+#ifdef INCLUDE_SPI4000_MDIO
+
+#if !defined (INCLUDE_OCTEON_SPI4000) || !defined (INCLUDE_SPI4000_PHY)
+#error "INCLUDE_SPI4000_MDIO requires INCLUDE_OCTEON_SPI4000 and INCLUDE_SPI4000_PHY"
+#endif
+
+IMPORT void spi4000MdioRegister(void);
+#endif /* INCLUDE_SPI4000_MDIO */

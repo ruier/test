@@ -1,0 +1,4 @@
+#ifdef DRV_NVRAM_FILE
+IMPORT void vxbFileNvRamRegister(void);
+#endif /* DRV_NVRAM_FILE */
+

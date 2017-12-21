@@ -1,0 +1,3 @@
+#ifdef INCLUDE_LSI_MAC_VXB_END
+    lsiMacVxbEndRegister ();
+#endif /* INCLUDE_LSI_MAC_VXB_END */

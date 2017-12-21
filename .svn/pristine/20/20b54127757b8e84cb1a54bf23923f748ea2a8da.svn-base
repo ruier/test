@@ -1,0 +1,86 @@
+
+                 README: Freescale MPC837X MDS (mds837x)
+
+This file contains board-specific information for the Motorola MPC837x
+MDS target board.  Specifically, this file contains information on any BSP
+interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+Additionally, the target board's reference entry (i.e., 'man mds837x')
+provides board-specific information necessary to run VxWorks, and
+should be read before this BSP is used.
+
+------------------------------------------------------------------------------
+RELEASE 6.9/x
+    TODO:
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.x
+
+    Fixed potential memory corruption caused by sysNvRamGet(). (WIND00101057)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+    
+    Update the description of Security Engine. (WIND00331832)
+    Improve I2C performance for mds837x. (WIND00289153)
+    Corrected a typo in target.ref. (WIND00337239)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+    
+    Add support for booting from vxWorks bootrom.
+    Add support for booting from vxWorks bootrom with BMS_HIGH_ENABLE.
+    Clean support for TFFS and fix support for tffsBootImagePut().
+    Replace legacy timer driver with vxBus driver.
+    Update FLASH memory driver.
+    Remove sysAUtils.s.
+    Fix PCIe configuration space access issue.
+    Fix VIP build error with BOOTAPP profile. (WIND00249429)
+    Fix SYS_MODEL value to pass BSPVTS. (WIND00282918)
+
+RELEASE 2.0/6
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Move vxSvrGet() from sysALib.s to vxALib.s.
+
+RELEASE 2.0/5
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Converted busCfgRead/Write to vxbPciDevCfgRead/Write for m83xxPciEx driver.
+    Support END2 versions of ETSEC drivers.
+
+RELEASE 2.0/4
+
+    Released from Wind River for Workbench 3.0, vxWorks 6.6
+
+    Added support for SATA and updated device drivers: USB, INTCTL with vxBus drivers.
+    Replaced the hEND ETSEC driver with the VxBus END ETSEC driver.
+
+Version 2.0/3
+
+    Re-released for VxWorks 6.5.
+
+    Fixed PCI bus controller driver wrong initialization and added PIB SUPPORT. (WIND00113447)
+
+Version 2.0/2
+
+    Re-released for VxWorks 6.5.
+
+    Added support for freescale security engine 3.0. Please read target.ref
+    for security engine driver installation and usage.Fixed PCI bus controller
+    driver wrong address of lawbar and lawar registers.
+
+Version 2.0/1
+
+    Released from Wind River for General Purpose Platform 3.5, VxWorks 6.5
+
+    Add support for USB host, TFFS, I2C and AUX timer.
+
+EAR 2.0/0
+
+    This is an early access release for vxWorks 6.5 and 6.4
+        The BSP requires a patch for vxBus driver for PCI/PCI express,
+    the flash mem driver and the marvell phy driver. See patch for
+        details, note patch may adversely affect other BSPs.

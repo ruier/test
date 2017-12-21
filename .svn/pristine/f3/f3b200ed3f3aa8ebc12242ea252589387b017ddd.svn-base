@@ -1,0 +1,104 @@
+                 README: Motorola MV3100 
+
+This file contains board-specific information for Motorola MPC8540-based
+boards.  Specifically, this file contains information on any BSP interface
+changes from previous software or hardware versions, and contains caveats
+that the user must be aware of before using this BSP.  Additionally, the
+target board's manual page entry (for example, mv3100/target.ref) provides
+board-specific information necessary to run VxWorks, and should be read
+before this BSP is used.
+
+-------------------------------------------------------------------------------
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    remove INCLUDE_PERFMON to reduce default footprint. (WIND00411417)
+    fix build errors when INCLUDE_TICK_TIMERS is defined. (WIND00415168)
+    fix build warnings and prevent errors.
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    undefine INCLUDE_TIMESTAMP and remove VXB_AUXCLK_DEBUG to reduce footprint. 
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+    
+    Modify SM_ANCHOR_ADRS value. (WIND00208587)
+    Added PCI autoconfig of SATA controller. (WIND00135823)
+    fixed page fault. (WIND00225499)
+
+RELEASE 2.0/8
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Reduced intLock time in sysDs1375RtcGet(). (WIND00117486)
+    Fixed Rear UARTs error. (WIND00160039)
+    Removed PCI config done flag check in sysLib.c. (WIND00158834)
+    Fixed error in DMA test routines. (WIND00163030)
+    Remove BSP version of ATA driver. (WIND00171937)
+    Fix typo error. (WIND00162041)
+    Remove unused INCLUDE_PPC_FPU. (WIND00153695)
+    Remove the logMsg for spurious interrupt. (WIND00179032)
+
+RELEASE 2.0/7
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Fixed bootrom build error. (WIND00119048)
+    Added vxBus support, including DEC timer, FIT timer and ns16550 UART driver.
+    Add BOOTAPP and BASIC_OS support to 20bsp.cdf. (WIND00129204) 
+    Add build rule to Makefile to build mpc8540End.obj automatically. (WIND00129200).
+    Change NVRAM storage to a 64KB EEPROM to protect the VPD. (WIND00131666)
+    Added virtual vxBus PCI to fix the USB issue. (WIND00135828)
+
+RELEASE 2.0/6
+
+    Re-released for VxWorks 6.6.
+
+    Fix the exception when including INCLUDE_PROTECT_VEC_TABLE in 
+    sysProgramBootImage.c (WIND00116259)
+    Support RoHS board - MVME31006E-1263
+    Fixed sysPhysMemTop() computing problem. (WIND00100664)
+    Fixed VME address mapping problem (WIND00106506) 
+    
+RELEASE 2.0/5
+
+    Released from Wind River for VxWorks 6.6.
+
+    Renamed BSP from mpc8540 to mv3100. mpc8540 was the processor name,
+    mv3100 is the BSP name.
+    The GPP & PNE distinction in the mpc8540End driver object code has been
+    removed as of this release. However, the mpc8540End.obj shipped with this 
+    BSP is still only valid with the release of vxWorks for which it was built.
+
+RELEASE 2.0/4
+
+    Released from Wind River for VxWorks 6.5.
+
+    Fixed defects: WIND00038065 and WIND00087536.
+
+RELEASE 2.0/3
+
+    FCS release for VxWorks 6.4.  
+    Updated Makefile to use mpc8540_vxWorks6_4.obj
+    Fixed USP Spurious Interrupt
+    Verified backward comptibility with vxWorks 6.2 and 6.3
+
+RELEASE 2.0/2
+
+    FCS release for VxWorks 6.3.  
+    Fixed vxprj build errors.
+    Fixed and verified USB (bulk devices, keyboard and mouse).
+    Verified sATA support.
+    Added mpc8540vxWorks6.3.obj objects for vxWorks 6.3 support.
+    Refer to notes below on End object for use with various vxWorks versions.
+ 
+
+RELEASE 2.0/1
+
+    FCS release for VxWorks 6.2.  
+

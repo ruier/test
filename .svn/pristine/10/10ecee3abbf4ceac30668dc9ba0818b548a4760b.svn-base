@@ -1,0 +1,288 @@
+
+             README: Freescale ADS5121e (fsl_ads5121e)
+
+This file contains board-specific information for the Freescale ADS5121e
+target board.  Specifically, this file contains information on any BSP
+interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+Additionally, the target board's reference entry (i.e., 'man fsl_ads5121e')
+provides board-specific information necessary to run VxWorks, and
+should be read before this BSP is used.
+
+--------------------------------------------------------------------------------
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    Fixed potential memory corruption caused by sysNvRamGet(). (WIND00101057)
+    Fixed TFFS failed for vxprj build. (WIND00365693)
+    Fixed build error when INCLUDE_RTC is defined. (WIND00415725)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+    
+    Delete _MMU_UBAT_VP attribute(WIND00162540)
+    Add DIU DVI-I support via TFP410.	
+    clear mot83xxPci.h. (WIND00212294)
+    Add INCLUDE_I2C when INCLUDE_WINDML is configured
+    Change CPLD PCI INTA index. (WIND00211229)
+    
+Version 2.0/4
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Enable Elpida DDR for rev 4.x board by default.
+    Add more AXE encoder decoder support.
+    Remove BSP version of ATA driver. (WIND00171937)
+    Move vxSvrGet() from sysALib.s to vxALib.s.
+    Update USB target configuration. (WIND00180575)
+    Add NAND via datalight support. (WIND00184589)
+
+Version 2.0/3
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Add support for PCB rev 4.1 hardware.
+    Add Elpida DDR memory chip support.
+    Updated DMA controller driver to support AC'97.
+    Updated PSC SIO driver with unified FIFO allocation.
+
+    The following new features have been added.
+    - AC'97 support. (only playback)
+    - AXE support. (sample application)
+    - USB peripheral stack support. (mass storage and serial port emulation)
+
+IMPORTANT!!! Read the following carefully before installing this BSP package.
+
+    This version of BSP will install the following driver files as well as the BSP.
+
+    /* vxbus driver stubs for command line builds */
+
+    target/config/comps/src/hwif/vxbAds5121eCpldIntCtlr.dc
+    target/config/comps/src/hwif/vxbAds5121eCpldIntCtlr.dr
+    target/config/comps/src/hwif/vxbFslAxe.dc
+    target/config/comps/src/hwif/vxbFslAxe.dr
+    target/config/comps/src/hwif/vxbM512xFifoc.dc
+    target/config/comps/src/hwif/vxbM512xFifoc.dr
+
+    /* cdf files for project builds */
+
+    target/config/comps/vxWorks/03wnCAN_MPC5121E.cdf
+    target/config/comps/vxWorks/40usb.cdf
+    target/config/comps/vxWorks/40vxbAds5121eCpldIntCtlr.cdf
+    target/config/comps/vxWorks/40vxbFslAxe.cdf
+    target/config/comps/vxWorks/40vxbM512xFifoc.cdf
+
+    /* vxbus drivers */
+
+    target/src/hwif/dmaCtrl/vxbM512xDma.c
+    target/src/hwif/fw/axe/axe_codec_api.h
+    target/src/hwif/fw/axe/axe_copy_to_sram.c
+    target/src/hwif/fw/axe/axe_hal.h
+    target/src/hwif/fw/axe/axe_load_task.c
+    target/src/hwif/fw/axe/axe_regs.h
+    target/src/hwif/fw/axe/axec_codec.c
+    target/src/hwif/fw/axe/axe-ipc.c
+    target/src/hwif/fw/axe/axe-ipc.h
+    target/src/hwif/fw/axe/AXELoader.c
+    target/src/hwif/fw/axe/AXELoader.h
+    target/src/hwif/fw/axe/axe-reset.c
+    target/src/hwif/fw/axe/context.c
+    target/src/hwif/fw/axe/context.h
+    target/src/hwif/fw/axe/elf.h
+    target/src/hwif/fw/axe/Makefile
+    target/src/hwif/fw/axe/os_depend.h
+    target/src/hwif/fw/axe/ppc-axe-driver.h
+    target/src/hwif/fw/axe/ppc-axe-server.c
+    target/src/hwif/fw/axe/ppc-axe-server.h
+    target/src/hwif/fw/axe/ppctypes.h
+    target/src/hwif/fw/axe/pxe.h
+    target/src/hwif/fw/axe/regaccess.h
+    target/src/hwif/fw/axe/task_host.h
+    target/src/hwif/fw/axe/timer.h
+    target/src/hwif/fw/axe/vxbFslAxe.c
+    target/src/hwif/h/dmaCtlr/vxbM512xDma.h
+    target/src/hwif/h/sio/vxbM5xxxPscSio.h
+    target/src/hwif/intCtlr/vxbAds5121eCpldIntCtlr.c
+    target/src/hwif/intCtlr/vxbAds5121eCpldIntCtlr.mk
+    target/src/hwif/methods/m512xFifoAlloc.c
+    target/src/hwif/methods/m512xFifoAlloc.mk
+    target/src/hwif/mf/Makefile
+    target/src/hwif/mf/vxbM512xFifoc.c
+    target/src/hwif/mf/vxbM512xFifoc.mk
+    target/src/hwif/sio/vxbM5xxxPscSio.c
+
+    /* USB host controller driver */
+
+    target/src/hwif/busCtlr/usb/hcd/ehcd/usbEhcdDataStructures.h
+    target/src/hwif/busCtlr/usb/hcd/ehcd/usbEhcdEventHandler.c
+    target/src/hwif/busCtlr/usb/hcd/ehcd/usbEhcdHal.h
+    target/src/hwif/busCtlr/usb/hcd/ehcd/usbEhcdInitExit.c
+    target/src/hwif/busCtlr/usb/hcd/ehcd/usbEhcdRhEmulation.c
+    target/src/hwif/busCtlr/usb/hcd/ehcd/usbEhcdRhEmulation.h
+    target/src/hwif/busCtlr/usb/hcd/ehcd/usbEhcdTransferManagement.c
+    target/src/hwif/busCtlr/usb/hcd/ehcd/usbEhcdUtil.c
+
+    /* USB peripheral stack */
+
+    target/config/all/usrConfig.c
+    target/config/comps/src/usrUsbTargKbdInit.c
+    target/config/comps/src/usrUsbTargMsInit.c
+    target/config/comps/src/usrUsbTargPrnInit.c
+    target/config/comps/src/usrUsbTargSerInit.c
+    target/h/drv/usb/target/usbTargMsLib.h
+    target/h/drv/usb/target/usbTargRbcCmd.h
+    target/h/drv/usb/target/usbTcdFsl.h
+    target/h/drv/usb/target/usbTcdFslLib.h
+    target/h/usb/target/usbPeriphInstr.h
+    target/h/usb/usbCdc.h
+    target/src/config/usrDepend.c
+    target/src/drv/usb/target/Makefile
+    target/src/drv/usb/target/usbTargMsLib.c
+    target/src/drv/usb/target/usbTargRbcCmd.c
+    target/src/drv/usb/target/usbTargRbcLib.c
+    target/src/drv/usb/target/usbTargSerLib.c
+    target/src/drv/usb/target/usbTargSerSio.c
+    target/src/drv/usb/target/usbTcdFslDeviceControl.c
+    target/src/drv/usb/target/usbTcdFslEndpoint.c
+    target/src/drv/usb/target/usbTcdFslInitExit.c
+    target/src/drv/usb/target/usbTcdFslInterrupt.c
+    target/src/drv/usb/target/usbTcdFslUtil.c
+    target/src/drv/usb/target/wrs_usb_cdc_serial.inf
+    target/src/usb/target/usbHalEndpoint.c
+    target/src/usb/target/usbHalInitExit.c
+    target/src/usb/target/usbHalInterruptHandler.c
+    target/src/usb/target/usbTargInitExit.c
+    target/src/usb/target/usbTargPipeFunc.c
+
+    /* CAN driver */
+
+    target/config/comps/src/CAN/mpc5121e_cfg.c
+    target/h/CAN/canBoard.h
+    target/h/CAN/private/mpc5121eCan.h
+    target/src/demo/can/sample_mpc5121e.c
+    target/src/drv/CAN/Makefile
+    target/src/drv/CAN/mpc5121eCan.c
+
+    /* WindML */
+
+    components/windml-5.2/config/makefiles/aud_m512xac97.makefile
+    components/windml-5.2/config/wrmdb/windML_AUD_DEVICE_MPC512X.wrmdb
+    components/windml-5.2/h/ugl/driver/audio/m512xAc97Audio.h
+    components/windml-5.2/h/ugl/sysWindML.h
+    components/windml-5.2/osconfig/vxworks/src/usrWindMl.c
+    components/windml-5.2/src/ugl/audio/sndWave.c
+    components/windml-5.2/src/ugl/driver/audio/m512xAc97/m512xAc97Dsp.c
+    components/windml-5.2/src/ugl/driver/audio/m512xAc97/m512xAc97Mxr.c
+    components/windml-5.2/src/ugl/driver/audio/m512xAc97/m512xAc97Snd.c
+    components/windml-5.2/src/ugl/driver/audio/m512xAc97/Makefile
+
+    Post Installation Steps:
+
+    1) For command line builds to work you should rebuild 'target/config/all/vxbUsrCmdLine.c'.
+       First remove the old vxbUsrCmdLine.c.  You should consider backing it up,
+       so you can restore to use the old version if necessary.
+       Next open the vxWorks Development Shell and run the following commands:
+
+           cd $WIND_BASE/target/config/comps/src/hwif
+           make vxbUsrCmdLine.c
+
+       The updated vxbUsrCmdLine.c should be copied to 'target/config/all' directory.
+
+    2) Build the updated vxbus driver support:
+
+       In the VxWorks Development Shell, run the following commands:
+
+           cd $WIND_BASE/target/src/hwif/methods
+           make CPU=PPC32 TOOL=diab
+           cd $WIND_BASE/target/src/hwif/dmaCtlr
+           make CPU=PPC32 TOOL=diab
+           cd $WIND_BASE/target/src/hwif/fw/axe
+           make CPU=PPC32 TOOL=diab
+           cd $WIND_BASE/target/src/hwif/intCtlr
+           make CPU=PPC32 TOOL=diab
+           cd $WIND_BASE/target/src/hwif/mf
+           make CPU=PPC32 TOOL=diab
+           cd $WIND_BASE/target/src/hwif/sio
+           make CPU=PPC32 TOOL=diab
+
+       This will add the updated vxbus drivers to the corresponding library.
+
+    3) Build USB host controller driver:
+
+       In the VxWorks Development Shell, run the following commands:
+
+           cd $WIND_BASE/target/src/hwif/busCtlr/usb/hcd/ehcd
+           make CPU=PPC32 TOOL=diab
+
+       The USB host controller driver has been updated.
+
+    4) Build USB peripheral stack:
+
+       In the VxWorks Development Shell, run the following commands:
+
+           cd $WIND_BASE/target/src/usb/target
+           make CPU=PPC32 TOOL=diab
+           cd $WIND_BASE/target/src/drv/usb/target
+           make CPU=PPC32 TOOL=diab
+
+       The USB peripheral stack has been updated.
+
+    5) Build CAN bus driver (only on MSP platform):
+
+       In the VxWorks Development Shell, run the following commands:
+
+           cd $WIND_BASE/target/src/drv/CAN
+           make CPU=PPC32 TOOL=diab _WRS_CONFIG_COMPONENT_CAN=1
+
+       This will add the CAN bus driver to the corresponding library.
+
+Version 2.0/2
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Add support for PCB rev 4 hardware.
+
+    The following new features have been added.
+    - vxWorks native bootrom support. (only rev 4)
+    - CAN support. (rev 3.x and rev 4)
+    - PCI and CPLD interrupt controller support. (only PCB rev 4 and CPLD rev 5 or above)
+    - RTC support. (rev 2 and rev 4)
+    - USB host support.
+
+Version 2.0/1
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Add initial support for rev.3.x hardware.
+    Add auxiliary clock support. (WIND00134470)
+    Modify sysUsDelay function to support vxWorks_romResident. (WIND00139270)
+
+Version 2.0/0
+
+    Released from Wind River for General Purpose Platform 3.6, VxWorks 6.6
+
+    Initial release.
+
+    The supported features of the ADS5121e board included in this release are:
+
+    MPC5121e processor
+    board initialization
+    cache support
+    decrementer timer, used to implement the system clock
+    general purpose timer, used to implement the aux clock
+    decrementer timer, used to implement the timestamp clock
+    integrated programmable interrupt controller
+    on-chip PSC UART
+    on-chip fast ethernet controller
+    DDR SDRAM (256MB)
+    NOR Flash (64MB)
+    TFFS file system
+    NVRAM using one sector of flash to simulate
+    saving bootline parameters on the nvRam
+    on-board CPLD configuration
+    boot from U-BOOT
+    DMA controller
+    I2C controller
+    PATA controller

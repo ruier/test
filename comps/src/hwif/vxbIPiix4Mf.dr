@@ -1,0 +1,4 @@
+#ifdef INCLUDE_IPIIX4_MF
+    vxbIPiix4MfRegister ();
+#endif /* INCLUDE_PIIX4_MF */
+

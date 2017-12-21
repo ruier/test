@@ -1,0 +1,3 @@
+#ifdef DRV_TI_AM335X_SPI
+IMPORT void tiAm335xSpiRegister(void);
+#endif /* DRV_TI_AM335X_SPI */

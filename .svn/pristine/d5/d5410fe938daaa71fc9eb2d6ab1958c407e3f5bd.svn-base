@@ -1,0 +1,1175 @@
+\" wrSbcPowerQuiccII/target.ref - SBCPowerQUICCII target specific documentation
+\"
+\" Copyright 2003-2010 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 02b,16dec10,pch  CQ245607: romResident images are not supported
+\" 02a,29jun09,fao  Remove PC card support.(WIND00170941)
+\" 01z,29dec08,syt  Update section 1 and section 2.(WIND00113111)
+\" 01y,05sep07,jrp  APIGEN updates
+\" 01x,22mar07,rec  Update workbench instructions for workbench 2.6
+\" 01w,17jan07,wyc  workbench support added
+\" 01v,20nov06,rvm  Added workbench instructions for Flash Programming
+\" 01u,08mar05,ami  USB 2.1 & WLAN support added
+\" 01t,16now04,j_b  project support for Boot and TFFS selection
+\" 01s,24sep04,mdo  Convert to Base6 markup scheme
+\" 01r,30jul04,rec  MAC address scheme ('M') (SPR #93020)
+\" 01q,19feb04,j_b  merge power management
+\" 01p,19nov03,j_b  fix 32-bit PCI IO space definitions
+\" 01o,14nov03,j_b  fixed SIMM Flash device identification
+\" 01n,28oct03,j_b  misc. cleanup
+\" 01m,06oct03,j_b  PC Card, WindNet 802.11b Wireless LAN support
+\" 01l,12aug03,j_b  fix Hard Config Word programming instructions; add TFFS
+\" 01k,05aug03,scm  document extended backplane support...
+\" 01j,29jul03,j_b  add Flash programming info for SingleStep, WindPower IDE
+\" 01i,22jul03,j_b  add ATM build support
+\" 01h,12jun03,j_b  clarify network and serial configuration; add RTC support
+\" 01g,29may03,jb3  Multi network.
+\" 01f,29may03,j_b  remove INCLUDE_LOCAL_BUS_SDRAM
+\" 01e,29may03,j_b  removed unsupported processors
+\" 01d,28may03,j_b  remove hard reset configuration word programming (in
+\"		    board manual)
+\" 01c,21may03,j_b  update and cleanup
+\" 01b,21may03,scm  add pci & external interrupt info...
+\" 01a,05may03,j_b  created
+\"
+\"
+\TITLE wrSbcPowerQuiccII - Wind River SBCPowerQUICCII
+
+NAME `Wind River SBCPowerQUICCII'
+
+INTRODUCTION
+This manual entry provides board-specific information necessary to run
+VxWorks for the wrSbcPowerQuiccII BSP.  The wrSbcPowerQuiccII is a super-
+configurable board support package for all versions of the Wind River
+SBCPowerQUICCII target hardware.
+
+\sh Boot ROM
+'bootrom.bin'is configured to a ROM base address of 0x0. When programming
+the bootrom to the FLASH, an offset of 0xFFF00100 (the location of the reset
+exception) needs to be given.
+It is configured to execute from the 2MB On Board Flash ROM on a Wind River
+SBCPowerQUICCII target with a 66 MHz processor clock input.
+The 10/100BaseT Ethernet port FCC2 is the default boot device and serial port
+COM1 is the default console device.
+
+1. Creating a bootrom.bin:
+    1.1 Launch Workbench 3.1, go to the "File" menu and choose the option
+        "New" -> "VxWorks Boot Loader / BSP Project".
+
+    1.2 The "New VxWorks Boot Loader / BSP Project" window will popup, input a
+        project name then click "Next" button. In the next window, choose the BSP
+        as "wrSbcPowerQuiccII", "Tool chain" could be set as "diab", in the
+        "Boot loader / BSP image" part, choose the style as "Compressed (default)",
+        "Format" as "Bin", then press the "Finish" button to finish the project
+        creation.
+
+    1.3 Once the build process finish successfully (You will see "Build Finished"
+        in the "Build Console" window without error), you will find the file
+        "bootrom.bin" in the BSP directory "$(WIND_BASE)/target/config/wrSbcPowerQuiccII".
+
+2. Programming bootrom.bin to SBCPowerQuiccII Flash:
+
+   Each set of host tools requires information for the Wind River Probe or
+   Wind River ICE to initialize the hardware.  A register configuration file is
+   needed for this purpose.  Two examples are contained in the BSP:
+   wrSbcPQII8265_lsd.reg for using local bus SDRAM and wrSbcPQII8265_pci.reg
+   for using the PCI bus.  They are for use with the default wrSbcPowerQuiccII
+   BSP, where on board Flash is the boot memory. These examples can be copied
+   and modified for other processors by replacing the processor identifier in
+   the line:
+
+\cs
+   CF TAR          8265          ; OPERATION
+\ce
+
+   If the board and BSP are configured to boot from the SIMM Flash, replace the
+   values for OR0, BR0, OR1, BR1, OR6 and BR6 in the register configuration
+   file as:
+
+\cs
+   SCGA MEMC       OR0       00010104  FC000896 MEMC       /ua:0
+   SCGA MEMC       BR0       00010100  FC001801 MEMC       /va_dr /ua:0 /sa:1
+   SCGA MEMC       OR1       0001010C  FC000896 MEMC       /ua:0
+   SCGA MEMC       BR1       00010108  E4001801 MEMC       /va_dr /ua:0 /sa:1
+   SCGA MEMC       OR6       00010134  FC000896 MEMC       /ua:0
+   SCGA MEMC       BR6       00010130  E0000801 MEMC       /va_dr /ua:0 /sa:1
+\ce
+
+   Note that register configuration files enabling PCI are for use with those
+   processors with PCI bridge functionality (i.e., MPC8250/65/70/80).
+
+   Wind River ICE  utilizes board descriptor files that contain target connection
+   information as well as references to a register configuration file. An
+   example board descriptor file is provided in the BSP: wrSbcPQII8265.brd.
+   This board descriptor file contains references to the example register
+   configuration files included in the BSP, but file paths will need to be
+   added to the lines:
+
+\cs
+             <SELREG_FILE>PQII8265_pci.reg</SELREG_FILE>
+
+             <REG_FILE>PQII8265_pci.reg</REG_FILE>
+             <REG_FILE>PQII8265_lsd.reg</REG_FILE>
+\ce
+
+   This may be done by manually editing the board file or by opening it in
+   Wind River ICE and browsing for the register file in the board file editor.
+
+    2.1 Install Wind River Probe or Wind River ICE and power it on.
+
+        Connect the JTAG interface cable from the  Wind River Probe or Wind
+        River ICE to the SBCPowerQuiccII board's JTAG connector (JP15).
+        Once the connections have been made, power up the SBCPowerQuiccII
+        board and launch Workbench on the host.
+
+    2.2 Configure the Wind River Probe or Wind River ICE connection.
+
+    	In Workbench on the left pane, there is a "Remote Systems" window.
+        Click on the "Define a connection to remote system" button. In the popup
+        "New Connection" window, select the Connection type as
+        "Wind River OCD ICE Connection" for Wind River ICE and "Wind River OCD
+        Probe Connection" for Wind River Probe. If the Wind River ICE is
+        connected via serial port, specify the configuration else select
+        "Specify all communication settings manually".
+
+        In the "Wind River ICE Settings" or "Wind River Probe Settings", select
+        Processor and Browse to "MPC8260". Select "Auto-attach to connected
+        designators". In the "Communications" tab, Enter Hostname/IP address of
+        ICE for Wind River ICE or USB Device Name for Wind River Probe. Connect
+       	Workbench OCD with the Wind Power Probe or Wind Power ICE by clicking
+       	the "Next" and then "Finish" button. A New connection appears in the
+       	"Remote Systems" window.
+
+    2.3 Program Wind River Probe / Wind River ICE with the proper register
+        settings for the wrSbcPowerQuiccII board.
+
+        To view/modify the Wind River ICE firmware setting, terminate the
+        debug session for Wind River ICE. In the "Remote Systems" window,
+        right click on the newly connected OCD connection. Select
+        "OCD Utilities". To know about the current firmware information,
+        select "Emulator firmware version information". To download the new
+        firmware, Select "Firmware Download" and select appropriate file
+        from "$WIND_HOME/ocd-3.1/WindRiverIceImages/*.bin".
+
+        Go to the "OCD Command Shell" and click on the "Settings" button. The
+        OCD Command Shell Settings dialog appears, where you can select the
+        appropriate register file. Navigate to the location of the appropriate
+        register configuration file. The register file of wrSbcPowerQuiccII
+        board is "$(WIND_BASE)/target/config/wrSbcPowerQuiccII/wrSbcPQII8265_lsd.reg".
+        After choosing the register file, press the "OK" button. In the
+        OCD Command Shell, click the "Playback File" button. The selected
+        register file is downloaded to the target and the commands from the file
+        appear in the OCD command shell. When playback is finished the ">BKM>"
+        or the ">ERR>" prompt returns.
+
+    2.4 Get into Background Mode.
+
+        Execute the "IN" command to reset the board and initialize it with
+        the register setting.
+\cs
+            IN
+\ce
+
+    2.5 Program the wrSbcPowerQuiccII Flash.
+
+        In WindRiver OCD, Select the "Flash Programmer". The
+        "Flash Programmer" view has three tabs: "Configuration",
+        "Programming" and "Memory/Diagnostics".
+
+        2.5.1 Select the "Configuration" tab. In the "Device Selection' field,
+            if you are programming "2MB On Board Flash" then browse for
+            "AMD 29F160xB (2048 x 8) 1 Device". Browse for
+            "INTEL 28F128Jx (16384 x 8) 4 Devices" if programming the
+            "64MB SIMM Flash".
+            Select the Flash Base Address to be "0xffe00000". Select the
+            "RAM Workspace" start address to be "0x00000000" and set the
+            "size" to "60000".
+
+        2.5.2 Click on the "Programming" tab. Select the "Add File"
+            button, in the popup window, select the newly generated
+            "$(WIND_BASE)/target/config/wrSbcPowrQuiccII/bootrom.bin", and click
+            the "This is a raw binary file" checkbox then click "OK" to finish
+            file adding. Click the "Start Address" and set it as "0xfff00100",
+            the "End Address" will be fixed automatically. Please notice that
+            the "Start Address" should include the "Offset bias". Enable a file
+            by clicking on the checkbox under the "Enabled" heading.
+
+        2.5.3 In the "Erase Sector Selection" pane, select addresses 0xfff00000
+            through 0xffff0000. Press the "Erase/Program" button to erase the
+            flash and then program the flash with selected "bootrom.bin" file.
+            A window pops up to show the progress of the Flash device
+            programming. When it is complete, the Flash should contain the new
+            boot program.
+
+3. Run the VxWorks Boot ROM program.
+
+   3.1 Turn off the power to the board. The Wind PROBE or Wind ICE
+       emulator may be disconnected from the board.
+
+   3.2 Connect the Ethernet channel and the serial channel:
+
+       3.2.1 Connect the supplied serial cable with the board from the COM1
+             port on the SBCPowerQuiccII to a host.  The SMC devices are
+             set as: 9600 baud, 8 data bits, 1 stop bit, no parity or flow
+             control.  Start a terminal program on the host.
+
+       3.2.2 Connect a standard Ethernet cable to the RJ45 connector
+             labeled "FCC2" on the SBCPowerQuiccII.
+
+   3.3 To execute this new boot program, turn the board on. The VxWorks boot
+       count down should appear on the terminal window.  Press any key to
+       stop the count down.
+
+\sh Board Jumper & Switch Settings
+
+The board's default jumper and switch configurations should have been
+set correctly by the factory to allow VxWorks to run.  See the
+"Wind River SBCPowerQUICCII Engineering Reference Guide" for details
+of the board's jumper and switch settings.  The boot memory chip select
+jumpers and the CPU ID switches are particularly important for this BSP.
+See the "Processor Configuration" and "Flash ROM Configuration" sections
+below for details.
+
+
+FEATURES
+This section describes the supported and unsupported features of the SBCPowerQuiccII.
+
+\sh Supported Features
+
+
+The supported features of the SBCPowerQuiccII board are:
+    MPC8250A processors, running at Bus/CPM/Core frequency
+        66/200/300 MHz
+    MPC8260A and MPC8265A processors, running at Bus/CPM/Core frequency
+        66/200/300 MHz and 83/208/300 MHz
+    MPC8280A processors, running at Bus/CPM/Core frequency
+        100/300/450 MHz
+    Board Initialization
+    PowerQUICCII MMU support
+    PowerQUICCII (L1) Cache support
+    PowerPC decrementer timer, used to implement a System Clock.
+    SMC1, a UART for COM1 (Console channel).
+    SMC2, a UART for COM2.
+    SCC1 Port as an Ethernet device supporting 10Base-T protocol.
+    FCC1 Port as an Ethernet device supporting 10/100Base-T protocol
+        (PCMCIA build only).
+    FCC2 and FCC3 Ports as an Ethernet device supporting 10/100Base-T protocol.
+    TIMER2 as an 16-bit auxiliary clock.
+    TIMER3 and TIMER4 are cascaded into a free-running 32-bit timer for
+        timestamp support.
+    PowerQUICCII Interrupt Controller.
+    Baud Rate Generators as required for SMC1 and SMC2.
+    256MB SDRAM on 60x Bus.
+    16MB SDRAM on Local Bus.
+    64MB SIMM FLASH on 60x Bus.
+    2MB On Board FLASH on 60x Bus.
+    8KByte EEPROM for Ethernet MAC address and boot parameters.
+    External Interrupt Controller.
+    PowerQUICCII PCI Bridge
+    PCI-PCI Bridge
+    7 segment display
+    User DIP switch bank
+    Real-Time Clock
+
+\sh Unsupported Features
+
+
+The items not supported on the SBCPowerQuiccII are:
+    L2 Cache
+    Hot Swap Controller
+    Dual ATM Ports (ATM build)
+    PC Card (PCMCIA build)
+    vxWorks_romResident image type
+
+
+HARDWARE DETAILS
+This section documents the details of the device drivers and board
+hardware elements for the SBCPowerQuiccII.
+
+
+\sh Devices
+The device drivers included are:
+
+
+\cs
+    eeprom.c            - EEPROM access routines
+    smc8260Sio.c        - SMC serial driver
+    i8259Intr.c         - external interrupt controller driver
+    mot82xxPci.c        - PowerQUICC II PCI Bridge driver
+    sysLed.c            - 7 segment display interface (API)
+    sysIOPort.c         - PowerQUICC II I/O port interface (API)
+    stm48t59Rtc.c       - Real-Time clock and SRAM
+\ce
+
+
+
+\sh Default Memory Map
+\cs
+Memory Map from CPU point of view:
+
+Chip Select	     Start       Size   Access to
+---------------------------------------------------------------------
+If CS0     (R/W) 0xFE000000	 2MB    On Board Local FLASH (default)
+If CS1 & 6 (R/W) 0xE0000000  64MB   SIMM FLASH memory (default)
+If CS0 & 1 (R/W) 0xFC000000  64MB   SIMM FLASH memory
+If CS6     (R/W) 0xE0000000	 2MB    On Board Local FLASH
+CS2-3      (R/W) 0x00000000  256MB  DIMM SDRAM
+CS4        (R/W) 0x20000000	 4MB    SDRAM on Local bus
+CS5        (R/W) 0x22000000	 8KB    NVRAM (EEPROM)
+CS5        (R/W) 0x22002000	 8Bit   visionPORT
+CS5        (R)	 0x22004000	 8Bit   User Switches (Register)
+CS5        (R)	 0x22006000	 8Bit   MODCK/FLASH/PCI Status (Register)
+CS5        (R/W) 0x22008000	 8Bit   External Interrupt Controller
+CS5        (W)	 0x2200A000	 8Bit   User Seven Segment LED (Register)
+CS11       (R/W) 0x80000000	 8KB    Real-Time Clock and SRAM
+\ce
+
+
+\sh Processor Configuration
+   For the BSP to properly determine some of the target hardware capabilities
+   such as PCI and the number of available FCCs, the processor must be
+   identified. This is done by determining board switch settings or by defining
+   the processor in config.h.
+
+   The default boot ROM and VxWorks images require the CPU to be identified
+   by switches 1, 2 and 3 in switch bank 5.  This allows the BSP to identify
+   the processor at run-time.
+
+   The CPU IDs below match the following user switch settings:
+   Switch Bank SW5, Switches 3,2 and 1 (Open/Off = 1, Closed/On = 0).
+   Example: CPU_ID_8265 is determined by SW5-3 = Off, SW5-2 = On, SW5-1 = On.
+\cs
+    _____________________________________________________
+   | CPU       ID #     | Dip Switch SW5                 |
+   |--------------------|--------------------------------|
+   | MPC8250   0x0      | SW5-1    CPU ID Bit 2          |
+   | MPC8255   0x1      | SW5-2    CPU ID Bit 1          |
+   | MPC8260   0x2      | SW5-3    CPU ID Bit 0          |
+   | MPC8264   0x3      | SW5-4    Available to User     |
+   | MPC8265   0x4      | SW5-5    Available to User     |
+   | MPC8266   0x5      | SW5-6    Available to User     |
+   | MPC8270   0x6      | SW5-7    Available to User     |
+   | MPC8280   0x7      | SW5-8    Available to User     |
+   |____________________|________________________________|
+
+\ce
+
+   As an alternative, the processor may be identified by defining HARDCODED_CPU_ID
+   and CPU_ID in config.h as shown below.  CPU_ID is defined as one of the
+   supported MPC82xx processors as CPU_ID_82xx where xx is one of the following:
+   50, 55, 60, 64, 65, 66, 70 or 80.  Defining the processor at compile-time
+   makes user switches SW5-1, 2 and 3 available to applications.
+
+\cs
+#define HARDCODED_CPU_ID  /@ undef to use User Dip Switches @/
+
+#define CPU_ID              CPU_ID_8265
+\ce
+
+\sh Processor Speed Configuration
+There are three components to determining the processor speed: the input
+frequency,  MODCK[1-3] and MODCK_H settings and the PCI mode setting.
+
+The processor's input clock rate must be properly defined by OSCILLATOR_FREQ in
+config.h to match the board oscillator Y2.  OSCILLATOR_FREQ is defined as
+one of the supported input frequencies FREQ_xxMHZ where xx is one of the
+following: 66, 83 or 100.  The default boot ROM and VxWorks images assume an
+input frequency of 66 MHz, as shown below.
+
+\cs
+/@
+ * Input Frequency configuration: FREQ_66MHZ, FREQ_83MHZ or FREQ_100MHZ
+ * OSCILLATOR_FREQ is target-dependent and must be set correctly to
+ * determine CPU, CPM, PCI bus, SCC clock and Baud Rate Generator frequencies.
+ @/
+
+#define OSCILLATOR_FREQ     FREQ_66MHZ  /@ is also 60x Bus Frequency @/
+\ce
+
+The MODCK[1-3] settings are determined by switch bank 1, switches 2, 3 and 4.
+If the target is not in PCI mode, the MODCK_H bits are read from the Hard
+Reset Configuration Word.  If the target is in PCI mode, the MODCK_H bit
+values are determined by switch bank 6, switches 5, 6, 7 and 8.  Together,
+the MODCK[1-3] and MODCK_H bits select the processor's 60x bus, CPM and CPU
+speeds.  See the "Clock Configuration" section of the appropriate PowerQUICC II
+specification for clock configuration mode details.  The switch settings
+mentioned are readable from the PCI/MODCK/FLASH Status Register.  See the
+"Status Register" and "Switch Position Settings" sections of the "Wind River
+SBCPowerQUICCII Engineering Reference Guide" for details.
+
+PCI mode is determined by the state of switch bank 6, switch 1.  The PCI mode
+setting can be read from the PCI/MODCK/FLASH Status Register.  See the
+"PCI Access" section below for PCI details.
+
+\sh Support for L1 Cache Locking
+L1 cache locking is available for supported processors. The cache lock routine
+can be used to lock the entire data or instruction cache with a specified memory
+region.
+
+\sh Flash ROM Configuration
+The Wind River SBCPowerQuiccII has two Flash ROM sources as shown in
+the memory map above. The 2MB of On Board Flash are accessed 8 bits
+at a time, while the 64MB SIMM Flash is accessed 32 bits at a time.
+If the SIMM Flash contains more than 64MB, define CS1_FLASH_SIZE in config.h
+to the amount of Flash over 64MB.
+
+\sh Selecting the Boot Flash
+By default, the SBCPowerQuiccII and the BSP are configured to boot from the
+2MB On Board Flash.  The boot Flash source is selectable by configuring
+PowerQUICCII chip select 0 (CS0) in hardware and software as shown below.
+
+The SBCPowerQuiccII configures boot Flash chip select CS0 based on the setting
+of jumper JP2:
+
+\cs
+    ___________________________________________________
+   |Chip Select 0 to On Board FLASH  | JP2    1-3 & 2-4|
+   |_________________________________|_________________|
+   |Chip Select 0 to SIMM FLASH      | JP2    1-2 & 3-4|
+   |_________________________________|_________________|
+\ce
+
+The BSP determines CS0 based on either:
+   1. The definition of BOOT_FLASH in config.h (for command-line building):
+
+      To boot from the On Board Flash, BOOT_FLASH is defined as:
+\cs
+    #define BOOT_FLASH ON_BOARD_FLASH
+\ce
+      To boot from the SIMM Flash, BOOT_FLASH is defined as:
+\cs
+    #define BOOT_FLASH SIMM_FLASH
+\ce
+   or
+   2. The selection made under the "BSP configuration variants" folder
+      (for IDE project building).
+
+If the boot Flash selection is changed, a new boot ROM image must be built and
+programmed.
+
+\sh Hard Reset Configuration Word in Boot Flash
+The hard reset configuration word must be programmed separately at boot Flash
+base address 0xFE000000 at offsets 0x0, 0x8, 0x10 and 0x18.  It should have been
+programmed into the On Board Flash at the factory to allow VxWorks to run.
+For more information about the hard reset configuration word, see section
+5.4 Reset Configuration in the MPC8260 PowerQUICC II User's Manual.  Scripts
+included in the BSP can be run on a visionPROBE II, visionICE II or Wind Power
+ICE via the associated host tools (ex. visionClick, Wind Power IDE) to
+program the default hard reset configuration word into the boot Flash:
+
+   1. Turn off power to the board and set SW1-1 to OFF.
+   2. Connect the board to the Wind Power IDE or visionClick and get
+      into BKM> mode
+   3. Play the script.
+      3.1 For Wind Power IDE:
+          Right-click in a Command Window, select "Play..." and navigate to
+          the file "sbcPQII_resetcfg.vsh" for On Board boot Flash or
+          "sbcPQII_SIMM_resetcfg.vsh" if booting from the SIMM Flash.
+      3.2 For visionClick:
+          Select Tools -> Log Output/Playback Scripts, navigate to the file
+          "sbcPQII_resetcfg.vsh" under "Playback Command from File" and
+          press "Start".
+   4. Set SW1-1 to ON and cycle the board's power off and on.
+
+\sh TrueFFS support
+
+
+This BSP supports TrueFFS for Tornado. To include TrueFFS support in the BSP,
+the INCLUDE_TFFS macro must be defined in config.h.  TrueFFS support is not
+built into the default BSP.
+
+TrueFFS may be used on either the On Board or SIMM Flash, but not both
+simultaneously.  The Flash memory selected for TrueFFS support is determined
+by either:
+   1. The definition of TFFS_FLASH in config.h (for command-line building).
+
+      To select TrueFFS support on the On Board Flash, TFFS_FLASH is defined as:
+\cs
+    #define TFFS_FLASH ON_BOARD_FLASH
+\ce
+      To select TrueFFS support on the SIMM Flash, TFFS_FLASH is defined as:
+\cs
+    #define TFFS_FLASH SIMM_FLASH
+\ce
+or
+   2. The selection made under the "BSP configuration variants" folder
+      (for IDE project building).
+
+Each Flash memory requires its own custom Memory Technology Driver (MTD),
+contained in sysTffs.c. It is determined by the Flash selected for TrueFFS.
+
+By default, TrueFFS is configured to save memory space for the Hard Reset
+Configuration Word and bootrom image in the On Board Flash.  This is NOT the
+default situation for the SIMM Flash, however. TrueFFS overwrites
+any stored Hard Reset Configuration Word and bootrom image.
+
+\sh SDRAM Configuration
+The SBCPowerQuiccII has two sources of SDRAM as shown in the memory map above.
+The 256MB DIMM SDRAM resides on the 60x bus as main program memory and the
+4MB On Board SDRAM resides on the PowerQUICCII local bus.
+
+\sh DIMM SDRAM Configuration
+The BSP divides the 256MB SDRAM into two sections. The first 32MB section is
+used by VxWorks at the beginning. The second section is the rest of the
+memory 224MB. It can be added in the application level or by changing the
+compilation switch.
+
+The reason the BSP divides the 256MB SDRAM into a 32MB section and a 224MB
+section has to do with the EABI compilation option of a 24 bit address.
+The default compilation options generates a 'bl' for branch instructions.
+This increases performance, but places a 32MB address limit on the code.
+
+There are two "work arounds" to this limitation.
+
+    1.) recompile all the source with the -mlongcall GNU compilation flag or
+        "-Xmax-long-branch" DIAB compilation flag; or
+    2.) add remaining 224MB to the memory pool via the memAddToPool() function.
+
+Option #1 would require all the libraries, driver, and the BSP to be
+recompiled with the added compiler option. This results in a number
+of code changes; the most obvious code change is branches are implemented
+via the "brlr" instruction versus the "bl" instruction.
+
+Option #2, the preferable option, requires the USER_RESERVED_MEM and the
+memAddToPool() constructs be used to specify the remaining 224MB to be added
+to the memory pool. Consult WindTech Note WTN41 for details on specifying
+user memory.
+
+\sh Local Bus SDRAM Configuration
+PowerQUICCII Local bus and PCI bus use are mutually exclusive.  By default,
+the SBCPowerQUICCII and the BSP are configured for PCI bus support and do
+NOT support local bus SDRAM.  The bus is selected by configuring the hardware
+and software as shown below.
+
+Hardware PCI/Local bus support is determined by the state of switch bank 6,
+switch 1.  The PCI/Local bus mode setting can be read from the
+PCI/MODCK/FLASH Status Register.  See the "Status Register" and
+"Switch Position Settings" sections of the "Wind River SBCPowerQUICCII
+Engineering Reference Guide" for details.
+
+Software PCI/Local bus support is determined by the INCLUDE_PCI parameter
+in config.h.  If INCLUDE_PCI is defined, local bus SDRAM is NOT supported.
+
+If the SCC or FCCs are configured to use local bus SDRAM,
+INCLUDE_PCI must NOT be defined in config.h.
+
+\sh NVRAM Support
+This BSP implements Nonvolatile RAM via an EEPROM device. There are a few
+user parameters associated with this device. The parameters are located in
+the config.h file and are:
+\cs
+    #undef  INCLUDE_EEPROM_LOCKING
+    #define SMART_EEPROM_WRITE
+    #define ETHERNET_ADR_SET /@ (used in bootConfig.c to enable 'N' command) @/
+\ce
+The INCLUDE_EEPROM_LOCKING parameter is typically #undef'ed. If #define'ed, the
+EEPROM is software locked between accesses. This was implemented on the
+BSP to work around a power-on EEPROM corruption problem. It should be noted,
+that if the EEPROM is locked, its contents can not be altered via an emulator
+or visionPROBE II or visionICE II (JTAG does not meet the minimum timing
+relationships needed).
+
+The SMART_EEPROM_WRITE parameter is typically #define'd. When defined, the
+EEPROM write code first checks to see if a cell is the desired value. If the
+memory location already contains the desired value, the write is skipped. This
+was implemented to increase the life of the EEPROM device.
+
+The ETHERNET_MAC_HANDLER is a value that indicates the MAC address is stored in
+NVRAM and alterable via the "M" bootrom command.
+
+\sh Shared Memory
+NA
+
+\sh Serial Configuration
+SMC1 and SMC2 are configured as UART devices with 8 data bits, 1 stop bit,
+hardware handshaking, and parity disabled.  SMC1 is the default console
+channel, accessed by the COM1 port.  SMC2 is accessible by the COM2 port.
+The default console port is determined by CONSOLE_TTY in config.h, where
+a value of 0 configures COM1 and 1 configures COM2.
+If the console output does not seem to be at the expected baud rate, check
+that OSCILLATOR_FREQ is properly defined in config.h as described in section
+"Processor Speed Configuration" above.
+
+\sh Network Configuration
+The supported boot devices are:
+\cs
+    motfcc - MII 10/100BaseT Fast Ethernet
+           - unit 0 is channel FCC1, unit 1 is FCC2 and unit 2 is FCC3
+    motscc - 10BaseT Ethernet
+           - unit 0 is channel SCC1
+    fei    - Intel 82557/82559 Fast Ethernet PCI bus controller, when available
+             via the PMC connector and the PCI bus is enabled.
+\ce
+
+The "motfcc" and "motscc" boot devices correspond to the on-board FCC and SCC
+network interfaces, respectively.  The "fei" boot device is for use with
+PCI Ethernet adapters with an Intel 82557/82559 Fast Ethernet controller.
+The "fei" network interface can only be used when the PCI bus is supported
+and INCLUDE_FEI_END is defined in config.h.  See the "PCI Access" section for
+more information about PCI bus support.
+
+Note that the ATM build of the SBCPowerQuiccII has two limitations on Ethernet
+support.  The FCC1 channel is not available as an Ethernet device, since it is
+wired for use as an ATM interface.  Also, the SCC1 channel is not available
+as an Ethernet channel on this board if it is configured to use the ATM
+interface.  This is determined by switch bank 3, switches 7 and 8 which must
+be set as SW3-7=Off and SW3-8=On to configure SCC1 for Ethernet use.
+See the "Switch Position Settings" sections of the "Wind River SBCPowerQUICCII
+Engineering Reference Guide" for details.
+
+Support for the network interfaces is determined by the BOOT_DEVICE macro in
+config.h.  By default, the BSP includes support for the SCC and FCC END devices
+as well as any network interfaces supported on the PCI bus.  To remove support
+for any or all of the interfaces, follow the steps below.
+
+1. In config.h, change the definition:
+
+From
+\cs
+#define BOOT_DEVICE          SCC_FCC_END
+\ce
+To
+\cs
+   SCC_END to remove FCC channel support;
+   FCC_END to remove SCC channel support;
+   FEI_END (if "fei" support is included) to remove both FCC and SCC channel support; or
+   NO_NETWORK to remove all network interface support.
+\ce
+
+
+2. Rebuild the bootrom and VxWorks images.
+
+\sh Ethernet Port
+The BSP configures FCC2 as the default Ethernet port. The name `motfcc' and
+unit number 1 should be specified as the boot device to the boot ROMs when
+booting VxWorks over that interface. The BSP is configured to use the END-style
+network driver. If you wish to use SCC1 as the boot device you need to change
+the boot device name to "motscc" and the unit number to 0.  Note the limitations
+on Ethernet support on the ATM build of the SBCPowerQuiccII described in the
+"Network Configuration" section.
+
+\sh Setting the Ethernet Address
+The SBCPowerQuiccII boards are assigned unique Ethernet hardware or MAC
+addresses at the factory. A unique 6 byte address is absolutely necessary if the
+board will be connected to a network. The first 3 bytes are a Wind River-
+specific prefix. The last 3 bytes are unique. A set of default Ethernet
+addresses are specified in config.h as:
+\cs
+    /@ Ethernet MAC Address Parameters @/
+	#define CUST_ENET3_0    0xA0	/@ Customer portion of MAC address @/
+	#define CUST_ENET3_1    0xA1
+	#define CUST_ENET3_2    0xA2
+	#define CUST_ENET3_3    0xA3
+	#define CUST_ENET4 	0xAA
+	#define CUST_ENET5 	0xA0
+\ce
+The first three bytes (0x00, 0xa0, 0x1e) are a Wind River specific prefix
+that should be kept as-is. If for some reason you need to change them, the
+following macros are in config.h:
+\cs
+    #define WR_ENET0  0x00  /@ Wind River specific portion of MAC (MSB->LSB) @/
+    #define WR_ENET1  0xa0
+    #define WR_ENET2  0x1e
+
+    #define	ENET_DEFAULT 0x1ea00000
+\ce
+Note:
+    The "ENET_DEFAULT" macro should contain the same number as the three
+    "WR_ENETx" macros. For example :
+\cs
+    #define WR_ENET0  0x11
+    #define WR_ENET1  0x22
+    #define WR_ENET2  0x33
+
+    #define ENET_DEFAULT 0x33221100
+\ce
+
+The bytes are reversed in the #define due to little endian issues
+in the macro that processes the ENET_DEFAULT macro.
+
+If these MAC address parameters are changed, a new boot ROM must be programmed
+and a new VxWorks image must be built.
+
+The BSP supports storage of up to 4 different MAC addresses in NVRAM, one for
+each on-board Ethernet device. Ethernet Addresses are assigned and stored by
+END device number:
+\cs
+   END device # | Boot Device | Physical Channel
+   -------------|-------------|-----------------
+         0      |   motscc0   |      SCC1
+         1      |   motfcc0   |      FCC1
+         2      |   motfcc1   |      FCC2
+         3      |   motfcc2   |      FCC3
+\ce
+
+The MAC addresses can be set by writing them directly to NVRAM using the
+'N' command from the boot ROM prompt.  This option allows only the last three
+bytes to be changed.  To use this option, open a console window and reset the
+hardware.  When the bootrom banner appears and the countdown starts, press any
+key to get the "[VxWorks Boot]:" prompt.  Type 'N' and follow the instructions.
+For example, to set the address for motfcc1 enter the three bytes and then
+specify 2 for the Ethernet device number.  Note that the BSP does not use the
+Ethernet Address of the FCC1 channel on the ATM build of the SBCPowerQuiccII.
+
+\sh Multiple Ethernet Support
+The BSP configures only one END device by default upon on booting.  To enable
+multiple END drivers, modify config.h to define INCLUDE_USER_APPL.
+After the BSP configures the END-style network driver used for booting,
+the myAppInit() function tries to start up all other available FCCs and
+the SCC as well if it was not the boot device.  The default IP Addresses
+assigned to these are defined in sysNet.c starting at 192.168.0.0, placing
+each device on a different subnet.  The boot device retains its address.  Routes
+are set up as well.  The IP addresses are assigned and stored in NVRAM by END
+device number, as described above for MAC addresses.  Note that the BSP does not
+initialize the FCC1 channel on the ATM build of the SBCPowerQuiccII.
+
+\sh External Interrupt Controller
+
+The i8259A external interrupt controller is used to support PCI/PCMCIA devices.
+It handles up to 8 vectored priority interrupts. The i8259A is initialized for
+"Fully Nested"/"Non-Specific EOI".  By default, INCLUDE_i8259A is included in
+config.h to add support.  NOTE: PCI support can not be included without this
+being defined.  Also, PCMCIA is not available on the ATM build of the
+SBCPowerQuiccII.
+
+The mapping between interrupt numbers and the priority levels is not
+necessarily a one-to-one mapping. Hardware determines the mapping of
+interrupt request lines to priority levels.
+
+Interrupt mapping :
+
+\cs
+IRQ  MAPPING                                      Default Priority
+===  =======                                      ================
+ 0 - PCMCIA Card Bus 0 (PC_INTA)                       0 (highest)
+ 1 - PCMCIA Card Bus 1 (PC_INTB)                       1
+ 2 - Security Processor (185_IRQ) -NOT supported       2
+ 3 - ATM Interface (ATM_IRQ) -NOT Supported            3
+ 4 - Device of PMC connector (INT_A)                   4
+ 5 - INT_B                                             5
+ 6 - INT_C                                             6
+ 7 - INT_D                                             7 (lowest)
+\ce
+
+\sh VME Access
+NA
+
+\sh PCI Access
+
+Support is included for the PowerQUICCII on-chip PCI bridge and the IBM
+PCI-to-PCI bridge that enables the access to the Compact PCI bus.  The
+hardware and BSP are configured to support PCI access by default.
+Local bus access is not available when the PCI bus is supported.
+
+Hardware PCI support is determined by the state of switch bank 6, switch 1.
+The PCI mode setting can also be read from the PCI/MODCK/FLASH Status Register.
+See the "Status Register" and "Switch Position Settings" sections of the
+"Wind River SBCPowerQUICCII Engineering Reference Guide" for details.
+
+By default INCLUDE_PCI is defined in config.h.  NOTE: PCI is dependent on
+the external interrupt controller and cannot be included without INCLUDE_i8259A
+being defined in config.h as well.  Both are enabled by default, but the BSP
+disables PCI support at run-time if the processor does not support it.
+
+PCI interrupts, external to the CPU, are routed through the external interrupt
+controller. IRQ6 is used to signal the CPU that a PCI interrupt has occurred.
+The external interrupt controller is queried to decipher the source of
+the PCI interrupt.
+
+The support at the moment is for 1 to 1 memory map with LOCAL and PCI memory
+space.
+
+Support for configuring the PCI cards off of the WindRiver extended backplane is
+provided via the flag PQII_EXTND_PCI_MASTER. When PQII_EXTND_PCI_MASTER is defined
+the PCI auto-configuration assigns the proper interrupts to PCI cards found
+off on the extended PCI backplane card. NOTE: On the Wind River extended PCI backplane
+card there are 3 PCI slots, assigned interrupts, INT_A, INT_B, and INT_C respectively.
+INT_A is shared between the on-board PMC port and one of the slots off on the extended
+backplane card. The current version of the BSP doesn't support sharing of interrupts.
+The PMC connector and the slot which makes use of INT_A may not be used
+at the same time.
+
+\cs
+/@**************************************
+* PowerQUICCII PCI Configuration Defines
+****************************************@/
+
+CPU Addr                                         PCI Addr
+PCI_LOCAL_MEM_BUS     -------------------------- PCI_MSTR_MEM_BUS
+                      -                        -
+                      -                        -
+PCI_LOCAL_MEM_BUS +   -------------------------- PCI_MSTR_MEM_BUS +
+PCI_LOCAL_MEM_SIZE    ----IMMR                 - PCI_MSTR_MEM_SIZE
+                      -                        -
+                      -                    -----PIMMR
+                      -                        -
+                      -                        -
+CPU_PCI_MEM_ADRS      -------------------------- PCI_MEM_BASE
+                      -                        -
+                      -                        -
+CPU_PCI_MEMIO_ADRS    -------------------------- PCI_MEMIO_ADRS
+                      -                        -
+                      -                        -
+CPU_PCI_IO_ADRS       -------------------------- PCI_IO_BASE
+                      -                        -
+                      -                        -
+CPU_PCI_IO_ADRS +     -------------------------- PCI_IO_BASE +
+CPU_PCI_IO_SIZE       -                        - PCI_IO_SIZE
+                      -                        -
+                      -                        -
+                      -                        -
+                      -------------------------- 4GBytes
+
+PCI based addresses:
+
+PCI Auto Config Memory Start Address - 0x90000000 (PCI_MEM_BASE)
+64M, PCI Auto Config Memory Size     - 0x04000000 (PCI_MEM_SIZE)
+
+PCI Auto Config IO Start Address     - 0xB0000000 (PCI_IO_BASE)
+1M, PCI Auto Config IO Size          - 0x00100000 (PCI_IO_SIZE)
+
+CPU based addresses:
+
+CPU_PCI_MEM_ADRS           PCI_MEM_BASE
+CPU_PCI_MEM_SIZE           PCI_MEM_SIZE /@ (PCI_MEM_SIZE / 2) @/
+
+CPU_PCI_NO_PRE_MEM_ADRS    0x00000000   /@ (PCI_MEM_BASE + CPU_PCI_MEM_SIZE) @/
+CPU_PCI_NO_PRE_MEM_SIZE    0x00000000   /@ (PCI_MEM_SIZE / 2) @/
+
+CPU_PCI_IO32_ADRS          PCI_IO_BASE
+CPU_PCI_IO32_SIZE          PCI_IO_SIZE
+
+CPU_PCI_IO16_ADRS          0x00000000
+CPU_PCI_IO16_SIZE          0x00000000
+
+PCI_IO_END                 (PCI_IO_BASE + PCI_IO_SIZE - 1)
+PCI_MEM_END                (PCI_MEM_BASE + PCI_MEM_SIZE - 1)
+
+PCI Device Mapping:
+
+Devices                        Device #   Vendor ID   Device ID   Class Code
+=======                        ========   =========   =========   ==========
+MPC8265ADS-PCI Host Bridge      0x00       0x1057      0x18c0     0x00060000
+TI PCI1420 PCItoPCMCIA Contrlr  0x11       0x104c      0xac51     0x00060700
+IBM 21P100BGC PCI/PCIX Bridge   0x12       0x1014      0xd1a7     0x00060400
+
+NOTE: The TI PCI1420 PCItoPCMCIA Controller is not on the ATM build of the
+SBCPowerQuiccII.
+
+Devices tested off PMC connector:
+
+FEI 82557                       0x10       0x8086      0x1030
+FEI 82559                       0x10       0x8086      0x1229
+FEI 82559ER                     0x10       0x8086      0x1209
+\ce
+Support for the 'fei' END is enabled by defining INCLUDE_FEI_END in config.h.
+It may be specified as the boot device.
+
+\sh "USB Support"
+The BSP Support for USB is given in the file usbPciStub.c.
+The following PCI offsets are used:
+
+     PCI_IO_OFFSET  - This is the offset between a physical PCI IO address
+     and the virtual address used to access it.
+
+     USB_PCI_MEMIO_OFFSET - This is the offset between Memory IO (non prefetch)
+     PCI physical addresses and the local virtual address that corresponds
+     to it.
+
+     PCI_MEM_OFFSET - This is the offset between Memory (prefetchable) PCI
+     physical addresses and the local virtual address that corresponds to it.
+
+In addition, the The BSP specific interfaces which are used by USB are defined
+in the file usbPciStub.c.
+
+\sh I/O Port routines
+The PowerQUICCII processors are equipped with four parallel I/O ports, each
+comprised of 32 discrete I/O pins. sysIOPort.c is sample code for reading
+and writing I/O pin states and connecting an interrupt handler that triggers
+on a pin state transition.
+
+\sh Real-Time Clock
+Support for the STMicroelectronics M48T59 TIMEKEEPER SRAM is included for
+access to a real-time clock.  It also features an interrupt-generating
+alarm timer and a programmable watchdog timer that may generate a hardware
+reset or interrupt upon expiration.  An interrupt from this source
+generates a machine check exception.  The M48T59 TIMEKEEPER SRAM also contains
+8176 bytes (8KB - 16 registers) of nonvolatile memory in the form of
+battery-backed static RAM.  Real-Time clock support is included by default
+with the macro M48T59_RTC_SRAM defined in config.h.
+
+\sh Delivered Objects
+The following images are delivered with the wrSbcPowerQuiccII BSP:
+
+\ml
+\m -
+
+bootrom_uncmp
+\m -
+
+bootrom_uncmp.hex
+\m -
+
+bootrom
+\m -
+
+bootrom.hex
+\m -
+
+vxWorks
+\m -
+
+vxWorks.st
+\me
+
+
+\sh Make Targets
+Only bootrom, bootrom_uncmp, vxWorks and vxWorks.st have been tested.
+
+\sh Dual Port RAM Configuration
+The wrSbcPowerQuiccII uses MPC82xx Dual Port RAM, allocated dynamically for
+the serial and Ethernet channels. Key features of Dual Port RAM management are:
+
+    - Init the DPRAM memory with considerations of any Microcode that add been
+      loaded.
+
+    - Allocate aligned and non aligned memory.
+
+    - Free memory.
+
+    - Manage a special section (b000 - c000) for special FCC needs.
+
+    - Manage a special section (8000 - 9000) for special SCC needs.
+
+\sh Interrupts
+
+
+The following table describes the relationship between the interrupt
+number, interrupt vector, and the interrupt bit position in the SIU
+Interrupt Mask Register (SIMR_H and SIMR_L). Also described is the
+mask to use to enable all interrupts of a higher priority.
+\cs
+Default                                        Mask to Enable
+Interrupt  Interrupt  Interrupt  SIMR          Higher Priority Interrupts   Interrupt
+Priority   Number     Vector     Mask          SIMR_H       SIMR_L          Source
+-------------------------------------------------------------------------------------
+HIGHEST PRIORITY
+-------------------------------------------------------------------------------------
+1          16         0x10       H 0x00000004  0000_0000    0000_0000        TMCNT
+2          16         0x10       H 0x00000004  0000_0000    0000_0000        TMCNT
+3          17         0x11       H 0x00000002  0000_0004    0000_0000        PIT
+4   reserved
+5          19         0x13       H 0x00004000  0000_0006    0000_0000        IRQ1
+6          27         0x20       L 0x80000000  0000_4006    0000_0000        FCC1
+7          28         0x21       L 0x40000000  0000_4006    8000_0000        FCC2
+8          29         0x22       L 0x20000000  0000_4006    C000_0000        FCC3
+9   inactive
+10  unused
+11         31         0x24       L 0x08000000  0000_4006    E000_0000        MCC1
+12         32         0x25       L 0x04000000  0000_4006    E800_0000        MCC2
+13  inactive
+14  inactive
+15         20         0x13       H 0x00002000  0000_4006    EC00_0000        IRQ2
+16         21         0x14       H 0x00001000  0000_6006    EC00_0000        IRQ3
+17         22         0x15       H 0x00000800  0000_7006    EC00_0000        IRQ4
+18         23         0x16       H 0x00000400  0000_7806    EC00_0000        IRQ5
+19  unused
+20         35         0x28       L 0x00800000  0000_7C06    EC00_0000        SCC1
+21         36         0x29       L 0x00400000  0000_7C06    EC80_0000        SCC2
+22         37         0x2A       L 0x00200000  0000_7C06    ECC0_0000        SCC3
+23         38         0x2B       L 0x00100000  0000_7C06    ECE0_0000        SCC4
+24  inactive
+25  inactive
+26  inactive
+27  inactive
+28  unused
+29         40         0x30       H 0x00010000  0000_7C06    ECF0_0000        PC15
+30         12         0x0C       L 0x00000010  0001_7C06    ECF0_0000        Timer 1
+31         41         0x31       H 0x00020000  0001_7C06    ECF0_0010        PC14
+32  unused
+33         42         0x32       H 0x00040000  0003_7C06    ECF0_0010        PC13
+34         10         0x0A       L 0x00000040  0007_7C06    ECF0_0010        SDMA Bus Error
+35         6          0x06       L 0x00000400  0007_7C06    ECF0_0050        IDMA1
+36  unused
+37         43         0x33       H 0x00080000  0007_7C06    ECF0_0450        PC12
+38         44         0x34       H 0x00100000  000F_7C06    ECF0_0450        PC11
+39         7          0x07       L 0x00000200  001F_7C06    ECF0_0450        IDMA2
+40         13         0x0D       L 0x00000008  001F_7C06    ECF0_0650        Timer 2
+41         45         0x35       H 0x00200000  001F_7C06    ECF0_0658        PC10
+42  unused
+43  unused
+44         3          0x03       L 0x00002000  003F_7C06    ECF0_0658        RISC Timer Table
+45         1          0x01       L 0x00008000  003F_7C06    ECF0_2658        I2C
+46  unused
+47         46         0x36       H 0x00400000  003F_7C06    ECF0_A658        PC9
+48         47         0x37       H 0x00800000  007F_7C06    ECF0_A658        PC8
+49         24         0x18       H 0x00000200  00FF_7C06    ECF0_A658        IRQ6
+50         8          0x08       L 0x00000100  00FF_7E06    ECF0_A658        IDMA3
+51         25         0x19       H 0x00000100  00FF_7E06    ECF0_A758        IRQ7
+52         14         0x0E       L 0x00000004  00FF_7F06    ECF0_A758        Timer 3
+53  unused
+54  unused
+55         48         0x38       H 0x01000000  00FF_7F06    ECF0_A75C        PC7
+56         49         0x39       H 0x02000000  01FF_7F06    ECF0_A75C        PC6
+57         50         0x3A       H 0x04000000  03FF_7F06    ECF0_A75C        PC5
+58         15         0x0F       L 0x00000002  07FF_7F06    ECF0_A75C        Timer 4
+59  unused
+60         51         0x3B       H 0x08000000  07FF_7F06    ECF0_A75E        PC4
+61  unused
+62         9          0x09       L 0x00000080  0FFF_7F06    ECF0_A75E        IDMA4
+63         2          0x02       L 0x00004000  0FFF_7F06    ECF0_A7DE        SPI
+64         52         0x3C       H 0x10000000  0FFF_7F06    ECF0_E7DE        PC3
+65         53         0x3D       H 0x20000000  1FFF_7F06    ECF0_E7DE        PC2
+66         4          0x04       L 0x00001000  3FFF_7F06    ECF0_E7DE        SMC1
+67  unused
+68         5          0x05       L 0x00000800  3FFF_7F06    ECF0_F7DE        SMC2
+69         54         0x3E       H 0x40000000  3FFF_7F06    ECF0_FFDE        PC1
+70         55         0x3F       H 0x80000000  7FFF_7F06    ECF0_FFDE        PC0
+71  unused
+72  unused
+73  reserved
+-----------------------------------------------------------------------------------------------
+LOWEST PRIORITY
+-----------------------------------------------------------------------------------------------
+\ce
+
+\sh Power Management
+The PPC architecture includes a decrementer timer (DEC) that was used as the
+system tick timer in previous timer implementations.  This timer is a 32 bit
+countdown timer that generates an interrupt whenever it underruns.  There is no
+hardware mechanism available to reload the timer.  In order to use this timer
+to generate periodic interrupts at rates other than the natural underflow rate
+of the 32 bit timer, software must reload the timer count value at each
+interrupt.  To prevent drift caused by this reload mechanism, considerable
+overhead must be added to the routine.  This can lead to negative performance
+impacts.
+
+The PowerQuiccII architecture adds four additional 16 bit timers to the basic
+DEC timer.  These timers can be chained in pairs to implement 32 bit timers.
+In order to avoid weaknesses in the DEC timer, these timers are used as the
+system and auxiliary timers.  The DEC timer is used as the timestamp timer.
+
+The DEC interrupt is tied to the external interrupt signal in the PPC.  It
+is not possible to disable this interrupt, nor is it possible to stop or slow
+the DEC timer.  If the timestamp timer is not used, the DEC timer value is
+reloaded with a maximum timeout value.
+
+If the timestamp timer is configured, the macro DEC_CLOCK_FREQ, the frequency
+of the decrementer input clock, must be defined. The macro DEC_CLK_TO_INC,
+the ratio between the number of decrementer input clock cycles and one
+counter increment, may be redefined in sysLib.c.
+
+Power management support allows the core to sleep for periods of up to 23
+seconds.  The maximum sleep period is limited by the DEC timer and overflow
+period of the PowerQuiccII timers. Power management turns the processor
+clock off when the system is otherwise idle, but keeps the system timer
+interrupt clock running.  The system goes into a low power "sleep" mode
+until an interrupt wakes the system up.  Power management reschedules the
+system timer based on the time to the next scheduled system event.  When
+the system wakes up, it recomputes system time and adjusts the tick count.
+
+Power management is enabled in config.h by defining
+INCLUDE_POWER_MGMT_CPU_BSP_SUPPORT.
+
+SPECIAL CONSIDERATIONS
+This section describes miscellaneous information that the user needs
+to know about the BSP.
+
+\sh Cache coherency between the 603 core and the CPM
+The MPC82xx does not maintain cache coherency between the 603 core and the
+CPM.  As a result, all the data that is transferred from the 603 to the CPM
+an vice versa should be placed in non-cacheable memory. For example, the FCC
+and SCC buffers and buffer descriptors should be allocated using
+cacheDmaMalloc(). In this BSP, they are located inside the CPM DPRAM.
+This means only the buffers are on the 60x bus and they are non-cacheable.
+
+\sh Force Default Boot Line Option
+If the FORCE_DEFAULT_BOOT_LINE is defined in config.h, then the
+DEFAULT_BOOT_LINE parameters are used as boot parameters regardless
+of the NVRAM values previously specified.  Recall that boot parameters
+are stored in the NVRAM device so boot parameters are not lost
+during a power cycle.
+
+Defining FORCE_DEFAULT_BOOT_LINE is useful for debugging
+emulator downloaded RAM-based VxWorks images.  It is considered a
+DEBUG option, so it should be #undef'ed for the final image.
+
+Normally the boot parameters are specified at the bootrom prompt and
+stored in NVRAM.  When a downloaded image executes, the boot parameters
+are retrieved from the NVRAM device.
+
+This can sometimes cause undesired results.  For example, if the NVRAM
+has been  previously initialized, then changing the DEFAULT_BOOT_LINE
+in the config.h does not result in the new settings being used. The
+reason is the initialization code always takes the boot parameters
+from the NVRAM device.  If there are valid values in the NVRAM device,
+these boot parameters are used.
+
+If you intend to debug an image by downloading with Wind River tools
+and plan on changing the DEFAULT_BOOT_LINE parameters a number of times,
+it might be convenient to define this FORCE_DEFAULT_BOOT_LINE parameter.
+
+As a note, an uninitialized NVRAM device is initialized automatically with
+the DEFAULT_BOOT_LINE parameters specified in the config.h file.
+
+As an alternate solution for the above scenario, the boot parameters can
+be changed via the bootrom. This stores the values in NVRAM and
+subsequentially used by the download image.  This would require
+a valid bootrom and would require the target board to run via the bootroms
+to set the values and then halted to download the image to be debugged via
+Wind River tools.
+
+
+\sh Known Issues
+
+
+
+Ethernet Ports
+
+When an FCC port is initialized and there is no active connection to it, the
+message "(tRootTask): miiPhyInit check cable connection" is printed on
+the console.  To prevent this message from appearing for unused FCC ports,
+perform one of the following steps:
+- make an active connection to the port (two unused FCC ports may be connected
+to each other using a crossover/null modem cable);
+- in configNet.h, set the 'initialized' flag for unused FCC ports to TRUE
+(from the default FALSE value) in the endDevTbl[] array and rebuild; or
+- in configNet.h, remove the unused FCC ports from the endDevTbl[] array and
+rebuild.
+
+
+Autonegotiation support is limited to FCC port initialization.  The software
+does not reliably detect changes in the communication speed after that.  The
+reasons for this are the lack of PHY interrupt support in the hardware and
+the lack of software support in the MII libraries.
+
+Booting from SIMM Flash
+
+The SBCPowerQUICCII supports booting from SIMM Flash if ECO-00661 has been
+performed on the board.
+Wind River SPR #91073 contains details about this issue.
+
+
+BIBLIOGRAPHY
+
+\tb Wind River SBCPowerQUICCII Engineering Reference Guide
+
+\tb MPC8260 PowerQUICC II User's Manual, MPC8260UM/D
+
+\tb PCI Bridge Functional Specification, MPC8265AUMAD/D
+
+\tb MPC8280 PowerQUICC II Specification, MPC8280UMAD/D
+
+\tb PowerPC Microprocessor Family: The Programming Environments for 32-bit Microprocessors, MPCFPE32B/AD
+
+\tb MPC603e & EC603e RISC Microprocessors User's Manual, MPC603EUM/AD
+
+\tb OKI Semiconductor MSM82C59A-2RS/GS/JS Programmable Interrupt Controller, FEDL82C59A-2-03
+
+\tb STMicroelectronics M48T59,M48T59Y,M48T59V 64Kbit (8 Kbit x 8) TIMEKEEPER SRAM Datasheet, April 2003 Rev. 4.0

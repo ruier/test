@@ -1,0 +1,3 @@
+#ifdef INCLUDE_MCF5475_PCI
+    mcf5475PciRegister();
+#endif /* INCLUDE_MCF5475_PCI */

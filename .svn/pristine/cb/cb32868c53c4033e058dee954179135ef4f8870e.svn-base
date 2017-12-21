@@ -1,0 +1,3 @@
+#ifdef INCLUDE_RMI_MDIO
+#include "../src/hwif/h/mii/vxbRmiMdio.h"
+#endif /* INCLUDE_RMI_MDIO */

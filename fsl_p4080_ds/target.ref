@@ -1,0 +1,1761 @@
+\" target.ref - Freescale QorIQ P4080 DS/Simics target specific documentation
+\"
+\" Copyright (c) 2008-2013 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 02h,11jan13,ylu  Update documentation to support Rev 3 silicon.
+\" 02g,06jun12,mpc  added descripton for remapping of the Ethernet ports. 
+\"                  (WIND00351704)
+\" 02f,25may12,mpc  added description for Freescale A-004529. (WIND00350649)
+\" 02e,17apr12,c_l  Add BSP bootloaders and bootroms description. 
+\"                  (WIND00306910)
+\" 02d,27mar12,h_k  removed SYSTEM_GLOBALS and RESERVED_ATOMICS. (WIND00341977) 
+\" 02c,15feb12,wqi  Correct the information and address table for 
+\"                  flashing bootrom. (WIND00291527)
+\" 02b,30jan12,agf  Replace SYSTEM_GLOBALS with RESERVED_ATOMICS
+\" 02a,05jan12,d_c  Fix defect WIND00240390. Add missing configuration
+\"                  defines for 8 DTSEC configuration.
+\" 01z,08oct11,ers  Fixed wrload description for romInit changes.
+\" 01y,08aug11,ers  Replaced DYNAMIC_WRLOAD with generic wrload support.
+\" 01x,27jan11,kxb  Limited UBOOT support for booting vxWorks images
+\" 01w,26jan11,kxb  remove obsolete TFFS component
+\"		    Rev A board / Rev 1 silicon no longer supported
+\" 01v,13jan11,agf  Add QMAN & BMAN private buffer space to memory map,
+\"                  add discussion to special consideration section
+\" 01u,05jan11,pgh  Document CPUn_SPACE_BASE_ADRS macro
+\" 01t,07sep10,kab  SRIO is not supported
+\" 01s,22jun10,pmr  Update to reflect Rev 2 silicon as default
+\" 01r,20may10,pmr  Updates for Simics, AMP
+\" 01q,19may10,wap  Document SERDES/FMAN swap in later boards
+\" 01p,02apr10,pmr  Update DPAA and TGEC documentation
+\" 01o,16feb10,pmr  SMP M-N updates
+\" 01n,25jan10,wap  Add pointers to documentation and demo code
+\" 01m,11jan10,wap  Add additional network configuration documentation
+\" 01l,30nov09,rab  Add TFFS, DMA, SPI, documentation
+\" 01k,19nov09,pmr  36-bit documentation
+\" 01j,13nov09,pmr  BSP name change
+\" 01i,22oct09,pmr  updated documentation for Linux
+\" 01h,01oct09,wap  Document PCIe support
+\" 01g,16sep09,pmr  Updated documentation for DS board
+\" 01f,27aug09,pmr  Updated documentation for Simics 4.2
+\" 01e,05jan08,pmr  Updated documentation
+\" 01d,05nov08,pmr  Updates for Simics 4.0
+\" 01c,10sep08,pmr  BSP name change.
+\" 01b,08sep08,pmr  Updates for floating point and AMP
+\" 01a,28apr08,pmr  Created from ads8572/01a
+\"
+\"
+\TITLE fsl_p4080_ds - Freescale QorIQ P4080 DS/Simics
+
+NAME
+`Freescale QorIQ P4080 DS/Simics'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks for the fsl_p4080_ds BSP.  Please read the section "RUNNING VXWORKS" 
+in order to configure the board to run vxWorks.
+
+This BSP supports two types of target boards:
+\ts
+Supported SOC board    | Supported silicon Version   |  Number of Cores
+----------------------------------------------------------------------
+FSL_P4080_DS REV B     | P4080 Rev 2                 |  8
+FSL_P4080_DS REV F     | P4080 Rev 3                 |  8
+\te
+
+RUNNING VXWORKS
+This section provides guidelines for running VxWorks on the P4080DS target
+board.  This BSP has been tested in the following configurations:
+
+\is
+\i VxWorks boot loader running out of flash, loading VxWorks UP, AMP, or SMP
+\i VxWorks (UP build only) loaded onto the target via CodeWarrior and USB Tap
+\i VxWorks (UP build only) loaded in an AMP configuration from Wind River Linux
+\i VxWorks (UP build only) loaded onto the target via UBOOT SDK 2.0-rc1 (no other UBOOT version is supported)
+\ie
+
+For Rev 2.0 silicon, booting a vxWorks image directly from any version of UBOOT other than 
+SDK 2.0-rc1 is not supported; all versions of UBOOT may be used to flash 
+a vxWorks image into the alternate flash bank. For Rev 3.0 silicon, the version of UBOOT 
+is SDK V1.3-20121114.
+
+Note that the only way to boot SMP or AMP configurations is to program flash with
+VxWorks boot loader.
+
+\sh Notes on the above configurations
+This BSP is flexible and supports a wide range of configurations.
+However, there are two macros in config.h which must be set properly to
+ensure proper operation.
+
+\is
+\i If the BSP will be booted on Simics using the p4080-simple model, you *must*
+   #define SIMICS in config.h (no longer recommended - use p4080ds model).  
+   If using the p4080ds model, this is not necessary.  The p4080ds model is 
+   compatible with the hardware.
+\i If the BSP will be booted from the VxWorks bootrom, then you *must not*
+   define UBOOT.
+\i If the BSP will be booted using CodeWarrior and USB Tap, then the safest
+   configuration to use is #define UBOOT, though it is not absolutely
+   necessary.
+\ie
+
+Failure to define the correct macro for your configuration will result in
+failure to boot.
+
+\sh Creating a bootrom.bin:
+
+    a) Launch VxWorks Development Shell, go to the BSP directory
+        "$(WIND_BASE)/target/config/fsl_p4080_ds".
+
+    b) Type "make bootrom.bin" or "make bootrom_uncmp.bin", and press ENTER.
+
+    c) Once the make process finish successfully, you will find
+        the file "bootrom.bin" in the BSP directory
+        "$(WIND_BASE)/target/config/fsl_p4080_ds".
+
+\sh Programming the bootrom with U-Boot
+This section describes how to use U-Boot to program the VxWorks bootrom
+into flash.
+
+	For Rev 2.0 silicon, the version of U-Boot used for these instructions 
+        was:U-Boot SDK 2.0-rc1 (also verified with SDK 2.2; any version of
+        U-Boot should be able to flash VxWorks bootroms, although some 
+	commands/parameters may	vary with a specific version).
+
+        For Rev 3.0 silicon, the version of U-Boot used for these instructions 
+        was:U-Boot SDK V1.3-20121114.(no other UBOOT version is supported).
+
+	The P4080DS reference board is shipped with two copies of
+	U-Boot and an eDINK testing utility in flash. The copy of
+	U-Boot in bank 0 is considered the 'golden' or master copy,
+	which should be preserved. The second copy of U-Boot in bank
+	4 is usually identical to the golden copy. This copy can be
+        upgraded using the golden copy from bank 0. The eDINK utility
+	is in bank 1. The U-Boot images and the eDINK image also each
+        have corresponding copies of the reset control word (RCW) stored
+	in flash with them.
+
+	The factory-programmed U-Boot boot loader is capable of downloading a
+	Boot ROM image using its tftp client and programming it in an
+	alternate flash bank. SW7[1:8] are used to switch between flash 
+	banks. Set baud rate to 115200 for u-boot. A tftp server is required. 
+	In the following instructions, the tftp server IP address is 
+	128.224.146.96
+
+	The following instructions assume that the bootrom will be flashed
+	while running the U-Boot image from flash bank 4. 
+
+
+SW7 | (1-4) | lbmap[0:3] | Static
+       5    | spare6     |  --
+       6    | spare7     |  --
+       7    | spare8     |  --
+       8    | rstreq_en  | Static
+
+       The "lbmap" is used to rearrange the internal addresses of NOR Flash devices, 
+       based on user configuration options. Simplistically, no matter what state the 
+       switches are in,the end-user toggling the switch results in toggling the 
+       halves or quarters of the NOR Flash and toggling the CS lines of the NAND Flash. 
+       If different program images are stored therein, upon reset, different startup code 
+       is executed. NAND Flash is not currently supported on the system board.
+
+\ts
+SW7 (1:8) | E8 | E9 | EA | EB | EC | ED | EE | EF  <- flash adrs[0:7]
+----------+----+----+----+----+----+----+----+-----------------------
+ 00001111 |  7 |  6 |  5 |  4 |  3 |  2 |  1 |  0   (U-Boot bank 0)
+ 00011111 |  6 |  7 |  4 |  5 |  2 |  3 |  0 |  1   (eDINK bank 1)
+ 00101111 |  5 |  4 |  7 |  6 |  1 |  0 |  3 |  2
+ 00111111 |  4 |  5 |  6 |  7 |  0 |  1 |  2 |  3
+ 01001111 |  3 |  2 |  1 |  0 |  7 |  6 |  5 |  4   (U-Boot bank 4)
+ 01011111 |  2 |  3 |  0 |  1 |  6 |  7 |  4 |  5   (VxWorks bank 5)
+ 01101111 |  1 |  0 |  3 |  2 |  5 |  4 |  7 |  6
+ 01111111 |  0 |  1 |  2 |  3 |  4 |  5 |  6 |  7
+\te
+
+	The location of the Reset Control Word (RCW) for bank i is (7-i).
+	For example, if U-Boot is in bank 0, SW7[1:8] will be 00001111. 
+	The location of the Reset Control Word (RCW) is bank 7. If U-Boot 
+	is in bank 4, SW7[1:8] will be 01001111. The location of the 
+	Reset Control Word (RCW) is bank 3.  
+
+	The following instructions describe how to load a VxWorks bootrom
+	into flash bank 5, using the U-Boot from bank 4. Flash bank 5 is
+	otherwise unused, so this will preserve both U-Boot images and the
+	eDINK image as shipped with the board by Freescale, allowing them
+	all to co-exist.
+
+	Note that with the bootrom in bank 5, switching between U-Boot and
+        VxWorks only requires toggling switch 4 on SW7. This is recommended
+	since it minimizes the work needed to swap between operating systems.
+       
+	The following instructions describes all the steps that must be
+	be performed to flash a bootrom. You are only required to type in
+	the line following the "=>" UBOOT prompt.
+
+	a) start with the target powered off
+
+	b) set SW7[1:8] to 01001111 to select U-Boot from bank 4
+
+	c) power on the target, U-Boot should load
+
+	d) press a key to stop the countdown
+
+	e) set the target ip address.
+   
+	   => setenv ipaddr 128.224.147.196
+   
+	f) set the tftp server ip address
+   
+	   => setenv serverip 128.224.146.96
+   
+	   Note: Additional environment changes may be required for
+	   your network, particularly the gateway IP address and netmask.
+   
+	g) save the environment.
+   
+	   => saveenv
+
+        h) copy the reset control word (RCW) from U-boot bank 4 to
+	   bank 5:
+
+	   => protect off e9000000 +120
+	   => erase e9000000 +120
+	   => cp.b e8000000 e9000000 120
+	   => protect on e9000000 +120
+	   => cmp.b e8000000 e9000000 120
+
+           Note: this step only needs to be done once, when the bootrom
+	   is loaded onto a new board for the first time. If the bootrom is
+	   upgraded later, the existing copy of the RCW can be retained.
+
+	i) get the bootrom image from the tftp server and store
+	   it in RAM at address 0x1000000.
+   
+	   => tftp 1000000 bootrom_uncmp.bin
+   
+	j) erase the alternate flash bank.
+
+  	   => protect off eef00000 +100000 
+	   => erase eef00000 +100000
+   
+	k) program the flash at location 0xeef00000 for 0x100000 bytes.
+	   Note that the number of bytes to program will depend on the image
+	   size. The actual number of bytes in the image is available in the
+	   output of step 'i' above after 'Bytes transfered'. It will be 1MB by 
+           default unless you change the ROM_SIZE to create a larger image.
+   
+	   => cp.b 1000000 eef00000 100000
+	   => protect on eef00000 +100000
+	   => cmp.b 1000000 eef00000 100000
+   
+	   At this point, the Boot ROM image is programmed and is ready
+	   to be used once these additional steps are complete.
+   
+	l) Power off the target.
+   
+	m) Set SW7[1:8] to 01011111 to select bank 5 as the boot bank
+   
+	n) Power the target back on. After a few seconds, the VxWorks bootrom
+	   banner should appear
+
+	o) If this is the first time a VxWorks bootrom has been loaded onto this
+	   board, use the 'M' command from the [VxWorks Boot]: prompt to set the
+	   MAC addresses for all of the network ports. These will be stored in
+	   flash.
+	   
+	If it is desired to use bank 2 for the VxWorks bootrom, replace the 
+	'EEF00000' with 'E9F00000' for bits 0:7 in steps j) and k). The RCW will 
+	go into bank 5, so replace the 'E9000000' whit 'EE000000' in step h).  
+	Select bank 2 for booting by setting SW7[1:8] to 00101111 in step m).	   
+
+RUNNING VXWORKS ON SIMICS
+This section provides guidelines for running VxWorks on the P4080
+Simics model.  This BSP has been tested with the following versions of
+Simics and the P4080 model:
+
+\is
+\i Simics 4.4.15, P4080 (package 2067) 4.2.pre8
+\i Simics 4.2.36, P4080 (package 2067) 4.2.pre43
+\i Simics 4.2.16, P4080 (package 2067) 4.2.pre17
+\i Simics 4.0.47, P4080 (package 2067) 4.0.pre36
+\ie
+
+Intermediate versions may be supported as well.  
+
+NOTE: The MPC8578-Beta model (package 2059) is no longer supported.
+NOTE: The P4080-R1 model (package 2068) is no longer supported.
+
+\sh Building for Simics
+This BSP is now configured by default to run on the P4080DS hardware board.
+The p4080ds model now included with Simics package 2067 is compatible with
+the hardware, and no modification is required to the BSP to run on this model.
+
+To configure this BSP for use with the older p4080-simple Simics model, you
+need to #define SIMICS in config.h.  Otherwise all special configuration needed
+for Simics is already done in the BSP.  Care must be taken in modifying this
+configuration as some components, are not supported in the p4080-simple model.
+
+A set of scripts for initializing the Simics model and loading images is 
+available from Wind River.  These scripts reference particular locations in the
+user's installation where bootrom_uncmp.bin, vxWorks, u-boot, and wrLinux
+images must be placed in order to be loaded.  
+
+\sh BOOT DEVICES
+The supported boot devices are:
+\is
+\i dtsec - 10/100/1000 Triple Speed Ethernet Controller
+\i motetsec - 10/100/1000 Triple Speed Ethernet Controller (Simics only)
+\ie
+
+FEATURES
+This section describes the supported and unsupported features of the 
+fsl_p4080_ds.
+
+The P4080 development system (DS) is a high-performance computing, evaluation, 
+and development platform supporting the P4080 Power Architecture processor.
+
+The P4080 processor is based upon the e500mc core, built on Power Architecture
+technology, offering speeds of 1200-1500MHz. It has a three-level cache hierarchy 
+with 32 KB of instruction and data cache per core,128 KB of unified backside L2 
+cache per core and 2 MB of shared frontside CoreNet platform 
+cache that fronts the memory controller. The processor's I/O includes 18 SerDes lanes 
+running at up to 5 GHz, multiplexed across three PCI Express Gen2 controllers, two   
+10 GE XAUI interface, eight 1 GE SGMII interfaces, two Serial RapidIO 1.2 interfaces 
+running at up to 3.125 GHz, and the high-speed Aurora debug interface. It has a dual 
+64-bit (72-bit with ECC) DDR2 and DDR3 DRAM interfaces running at up to 1333 MHz. 
+It includes two USB 2.0 interfaces (with ULPI interface to external PHY), two DUARTs, an 
+SD/MMC interface, four I2C, and SPI. It also includes the accelerator blocks collectively 
+known as Data Path Acceleration Architecture (DPAA) that offload various tasks from the core, 
+including routine packet handling, security algorithm calculation and pattern matching. 
+
+The FSL_P4080_DS board is configured to support the following I/O interfaces by default:
+
+    . Two x2 PCIe slots
+    . one UART1
+    . one USB host port
+    . one RGMII 10/100/1000 DTSEC ethernet ports (dtsec4)
+    . four SGMII 10/100/1000 DTSEC ethernet ports(dtsec0-3)
+    . one XAUI 10 gigabit TGEC port(tgec1) 
+
+It documents all configurations of the board and the interaction between
+features and configuration items.
+
+\sh Supported Features
+
+Only the Rev B , Rev F board is supported as of 6.9.  The Rev A code remains 
+in place, but the hardware is no longer supported. Rev F board's processor version is Rev 3,
+Rev B board's processor version is Rev 2. Rev 1 silicon is no longer supported.
+
+\sh List of Hardware Features (Freescale P4080 Rev B board)
+
+\ts
+Hardware Interface | Controller | Driver/Component    | Status
+--------------------------------------------------------------
+UART:0             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+UART:1             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+DDR2/3(2GB)        | INNODISK   | M3CN-2GHFHC09-D92   | SUPPORTED
+1GB-ETHERNET:0     | SGMII riser| vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:1     | SGMII riser| vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:2     | SGMII riser| vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:3     | SGMII riser| vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:4     | on-chip    | vxbDtsecEnd.c       | SUPPORTED
+10GB-ETHERNET:1    | XAUI Card  | vxbTgecEnd.c        | SUPPORTED
+NOR-FLASH          | S29GL01G   | 'flashMem.c'        | SUPPORTED
+TIMER              | on-chip    | vxbM85xxTimer.c     | SUPPORTED
+PCI-E-HOST:0       | on-chip    | vxbQorIQPciEx.c     | SUPPORTED
+PCI-E-HOST:1       | on-chip    | vxbQorIQPciEx.c     | SUPPORTED
+PCI-E-HOST:2       | on-chip    | vxbQorIQPciEx.c     | SUPPORTED
+DMA:0              | on-chip    | DRV_DMA_FSL         | SUPPORTED
+DMA:1              | on-chip    | DRV_DMA_FSL         | SUPPORTED
+SPI-FLASH          | S25FL128P  | sysSpiFlash.c       | SUPPORTED
+USB-HOST:0         | on-chip    | INCLUDE_USB         | SUPPORTED
+SATA               | SATA Card  | DRV_STORAGE_SI31XX  | UNSUPPORTED
+SD-CARD            | on-chip    | DRV_STORAGE_SDHC    | UNSUPPORTED
+SRIO               | on-chip    | -                   | UNSUPPORTED
+Pattern Matcher    | on-chip    | -                   | UNSUPPORTED  
+Security Engine    | on-chip    | -                   | UNVALIDATED
+Performance Monitor| on-chip    | -                   | UNSUPPORTED
+\te
+
+\sh List of Hardware Features (Freescale P4080DS Rev F board)
+
+\ts
+Hardware Interface | Controller | Driver/Component    | Status
+--------------------------------------------------------------
+UART:0             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+UART:1             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+DDR2/3(2GB)          | INNODISK | M3CN-2GHFHC09-D92   | SUPPORTED
+1GB-ETHERNET:0     | SGMII riser| vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:1     | SGMII riser| vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:2     | SGMII riser| vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:3     | SGMII riser| vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:4     | on-chip    | vxbDtsecEnd.c       | SUPPORTED
+10GB-ETHERNET:1    | XAUI Card  | vxbTgecEnd.c        | SUPPORTED
+NOR-FLASH          | S29GL01G   | 'flashMem.c'        | SUPPORTED
+TIMER              | on-chip    | vxbM85xxTimer.c     | SUPPORTED
+PCI-E-HOST:0       | on-chip    | vxbQorIQPciEx.c     | SUPPORTED
+PCI-E-HOST:1       | on-chip    | vxbQorIQPciEx.c     | SUPPORTED
+PCI-E-HOST:2       | on-chip    | vxbQorIQPciEx.c     | SUPPORTED
+DMA:0              | on-chip    | DRV_DMA_FSL         | SUPPORTED
+DMA:1              | on-chip    | DRV_DMA_FSL         | SUPPORTED
+SPI-FLASH          | S25FL128P  | sysSpiFlash.c       | SUPPORTED
+USB-HOST:0         | on-chip    | INCLUDE_USB         | SUPPORTED
+SATA               | SATA Card  | DRV_STORAGE_SI31XX  | SUPPORTED
+SD-CARD            | on-chip    | DRV_STORAGE_SDHC    | SUPPORTED
+SRIO               | on-chip    | -                   | UNSUPPORTED
+Pattern Matcher    | on-chip    | -                   | UNSUPPORTED  
+Security Engine    | on-chip    | -                   | UNVALIDATED
+Performance Monitor| on-chip    | -                   | UNSUPPORTED
+\te
+
+HARDWARE DETAILS
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Verified Hardware
+This BSP has been verified on a P4080DS rev3.0 with default clock settings.
+Note The default clock speed for P4080DS is 1.5GHz for core0 and core1..core7, 
+800MHz for CCB. 
+
+\sh Memory Maps
+The default hardware memory map of this BSP is as follows:
+
+\ts
+Start       | Size  | End         | Access to
+---------------------------------------------
+0x0000_0000 |  2GB  | 0x7FFF_FFFF | DDR3 SDRAM
+0x3FD0_0000 |  2MB  | 0x3FF0_0000 | 2MB reserved memory for QMAN hardware
+0x3FF0_0000 |  1MB  | 0x3FFF_FFFF | 1MB reserved memory for BMAN hardware
+0x8000_0000 |  64MB | 0x83FF_FFFF | PCIe 1 Prefetchable Memory
+0x8400_0000 |  64MB | 0x87FF_FFFF | PCIe 1 Non-Prefetchable Memory
+0x8800_0000 |  64MB | 0x8BFF_FFFF | PCIe 1 IO
+0x8C00_0000 |  64MB | 0x8FFF_FFFF | PCIe 1 IO32
+0xA000_0000 |  64MB | 0xA3FF_FFFF | PCIe 2 Prefetchable Memory
+0xA400_0000 |  64MB | 0xA7FF_FFFF | PCIe 2 Non-Prefetchable Memory
+0xA800_0000 |  64MB | 0xABFF_FFFF | PCIe 2 IO
+0xAC00_0000 |  64MB | 0xAFFF_FFFF | PCIe 2 IO32
+0xC000_0000 |  64MB | 0xC3FF_FFFF | PCIe 3 Prefetchable Memory
+0xC400_0000 |  64MB | 0xC7FF_FFFF | PCIe 3 Non-Prefetchable Memory
+0xC800_0000 |  64MB | 0xCBFF_FFFF | PCIe 3 IO
+0xCC00_0000 |  64MB | 0xCFFF_FFFF | PCIe 3 IO32
+0xF400_0000 |   2MB | 0xF41F_FFFF | BMAN LAW
+0xF420_0000 |   2MB | 0xF43F_FFFF | QMAN
+0xFE00_0000 |  16MB | 0xFEFF_FFFF | CCSBAR
+0xFF00_0000 |  16MB | 0xFFFF_FFFF | NOR FLASH
+\te
+
+The default software memory map of the fsl_p4080_ds BSP is as follows:
+
+\ts
+Start Addr  | End Addr    | Used for
+---------------------------------------------
+0x0000_0000 | 0x000F_FFFF | PHYS_MEM_START
+0x0000_0000 | 0x3FFF_FFFF | (core 0) LOCAL_MEM_LOCAL_ADRS
+0x0000_0100 | 0x0000_3500 | Vectors (3500 - Performance Mon)
+0x0000_4100 | 0x0000_41FF | SM_ANCHOR
+0x0000_4200 | 0x0000_42FF | BOOT_LINE
+0x0000_4300 | 0x0000_43FF | EXC_MSG
+0x0001_0000 | 0x0007_FFFF | SM_MEM_ADRS
+0x0008_0000 | 0x000C_0000 | SM_OBJ_MEM_ADR
+0x000C_0000 | 0x000D_FFFF | SM_TIPC_ADRS_DEFAULT
+0x000E_0000 | 0x000E_0014 | CPUn_SPACE(7) (if _WRS_CONFIG_SMP)
+0x000E_F400 | 0x000E_F414 | CPUn_SPACE(3) (if _WRS_CONFIG_SMP)
+0x000F_F800 | 0x000E_F814 | CPUn_SPACE(2) (if _WRS_CONFIG_SMP)
+0x000F_FC00 | 0x000E_FC14 | CPUn_SPACE(1) (if _WRS_CONFIG_SMP)
+0x0010_0000 | 0x000F_0014 | CPUn_SPACE(0)
+0x000F_0000 | 0x000F_FFFF | root stack (core 0)
+0x0010_0000 | 0x1000_0000 | core 0 image/heap
+0x1000_0000 | 0x100F_FFFF | root stack (core 1)
+0x1001_0000 | 0x1200_0000 | core 1 image/heap (RAM_LOW_ADRS)
+0x1c01_0000 | 0x1E00_0000 | core 7 image and heap space
+0x2000_0000 | 0x2100_0000 | VIRTUAL_SM_BASE_PHYS
+0x2000_4400 | 0x4000_44FF | TM_ANCHOR_ADRS
+0x2001_0000 | 0x2009_0000 | MIPC_SM_SYSTEM_POOL_BASE_PHYS
+0x3FD0_0000 | 0x3FEF_FFFF | QMAN_MEM_BASE
+0x3FF0_0000 | 0x3FFF_FFFF | BMAN_MEM_BASE
+------------|-------------|-----------------
+0x8000_0000 | 0x8FFF_FFFF | PCIEX1_LAW_BASE
+0xA000_0000 | 0xAFFF_FFFF | PCIEX2_LAW_BASE
+0xC000_0000 | 0xCFFF_FFFF | PCIEX3_LAW_BASE
+0xFE00_0000 | 0xFEFF_FFFF | CCSBAR
+0xEFDF_0000 | 0xEFDF_0FFF | PIXIS_BASE
+0xF400_0000 | 0xF41F_FFFF | BMAN_LAW_BASE
+0xF420_0000 | 0xF43F_FFFF | QMAN_LAW_BASE
+0xFD00_0000 | 0xFD3F_FFFF | DCSR_LAW_BASE
+0xFF00_0000 | 0xFFFF_FFFF | FLASH_BASE_ADRS
+0xFFFF_FFFC |             | Reset vector (only 1, 4-K page valid).
+\te
+
+\sh Devices
+
+The chip drivers included are:
+
+	vxbM85xxTimer.c - Timer driver.
+	vxbEpicIntCtlr.c - On-chip interrupt controller.
+	etsecVxbEnd.c - TSEC ethernet controller. (Simics only)
+	vxbQorIQBman.c - BMAN driver
+	vxbQorIQBmanPortal.c - BMAN portal support
+	vxbQorIQQman.c - QMAN driver
+	vxbQorIQQmanPortal.c - QMAN portal support
+	vxbQorIQFman.c - FMAN driver
+	vxbDtsecEnd.c - DTSEC ethernet controller. 
+	vxbTgecEnd.c -  TGEC  ethernet controller.
+        ns16550Sio.c - Serial driver.
+	sysCache.c - L2/L3 cache library.
+	vxbQorIQPciEx.c - PCI bus controller driver.
+
+The following table describes the default VxWorks macros that are used 
+to address memory
+\ts
+
+Macro Name | Macro Definition | Description
+------------------------------
+LOCAL_MEM_LOCAL_ADRS | 0x0000_0000 | base of RAM
+CPUn_SPACE_BASE_ADRS | 0x0100_0000 | Used by core 0 to communicate with cores 1 - 7.  
+The address space is indexed down from the defined value to address 0x0009_0000.  
+Each CPU has 0x0001_0000 bytes of memory reserved for it.
+RAM_LOW_ADRS   | LOCAL_MEM_LOCAL_ADRS + 0x0010_0000 | VxWorks image point and stack \ 
+                                                      grows down from this address.
+RAM_HIGH_ADRS  | LOCAL_MEM_LOCAL_ADRS + 0x0100_0000 | VxWorks boot ROM loaded here.
+LOCAL_MEM_SIZE | 0x2000_0000 | default is 512MB of RAM
+QMAN_MEM_BASE  | 0x3fd0_0000 | 2MB reserved memory for QMAN hardware
+BMAN_MEM_BASE  | 0x3ff0_0000 | 1MB reserved memory for BMAN hardware
+ROM_BASE_ADRS  | 0xFFF0_0000 | base address of ROM
+ROM_TEXT_ADRS  | ROM_BASE_ADRS + 0x100 | text must start after vector table 
+ROM_WARM_ADRS  | ROM_TEXT_ADRS + 4 | warm Reboot Entry Address
+ROM_SIZE | 0x0010_0000 | default 1 MB of ROM
+\te
+
+\sh Boot Process
+
+Upon reset, the e500mc begins executing from 0xFFFF_FFFC. Only the last 
+4 KB of memory is mapped by the TLB. The instruction at 0xFFFF_FFFC branches 
+to resetEntry( ) (which is located at the last 2 KB of memory) to begin 
+initialization and mapping of memory static TLB entries. The DDR SDRAM is 
+then mapped to 0x0 where the vectors are set up for use and execution is 
+then transferred to RAM after copying and uncompressing (if necessary). 
+
+\sh Boot process and vxWorks images
+
+Previous releases of the BSP specified a separate BSP directory for AMP images.
+As of this release, UP, SMP, AMP, and bootrom images are built from a single
+BSP directory.  The fsl_p4080_ds_AMP BSP directory is no longer used.
+
+To include AMP support in an image, add the INCLUDE_AMP component.
+
+AMP is supported in a VxWorks / VxWorks combination, as well as in a 
+Linux / VxWorks combination, with the Linux image running on the boot CPU set.
+The VxWorks AMP images are loaded and run on the secondary CPUs using wrLoad.  
+ 
+The following configurations are suggested as baselines:
+
+\ts
+Image Type | Components
+------------------------------
+AMP primary   | INCLUDE_MSD INCLUDE_WDB_PROXY_MIPC INCLUDE_WRLOAD INCLUDE_AMP 
+                INCLUDE_AMP_CPU_00
+AMP secondary | INCLUDE_MSD INCLUDE_WDB_COMM_MIPC INCLUDE_WRLOAD_IMAGE_BUILD 
+                INCLUDE_AMP INCLUDE_AMP_CPU_0x * 
+
+\te
+* Substitute x with 1 - 7 to match CPU for which this image is targeted.
+
+\sh VxWorks - VxWorks AMP with wrload and MIPC
+
+You must use Workbench or vxprj to build the BSPs.  
+You can build any image for CPU0 from the fsl_p4080_ds BSP.
+This image is configured for AMP, wrload and MSD (MIPC serial device).
+For CPUs 1-7 you can build a RAM based image (vxWorks) and is also configured
+to be loaded by wrload and to route the console to CPU0.
+See documentation on MIPC/wrload and MIPC Serial Device for details.
+
+This the latest approach to loading vxWorks images to additional CPUs.
+It is configured by default.
+
+Boot using an image created from fsl_p4080_ds BSP using vxprj or
+Workbench; the default bootrom provided from the fsl_p4080_ds BSP may
+be used to boot this image.
+
+Call wrload using the following either add as part of the usrAppInit or call
+from a shell such as the target shell.
+
+For instance, core 0 must be configured with the components to execute
+as the primary CPU. 
+
+\cs
+$ cd $WIND_BASE/target/proj
+$ vxprj create fsl_p4080_ds diab amp0
+& vxprj component add amp0/amp0.wpj INCLUDE_AMP INCLUDE_AMP_CPU_00 INCLUDE_WRLOAD
+& vxprj build amp0/amp0.wpj
+\ce                            
+
+The images for rest cores must be configured with the components to
+execute as a secondary CPU. Use vxprj to add the appropriate component, 
+INCLUDE_AMP_CPU_0x. Also, vxprj automatically maintains mutual exclusion 
+among the CPU components. Adding a CPU component removes the pre-existing one.
+
+\cs
+$ cd $WIND_BASE/target/proj
+$ vxprj create fsl_p4080_ds diab ampx
+& vxprj component add ampx/ampx.wpj INCLUDE_AMP INCLUDE_AMP_CPU_0x INCLUDE_WRLOAD_IMAGE_BUILD 
+& vxprj build ampx/ampx.wpj
+\ce 
+
+Substitute x with 1 - 7 to match CPU for which this image is targeted.
+
+The following configurations are provided as optional:
+
+\ts
+| Components
+-------------------------------------------------------------
+| INCLUDE_MSD INCLUDE_SHELL INCLUDE_MIPC_SM INCLUDE_MIPC_SHOW
+\te
+
+Of course, Workbench may be used instead of vxprj.  Navigate the 
+configuration menus thusly:
+Kernel configurations: hardware -> BSP configuration variants -> VxWorks AMP core build
+
+Boot using an image created from fsl_p4080_ds BSP using vxprj or
+Workbench; the default bootrom provided from the fsl_p4080_ds 
+BSP may be used to boot this image. See the boot loader description in 
+chapter SMP above.
+
+Call wrload using the following either add as part of the usrAppInit or call
+from a shell such as the target shell.
+
+For Example:
+
+-> wrload "-file <image_dir>/vxWorks -cpu 1"
+
+wrload supports modifying the bootline using "-tsym" (highly recommended to
+set the network device and CPU index correctly).
+See wrload documentation for details.
+
+The image you load should be built from fsl_p4080_ds BSP using vxprj or
+workbench.
+
+Note:Because the on chip dtsec controller is dtsec4 by default, so when you build 
+image on UP mode or AMP mode. On AMP mode, add the component INCLUDE_AMP_CPU_00,
+core 0 configured with the components to execute as the primary CPU. You should 
+modify hwconf.c to change the default maping, remap dtsec4 to core0.
+The changed code is as followed.
+
+\cs
+const struct hcfDevice hcfDeviceList[] = {
+...
+#if !defined (INCLUDE_AMP) || defined (INCLUDE_AMP_CPU_00)
+    { "dtsec", 4, VXB_BUSID_PLB, 0, dtsec4Num, dtsec4Resources },
+#endif
+...
+};
+\ce
+
+\cs
+const struct hcfResource dtsec4Resources[] = {
+    <snip>
+#if defined (INCLUDE_AMP_CPU_00)
+    { "coreNum",        HCF_RES_INT,    { (void *)0 } },
+#endif
+};
+\ce
+
+\sh wrload and memory management. 
+
+wrload, executed from the primary CPU, calls the function usrWrloadMap() to
+dynamically allocate virtual memory pages in the primary CPU's context for
+placing the secondary image into physical memory.  The argument to
+usrWrloadMap() is 'pAddr' which is set based upon the ELF file's load memory
+address (LMA) plus a physical bias.
+
+The physical bias is compiled into the loaded image via the CDF parameter 
+WRLOAD_IMAGE_BUILD_PHYS_BIAS.  The value of the parameter is stored across two
+32 bit variables as (_wrload_bias_high_32 | _wrload_bias_low_32). wrload, on 
+the primary CPU, reads these symbols directly from the ELF file prior to 
+loading.  This physical bias is superseded by wrload's -loadbias argument
+(i.e. a dynamic bias not defined at build time).  Which ever value is used, 
+the result is placed into the symbol _wrload_bias.
+
+The -loadbias argument is currently unsupported.  If the -loadbias
+argument is used, the primary CPU will load the image to the physical
+bias specified by -loadbias; however the secondary CPU cannot execute the
+image because the sysPhysMemDesc table and sysVirtToPhys routines use the
+WRLOAD_IMAGE_BUILD_PHYS_BIAS macro defined at compile-time.
+
+There are a few additional limitations when using
+WRLOAD_IMAGE_BUILD_PHYS_BIAS.  If a load bias is used, the MMU no longer
+uses a 1-to-1 physical-to-virtual mapping.  The ICE may require a 1-to-1
+mapping (with a physical bias of 0) to properly debug an image.  Finally,
+the bootrom supports but constraints the bias to lie on a 256MB boundary.
+
+For secondary images the bootrom (romInit) reads a shared memory area
+starting at CPUn_SPACE to get the image's stack pointer, starting address
+and MMU data.  The primary image sets up CPUn_SPACE from sysAmpCpuEnable().
+The usrWrload functions usrWrloadBiasHighGet() and usrWrloadBiasLowGet()
+are provided for sysAmpCpuEnable() to get the _wrload_bias value and put it
+into CPUn_LOCAL_MEM_ERPN and CPUn_LOCAL_MEM_RPN.  The bootrom uses RPN and
+ERPN to specify the (36-bit) physical address for a 256MB mapping that the
+secondary image starts running in.  The corresponding virtual address is
+derrived from the CPUn_FUNC_START_ADR.  Later, as the image boots and runs
+sysHwInit() this initial 256MB mapping is overwritten by sysStaticTlbDesc[].
+This allows the entries in sysStaticTlbDesc[] to expand (or reduce) the
+image's footprint to any workable size.
+
+The primary image's MMU does not include a mapping for the physical area
+used by the secondary image(s).  This protects the secondary image(s)
+from the primary.  The primary image uses usrWrloadMap() to map a virtual
+scratchpad area created just to load the image.  This area must be outside
+the primary's current virtual space and is typically the lower 32-bits of
+the image physical address.  However, if these lower 32-bits overlap the
+primary's current virtual space an error is returned and wrload will abort.
+Consequently, a fixed offset wrloadPriScratchMemOffset based on the CDF
+parameter WRLOAD_PRI_SCRATCH_OFFSET is added to the lower 32-bits to generate
+the virtual address.
+
+As indicated above, the image virtual address is derrived from the start
+address and should be RAM_LOW_ADRS.  The physical address is equal to
+the virtual address added to the WRLOAD_IMAGE_BUILD_PHYS_BIAS.  Virtual
+(RAM_LOW_ADRS) and physical (RAM_LOW_ADRS + WRLOAD_IMAGE_BUILD_PHYS_BIAS)
+address tables are shown below for an even division of memory to the 8 cores
+for 3 cases of memory: 4GB, 8GB and 16GB.
+
+For example: If the core 1 primary loads core 5 on an 8GB configuration then
+for core 5:
+
+RAM_LOW_ADRS                 = 0_0000_0000
+WRLOAD_IMAGE_BUILD_PHYS_BIAS = 1_0000_0000
+
+Since usrWrloadMap() by default would load core 5 right over the top of core 0
+we need to use a scratchpad area outside core 0's memory region.  Since core 0
+uses memory from 0 to 0x4000_0000 for the 8GB example, lets use 0x4000_0000 and
+above as the virtual scratchpad area.  So for core 0:
+
+WRLOAD_PRI_SCRATCH_OFFSET    = 0x4000_0000
+
+Remember, this is a virtual address for core 0, the corresponding physical
+address is where the image is actually loaded so we don't have to worry about
+using the same virtual scratchpad to load all physical cores.
+
+Here are the tables:
+\cs
+Virtual Addr  CORE  Physical Addr
+RAM_LOW_ADRS
+0_E000_0000    8    0_E000_0000
+0_C000_0000    7    0_C000_0000
+
+0_A000_0000    6    0_A000_0000
+0_8000_0000    5    0_8000_0000
+
+0_6000_0000    4    0_6000_0000
+0_4000_0000    3    0_4000_0000
+
+0_2000_0000    2    0_2000_0000
+0_0000_0000    1    0_0000_0000
+
+Virtual Addr  CORE  Physical Addr  CORE  Physical Addr
+0_C000_0000    4    0_C000_0000     8    1_C000_0000
+0_8000_0000    3    0_8000_0000     7    1_8000_0000
+0_4000_0000    2    0_4000_0000     6    1_4000_0000
+0_0000_0000    1    0_0000_0000     5    1_0000_0000
+
+Virtual Addr  CORE  Ph. Adr(1,2)   Ph. Adr(3,4)   Ph. Adr(5,6)   Ph. Adr(7,8)
+0_8000_0000    2    0_8000_0000    1_8000_0000    2_8000_0000    3_8000_0000
+0_0000_0000    1    0_0000_0000    1_0000_0000    2_0000_0000    3_0000_0000
+\ce
+
+\sh Linux - VxWorks AMP
+The basic configuration for VxWorks AMP when VxWorks is primary is also
+usable when Linux is primary.
+
+This BSP has been tested with Wind River Linux 3.0.2, with wrload and MIPC.
+
+NOTE: In order to use VxWorks AMP on a secondary CPU with Linux running as
+primary, it is necessary to configure the EPIC driver for external proxy mode.
+This is done by #define EPIC_EXTERNAL_PROXY in config.h.  This is the default
+setting.  It is possible to undefine this for VxWorks-only configurations,
+however, provided all images use the same setting.
+
+\sh DDR RAM Size
+
+This BSP can support up to 2048 MB DDR memory. By default, project builds set
+LOCAL_MEM_SIZE to 512Mb (see 20bsp.cdf); command line builds set 
+
+By default, only 2048MB DDR 
+memory is configured in config.h. 
+
+Change the definition of PHYS_MEM_SIZE_TOTAL 
+in config.h for your desired DDR memory size.  Auto-detect has not been 
+implemented.
+
+\sh 36-bit Physical Addressing
+This BSP supports configuring a portion of RAM with a 36-bit physical address.
+This allows for loading VxWorks AMP images at 36-bit addresses.  By default,
+the BSP divides physical memory in half.  The bottom half is used for local
+memory for UP, SMP, and AMP on CPU0, as well as shared memory.  AMP images
+configured with LOCAL_MEM_ERPN set to 0 will also use this half.   The top
+half can be configured to have a non-zero upper 4 bits (the ERPN) for its
+physical address.  By default, this value is 2, so the top half will be
+mapped to 0x2'0000'0000.  This is configurable by the DDR_SDRAM_LOCAL_ADRS2_H
+macro in config.h.  If this is set to 0, then physical memory will be mapped
+contiguously below the 32-bit boundary.
+
+To use 36-bit addressing in VxWorks-VxWorks AMP:
+
+1. Build a new bootrom with the default BSP configuration.
+
+2. Create projects for CPU0 and any other CPUs you want to use.
+
+3. In the non-CPU0 projects, set LOCAL_MEM_ERPN to 2 to load into the top
+   half of RAM, or 0 to load into the bottom half.  Also set the upper 4 bits
+   of the WRLOAD_IMAGE_BUILD_PHYS_BIAS (to 0x200000000 or 0) to keep it in
+   sync with the LOCAL_MEM_ERPN value.
+
+4. wrload the images normally.
+
+
+To use 36-bit addressing in Linux-VxWorks AMP:
+
+1. Make sure the U-Boot you are using maps some RAM at a 36-bit physical 
+   address.
+
+2. Create VxWorks projects for any CPUs you want to use.
+
+3. Set LOCAL_MEM_ERPN to match the RAM configuration in U-Boot (note that this been
+verified with UBOOT SDK 2.0-rc1 only; SDK 2.2 and later places UBOOT itself high in 
+the 36-bit address range and may interfere).
+
+4. wrload the images as above.
+
+\sh Virtual Shared Memory
+This BSP contains enhanced support for AMP, allowing SMP images to participate
+in AMP, and allowing SMP images to be loaded above the 32-bit boundary.  To
+accommodate these features, one shared memory component has been added.
+
+1. Virtual Shared Memory - the INCLUDE_VIRTUAL_SM is optional, but it must
+be added to any image built for loading above the 32-bit boundary which utilizes
+SMP or MIPC.  This component sets up a virtual to physical mapping above the
+1GB (default) page mapping SDRAM for accessing the shared MIPC data region.
+
+There are three configurable parameters for INCLUDE_VIRTUAL_SM: VIRTUAL_SM_BASE,
+VIRTUAL_SM_BASE_PHYS, and VIRTUAL_SM_SIZE.  These specify the virtual address,
+physical address, and size of the region, respectively.  These default to
+0x40000000, 0x20000000, and 0x01000000.  The BSP only supports 16MB for the
+size.
+
+Note: MIPC is located in this shared memory region by default.  For this
+reason, a new configurable parameter is added for the MIPC SM physical address:
+MIPC_SM_SYSTEM_POOL_BASE_PHYS.  When designing a system, this physical address
+should be matched with other images in the system (Linux, VxWorks, etc.).
+
+\sh Logical Partition Support
+The component INCLUDE_LOGICAL_PARTITION is provided to allow each AMP image
+to have its own logical partition ID.  This is required when there is any SMP
+running in the system, as VxWorks SMP uses tlbivax to invalidate TLBs and
+broadcast the invalidation to each of its CPUs.  By default,
+INCLUDE_LOGICAL_PARTITION is included when INCLUDE_AMP is included, and its
+configuration parameter, LOGICAL_PARTITION_ID, defaults to a unique value
+based upon which INCLUDE_AMP_CPU_0x component is included.
+LOGICAL_PARTITION_ID can be a value from 0 to 63.  Note that 0 indicates the
+global partition, and 1 is used by Linux SMP.
+
+\sh SMP
+
+VxWorks SMP(Symmetric Multiprocessing) configuration can be used on this 
+multiprocessor hardware platform supported by this BSP. Please refer to
+the chapter "VxWorks SMP" of vxworks_kernel_programmers_guide_6.x.pdf for 
+more details about the SMP-specific features from software and hardware view.
+
+Here we list some key features of SMP.
+
+1. SMP build
+
+   VxWorks SMP can be configured and built using the standard Wind River
+   Workbench and vxprj facilities. VxWorks SMP images cannot be created with the
+   legacy BSP directory configuration and build method (using config.h and make).
+   
+   Workbench provides a VxWorks Image Project (VIP) option for creating VxWorks
+   SMP projects. The vxprj provides the '-smp' option for configuring and building
+   VxWorks SMP from the command line. For example:
+\cs   
+   vxprj create -smp fsl_p4080_ds diab
+\ce
+
+2. Boot loader
+
+   Boot loader for VxWorks SMP must not be built with the SMP build option-neither 
+   with Workbench nor with vxprj. In other words, you can build a bootloader using 
+   command line or Workbench, just like the steps you follow in UP system, the 
+   bootloader will support UP, SMP and AMP.
+
+3. MMU
+
+   VxWorks SMP does not support MMU-less configuration.
+
+4. Cache and bus snoop
+
+   Snoop logic is specific to the hardware architecture, but it's usually supported
+   by a multiprocessor hardware platform. Therefore, CACHE_SNOOP_ENABLE can be used 
+   in BSP to maintain the system coherency. Please refer to config.h of this BSP to 
+   find how CACHE_SNOOP_ENABLE is used.
+   
+   Note that CACHE_SNOOP_ENABLE is required in PowerPC, ARM and IA. It doesn't make
+   sense in MIPS BSP.
+   
+   Cache can not be disabled in a VxWorks SMP system. I.e, function cacheDisable()  
+   directly returns error and does nothing.
+   
+   Only copy-back mode is tested and supported officially by WindRiver BSP and VxWorks
+   kernel for SMP system and this is the default configuration in BSP. So system may has
+   unpredictable behavior if you decide to change the cache mode from copy-back to 
+   write-through. In addition, there are some other reasons for this restriction. For 
+   example, write-through is not supported by VxWorks for PowerPC processors because of 
+   the atomic operation, and neither does ARM because of the hardware implementation.
+
+5. CPU number
+
+   VxWorks project parameter, VX_SMP_NUM_CPUS, is used to represent the CPUs which 
+   get involved in the SMP system, as VxWorks supports part of all the CPUs to participate
+   the SMP system and the rests keep reset or idle. The CPU number we are discussing here 
+   includes all the hardware units which have the same behavior as CPU, for example, the 
+   thread, hyper-thread, etc.
+   
+   The maximum CPU number of this BSP is 2 or 4 and this is also the possible 
+   maximum value of VX_SMP_NUM_CPUS.
+
+\sh Serial Configuration
+
+UART1 as default console. If UART2 will be used, CONSOLE_TTY should be change to 
+1 in config.h
+
+Default configuration is:
+    Baud Rate: 115200
+    Data: 8 bit
+    Parity: None
+    Stop: 1 bit
+    Flow Control: None
+
+\sh Network Configuration
+The ETSEC (Simics only) or DTSEC port allows a 10/100/1000T connection. 
+The driver will auto-negotiate and configure the port accordingly. The BSP also
+ supports TGEC with a 10G connection.
+
+The following END drivers are supported in this BSP.
+
+\ts
+Driver | END
+-------------------------
+DTSEC  | DRV_VXBEND_DTSEC
+TGEC   | DRV_VXBEND_TGEC
+\te
+
+The P4080 processor has a total of 10 internal network controllers, however
+the number of ports available on the P4080DS board can vary depending on
+its I/O configuration.
+
+There are two configurations supported by the BSP.
+
+For Rev A boards and early Rev B boards with revision 1 silicon, in the 
+original default factory configuration, FMAN1 is configured
+for SGMII mode and FMAN2 is configured for RGMII mode. The four DTSEC ports
+on FMAN1 are accessed via an SGMII riser card plugged into I/O slot 5.
+One DTSEC port on FMAN2 is wired to an RGMII PHY which is wired directly to
+the main board. The remaining 3 DTSEC ports on FMAN2 are unavailable: their
+pins are used instead by the USB controller.  Note that this configuration
+is no longer supported (but documentation preserved for posterity, to help
+identify old hardware).
+
+With revision 2 of the P4080 silicon, Freescale removed the SERDES lane option
+setting (0x7) that was previously used to enable the configuration documented
+above. Instead, newer boards now use option (0x10) which uses the opposite
+configuration: FMAN1 is programmed for RGMII mode, with one DTSEC port wired
+to the RGMII PHY, and FMAN2 uses SGMII mode, with the four ports on FMAN2
+accessed through an SGMII riser card in slot 3. In this configuration,
+only the second DTSEC MAC on FMAN1 is accessible. A different RCW is required
+to enable this port layout. To use this configuration, the FMAN_SWAP macro
+in config.h must be defined. As only rev 2 silicon is meant for production
+use, this configuration is intended to be used by default, as most boards
+will be configured this way. Older boards using the old configuration can be
+converted by modifying the RCW.  The fsl_p4080_ds BSP supports this
+configuration by default.
+
+A third configuration is also supported that allows all 8 DTSEC ports (4 per
+FMAN) to be active at once. This configuration requires two SGMII cards,
+one in slot 4 and another in slot 5. (The second card must be purchased
+separately.) As with the second configuration option described above, in  order
+to use this configuration, a new reset control word (RCW) must be written
+to the flash that disables RGMII mode on FMAN2 and changes the SerDes lane
+configuration so that slot 4 will accomodate an additional SGMII riser card
+instead of a XAUI card. To use this configuration with the fsl_p4080_ds BSP,
+edit the config.h file and ensure that the SECONDARY_SGMII_RISER macro is
+defined. If this option is selected, the on-board PHY and RJ45 jack will be
+non-functional. (The FMAN_SWAP macro should be left #undefined when using
+this setup.)
+
+In addition, the P4080_ERRATUM_SERDES8_BANK2 and
+P4080_ERRATUM_SERDES8_BANK3 macros should be set to 0x00. This has the
+effect of clearing all SERDES lane power down (LPD) bits in banks 2
+and 3 (slots 4 and 5), and hence enabling the use of all 8 lanes for
+SGMII.
+
+The following diagrams illustrate these three configurations, and how
+the BSP should be configured to support them:
+
+\cs
+   SRDS_PRTCL 0x07 setup (original, rev 1 silicon - UNSUPPORTED)
+
+   #undef FMAN_SWAP
+   #undef SECONDARY_SGMII_RISER
+   #define P4080_ERRATUM_SERDES8_BANK2 0x0
+   #define P4080_ERRATUM_SERDES8_BANK3 0xF
+
+   -------------               -------------
+   |Fman1  MAC1| -- dtsec0     |Fman2  MAC1| -- dtsec4
+   |SGMII  MAC2| -- dtsec1     |RGMII  MAC2|
+   |slot 5 MAC3| -- dtsec2     |on-    MAC3|
+   |       MAC4| -- dtsec3     |board  MAC4|
+   -------------               -------------
+
+   SRDS_PRTCL 0x10 setup (new, rev 2/3 silicon)
+
+   #define FMAN_SWAP
+   #undef SECONDARY_SGMII_RISER
+   #define P4080_ERRATUM_SERDES8_BANK2 0x0
+   #define P4080_ERRATUM_SERDES8_BANK3 0xF
+   
+   -------------               -------------
+   |Fman1  MAC1|               |Fman2  MAC1| -- dtsec0
+   |RGMII  MAC2| -- dtsec4     |SGMII  MAC2| -- dtsec1
+   |on-    MAC3|               |slot 3 MAC3| -- dtsec2
+   |board  MAC4|               |       MAC4| -- dtsec3
+   -------------               -------------
+
+   SRDS_PRTCL 0x16 setup (optional, 8 DTSECs)
+
+   #undef FMAN_SWAP
+   #define SECONDARY_SGMII_RISER
+   #define P4080_ERRATUM_SERDES8_BANK2 0x0
+   #define P4080_ERRATUM_SERDES8_BANK3 0x0
+
+   -------------               -------------
+   |Fman1  MAC1| -- dtsec0     |Fman2  MAC1| -- dtsec4
+   |SGMII  MAC2| -- dtsec1     |SGMII  MAC2| -- dtsec5
+   |slot 5 MAC3| -- dtsec2     |slot 4 MAC3| -- dtsec6
+   |       MAC4| -- dtsec3     |       MAC4| -- dtsec7
+   -------------               -------------
+\ce
+
+For Rev 3 silicon, The default network configuration is as bellows:
+RCW[srds_prtcl] = 0x10 (RSX configuration)
+-------------------------------------------------------------
+             BANK1               |  BANK2    |     BANK3    |     
+------------------------------------------------------------
+A B  | C D  | E F G H      | I J | A B C D   |  A B C D     |
+------------------------------------------------------------
+PCIe1|PCIe3 | 4X SGMII FM2 |Debug| XAUI FM2  |cannot be used|
+            |slot3 dtsec0-3|     |slot4 TGEC1|              |
+-------------------------------------------------------------
+
+Each FMAN also has a Ten Gigabit Ethernet Controller (TGEC). A TGEC
+driver is supplied, and has been tested with both Simics and rev 1
+silicon. Using the TGEC ports requires the addition of a XAUI riser
+card, which provides a single 10GBase-T media port. The default P4080DS
+configuration for rev A and rev B boards (with rev 1 silicon) supports an
+a XAUI riser in slot 4, connected to the TGEC on the second FMAN (tgec1).
+Like the second SGMII card, the XAUI riser card must be purchased separately.
+To use the TGEC in VxWorks, the DRV_VXBEND_TGEC driver component must be
+included into the project configuration. It is possible to configure the
+board to use two XAUI risers, however in this configuration, SGMII
+support for the DTSECs is not available, except with SerDes configuration
+0x0E, where two MACs from FMAN2 are available in SGMII mode on SerDes
+bank 1. This DTSEC configuration has not been tested.
+
+The XAUI media riser card supplied by Freescale has both a 10GBase-T port
+and a slot for an SFP+ module, which can accommodate a 10GBase-SR fiber
+module. The card is not normally supplied with a module, and the 10GBase-T
+port is usually enabled by default. Support for fiber media is available,
+however some caveats apply. In order to use a fiber SFP+ module, the
+XAUI card must be flashed with the latest PHY firmware. If it's set to
+default to 10Gbase-T, the fiber module must be enabled via software by
+accessing some MDIO registers in the PHY. This requires the use of the
+TGEC MDIO driver. To select fiber media, the TGEC0_FIBER and/or TGEC1_FIBER
+macros in config.h should be defined.
+
+Note that with rev 1 silicon, there is an erratum that renders TGEC MDIO
+access non-functional with certain SERDES lane configurations. Only the
+MDIO page for tgec0 is actually usable, however the default SERDES setup
+disables tgec0 and enables only tgec1. This prevents software from
+accessing the registers on the PHY on tgec1. The only workaround for
+this is to change the reset control word to select a SERDES configuration
+that enables both tgec0 and tgec1. On rev 2 silicon, this issue has been
+fixed.
+
+Both the DTSEC and TGEC include support for jumbo frames.
+
+The following table illustrates the mapping of Ethernet port for AMP:
+
+\ts
+    Ethernet Port |  AMP core 
+----------------------------
+    dtsec0 | core0
+    dtsec1 | core1
+    dtsec2 | core2
+    dtsec3 | core3
+    dtsec4 | core4
+    dtsec5 | core5
+    dtsec6 | core6
+    dtsec7 | core7
+\te
+
+You can modify hwconf.c to change the default maping. Take the following 
+example to remap dtsec0 to core4 and dtsec4 to core0:
+
+1. change 
+
+\cs
+const struct hcfDevice hcfDeviceList[] = {
+    <snip>
+#if !defined (INCLUDE_AMP) || defined (INCLUDE_AMP_CPU_00)
+    { "dtsec", 0, VXB_BUSID_PLB, 0, dtsec0Num, dtsec0Resources },
+#endif
+    <snip>
+#if !defined (INCLUDE_AMP) || defined (INCLUDE_AMP_CPU_04)
+    { "dtsec", 4, VXB_BUSID_PLB, 0, dtsec4Num, dtsec4Resources },
+#endif
+    <snip>
+    };
+\ce
+
+to
+
+\cs
+const struct hcfDevice hcfDeviceList[] = {
+#if !defined (INCLUDE_AMP) || defined (INCLUDE_AMP_CPU_00)
+    { "dtsec", 4, VXB_BUSID_PLB, 0, dtsec4Num, dtsec4Resources },
+#endif
+    <snip>
+#if !defined (INCLUDE_AMP) || defined (INCLUDE_AMP_CPU_04)
+    { "dtsec", 0, VXB_BUSID_PLB, 0, dtsec0Num, dtsec0Resources },
+#endif
+    <snip>
+};
+\ce
+
+2. change
+
+\cs
+const struct hcfResource dtsec0Resources[] = {
+    <snip>
+};
+
+const struct hcfResource dtsec4Resources[] = {
+    <snip>
+#if defined (INCLUDE_AMP_CPU_04)
+    { "coreNum",        HCF_RES_INT,    { (void *)4} },
+#endif
+};
+\ce
+
+to
+
+\cs
+const struct hcfResource dtsec0Resources[] = {
+    <snip>
+#if defined (INCLUDE_AMP_CPU_04)
+    { "coreNum",        HCF_RES_INT,    { (void *)4 } },
+#endif
+};
+
+const struct hcfResource dtsec4Resources[] = {
+    <snip>
+#if defined (INCLUDE_AMP_CPU_00)
+    { "coreNum",        HCF_RES_INT,    { (void *)0 } },
+#endif
+};
+\ce
+
+\sh DPAA
+In addition to standard DTSEC and TGEC END drivers, support is also
+provided for Qman, Bman and Fman DPAA components. The vxbQorIQQman,
+vxbQorIQBman and vxbQorIQFman modules support the following functionality:
+
+\is
+\i User creation of Qman frame queues
+\i Interrupt driven and polled Qman event handling
+\i Management of Bman buffer pools
+\i Use of Fman hard parser for RX checksum offload in the DTSEC and TGEC drivers
+\i APIs provided to program the keygen, parser, coarse classifier and policer in the Fman
+\ie
+
+Note that while the soft parser is supported, it requires the user of
+user-generated soft parser programs. These can either be generated using
+the Freescale FMC tool, or loaded via a runtime soft parser assembler
+component. The FMC tool is not provided with this BSP; it is available
+with the Freescale P4080 Linux SDK. A standalone soft parser assembler is
+provided in the fsl_spa.zip file included with this BSP. This is a host
+side utility which can be used to develop and debug soft parser programs
+before loading them into the hardware. The standalone assembler also
+includes a description of the soft parser assembler syntax.
+
+Documentation for these APIs can be found in the following files:
+
+\is
+\i target/src/hwif/resource/vxbQorIQBmanPortal.c -- Bman API
+\i target/src/hwif/resource/vxbQorIQQmanPortal.c -- Qman API
+\i target/src/hwif/resource/vxbQorIQQmanFman.c -- Fman API
+\ie
+
+Also, several example Fman applications can be found in the
+target/src/demo/p4080 directory.
+
+\sh Boot Methods
+
+The boot methods are affected by the boot parameters.  If no password is
+specified, RSH (remote shell) protocol is used.  If a password is specified,
+FTP protocol is used, or, if the flag is set to 0x80, TFTP protocol is used.
+
+\sh PCI Express support
+The P4080 processor has a total of 3 PCI Express controllers. The P4080 DS
+factory default configuration supports PCIEX1 and PCIEX3, which are wired
+to I/O slot 1 and 2. Slot 3 may be configured for SRIO by default on some
+boards, however it can be set for PCI Express support via PCIEX2 by changing
+the reset control word (RCW) in flash.
+
+Use of the PCIe slots requires the DRV_PCIBUS_QORIQ_PCIEX 
+driver component. Adding INCLUDE_PCI_BUS with vxprj or from Workbench will 
+automatically add that component, as well as INCLUDE_PCI_BUS_AUTOCONF, which 
+is also required. INCLUDE_PCI_BUS_SHOW component can optionally be included to 
+add PCI show routines. Any supported vxBus PCI driver should work once the QorIQ
+PCI bus controller driver is present.
+
+The fsl_p4080_ds BSP supports the two controller configuration by
+default. To use PCIEX2, edit the config.h file and ensure that the
+SECONDARY_PCIE_BRIDGE macro is defined.
+
+When enabled, all three controllers will operate in root complex mode.
+
+The Rev B board appears to come with all 3 PCIe bridges enabled, so when
+built for the Rev B board configuration (which is currently the default),
+all 3 bridges will be available.
+
+\sh TrueFFS
+The standard Wind River TrueFFS product is supported in this release.
+
+This BSP uses the Spansion S29GL01GP flash as the TrueFFS media.
+VxWorks maps 16 MB of FLASH address space at 0xff000000 - 0xffffffff.
+
+Note:The VxWorks bootrom is stored at 0xfff00000~0xffffffff, 8 MBytes of space
+(0xff000000~0xff7fffff) is used for TFFS, please don't extend the TFFS space 
+before you carefully check the flash memory map, otherwise misusing TFFS may 
+damage the bootloader (bootrom) and would cause the board to fail to boot up.
+
+To use it, define INCLUDE_TFFS in config.h. When using TrueFFS on a new FLASH
+for the first time, you should format and configure the FLASH by using:
+
+\cs
+    sysTffsFormat ();
+    usrTffsConfig (0, 0, "/tffs0");
+\ce
+
+If you are using DOSFS, please use
+
+\cs
+    dosfsDiskFormat ("/tffs0");
+\ce
+
+Note: If you are running these commands in the VxWorks target shell, please use
+
+\cs
+    sp sysTffsFormat
+\ce
+
+to format the FLASH as it will take long time to complete.
+
+You should now be able to use VxWorks I/O and file system commands to access
+the FLASH device as if it were a disk.  For example, you can copy a vxWorks
+image from your host to TFFS by using file system 'copy'.  Of course, you must
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/tffs0/vxWorks");
+\ce
+
+If you want to use "/tffs0" as a boot device, you should follow these steps:
+
+For command line mode, make sure INCLUDE_TFFS is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the flash chip.  Also make sure you have all the necessary file system
+components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_TFFS_MOUNT
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a default_romCompress.bin in the project directory, program
+it into the flash chip as a bootrom.
+
+Below is an example by using /tffs as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /tffs0/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : user
+    ftp password (pw)    : pass
+    flags (f)            : 0x0
+    target name (tn)     : p4080ds
+    other (o)            : dtsec0
+\ce
+
+\sh SD memory card controller (eSDHC)
+
+The P4080 on chip enhanced SD host controller (eSDHC) is supported in this 
+release. Both stand capacity and high capacity SD memory cards are supported,
+but MMC cards are not.
+
+NOTE: When you using the SD card with Rev 2.0 silicon, since the SDHC chip 
+exist errors, So you must modify your SDHC driver, this is a workaround on
+Rev 2.0 silicon. 
+
+\cs
+Change fslSdhcClkFreqSetup function 
+in "../target/src/hwif/storage/vxbSdhcStorage.c"
+
+LOCAL void fslSdhcClkFreqSetup
+    (    
+    SDMMC_HOST * host,
+    UINT32       clk
+    ) 
+   {
+    ...
+    CSR_CLRBIT_4 (pDev, SDHC_SYSCTL, SYSCTL_SDCLKEN);
+    /* program SDCLKFS & DVS fields */
+    
+    sdClk =0x80f0;/*workround for p4080 Rev 2.0*/
+    
+    CSR_CLRBIT_4 (pDev, SDHC_SYSCTL, SYSCTL_CLK_MASK);
+    ...
+   }
+\ce
+
+This SDHC chip errata has been fixed on Rev 3.0 silicon.
+
+To enable eSDHC support, make sure the following feature definitions are
+added in config.h:
+
+\cs
+    #define DRV_STORAGE_SDHC
+\ce
+
+To use SD, file system configuration is usually needed. Please refer to
+"Block Device File System Configuration" chapter below for more details
+about how to use SD on VxWorks file system.
+
+\sh SATA Support
+There are no SATA interfaces on the P4080DS board, you can plug a SIL3132
+SATA card in slot 1 or 2, the cpu access the SATA card via PCIe bridge,
+with P4080DS board. To use the SIL3132 SATA card, the macro DRV_STORAGE_SI31XX 
+must be defined in config.h. 
+
+Note:by default the P4080DS board is configured with only two active PCIe slots: 
+PCIEX1 is wired to slot 1 and PCIEX3 is wired to slot 2. If you plug a SATA 
+card via slot1, you should reconfigure the PCIe bridge as the followed.
+
+\cs
+    /@ hwconf.c @/
+    ...
+    const struct hcfResource pci0Resources[] = {
+    ...   
+      { "msiEnable",      HCF_RES_INT,    { (void *)FALSE } }
+    ...
+    };
+   ...
+\ce
+
+If you plug a SATA card via slot2, you should reconfigure the PCIe bridge 
+as the followed.
+
+\cs
+    /@ hwconf.c @/
+    ...
+    const struct hcfResource pci2Resources[] = {
+    ...
+      { "msiEnable",      HCF_RES_INT,    { (void *)FALSE } }
+    ...
+    };
+   ...
+\ce
+
+To use SATA, file system configuration is usually needed. Please refer to
+"Block Device File System Configuration" chapter below for more details
+about how to use SATA on VxWorks file system.
+
+\sh DMA
+Freescale DMA Controller is supported in this release. To enable DMA, please 
+define the following macro in config.h:
+
+\cs
+    #define DRV_DMA_FSL
+\ce
+
+Note: The MAX transfer size of every slice on each DMA channel should not
+exceed (64M - 1) Bytes.
+
+\sh eSPI and SPI Flash
+Freescale eSPI Controller and SPI Flash S25F128 are supported
+(only in polled mode) in this release. The size of SPI FLASH is 16M, 
+to enable this function, please define the following macro in config.h:
+
+\cs
+    #define DRV_SPI_S25FLXX
+\ce
+
+\sh I2C
+The P4080 processor has a total of 4 I2C controllers.The P4080 has four 
+separate I2C buses, however, the P4080DS uses three of them.
+To enable this function, please define the following macro in config.h:
+
+\cs
+    #define INCLUDE_I2C
+\ce
+
+Note: RTC is not supported in this release. 
+
+\sh USB Host
+The P4080DS has one USB host port, which is supported by this BSP. To enable USB 
+host support, include the following component in config.h:
+
+\cs
+#define INCLUDE_USB
+\ce
+
+For more information, please refer to
+\tb Wind River USB for VxWorks 6 PROGRAMMER'S GUIDE
+
+To use USB, file system configuration is usually needed. Please refer to
+"Block Device File System Configuration" chapter below for more details.
+
+\sh Block Device File System Configuration
+
+Block devices such as SD/USB/SATA are usually used based on file system.
+VxWorks supports 2 kinds of file system: dosFs and HRFS. Below are some
+sample component definitions which can be added in VIP to use dosFs:
+
+\cs
+    #define INCLUDE_DOSFS
+    #define INCLUDE_DOSFS_MAIN
+    #define INCLUDE_DOSFS_CHKDSK
+    #define INCLUDE_DOSFS_FMT
+    #define INCLUDE_DOSFS_FAT
+    #define INCLUDE_DOSFS_SHOW
+    #define INCLUDE_DOSFS_CACHE
+    #define INCLUDE_DOSFS_DIR_VFAT
+    #define INCLUDE_DOSFS_DIR_FIXED
+    #define INCLUDE_FS_MONITOR
+    #define INCLUDE_FS_EVENT_UTIL
+    #define INCLUDE_ERF
+    #define INCLUDE_XBD
+    #define INCLUDE_XBD_BLKDEV
+    #define INCLUDE_XBD_TRANS
+    #define INCLUDE_DEVICE_MANAGER
+    #define INCLUDE_XBD_BLK_DEV
+    #define INCLUDE_XBD_PART_LIB
+    #define INCLUDE_DISK_UTIL
+\ce
+
+When using a VxWorks block device for the first time, you should format it as
+a FAT file system by using
+\cs
+    dosFsVolFormat ("NameOfTheBlockDevice", 0x20, 0);    /@ FAT32 format @/
+\ce
+or
+\cs
+    dosFsVolFormat ("NameOfTheBlockDevice", 0x10, 0);    /@ FAT16 format @/
+\ce
+
+Then, you can use VxWorks I/O and file system commands to access the block
+device as if it were a disk.  For example, you can copy a vxWorks image from
+your host to the SD card by using file system copy.
+
+\cs
+    copy ("vxWorks", "NameOfTheBlockDevice/vxWorks");
+\ce
+
+NOTE. According to the current design, SD/USB/SATA may be shown with different
+name in VxWorks though all of them are block devices from the perspective of
+application. To get the correct device name, use "devs" command in kernel shell:
+
+\cs
+    devs
+\ce
+
+All available devices will then be displayed with concrete name. Below are some
+typical names of block devices:
+
+\ts
+/sd0:1
+/bd0
+/ata0:0
+\te
+
+Block device can also be used as the boot device in bootloader.
+INCLUDE_BOOT_FILESYSTEM needs to be defined in config.h or be included in your
+project.
+Below is an example by using USB disk "/bd0" as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /bd0/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : target
+    ftp password (pw)    : vxTarget
+    flags (f)            : 0x0
+    target name (tn)     :
+    other (o)            : dtsec4
+\ce
+
+\sh Programmable Interrupt Controller
+
+The PIC driver provided by this BSP supports all internal and external 
+interrupt sources. The driver can also be configured to route such interrupt 
+sources to the critical interrupt pin. However, because critical interrupts 
+are routed directly to the interrupt source instead of being manager by the 
+PIC with IACK or EOI, the Critical Interrupt Summary registers are used to 
+check for the source. The transient values in these registers cause a spurious
+vector when indexing into the vector table.
+
+\sh SPECIAL CONSIDERATIONS
+This section describes miscellaneous information that you need to know before 
+using this BSP.
+
+The fsl_p4080_ds BSP has two regions of reserved memory the locations of which
+must be consistent between the ROM kernels (vxWorks_rom, vxWorks_romCompress,
+bootrom, BOOTAPP profiles, etc.) and the downloadable kernels (vxWorks UP, SMP,
+and various AMP cores). One region is used for private memory for the QMAN's 
+and BMAN's internal buffer managers. The other region is used for the multicore
+reset synchronization where the primary core passes the program start addresses
+to the secondary cores. Each of these regions can be freely modified in the BSP,
+either relocated or resized or both. However, the boot flash must be
+reprogrammed for the changes to take effect.
+
+The QMAN and BMAN private reserved memory spaces are 2MB and 1MB respectively.
+They are assigned once and only once when the software performs system
+initialization of the hardware. Whatever location is assigned will be 
+permanent until the next hardware reset. A pair of macros, QMAN_MEM_BASE 
+and BMAN_MEM_BASE, in config.h are used to locate the reserved space. 
+Further details for selecting the addresses for the macros are in the
+comments of config.h. 
+
+The multicore synchronization block is a set of reserved addresses the
+secondary cores poll to get their program start address. Each core
+has a unique address which it polls. After the primary core has placed
+into memory the application the secondary core should execute, be it either 
+another OS or a stand-alone "bare iron" program, the primary core will
+write to the memory address corresponding to the secondary core which
+is to execute the application. This is completely a software design 
+implemented in the assembly code of romInit and c-source of sysLib.c. A set
+of macros "CPUn_SPACE..." in config.h are used to locate and configure the
+reserved memory. The default implementation places the polled addresses 
+64KB apart counting down from the typical RAM_LOW_ADRS of 0x0010_0000. 
+Note, 64KB was chosen for future expandibility; currently only 16 bytes 
+are used. Users experiencing memory constraints should feel free to chose values 
+appropriate for their application.
+
+\sh Known Issues
+a) USB host is only supported on UP mode, when adding INCLUDE_USB component on 
+   SMP mode, build image with diab or gnu, the compile result is not successful.
+
+b) When use SATA card on P4080DS, you should reconfigure the PCIe in hwconf.c.
+   About the detail, see the "SATA Support" section described.
+
+c) Silicon errata fixed in Rev 3:
+   1.The P4080 errata A-003474:Internal DDR calibration circuit is not
+     supported. The DDR controller has several internal automatic calibration 
+     circuits enabled by default. To ensure consistent timing results, 
+     Freescale recommends this feature be disabled in future customer products.  
+     There is no anticipated impact to parts that are already 
+     operating in the field.
+
+     Workaround: Prior to setting DDR_SDRAM_CFG[MEM_EN] = 1, 
+     disable auto-calibration by doing the following:
+     .Write a value of 0x0000_0015 to the register at offset CCSRBAR + DDR
+     OFFSET + 0xf30.
+     .Write a value of 0x2400_0000 to the register at offset CCSRBAR + DDR
+     OFFSET + 0xf54.
+
+     Note:The errata has been fixed on Rev 3 silicon.
+
+   2.The P4080 errata A-004529: Phantom Branch triggered by floating point
+     instruction can cause core to stall until interrupted.
+     The issue is only in rev 2 silicon and should be fixed in rev 3 and newer 
+     versions.
+
+     The workaround for the issue will turn off branch prediction. 
+     So the performance will be decreased. The workaround is disabled 
+     by default for performance.
+
+     Note:The errata has been fixed on Rev 3 silicon.
+
+   3.The P4080 errata A-004510: Transactions can be lost in the CoreNet 
+     coherency fabric. The issue is only in rev 2 silicon, this has been fixed 
+     in Rev 3.0 silicon.
+
+     Workaround: Specific settings in the CCF, CPC and the core are required
+     to reconfigure the CoreNet coherency fabric.
+
+     Note:The errata has been fixed on Rev 3 silicon.
+
+   4.The P4080 errata A-004511: Transactions may be incorrectly dropped 
+     from the wait queue in the CoreNet coherency fabric. The issue is only 
+     in rev 2 silicon, this has been fixed in Rev 3.0 silicon.
+
+     Workaround: Disable the Wait Queue logic by performing a read-modify-write
+     to clear bit 7 of the register at DCSRBAR + 0x000B_0008.
+
+     Note:The errata has been fixed on Rev 3 silicon.
+
+d) Silicon errata both exist in Rev1/2/3 silicon.
+   1.The P4080 errata A-003999: Running Floating Point instructions requires special 
+     initialization. Any floating point arithmetic operation may result in an 
+     incorrect result when it occurs in combination with a rare sequence of 
+     additional internal core events. Floating point load/store instructions 
+     are not affected and will not corrupt memory.
+
+     Workaround: Perform a read-modify-write to set bit 7 to a one in SPR977 before
+     executing any floating point arithmetic operation. The bit can be set when 
+     setting MSR[FP] and can be cleared when clearing MSR[FP]. Alternatively, 
+     the bit can be set once at boot time and never cleared. There will be 
+     no performance degradation due to setting this bit.
+
+     Note:When building VxWorks bootroms for hardware, users should 'define'
+     the FSL_ERRATA_FPU_A003999 macro in config.h.
+
+   2.The P4080 errata SERDES8: Interfering Serdes PLLs can result in jitter increase.
+     This occurs only when two or more banks have the same VCO
+     frequency. This problem does not occur when two banks operating with
+     different VCO frequencies and a 3rd bank is powered down.
+
+     Note:The errata is still exist on Rev.3.
+
+e) When you added the TGEC component in vxWorks, and execute usrNetInit() under 
+   the vxWorks shell, the function will perform about 10 seconds, because of 
+   waiting for vendor link to synchronize. 
+
+See README file within the fsl_p4080_ds BSP.
+
+\sh Delivered Objects
+\is
+\i bootrom
+\i bootrom_uncmp.hex
+\i bootrom_uncmp.bin
+\i vxWorks
+\i vxWorks.sym
+\i vxWorks.st
+\ie
+
+\sh BSP Bootloaders and Bootroms
+
+\ts
+Bootloader/Bootrom   | status
+----------------------------------
+bootrom              | SUPPORTED
+bootrom_uncmp        | SUPPORTED
+bootrom_res          | UNSUPPORTED
+vxWorks              | SUPPORTED
+vxWorks_rom          | UNSUPPORTED
+vxWorks_romCompress  | SUPPORTED
+vxWorks_romResident  | UNSUPPORTED
+\te
+
+The default size of the vxWorks_rom and vxWorks_romResident images are larger
+than the default ROM_SIZE of 1MB. ROM_SIZE and the corresponding link addresses
+can be adjusted to fit these images, however it is an unsupported configuration.
+
+Freescale P4080DS Rev B/F BOARD LAYOUT
+
+\bs
++------------------------------------------------------------------------------+
+| | | | | | | | | | |          | USB1 |         |UART1|   |SD-CARD|            | 
+| |S| |S| |S| |S| |S|          +------+         +-----+   +-------+            |
+| | | | | | | | | | |          |DTSEC4|         |UART2|                        |
+| |L| |L| |L| |L| |L|          |RGMII |         |(top)|                        |
+| | | | | | | | | | |          +------+         +-----+                        |
+| |O| |O| |O| |O| |O|                                                          |
+| | | | | | | | | | |                                                          |
+| |T| |T| |T| |T| |T|                                            +--+  +--+    |
+| | | | | | | | | | |                                            | D|  | D|    |
+| |1| |2| |3| |4| |5|                                            | D|  | D|    |
+| | | | | | | | | | |                          +-----------+     | R|  | R|    |        
+| +-+ +-+ +-+ +-+ +-+                          |           |     | 1|  | 2|    |
+|   +----------+                               |   QorIQ   |     +--+  +--+    |
+|   | LED-4080 |                               |           |                   |
+|   +----------+                               |   P4080E  |                   |
+|                                              |  Rev 2/3  |                   |
+|  +---+ +---+ +---+                           +-----------+                   |
+|  |SW1| |SW5| |SW9|                                                           |
+|  +---+ +---+ +---+                                                           |
+|  +---+ +---+ +----+                                                          |
+|  |SW2| |SW6| |SW10|            +-+                                           |
+|  +---+ +---+ +----+            |J|                +-----------+              |
+|  +---+ +---+                   |T|                |NAND08GW3B2|              |
+|  |SW3| |SW7|                   |A|                +-----------+              |
+|  +---+ +---+                   |G|                                           |
+|  +---+ +---+                   +-+                                           |
+|  |SW4| |SW8|                            +-----------+                        |
+|  +---+ +---+                            | NOR-FLASH |                        |
+| +-------+                +----------+   +-----------+                        |
+| | POWER |                |RTC-DS1374|                                        |
+| +-------+                +----------+                                        |
++------------------------------------------------------------------------------+
+\be
+
+BIBLIOGRAPHY
+For further information on the fsl_p4080_ds, refer to the following 
+documents:
+
+\tb QorIQ P4080 Reference Manual 
+
+\tb PowerPC E500MC Core Reference Manual 
+
+\tb Motorola PowerPC Microprocessor Family: The Programming Environments 
+
+SEE ALSO
+
+\tb Workbench User's Guide: Introduction
+
+\tb VxWorks Programmer's Guide: Configuration
+
+\tb VxWorks Programmer's Guide: Architecture Appendix

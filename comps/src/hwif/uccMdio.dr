@@ -1,0 +1,4 @@
+#ifdef INCLUDE_UCC_MDIO
+    umRegister();
+#endif /* mdioRegister */
+

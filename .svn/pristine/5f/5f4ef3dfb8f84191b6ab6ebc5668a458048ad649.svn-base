@@ -1,0 +1,3 @@
+#ifdef DRV_FW_FSL_AXE
+    fslAxeRegister ();
+#endif /* DRV_FW_FSL_AXE */

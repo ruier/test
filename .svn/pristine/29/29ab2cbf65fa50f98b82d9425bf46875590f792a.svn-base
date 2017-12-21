@@ -1,0 +1,3 @@
+#ifdef DRV_I2C_GENERIC_DEV
+IMPORT void vxbI2cGenericDevRegister (void);
+#endif /* DRV_I2C_GENERIC_DEV */

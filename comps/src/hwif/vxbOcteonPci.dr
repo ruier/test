@@ -1,0 +1,4 @@
+#ifdef DRV_PCIBUS_OCTEON
+    octPciRegister();
+#endif /* DRV_PCIBUS_OCTEON */
+

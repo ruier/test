@@ -1,0 +1,191 @@
+
+            README: Wind River SBC8548 Evaluation Board
+
+This file contains board-specific information for the Wind River SBC8548
+target board.  Specifically, this file contains information on any BSP
+interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+
+------------------------------------------------------------------------------
+RELEASE 6.9/x
+    TODO:
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.x
+
+    Fixed potential memory corruption caused by sysNvRamGet(). (WIND00101057)
+    Fixed a wrong memcpy in sysNetMacAddrSet. (WIND00387792)
+
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Save startType in sysInit. (WIND00307623)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Correct the description about booting from SODIMM flash. (WIND00316702)
+    Moved L1 cache parity error handling to the arch library.  L1 cache parity 
+       checking is now enabled by default. L1 parity errors now generate
+       (in many cases recoverable) machine check exceptions.  (WIND00309426)
+    Add fix for MPC8548 DDR20 errata. (WIND00292034)
+    Move lable checkStop from function resetEntry to romInit to fix the make 
+    release error. (WIND00331112)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+	
+    Remove DDR IO receiver bias initialization. It was required for erratum 
+        DDR10, which is fixed for rev 2.0 silicon. (WIND00186659)
+    Remove Global Timer group B interrupt description. (WIND00212656)
+    Fix incorrect static TLB entries for flash. (WIND00212654)
+    No longer clear entire MSR in sysInit, clear only EE, CE, & ME. Clearing
+        the entire MSR also disabled debugging, which caused breakpoints
+        from the WR-ICE to also stop working. (WIND00206578)
+    
+RELEASE 2.0/6
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Fix LED_xx macro error in sysLed.h. (WIND00143743)
+    Add static TLB item for TFFS FLASH to fix boot issue when TFFS is 
+    included. (WIND00161740)
+    Fix VIP with bootApp profile (vxWorks_romCompress) is not working with VIP
+    with basicOS profile. (WIND00162782)
+    Remove unused INCLUDE_PPC_FPU. (WIND00153695)
+    Remove RAM_LOW_ADRS and RAM_HIGH_ADRS defines in config.h (WIND00185815)
+
+Version 2.0/5
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Support END2 versions of ETSEC drivers
+    Fixed the build error when INCLUDE_RAPIDIO_BUS is defined. (WIND00140932)
+
+Version 2.0/4
+
+    Released from Wind River for General Purpose Platform 3.6, VxWorks 6.6
+
+    Replace TSEC hEND drivers with vxBus END versions. hEND drivers are now
+    deprecated and should not be used.
+    Replace legacy PCI controller drivers wigth VxBus PCI support.
+    Replace legacy Intel PRO/1000 driver with VxBus PRO/1000 driver (both
+    PCI-X and PCIe cards now supported)
+    Replace legacy ns16550, epic and m85xxTimer drivers with vxBus versions.
+    Remove tffsConfig.c from the BSP directory. INCLUDE_MTD_USR macro is
+    defined to enable the custom MTD driver.
+
+Version 2.0/3
+
+    Released from Wind River for General Purpose Platform 3.5, VxWorks 6.5
+
+    Add boot device selection. (boot from on-board flash or SODIMM flash)
+
+IMPORTANT!!! Read the following carefully before installing this BSP package.
+
+    This version of BSP will update the following driver files as well as the BSP.
+
+    target/config/comps/vxWorks/11rapidio.cdf
+    target/h/drv/end/gei82543End.h
+    target/src/drv/end/gei82543End.c
+    target/src/hwif/busCtlr/m85xxRio.c
+    target/src/hwif/vxbus/usrRapidIOBus.c
+
+
+    Pre-Installation Requirement:
+
+    1) You should consider backing up gei82543End.h/gei82543End.c/m85xxRio.c so
+       you can undo the install if necessary.
+
+
+    Post Installation Steps:
+
+    1) For project builds to work you should close Workbench if you are using it.
+       Next remove the file '$WIND_BASE/target/config/comps/vxWorks/CxrCat.txt'
+       You may now restart Workbench and create vxWorks image projects based on
+       the new BSP.
+
+    2) Build instructions for driver files outside of the BSP:
+       A build of the updated gei82543End driver installed is necessary.
+       In the vxWorks Development Shell, go to '$WIND_BASE/target/src/drv/end'.
+       Run the command:
+
+           make CPU=PPC32 TOOL=sfdiab
+
+       The gei82543End driver that was installed should be archived into the
+       libdrv.a library.
+
+
+
+Version 2.0/2
+
+    Released from Wind River for Workbench 2.6, VxWorks 6.4
+
+    Support the latest Wind River SBC8548 rev.2 board.
+    Add CPU rev.2 update.
+    Add TFFS support, using the SODIMM 64MB flash as the TFFS media.
+    Add PCI Express support, tested using a Intel 8257x NIC.
+    Modify SODIMM Flash base address to solve the static TLB issue.
+    Modify SRIO to use m85xxCCSR driver.
+    Modify auxClock and nvRam to get BSPVTS passed.
+
+FCS Version 2.0/1
+
+    Released from Wind River for Workbench 2.5, VxWorks 6.3
+
+    ETSEC functionality has been added including checksum offload support and
+    filer capability. The user should rebuild target/src/hwif for etsec.
+    VXBUS infrastructure is now used for ETSEC (and SRIO, which has not been
+    tested). These devices are configured via hwconf.c including the MII bus
+    and PHY driver.
+    There is backward compatibility with the END TSEC driver and can be
+    configured if necessary but not for SRIO which requires vxBus to be included.
+
+FCS Version 2.0/0
+
+    Released from Wind River for Workbench 2.4, VxWorks 6.2
+
+    SRIO not supported for this first release, waiting until silicon works with
+    a JTAG workaround during reset.
+    ETSEC - enhanced features such as checksum offload not supported until the
+    next release. Only standard TSEC features supported for now.
+
+    PCI Express not supported yet. MSI unsupported.
+
+    This BSP will move to the VXBUS infrastructure for drivers in vxWorks 6.3
+    which include rapidIO and ETSEC. There are already changes in the BSP to
+    support this which may not make alot of sense at this time. This means
+    anyone wanting the additional functionality should expect to migrate to
+    vxWorks 6.3.
+
+    L2 cache will require modification to support rev2 silicon.
+    Expect this to be done in the vxWorks 6.3 verison of the BSP.
+
+EAR Version 2.0/0
+
+    Issues:
+
+    Only Rev1.1 silicon supported
+
+    VxWorks bootrom may not always run properly after power-on reset or HRESET.
+    This is due to MPC8548 errata GEN3 which affects any silicon prior to rev
+    2.0. Refer to the "Freescale Device Errata for the MPC8548E PowerQUICC III".
+
+    SRIO:
+    Has not yet been tested on SBC8548.
+    Requires GEN6 pll workaround via JTAG. TIPC_SM/SM END is working.
+    Require addition of smUtilLib.o to MACH_EXTRA - should be temporary.
+
+    PCI-Express:
+    Has not yet been tested on SBC8548.
+
+    PCI2:
+    Not supported. Only the single 64-bit PCI1 interface is available on the SBC8548.
+
+    Security Engine:
+    Partially tested security engine drivers for SEC2.0 may still be issues.
+    Additional features SEC2.1 not supported in present drivers.
+
+    Only support 1GHz Core 400Mhz DDR to reduce configuration/initialization
+    issues.

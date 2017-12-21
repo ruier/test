@@ -1,0 +1,3 @@
+#ifdef DRV_PCIBUS_SPEAR13XX_EX
+IMPORT void spear13xxPcieRegister (void);
+#endif /* DRV_PCIBUS_SPEAR13XX_EX */

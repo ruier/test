@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND_TGEC
+    vxbTgecEndRegister();
+#endif /* DRV_VXBEND_TGEC */

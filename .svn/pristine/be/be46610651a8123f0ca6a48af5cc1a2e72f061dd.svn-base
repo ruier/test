@@ -1,0 +1,4 @@
+#ifdef DRV_SIO_SB1
+    extern void vxbSb1DuartSioRegister (void);
+#endif /* DRV_SIO_SB1 */
+

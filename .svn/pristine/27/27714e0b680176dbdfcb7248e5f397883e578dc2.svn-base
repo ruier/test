@@ -1,0 +1,679 @@
+\" ads8544/target.ref - Freescale MPC8544 ADS (Intrepid) target specific documentation
+\"
+\" Copyright (c) 2005, 2008-2010, 2012 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01g,22aug12,clx  fix typo error of RAM_LOW_ADRS. (WIND00371217)
+\" 01f,09sep10,kab  ROM build size issues
+\" 01e,18sep09,l_z  update the description of connection between PEXs and slots/ULI.
+                    (WIND00155480)
+\" 01d,11aug08,x_f  update IPNET native driver description
+\" 01c,05may08,x_f  Modified to add board layout info
+\" 01b,28apr08,x_f  Modified default baud rate to 115200 in vxWorks
+\" 01a,12jul05,dtr  Created from cds8548/01a
+\"
+\"
+\TITLE ads8544 - Freescale MPC8544 ADS (Intrepid)
+
+NAME
+`Freescale MPC8544 ADS'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks for the ads8544 BSP.  Please read the section "RUNNING VXWORKS" 
+in order to configure the board to run vxWorks.
+
+The board is also call the INTREPID.
+Board revision that supported by this BSP is Intrepid V1.0.
+
+RUNNING VXWORKS
+This section provides guidelines for running VxWorks on the ads8544 
+reference board.
+
+\sh 1. Setting the board Jumpers and Switches
+
+Switch Settings for the three boards that constitute the ADS8544 system:
+
+Use the relevant MPC8544ADS users guide for switch details.
+
+Here is a quick reference for switch settings used for testing this BSP. They 
+maybe out of date for newer revisions of the board. Board revision used in 
+testing was Intrepid V1.0.
+
+Quick configuration: 1-on 0-off
+\ts
+SW1 | | 
+
+0 0 0 0 0 0 0 0 | |
+
+SW2 | |  SW3
+
+0 1 0 1 0 0 0 1 | |  0 1 1 0 1 1 0 1 
+
+SW4 | |  SW5
+
+1 1 0 0 0 1 1 1 | |  1 0 1 0 1 1 0 0
+
+SW6 | |  SW7
+
+1 1 1 1 1 1 1 0 | |  1 1 1 1 1 0 1 1
+
+SW8 | |  SW9
+
+1 1 1 1 1 1 1 0 | |  0 0 0 0 0 0 0 0
+
+SW10 | |  SW11
+
+1 1 0 1 0 0 0 0 | |  1 0 0 1 1 0 1 1
+
+\te
+
+
+\sh 2. Flashing the Boot ROM Image Using Workbench
+
+This section describes how to program a VxWorks bootrom image onto 
+a flash bank using Workbench 2.6 (or later) and the Wind River ICE 
+plug-in. Note that the Wind River Probe (USB) is also supported and 
+uses the same basic instructions as the Wind River ICE but does not 
+require an IP address.
+
+If you want to preserve the UBOOT image, switch the flash bank that 
+will be used for the bootrom image using SW10 pin 2 on the carrier card. 
+This switches bank 1 and bank 0 of the flash bank and should prevent 
+UBOOT from being overwritten. Note that UBOOT can be used to program 
+a VxWorks bootrom image here.
+   
+
+Using Workbench, complete the following steps to flash your boot ROM image:
+          
+a) Create a bootrom.hex image.
+
+Create a VxWorks boot loader project based on the ads8544 BSP.
+You can use the default compressed image. However, use hex 
+format in place of the elf format.
+After the project is created, build the default image.
+ 
+b) Install the WindRiver ICE and power it on.
+
+Connect the JTAG interface cable from the Wind River ICE to the 
+ADS8544 board JTAG connector (located on the CPU card). When all 
+of the connections have been made, power up the ADS8544 board and 
+create a Wind River ICE connection in Workbench.
+
+c) Configure the Workbench connection.
+
+When creating the connection, specify the MPC8544 CPU.
+Enter the IP address of the Wind River ICE when requested.
+
+d) Load the proper ads8544 register setting for WindRiver ICE.
+
+Once you have connected the probe to the CPU, right-click on the 
+connection in the target manager and attach to the CPU core. At 
+this point, you can go to the main Workbench Window tab at the top 
+of the view and select "show view". Browse the view list and select 
+OCD Command Shell. This launches the original BKM command shell.
+Navigate to the target manager and right-click on core(U1). Select 
+reset and download. You can now put the register file in this BSP or 
+one provided by the installation in "play register file" 
+(for example,mpc8544e_intrepid.reg). Reset with IN then click the 
+reset download button. You have now loaded the target board with 
+enough settings to program the boot ROM. Select "Window > show view" 
+again and select Flash Programmer.
+
+e) Converting the bootrom.hex file to bootrom.bin.
+
+Select the Add/Remove tab in the flash programmer. Click 
+"convert file" and navigate to the boot loader project you created 
+previously e.g. WindRiver\workspace\ads8544BootProj\bootrom.hex. 
+Select the project. The start address should be 0x0 and the end 
+address should be set to 0xfffffff. Click "convert and add" to convert 
+the file. 
+At this point, the file is added to the list. Click on the start 
+address entry (should be 0x0) and change it to 0xfff00000. The file 
+is now ready for programming.
+
+
+f) Program the ads8544 flash.
+
+Select the configuration tab and choose the following device:
+'AMD -> 29LV64xDx -> 4096 x 16 -> 1 Device'.
+
+Set the base address to '0xff800000'.
+Set the start address to '0x5000'. 
+Set the size to '65536'.
+
+Select programming tab and set the following options:
+
+Set the erase from setting to '0xfff00000'.
+Set the erase to setting to '0xffffffff'.
+
+Go to OCD command shell and type IN. Be sure this returns the BKM 
+prompt and is OK. Return to the flash programmer and select the 
+Batch Program tab and then select the Initialize/Erase and Program 
+checkboxes. Click Execute.
+Wait for the programmer to complete.
+You can now run the VxWorks boot ROM by going back to the OCD command 
+shell and typing "INN" followed by "GO". Alternatively, you can 
+disconnect the ICE and proceed to Step 3 "Running the VxWorks Boot 
+ROM Program".
+
+\sh 3. Flashing the Boot ROM Image Using the on-board boot loader        
+   
+The MPC8544-DS reference board is shipped with a
+factory-programmed UBOOT boot loader capable of downloading a
+Boot ROM image using its tftp client and programming it in the
+alternate flash bank. SW10 pin 2 is used to switch between flash 
+banks. set baud rate to 115200 for u-boot. A tftp server is required. 
+In the following instructions, the tftp server IP address is 
+128.224.146.96.
+
+The following instructions describes all the steps that must
+be performed. You are only required to type in the line following
+the "=>" UBOOT prompt.
+	
+a) set the target ip address.
+\cs   
+=> setenv ipaddr 128.224.147.196
+\ce
+   
+b) set the tftp server ip address
+\cs  
+=> setenv serverip 128.224.146.96
+\ce
+  
+Note: Additional environment changes may be required for
+your network.
+   
+c) save the environment
+\cs   
+=> saveenv
+\ce
+
+d) get the bootrom image from the tftp server and store
+it in RAM at address 0x1000000.
+\cs
+=> tftp 1000000 bootrom_uncmp.bin
+\ce
+
+e) erase the alternate Flash bank
+\cs   
+=> erase ffb00000 ffbfffff
+\ce
+
+f) program the flash at location 0xffb00000 for 0x100000 bytes.
+Note that the number of bytes to program will depend on the image
+size. The actual number of bytes in the image is available in the
+output of step 'd' above after 'Bytes transferred'. If will be 1MB by 
+default unless you change the ROM_SIZE to create a larger image.
+\cs   
+=> cp.b 1000000 ffb00000 100000
+\ce
+
+At this point, the Boot ROM image is programmed and is ready
+to be used once these additional steps are complete.
+   
+g) Turn off the target
+   
+h) Toggle switch 10 position 2 to swap the flash banks
+   
+i) If  you have not changed the any default baud rates, it is necessary to 
+change the baud rate to 115200 which is the default value of BootRom.
+
+j) Turn on the target.
+   
+        
+\sh 4. Running the VxWorks Boot ROM Program
+
+To run the VxWorks boot ROM program, complete the following steps:
+
+a) If you have not already done so, disconnect the Wind River ICE.
+Note that if the ICE remains connected, it can stop the processor at 
+the first instruction in certain cases.
+
+b) Connect the Ethernet and serial channels.
+	
+  i) Connect the serial port to the host using the supplied serial cable.
+
+  ii) Connect the RJ45 Ethernet cables to the ETSEC ports which are next to 
+  the serial port. The connector on top is ETSEC1 and is used as the standard
+  boot device.
+
+c) Launch a terminal program on the host and configure as follows:
+
+ 8 data bits
+ 1 stop bit
+ no hardware handshaking 
+ parity disabled
+ baud rate = 115200 bps
+
+d) Power cycle the board.
+
+If the board is not already powered off, turn it off momentarily. 
+Then, power the board on. At this point, you should see characters 
+being printed to the terminal window signaling the boot countdown. 
+Press any key to stop the count down. You are now ready to configure 
+VxWorks. For detailed instructions, see the VxWorks Kernel 
+Programmer's Guide.
+
+BOOT DEVICES
+The supported boot devices are:
+\cs
+	motetsec - 10/100/1000 Triple Speed Ethernet Controller
+	tffs - True Flash File System
+\ce
+
+FEATURES
+This section describes the supported and unsupported features of the ads8544
+
+\sh Supported Features
+
+The supported features of the ADS8544 board are:
+
+	MMU support, including 36-bit physical addressing (see the Makefile)
+	Cache support
+	L2 cache support
+	L2 SRAM support
+	Decrementer timer, used to implement a system clock
+	Timestamp clock
+	Auxiliary clock
+	MPC8544 DUART
+	on-chip 10/100/1000 TSEC 1 and 3 only
+	on-chip programmable interrupt controller
+	DDR SDRAM (up to 512 MB memory)
+	Flash (16MB)
+	Security Engine - partial support only, SEC 2.0 features verified. 
+			- See Wind River/Freescale support for latest drivers
+	I2C controller - partial support only, single thread access
+	Intel GEI 8254x 10/100/1000 gigabit controller
+	PCI Express - note also known problems.
+
+\sh Unsupported Features
+
+The following devices are unsupported by this BSP:
+
+	PCI host controller - interrupts not working
+	DMA controller.
+
+HARDWARE DETAILS
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Devices
+
+The chip drivers included are:
+
+	am29lv64xdMtd.c - Flash memory MTD driver for TrueFFS.
+	sysMotI2c.c - Moto I2c driver.
+	sysMpc85xxI2c.c - Mpc85xx I2c driver.
+	sysL2Cache.c - L2 cache library.
+
+\sh Memory Maps
+
+The following table describes the ADS8544 default memory map:
+\ts
+
+Start | Size | End | Access to
+------------------------------
+0x0000_0000 | 512 MB | 0x1FFF_FFFF | DDR SDRAM
+0x5000_0000 | 64 MB | 0x53FF_FFFF | PEX1 Prefetchable Memory
+0x5400_0000 | 64 MB | 0x57FF_FFFF | PEX1 Non-Prefetchable Memory
+0x5800_0000 | 64 MB | 0x5BFF_FFFF | PEX1 I/O
+0x6000_0000 | 64 MB | 0x63FF_FFFF | PEX2 Prefetchable Memory
+0x6400_0000 | 64 MB | 0x67FF_FFFF | PEX2 Non-Prefetchable Memory
+0x6800_0000 | 64 MB | 0x6BFF_FFFF | PEX2 I/O
+0x8000_0000 | 64 MB | 0x63FF_FFFF | PEX3 Prefetchable Memory
+0x8400_0000 | 64 MB | 0x67FF_FFFF | PEX3 Non-Prefetchable Memory
+0x8800_0000 | 64 MB | 0x6BFF_FFFF | PEX3 I/O
+0x9000_0000 | 64 MB | 0x63FF_FFFF | PCI Prefetchable Memory
+0x9400_0000 | 64 MB | 0x67FF_FFFF | PCI Non-Prefetchable Memory
+0x9800_0000 | 64 MB | 0x6BFF_FFFF | PCI I/O
+0xE000_0000 | 1 MB | 0xFE0F_FFFF | Configuration Control Registers
+0xF810_0000 | 1 MB | 0xF81F_FFFF | PIXIS 
+0xFF80_0000 | 8 MB | 0xFFFF_FFFF | Flash 
+\te
+
+The following table describes the default VxWorks macros that are used 
+to address memory
+\ts
+
+Macro Name | Macro Definition | Description
+------------------------------
+LOCAL_MEM_LOCAL_ADRS | 0x0000_0000 | base of RAM
+RAM_LOW_ADRS  | LOCAL_MEM_LOCAL_ADRS + 0x0010_0000 | VxWorks image point and stack grows down from this address.
+RAM_HIGH_ADRS | LOCAL_MEM_LOCAL_ADRS + 0x0100_0000 | VxWorks boot ROM loaded here.
+LOCAL_MEM_SIZE | 2000_0000 | default 512 MB of RAM
+ROM_BASE_ADRS | 0xFFF0_0000 | base address of ROM
+ROM_TEXT_ADRS | ROM_BASE_ADRS + 0x100 | text must start after vector table 
+ROM_WARM_ADRS | ROM_TEXT_ADRS + 8 | warm Reboot Entry Address
+ROM_SIZE | 0x0010_0000 | default 1 MB of ROM
+\te
+
+\sh Support for L2 Cache
+L2 Cache is configured with callback function pointers for L2 Cache Global 
+Invalidation, L2 Cache Enable, L2 Cache Flush, and L2 Cache Disable. These 
+function pointers are initialized in sysHwInit( ). By default, the 256 KB 
+L2 is configured to 256 KB of cache. If a different configuration is desired, 
+a new boot ROM image should be used to match the RAM image configuration of 
+the L2.
+
+
+\sh Boot Process
+
+Upon reset, the MPC85xx begins executing from 0xFFFF_FFFC. Only the last 
+4 KB of memory is mapped by the TLB. The instruction at 0xFFFF_FFFC branches 
+to resetEntry( ) (which is located at the last 2 KB of memory) to begin 
+initialization and mapping of memory static TLB entries. The DDR SDRAM is 
+then mapped to 0x0 where the vectors are set up for use and execution is 
+then transferred to RAM after copying and uncompressing (if necessary). 
+
+The boot ROM for the ADS8544 allows you to load VxWorks with two TSEC 
+Ethernet channels. In the boot dialog, these channels correspond to the 
+"motetsec0" and the "motetsec1" devices. To switch between the boot devices 
+after a load is attempted, a hard reset or power cycle is necessary in order 
+for the device to function properly. After the reset, press a key to stop 
+the count down and use the "c" command to change the boot device to the 
+desired network device. 
+
+To configure the MAC address of the ETSEC devices you must use the M command:
+\cs
+[VxWorks Boot]: M
+Set device MAC address
+
+  0  quit
+  1  motetsec0  31:31:92:1e:a0:00
+  2  motetsec1  31:31:93:1e:a0:00
+  Selection : 1
+Mac address for motetsec0 invalid. Using a reproducible random address.
+motetsec0 current Ethernet Address is: 00:a0:1e:92:31:31
+Modify only the last 3 bytes (board unique portion) of Ethernet Address.
+The first 3 bytes are fixed at manufacturer's default address block.
+00- 00
+a0- a0
+1e- 1e
+92- 
+31- 
+31- 
+
+Address unchanged
+New Ethernet Address is: 31:31:92:1e:a0:00
+[VxWorks Boot]: 
+
+\ce
+
+The ADS8544 boot ROM also supports loading VxWorks using the Intel 8254x 
+gigabit Ethernet controller. An Intel 82573-based PEX NIC 
+can be plugged into an empty PCI slot. The config.h must be modified to define
+INCLUDE_GEI825XX_VXB_END. If the 8257x PEX NIC is plugged into the PCIEX slot1 or 2. 
+Then, you will need to rebuild the boot ROM with the above changes in 
+config.h. At this point, you can re-flash the boot ROM to flash memory. The 
+boot device for Intel 8254X gigabit controllers is "gei". 
+
+The ADS8544 boot ROM can also load the VxWorks image located in flash using 
+TrueFFS. To include TrueFFS, define the INCLUDE_TFFS macro in config.h. By 
+default, the flash address FF800000 - FFEEFFFF (6.9 MB) is configured to the 
+primary TrueFFS.  The boot device is "tffs=0,0" for the primary flash. The 
+VxWorks images must be copied into TrueFFS before booting.
+
+\sh DDR RAM Size
+This BSP can support up to 512 MB DDR memory. By default, only 512MB DDR 
+memory is configured in config.h. Change the definition of LOCAL_MEM_SIZE 
+in romInit.s for your desired DDR memory size and chip selects. Auto-detect 
+has not been implemented.
+
+\sh Network Configuration
+The ETSEC port allows a 10/100/1000T connection. 
+The driver will auto-negotiate and configure the port accordingly. 
+The BSP also supports Intel GEI 82573 NICs with the PCIEX interface.
+
+The following END and corresponding END2 drivers are supported in this BSP.
+However, only END driver is enabled by default.
+
+\ts
+Driver | END                      | END2
+----------------------------------------
+ETSEC   | INCLUDE_ETSEC_VXB_END    | INCLUDE_ETSEC_VXB_END2
+\te
+
+To enable the END2 driver, you should modify as follows:
+
+For command line build, add INCLUDE_END2 into config.h right after the
+definition of INCLUDE_END. Also replace the END driver name with corresponding
+END2 driver name, then rebuild the bootrom and vxWorks image.
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, add INCLUDE_END2 component and corresponding END2
+component, this will un-define END automatically. Then rebuild your project.
+
+\sh ROM Considerations
+The bootrom.hex file is provided with this BSP. The boot ROM is 
+configured to a ROM base address of 0x0. When programming the boot ROM to 
+the flash, an offset of 0xFFF00000 need to be given.
+
+The available ROM area is 1M.  Default vxWorks_rom and vxWorks_romResident 
+(and maybe vxWorks_romCompressed) with a full component load will not fit
+in 1M, and such builds will fail with an error: "Image is larger than 1048576 bytes."
+Default ROM images do not ship with this BSP.
+Reducing components to something more appropriate to a rommed image
+will build correctly.
+
+\sh Boot Flash
+There are two flash banks on the ADS8544 board.
+One is for normal falsh, the other is for bootrom or PROMJet.
+
+\sh PCI/PCI Express Support
+
+There are three PCI Express host controllers on the MPC8544 plus one PCI 
+controller.
+
+Interrupts are broken for the standard PCI controller.
+
+The PCI Express controllers are supported in the sense they can be manually 
+configured and standard devices which we support (Intel GEI 82573) are 
+supported with auto configuration for PEX2 slot1 and PEX1 slot2. 
+The ULI on PEX3 is not supported.
+
+The support for multiple PCI/PCIEX bus controllers and vxBus PCI devices is 
+provided by a new vxBus PCI/PCIEX bus controller driver and PCI config 
+libraries which will be added.
+
+Legacy interrupts are broken for PCI express so support for Message Signal 
+Interrupt (MSI) has been added via EPIC and PCI bus controller driver. Only 
+one shared message interrupt is supported at the moment due to a problem is
+still being investigated. However this means just slightly slower interrupt 
+response time.
+
+\sh TrueFFS
+TrueFFS is an optional product to use a flash device as a file system.
+To use TrueFFS, define INCLUDE_TFFS in config.h.
+
+There is one flash bank on the ads8544 board. It has 8 Mbytes with 
+last 1 MBytes for the bootloader and 1 block for boot parameters. 
+This layout allows just under 7 MBytes ready for TrueFFS. 
+
+To initialize and format the primary flash device (FF800000 - FFEEFFFF) for 
+TrueFFS, run the following commands in the shell:
+\cs
+    ->sysTffsFormat (0);
+\ce
+
+The above commands take a few minutes to complete. (Do not interrupt the 
+board during this time. It may result in damage to the flash.) Properly 
+formatted TrueFFS volumes can be mounted using the following commands 
+(required each time VxWorks boots): 
+
+\cs
+    /@ for primary flash @/
+    usrTffsConfig (0, 0, "/tffs0/");
+
+\ce
+
+TrueFFS can also serve as a boot device.  Assuming the target 
+is configured to access files on the host file system, the 
+following command will copy VxWorks from the host to the TrueFFS 
+volume on the target.  (Substitute /tff1/ for the secondary flash):
+
+\cs
+    copy ("vxWorks.st", "/tffs0/vxWorks.st");
+\ce
+
+To boot with a VxWorks image in the TrueFFS volume, define INCLUDE_TFFS in 
+config.h and build a boot ROM. Program the new boot ROM image into the boot 
+flash and specify the following in the boot dialog:
+
+\cs
+    /@ for primary flash @/
+    boot device: tffs=0,0
+    file name  : /tffs0/vxWorks.st
+
+\ce
+
+However, this release does not support using TrueFFS utility routines to 
+program the boot ROM.
+
+\sh Serial Configuration
+
+The UART device is configured with 8 data bits, 1 stop bit, hardware
+handshaking, and parity disabled.  The device operates at 115200 bps. The
+on-chip DUART on the MPC8544 is supported. However, only one channel of the 
+DUART is used on the ADS8544 reference boards.
+
+\sh Programmable Interrupt Controller
+
+The PIC driver provided by this BSP supports all internal and external 
+interrupt sources. The driver can also be configured to route such interrupt 
+sources to the critical interrupt pin. However, because critical interrupts 
+are routed directly to the interrupt source instead of being manager by the 
+PIC with IACK or EOI, the Critical Interrupt Summary registers are used to 
+check for the source. The transient values in these registers cause a spurious
+vector when indexing into the vector table.
+Support for shared message interrupt for PCI Express MSI has been added.
+
+
+\sh SPECIAL CONSIDERATIONS
+This section describes miscellaneous information that you need to know before 
+using this BSP.
+
+\sh Known Issues
+PCIEX and PCI line interrupts are not working for this BSP. 
+It is still being investigated, MSIs are working for PEX.
+
+Note the HEND drivers have been replaced by VXB_END drivers.
+PCI Bus support is only supported for functional MSI capable devices.
+Legacy PCI interrupts are broken.
+
+Note that "make release" can't build 'default_rom', 'default_romCompress' and 
+'default_romResident' by using sfgnu tool chain.
+
+If you do need to build project using sfgnu tool chain, you should modify
+'target/h/tool/gnu/ldscripts/link.DOTBOOTROM' by replacing 
+\cs
+  .boot (wrs_kernel_text_start + wrs_kernel_rom_size - 0x800) :
+  {
+  *(.boot)
+  }
+  .reset (wrs_kernel_text_start + wrs_kernel_rom_size - 4) :
+  {
+  *(.reset)
+  }
+\ce
+with: 
+\cs
+  .boot (wrs_kernel_text_start + wrs_kernel_rom_size - 0x800) :   \
+      AT(wrs_kernel_text_start + wrs_kernel_rom_size - 0x800) {
+  *(.boot)
+  . = 0x7fc;
+  *(.reset)
+  }
+\ce 
+Where wrs_kernel_text_start + wrs_kernel_rom_size = 0xffffffff. 
+
+\sh Delivered Objects
+\is
+\i bootrom
+\i bootrom.hex
+\i bootrom_uncmp.hex
+\i bootrom_uncmp.bin
+\i vxWorks
+\i vxWorks.sym
+\i vxWorks.st
+\ie
+
+\sh Board Layout
+
+\bs
+                                            RJ45                                
+ _________________________________________  ETSEC __         __     __      ___ 
+|                                         |TOP #0|  |  COM  |  |USB|  |PS/2|   |
+|   ___   ___   ___   ___   ___           |BOT #1|  |_______|  |___|  |____|   |
+|  |   | |   | |   | |   | |   |          |______|                             |
+|  |   | |   | | S | | P | | P |                                    ___        |
+|  | P | | P | | G | | C | | C |                                   |   |       |
+|  | C | | C | | M | | I | | I |                                   | D |       |
+|  | I | | I | | I | | E | | E |                                   |   |       |
+|  |   | |   | | I | |   | |   |       ___________________         | D |       |
+|  | S | | S | |   | | S | | S |      |                   |        |   |       |
+|  | L | | L | | S | | L | | L |      |                   |        | R |       |
+|  | O | | O | | L | | O | | O |      |                   |        |   |       |
+|  | T | | T | | O | | T | | T |      |      C P U        |        | 2 |       |
+|  |   | |   | | T | |   | |   |      |                   |        |   |       |
+|  | # | | # | |   | | # | | # |      |     MPC8544E      |        |   |       |
+|  | 1 | | 2 | |___| | 1 | | 2 |      |                   |        | D |       |
+|  |   | |   |       |___| |___|      |                   |        |   |       |
+|  |___| |___|                        |___________________|        | I |       |
+|                                                                  |   |       |
+|  ____                                                            | M |       |
+| |SW1 |                                                           |   |       |
+|  ----                                                            | M |       |
+|                                                                  |___|       |
+|  ____   ____                                                                 |
+| |SW2 | |SW3 |                                       ________________         |
+|  ----   ----                                       |                |        |
+|  ____   ____                                       |                |        |
+| |SW4 | |SW5 |                        _________     |     U L I      |        |
+|  ----   ----      ___               |         |    |                |        |
+|  ____   ____     |   |              |  BOOT   |    |     M1575      |        |
+| |SW6 | |SW7 |    | P |   ________   |  ROM    |    |                |        |
+|  ----   ----     | R |  |        |  |_________|    |                |        |
+|  ____   ____     | O |  |        |   ____   ____   |________________|        |
+| |SW8 | |SW9 |    | M |  | FLASH  |  |SATA| |SATA|                            |
+|  ----   ----     | J |  |        |   ----   ----                             |
+|  ____   ____     | E |  |________|   ____   ____    ___________________      |
+| |SW10| |SW11|    | T |              |SATA| |SATA|  |     IDE SLOT      |     |
+|  ----   ----     |___|               ----   ----   |___________________|     |
+|______________________________________________________________________________|
+                                                                                 
+\be
+
+BIBLIOGRAPHY
+For further information on the ADS8544 board, refer to the following 
+documents:
+
+\tb MPC8544E Reference Manual 
+
+\tb PowerPC E500 Core reference Manual 
+
+\tb Motorola PowerPC Microprocessor Family: The Programming Environments 
+
+\tb MPC8544 ADS Users Guide  
+
+Much of the Freescale documentation listed above can be found online. 
+The following URL is correct at the time of writing:
+
+http://www.freescale.com/webapp/sps/site/prod_summary.jsp?code=MPC8544E
+
+If the MPC8544E-specific link listed above does not work, you can also 
+navigate to the documentation from the main link at: 
+
+http://www.freescale.com/
+
+SEE ALSO
+
+\tb Workbench User's Guide: Introduction
+\tb VxWorks Programmer's Guide: Configuration
+\tb VxWorks Programmer's Guide: Architecture Appendix

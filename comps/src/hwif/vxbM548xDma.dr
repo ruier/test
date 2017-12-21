@@ -1,0 +1,3 @@
+#ifdef DRV_DMA_COLDFIRE
+    m548xDmaDrvRegister ();
+#endif /* DRV_DMA_COLDFIRE */

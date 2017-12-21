@@ -1,0 +1,9 @@
+#if defined (INCLUDE_GEI825XX_VXB_END) && defined (INCLUDE_GEI825XX_VXB_END2)
+#error "INCLUDE_GEI825XX_VXB_END and INCLUDE_GEI825XX_VXB_END2 are both defined"
+#endif
+
+#if defined (INCLUDE_GEI825XX_VXB_END2) && !defined (INCLUDE_END2)
+#error "INCLUDE_GEI825XX_VXB_END2 requires INCLUDE_END2"
+#endif
+
+IMPORT void geiEnd2Register(void);

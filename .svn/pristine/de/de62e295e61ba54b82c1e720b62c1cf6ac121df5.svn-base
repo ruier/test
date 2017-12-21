@@ -1,0 +1,3 @@
+#ifdef DRV_PCIBUS_LSI_PCIEX
+    lsiPciExRegister ();
+#endif /* DRV_PCIBUS_LSI_PCIEX */

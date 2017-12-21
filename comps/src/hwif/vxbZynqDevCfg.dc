@@ -1,0 +1,1 @@
+IMPORT void zynq7kDevCfgRegister (void);

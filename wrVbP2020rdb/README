@@ -1,0 +1,16 @@
+
+                 README: wrVbP2020rdb
+
+This file contains board-specific information for PPC Guest BSP, wrVbP2020rdb,
+based on the Freescale P2020RDB target board. Specifically, this file contains 
+information on any BSP interface changes from previous software or hardware 
+versions, and contains caveats that the user must be aware of before using 
+this BSP.
+
+------------------------------------------------------------------------------
+RELEASE 6.9/0:
+
+        Released from Wind River for Guest OS, VxWorks 6.9.1
+        Verified with Hypervisor 1.3.0.
+
+        Initial release.

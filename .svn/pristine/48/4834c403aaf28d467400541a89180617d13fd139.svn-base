@@ -1,0 +1,3 @@
+#ifdef	INCLUDE_TIMER_SYS
+    usrVxbTimerSysInit ();
+#endif	/* INCLUDE_TIMER_SYS */

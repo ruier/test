@@ -1,0 +1,4 @@
+#ifdef INCLUDE_SPI_BUS
+IMPORT void spiRegister (void);
+#endif /* INCLUDE_SPI_BUS */
+

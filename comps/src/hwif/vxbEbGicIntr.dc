@@ -1,0 +1,3 @@
+#ifdef DRV_EB_GIC
+extern void vxbEbGenIntrCtlRegister(void);
+#endif /* DRV_EB_GIC */

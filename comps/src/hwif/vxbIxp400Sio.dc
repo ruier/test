@@ -1,0 +1,3 @@
+#ifdef DRV_SIO_IXP400
+extern void ixp400SioRegister (void);
+#endif /* DRV_SIO_IXP400 */

@@ -1,0 +1,3 @@
+---- rioDmaNread Matches (2 in 2 files) ----
+usrApi.c (d:\windriver69\vxworks-6.9\target\config\svpx6-5s512-715):INT32 rioDmaNread(UINT8 chan,char  *pcSrcAddr,char *pcDestAddr,UINT32 uiSize)
+usrApi.h (d:\windriver69\vxworks-6.9\target\config\svpx6-5s512-715):extern INT32 rioDmaNread(UINT8 chan,char  *pcSrcAddr,char *pcDestAddr,UINT32 uiSize);

@@ -1,0 +1,4 @@
+#ifdef DRV_INTCTLR_VXSIM
+    vxbVxSimIntCtlrRegister();
+#endif /* DRV_INTCTLR_VXSIM */
+

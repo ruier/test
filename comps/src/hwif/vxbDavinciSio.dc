@@ -1,0 +1,1 @@
+extern void dv16550SioRegister (void);

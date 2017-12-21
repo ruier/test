@@ -1,0 +1,41 @@
+
+           README: Freescale P1021MDS (fsl_p1021_mds)
+
+This file contains board-specific information for the Freescale P1021RMDS
+target board.  This file documents BSP interface changes from previous software
+or hardware versions, and notifies the user of serious caveats that must be
+noted before using this BSP.  Additionally, the target board's reference entry
+(fsl_p1021_mds/target.ref) provides board-specific information necessary
+to run VxWorks and should be read fully before this BSP is used.
+
+--------------------------------------------------------------------------------
+RELEASE 6.9/x
+    TODO:
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.x
+
+    Fixed potential memory corruption caused by sysNvRamGet(). (WIND00101057)
+    Fix the AMP device filter. (WIND00387606)
+
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Added vxBus I2C support. (WIND00243089)
+    Fixed SPI_LOOP macro in sysFslSpi.h (WIND00253070)
+    Update the description of Security Engine. (WIND00331832)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Moved L1 cache parity error handling to the arch library.  L1 cache parity
+       checking is now enabled by default. L1 parity errors now generate
+       (in many cases recoverable) machine check exceptions.  (WIND00309426)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+    update
+
+    Initial Release.
+

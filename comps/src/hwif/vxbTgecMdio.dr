@@ -1,0 +1,3 @@
+#ifdef DRV_MII_TGEC_MDIO
+    tgmRegister();
+#endif

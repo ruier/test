@@ -1,0 +1,77 @@
+
+                 README: Freescale QorIQ P5020 DS/Simics
+
+This file contains board-specific information for the Freescale QorIQ P5020DS
+and Simics target model.  Specifically, this file contains information on any
+BSP interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+
+------------------------------------------------------------------------------
+
+RELEASE 6.9/7
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    Fixed FSL sRIO share slave target memory issue, AMP RMAN message END
+    doesn't work issue, RMAN port 1 doesn't work issue.(WIND00418128)
+
+RELEASE 6.9/6
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    Fixed time base enable issue on non-zero CPUs. (WIND00403567)
+
+RELEASE 6.9/5
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Removed RESERVED_ATOMICS functionality, which is introduced in
+    VxWorks 6.9.2 UP2, from BSP and PPC arch-specific libraries.
+    Fixed reboot failure on non-primary OS in AMP. (WIND00344093)
+    Restricted enabling and disabling L3 cache only on physical Core0 for
+    multi-core solutions. (WIND00341977)
+    Added missing L2 cache flush on non-primary core at reboot in SMP.
+    (WIND00341662)
+    Removed optional components, redundant definitions and undefinitions from
+    config.h. (WIND00334904)
+    Add related define for romInit.s (WIND00360538)
+
+RELEASE 6.9/4
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Added vxBus I2C support. (WIND00243089)
+    Added Errata implementation A-003474(DDR) and A-003999(FPU) (WIND00331187).
+
+RELEASE 6.9/3
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    SYSTEM_GLOBALS have been removed. They are replaced with the
+       RESERVED_ATOMICS functionality which is implemented in the PPC arch-
+       specific libraries (WIND00329621).
+
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+    
+    Support tffs/sata/dtsec5/tgec/pcie/sd/usb.
+    Updates to L3 cache to support access by multiple cores (WIND00297094).
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Replaced INCLUDE_DYNAMIC_WRLOAD with an architecture independant wrload
+    initialization and memory mapping/unmapping.  Added bootrom and BSP
+    support to execute secondary uAMP images with a physical bias on any
+    64MB boundary.
+
+    Reorganized romInit to make it common across QorIQ targets and to 
+    functionalize the TLB and cache initialization. 
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+    
+    Initial release to support both Simics and real hardware.

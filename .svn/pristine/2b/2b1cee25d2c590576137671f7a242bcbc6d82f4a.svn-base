@@ -1,0 +1,3 @@
+---- tempMonitorInit Matches (2 in 2 files) ----
+tempMonitor.c (e:\windriver69\windriver69\vxworks-6.9\target\config\ilrmc-10gbe\usr):STATUS tempMonitorInit()
+usrApp.c (e:\windriver69\windriver69\vxworks-6.9\target\config\ilrmc-10gbe):    tempMonitorInit();

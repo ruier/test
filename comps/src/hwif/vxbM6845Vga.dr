@@ -1,0 +1,3 @@
+#ifdef DRV_VGA_M6845
+    m6845vxbRegister ();
+#endif /* DRV_VGA_M6845 */

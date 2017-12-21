@@ -1,0 +1,3 @@
+#ifdef DRV_SPIFLASH_SP25
+    vxbSp25SpiFlashRegister();
+#endif /* DRV_SPIFLASH_SP25 */

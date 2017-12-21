@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTLR_COMCERTO
+    comcertoIntCtlrRegister ();
+#endif /* DRV_INTCTLR_COMCERTO */

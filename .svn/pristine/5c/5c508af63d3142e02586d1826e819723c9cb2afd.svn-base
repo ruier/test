@@ -1,0 +1,4 @@
+#ifdef INCLUDE_VXB_CPM
+    cpmRegister();
+#endif
+

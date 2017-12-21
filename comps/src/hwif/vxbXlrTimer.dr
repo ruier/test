@@ -1,0 +1,4 @@
+#ifdef INCLUDE_XLR_TIMER
+    vxbXlrTimerDrvRegister ();
+#endif /* INCLUDE_XLR_TIMER */
+    

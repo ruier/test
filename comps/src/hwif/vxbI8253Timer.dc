@@ -1,0 +1,3 @@
+#ifdef DRV_TIMER_I8253
+    extern void vxbI8253TimerDrvRegister (void);
+#endif /* DRV_TIMER_I8253 */

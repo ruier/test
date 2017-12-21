@@ -1,0 +1,209 @@
+
+                 README: Motorola MPC834X ADS (ads834x)
+
+This file contains board-specific information for the Motorola MPC834x
+ADS target board.  Specifically, this file contains information on any BSP
+interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+Additionally, the target board's reference entry (i.e., 'man ads834x')
+provides board-specific information necessary to run VxWorks, and
+should be read before this BSP is used.
+
+------------------------------------------------------------------------------
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Correct resource type of general purpose timer. (WIND00278669)
+    Fixed potential memory corruption caused by sysNvRamGet(). (WIND00101057)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+    Delete _MMU_UBAT_VP attribute. (WIND00162540)
+    clear mot83xxPci.h. (WIND00212294)
+
+RELEASE 2.0/8:
+    
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Fixed WIND00121316 - Define two start flags and provide accurate delay 
+                         routine in I2C driver.
+    Fixed WIND00046377 - Added workaround for errata LBC2.
+    Fixed WIND00118187 - Support USB host and target.
+    vxSvrGet() support - Move vxSvrGet() from sysALib.s to vxALib.s.
+    Code integration   - Integrate the USB target support by INCLUDE_FSL_TCD
+
+RELEASE 2.0/7:
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Modified to support MPC8349EA-MDS board. This version is compatible with
+    ADS834X. Now the default configuration is for MPC8349EA-MDS. To support
+    ADS834X board, macro MPC8349EA_MDS in config.h should be undefined.
+
+RELEASE 2.0/6
+
+    Released from Wind River for VxWorks 6.6
+
+RELEASE 2.0/5
+
+    Released from Wind River for Workbench 2.6, VxWorks 6.5
+
+    Added support for the IPNet Network Stack.
+    Correct wrong vendor code for the MAC address.(CQ:86932)
+
+RELEASE 2.0/4
+
+    Changes:
+    WIND00069944 - Added usbPciStub.c dummy function for compatability
+
+RELEASE 2.0/3
+
+    Changes:
+    WIND00069071 - no longer swap MAC address in load string.
+    WIND00061530 - replace magic numbers.
+    Fixed Defect 60694.
+    Added vxBus Support for TSEC HEnd driver and Timer drivers.
+    Added support for Rev3 silicon on for RevA board using DDR1.
+RELEASE 2.0/2
+
+    Changes:
+    SPR 113600 found and fixed. PCI outbound windows set incorrectly.
+
+RELEASE 2.0/1
+
+    Changes:
+    
+    Added support for startType, MAC storage in pseudo NVRAM. 
+    Using Rev1.1 silicon as default. 
+    PCI2 support added but interrupts untested due to PIB issues.
+    USB2.0 EHCI host controller support added for rev1.1 silicon only.
+    
+    SPR#111361 A fix is required for USB stack which is not due to be released
+    until vxWorks 6.2. A simple fix see published description.
+    
+    This BSP assumes revision 1.1 silicon or earlier for setting clk speed 
+    to allow all silicon to work. Expect Rev2 silicon will support 667Mhz.
+    out of the box. 
+    Must modify config.h for MPC8343 and rebuild bootrom.
+    MPC8343 was not tested due lack of hw.
+    More information about board clk configuration was added.
+    
+    SPR#110686 Performance enhancements - This BSP has been modified to improve 
+    the TSEC device driver and 8349 hw performance. Also a one line change is 
+    required to the motTsecEnd.c driver which will be detailed in the published 
+    description.
+    
+    Errata:
+    CPU4 - Means illegal address access may cause CPU to hang therefore some 
+    BSP error tests will fail. This is the reference to machine check 
+    unsupported in earlier rev of BSP.
+    
+    Undefine REV1_1_SILICON and define REV1_0_SILICON, if using rev1.0 silicon, 
+    in config.h and will ensure pci auto config not used and also ARB1 errata will be implemented (requires new bootrom).
+    
+    Important Info
+    
+    A new bootrom must be created if using previous versions of BSP due to MAC
+    storage change.
+    No longer supporting rev1.0 silicon although was tested.
+    MPC8343 not supported.
+    Default CPU clock freq is 400Mhz and DDR 266MHZ. If you want to change this
+    you must build a new bootrom and look at changes required to hard reset 
+    configuration word(HRCW) set in config.h and detailed in target.ref.
+    64 bit PCI is the default setting and requires a new bootrom to change.
+    See ads834x.h for some HRCW settings and freescale MPC8349E reference manual. 
+    Cannot use switch settings on board to set HRCW, this is unsupported.
+    Added support for startType, MAC storage in pseudo NVRAM. 
+    Using Rev1.1 silicon as default. 
+    PCI2 support added but interrupts untested due to PIB issues.
+    USB2.0 EHCI host controller support added for rev1.1 silicon only.
+
+    SPR#111361 A fix is required for USB stack which is not due to be released
+    until vxWorks 6.2. A simple fix see published description.
+
+    This BSP assumes revision 1.1 silicon or earlier for setting clk speed 
+    to allow all silicon to work. Expect Rev2 silicon will support 667Mhz.
+    out of the box. 
+    Must modify config.h for MPC8343 and rebuild bootrom.
+    MPC8343 was not tested due lack of hw.
+    More information about board clk configuration was added.
+
+    SPR#110686 Performance enhancements - This BSP has been modified to improve 
+    the TSEC device driver and 8349 hw performance. Also a one line change is 
+    required to the motTsecEnd.c driver which will be detailed in the published 
+    description.
+
+    Errata:
+    CPU4 - Means illegal address access may cause CPU to hang therefore some 
+    BSP error tests will fail. This is the reference to machine check 
+    unsupported in earlier rev of BSP.
+
+    Undefine REV1_1_SILICON and define REV1_0_SILICON, if using rev1.0 silicon, 
+    in config.h and will ensure pci auto config not used and also ARB1 errata 
+    will be implemented (requires new bootrom).
+
+    Important Info
+
+    A new bootrom must be created if using previous versions of BSP due to MAC
+    storage change.
+    No longer supporting rev1.0 silicon although was tested.
+    MPC8343 not supported.
+    Default CPU clock freq is 400Mhz and DDR 266MHZ. If you want to change this
+    you must build a new bootrom and look at changes required to hard reset 
+    configuration word(HRCW) set in config.h and detailed in target.ref.
+    64 bit PCI is the default setting and requires a new bootrom to change.
+    See ads834x.h for some HRCW settings and freescale MPC8349E reference manual
+    . 
+    Cannot use switch settings on board to set HRCW, this is unsupported.
+
+RELEASE 2.0 /0
+
+    Modified for vxWorks 6.x
+    Added support for CPU_VARIANT _83xx
+    Added support for extra BATs and breakpoints.
+    bootrom.hex image now supported.
+    
+    EAR:
+    
+    PCI Autoconfig will not work - Errata
+    PCI support therefore requires prior knowledge of PCI slot being used. 
+    The example supplied for GEI and FEI is for them present in PMC#1 of the 
+    platform Base Board and therefore will only work if one or the other enable 
+    with the correct device. GEI expected is 82543. 
+    If the bootrom accesses via configuration cycle unpopulated PCI slot this 
+    will cause the board to hang.
+    Interrupt assignment was done manually.
+    
+    PCI support was tested on the platform base board only which is available 
+    from Freescale.
+    
+    Machine Check Exception is not supported and will cause the board to hang if 
+    triggered.
+    
+    TFFS support is only for part of the flash 0xffc00000 -> 0xfffe0000. 
+    Below this is the boot image area and above is for boot parameter storage. 
+    To include TFFS you need to add cfiscs.o to MACH_EXTRA in Makefile.
+    EAR:
+
+    PCI Autoconfig will not work - Errata
+    PCI support therefore requires prior knowledge of PCI slot being used. 
+    The example supplied for GEI and FEI is for them present in PMC#1 of the 
+    platform Base Board and therefore will only work if one or the other enable 
+    with the correct device. GEI expected is 82543. 
+    If the bootrom accesses via configuration cycle unpopulated PCI slot this 
+    will cause the board to hang.
+    Interrupt assignment was done manually.
+
+    PCI support was tested on the platform base board only which is available 
+    from Freescale.
+
+    Machine Check Exception is not supported and will cause the board to hang if
+    triggered.
+
+    TFFS support is only for part of the flash 0xffc00000 -> 0xfffe0000. 
+    Below this is the boot image area and above is for boot parameter storage. 
+    To include TFFS you need to add cfiscs.o to MACH_EXTRA in Makefile.
+ 

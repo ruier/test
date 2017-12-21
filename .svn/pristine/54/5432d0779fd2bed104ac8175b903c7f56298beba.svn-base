@@ -1,0 +1,1245 @@
+\" apm_serengeti/target.ref - APM Serengeti target specific documentation
+\"
+\" Copyright (c) 2011, 2012 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01m,24aug12,cwl  Corrected the macro RAM_LOW_ADRS. (WIND00371428)
+\" 01l,11apr12,syt  corrected some typos and updated some sections to make it more clear.
+\"                  (WIND00344733)
+\" 01k,02mar12,syt  updated the descriptions about I2C and SPI.
+\" 01j,01mar12,x_s  added description about SMP/AMP reboot issue in
+\"                  Known Problems section.
+\" 01i,29feb12,syt  updated the description about SATA.
+\" 01h,10feb12,syt  added SATA,SDHC,I2C,SPI and TFFS support.
+\" 01g,04jan12,x_s  clean wrong descriptions.
+\" 01f,20dec11,x_z  added support for QMAN and on-chip MAC and use on-chip MAC
+\"                  as default Ethernet port; updated memory map.
+\" 01e,14dec11,x_s  add SMP & AMP descriptions.
+\" 01d,30jun11,x_z  add PCI Express support.
+\" 01c,18jul11,b_m  add usb descriptions.
+\" 01b,12jul11,b_m  add instructions to program VxWorks bootrom via U-Boot.
+\" 01a,25may11,syt  written.
+\"
+\TITLE apm_serengeti - APM Serengeti
+
+\sh NAME
+`APM Serengeti'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks for the apm_serengeti BSP. Please read the section "Getting the board
+running VxWorks" in order to configure the board to run VxWorks.
+
+\sh Switches
+
+There are two main jumpers in the bottom left corner of the Serengeti board.
+Be careful about the J5 & J6 settings.
+
+Default Switch Settings:
+
+\ts
+Jumper Number | Short Circuit    | Open Circuit
+--------------------------------------------------
+J5            | 1-2,3-4,5-6,9-10 | 7-8,11-12,13-14
+              |                  | 15-16
+J6            | 5-6,7-8,9-10     | 1-2,3-4,11-12
+              |                  | 13-14,15-16
+\te
+
+\sh Getting the board running VxWorks
+This section will guide you how to run VxWorks on the APM Serengeti board.
+
+1. Creating a bootrom.bin:
+
+    Open the VxWorks Development Shell, change directory to apm_serengeti
+    BSP directory, and then build the VxWorks bootrom image.
+
+\cs
+    cd target/config/apm_serengeti
+    make bootrom.bin
+\ce
+
+2. Flashing the VxWorks bootrom image via BDI3000
+
+    This section describes how to program VxWorks bootrom to the flash
+    by using the BDI3000 under Windows.
+
+    Connect the BDI3000 to the JTAG/BDM connector(CON17) on Serengeti board,
+    reset the BDI3000 by disconnecting and reconnecting the power cable.
+
+    Configure the BDI3000 using apm86xxx.cfg, the file needs to be modified
+    to fit target board. For the details, please refer to the Serengeti
+    Evaluation Board Software User's Manual.
+
+    Connect the serial cable to the UART0 port of the board and bring up a
+    PuTTY window, open a Command Prompt Window and start TFTP server
+    on the host system: tftpsrv [p] [w] [dRootDirectory], for example:
+
+\cs
+        tftpsrv c:/BDI
+\ce
+
+    Open another new Command Prompt window, and Telnet to the BDI3000, for example:
+\cs
+        telnet 192.168.53.72
+\ce
+    Where 192.168.53.72 is BDI's IP address, then you should see prompt as: BDI>
+
+    Set HOST to be the IP address of the PC in the BDI window:
+
+\cs
+        BDI> HOST <IP address of your PC>
+\ce
+
+    Flash Bootrom to NOR Flash:
+
+    Execute the following steps to program bootrom via BDI3000 for
+    Serengeti board at the BDI prompt:
+\cs
+        PROG> config apm86xxx.cfg
+        PROG> erase
+        PROG> prog
+\ce
+
+3. Flashing the VxWorks bootrom image via U-Boot
+
+    This section will describe how to program a VxWorks bootrom into the flash
+    using the pre-flashed NOR U-Boot and SD-Card U-Boot.
+
+    The following steps require APM Serengeti software release 1.18.05 or above,
+    in which it has the necessary utilities (eg: ipp_mkraw, a tool to generate
+    binary image for SD-Card) to program the VxWorks bootrom. Please contact
+    APM support to get the software release.
+
+    Note: The section 3.1 and 3.2 only need to be done once for the first time.
+          If you already have a working SLIMpro firmware on-board and an SD
+          memory card that has a U-Boot image, please skip these two sections
+          and jump to section 3.3 directly.
+
+    3.1 Programming the SLIMpro firmware for SD-Card boot
+
+        3.1.1 Set the boot location jumper to NOR flash
+
+            Make sure Jumper J5[1-2] is shorted. This will allow the board to
+            boot from the NOR flash.
+
+        3.1.2 Starting a TFTP server
+
+            Open a TFTP server on your host. Make sure the root directory
+            contains the SLIMpro firmware which controls the board to boot from
+            SD-Card. Please contact APM support to get this specific firmware.
+
+        3.1.3 Make sure your host serial port's configuration is:
+
+            Baud Rate: 57600
+            Data: 8 bit
+            Parity: None
+            Stop: 1 bit
+            Flow Control: None
+
+        3.1.4 Configuring the NOR U-Boot environment
+
+            Power up the board, you'll see the U-Boot shell prompt,
+            something like:
+
+\cs
+U-Boot 2009.11-serengeti_1.18.05 (Jun 30 2011 - 13:48:34)
+
+CPU0:  AMCC PowerPC 460 APM86290 at 1200 MHz PLB=600 MHz
+       (SOC=1000 AXI=250 AHB=166 APB=83 EBC=100)
+       Internal PCI arbiter disabled
+       32 kB I-Cache 32 kB D-Cache
+Board: Serengeti - AppliedMicro APM86xxx Reference Board
+I2C:   ready
+SPI:   ready
+DRAM:  ........ 1 GB at 1332MHz
+FLASH: 64 MB
+Net:   eth0
+
+Type "run flash_nfs" to mount root filesystem over NFS
+
+Hit any key to stop autoboot:  0
+=>
+\ce
+
+            Type the following commands to setup the U-Boot environment.
+
+\cs
+            setenv ipaddr 192.168.0.3
+            setenv netmask 255.255.255.0
+            setenv serverip 192.168.0.2
+            setenv gatewayip 192.168.0.1
+\ce
+
+            Note: This is just an example, you should change the network
+                  parameters according to your actual environment.
+                  'ipaddr' is the target IP address while 'serverip' is
+                  your host IP address.
+
+        3.1.5 Programming the SLIMpro firmware to EEPROM
+
+            Type the following commands in the U-Boot shell.
+
+\cs
+            tftp 100000 <SLIMpro_firmware_SD_with_BSC>
+            i2c dev 1
+            eeprom write 100000 0 $(filesize)
+\ce
+
+            Note: <SLIMpro_firmware_SD_with_BSC> is the SLIMpro firmware
+                  you get from APM support.
+
+    3.2 Prepare an SD memory card for SD-Card boot
+
+        3.2.1 Build a U-Boot that boots from SD-Card
+
+            Please refer to APM Serengeti software user guide for how to
+            build U-Boot for SD-Cad boot. Also the 'ipp_mkraw' utility is
+            needed to generate the final binary image that is written to
+            an SD memory card.
+
+        3.2.2 Write the SD-Card U-Boot image to SD memory card
+
+            Get an empty SD memory card along with a USB card reader and
+            plug it into a USB port in a Linux host machine.
+
+            Type the following command in the Linux terminal shell.
+
+\cs
+            dd if=u-boot-sd.bin of=/dev/<sd card device>
+\ce
+
+            Note: You must be root to execute the command. Be careful about
+                  <sd card device> name. Make sure it is absolutely correct.
+
+    3.3 Programming the VxWorks bootrom
+
+        3.3.1 Set the boot location jumper to SD-Card
+
+            Make sure Jumper J5[1-2] is open. This will allow the board to
+            boot from the SD-Card.
+
+        3.3.2 Starting a TFTP server
+
+            Open a TFTP server on your host. Make sure the root directory is
+            your apm_serengeti BSP directory which contains the VxWorks bootrom
+            image you've just created.
+
+        3.3.3 Make sure your host serial port's configuration is:
+
+            Baud Rate: 57600
+            Data: 8 bit
+            Parity: None
+            Stop: 1 bit
+            Flow Control: None
+
+        3.3.4 Configuring the SD-Card U-Boot environment
+
+            Insert the SD memory card to SD_CARD_SLOT 1 on the board.
+            Then power up the board, you'll see the U-Boot shell prompt,
+            something like:
+
+\cs
+U-Boot 2009.11-serengeti_1.18.05 (Jul 11 2011 - 13:16:12)
+
+CPU0:  AMCC PowerPC 460 APM86290 at 800 MHz PLB=400 MHz
+       (SOC=500 AXI=125 AHB=125 APB=50 EBC=50)
+       Internal PCI arbiter disabled
+       32 kB I-Cache 32 kB D-Cache
+Board: Serengeti - AppliedMicro APM86xxx Reference Board
+I2C:   ready
+SPI:   ready
+DRAM:   1 GB at 1324MHz
+FLASH: 64 MB
+Using default environment
+
+PCIE0: RC (link down)
+PCIE1: RC (link down)
+PCIE2: RC (link down)
+Net:   ERROR: ethaddr not set!
+eth0
+
+Type "run flash_nfs" to mount root filesystem over NFS
+
+Hit any key to stop autoboot:  0
+=>
+\ce
+
+            Type the following commands to setup the U-Boot environment.
+
+\cs
+            setenv ipaddr 192.168.0.3
+            setenv netmask 255.255.255.0
+            setenv serverip 192.168.0.2
+            setenv gatewayip 192.168.0.1
+            setenv ethaddr 00:11:22:33:44:55
+\ce
+
+            Note: This is just an example, you should change the network
+                  parameters according to your actual environment.
+                  'ipaddr' is the target IP address while 'serverip' is
+                  your host IP address.
+
+        3.3.5 Programming the VxWorks bootrom to NOR flash
+
+            Type the following commands in the U-Boot shell.
+
+\cs
+            tftp 100000 bootrom.bin
+            erase fff00000 ffffffff
+            cp.b 100000 fff00000 $(filesize)
+\ce
+
+        3.3.6 Set the boot location jumper back to NOR flash
+
+            Make sure Jumper J5[1-2] is shorted. This will allow the board
+            to boot from the NOR flash with VxWorks bootrom.
+
+4. Running the VxWorks bootrom
+
+   Re-power on the board, then the VxWorks bootrom should run up.
+
+FEATURES
+
+This section describes all features of the board, supported or not.
+It documents all configurations of the board and the interaction between
+features and configuration items.
+
+\sh List of Hardware Features (APM Serengeti board)
+
+\ts
+Hardware Interface | Controller | Driver/Component     | Status
+---------------------------------------------------------------
+UART:0             | on-chip    | vxbNs16550Sio.c      | SUPPORTED
+UART:1             | on-chip    | vxbNs16550Sio.c      | SUPPORTED
+UART:2             | on-chip    | vxbNs16550Sio.c      | UNSUPPORTED
+UART:3             | on-chip    | vxbNs16550Sio.c      | UNSUPPORTED
+MPIC               | on-chip    | vxbMpicIntCtlr.c     | SUPPORTED
+TIMER              | on-chip    | vxbPpc440Timer.c     | SUPPORTED
+NOR-FLASH          | S29WS512P  | 'flashmem.c/TFFS'    | SUPPORTED
+NAND-FLASH         | MT29F2G08  | -                    | UNSUPPORTED
+1GB-ETHERNET:0     | on-chip    | vxbApmPProMacEnd.c   | SUPPORTED
+1GB-ETHERNET:1     | on-chip    | vxbApmPProMacEnd.c   | SUPPORTED
+Classifier:0       | on-chip    | vxbApmPProMacCle.c   | SUPPORTED
+QMTM:0             | on-chip    | vxbApmPProQman.c     | SUPPORTED
+USB-OTG            | on-chip    | -                    | UNSUPPORTED
+USB-HOST:OHCI:0    | on-chip    | usbPciStub.c/OHCI    | SUPPORTED
+USB-HOST:EHCI:0    | on-chip    | usbPciStub.c/EHCI    | SUPPORTED
+USB-HOST:OHCI:1    | on-chip    | usbPciStub.c/OHCI    | SUPPORTED
+USB-HOST:EHCI:1    | on-chip    | usbPciStub.c/EHCI    | SUPPORTED
+PCI-E-HOST:0       | on-chip    | vxbApmPciEx.c/PCIe x1| SUPPORTED
+PCI-E-HOST:1       | on-chip    | vxbApmPciEx.c/PCIe x1| SUPPORTED
+PCI-E-HOST:2       | on-chip    | vxbApmPciEx.c/PCIe x4| SUPPORTED
+SATA:0             | on-chip    | vxbAhciStorage.c     | SUPPORTED
+SATA:1             | on-chip    | vxbAhciStorage.c     | SUPPORTED
+SD-CARD:0          | on-chip    | vxbSdhcStorage.c     | SUPPORTED
+SD-CARD:1          | on-chip    | vxbSdhcStorage.c     | SUPPORTED
+I2C:0              | on-chip    | sysApmI2c.c          | SUPPORTED
+I2C:1              | on-chip    | -                    | UNSUPPORTED
+SPI:0              | on-chip    | sysApmSpi.c          | SUPPORTED
+SPI:1              | on-chip    | sysApmSpi.c          | SUPPORTED
+\te
+
+\sh Feature Interactions
+Refer to the board vendor's documentation.
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Verified Hardware
+This BSP has been verified on Rev.1.1 of APM Serengeti board.
+The default clock speed for Serengeti is 1.2GHz core, 600MHz PLB.
+
+\sh Memory Maps
+The following table describes the default memory map of this BSP.
+
+\ts
+Start(Virtual) | Start(Physical) | Size  | Access to
+----------------------------------------------------
+0x0000_0000    | 0x0_0000_0000   | 1GB   | DDR SDRAM
+0x9000_0000    | 0xE_ffff_8000   | 32KB  | OCM space
+0xA000_0000    | 0x6_A000_0000   | 256MB | PCIE1 memory space
+0xD000_0000    | 0x6_D000_0000   | 1MB   | PCIE1 configuration space
+0xB000_0000    | 0x7_B000_0000   | 256MN | PCIE2 memory space
+0xD100_0000    | 0x7_D100_0000   | 1MB   | PCIE2 configuration space
+0xC000_0000    | 0xA_C000_0000   | 256MB | PCIE3 memory space
+0xD200_0000    | 0xA_D200_0000   | 1MB   | PCIE3 configuration space
+0xDD80_0000    | 0xD_DD80_0000   | 1MB   | CSR registers
+0xDDF0_0000    | 0xD_DDF0_0000   | 1MB   | QMTM HBF space
+0xDF40_0000    | 0xD_DF40_0000   | 256KB | MPIC registers
+0xE000_0000    | 0xF_A000_0000   | 2MB   | Peripheral Register Bank 1
+0xE020_0000    | 0xD_0040_0000   | 1MB   | Peripheral Register Bank 2
+0xE030_0000    | 0x5_0000_0000   | 1MB   | SATA space
+0xEFFF_C000    | 0x3_FFFF_C000   | 4KB   | DDR controller Space
+0xEFFF_D000    | 0x3_FFFF_D000   | 10KB  | Mailboxes space
+0xEFFF_F800    | 0x3_FFFF_F800   | 2KB   | MEMC space
+0xFC00_0000    | 0xF_FC00_0000   | 64MB  | NOR FLASH
+\te
+
+\sh Serial Configuration
+No special configuration needed.
+
+Default configuration is:
+    Baud Rate: 57600
+    Data: 8 bit
+    Parity: None
+    Stop: 1 bit
+    Flow Control: None
+
+\sh Network Configuration
+The on-chip Ethernet ports allow 10/100/1000M connection. The driver will
+auto-negotiate and configure the port accordingly. The BSP also supports Intel
+825xx based NICs via PCIe See the gei825xxVxbEnd driver for the supported mode
+numbers.
+
+The following END and corresponding END2 drivers are supported in this BSP.
+However, only END driver is enabled by default.
+
+\ts
+Driver | END                        | END2
+---------------------------------------------------------------
+APMMAC | DRV_VXBEND_APM_PPRO_MAC    | -
+GEI    | INCLUDE_GEI825XX_VXB_END   | INCLUDE_GEI825XX_VXB_END2
+\te
+
+For command line build, add INCLUDE_END2 into config.h right after the
+definition of INCLUDE_END. Also replace the END driver name with corresponding
+END2 driver name, then rebuild the bootrom and vxWorks image.
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, add INCLUDE_END2 component and corresponding END2
+component, this will un-define END automatically. Then rebuild your project.
+
+\sh Boot Devices
+The default supported boot device is:
+
+\ts
+    `apmMac0'  | on-chip Ethernet port 0 by default
+    `apmMac1'  | on-chip Ethernet port 1
+    `fs'       | U-Disk
+    `fs'       | SD-Card
+    `fs'       | SATA-Disk
+    `fs'       | TureFFS
+    `gei'      | Intel Pro1000 Ethernet PCI adaptor when the PCIe bus is enabled
+\te
+
+\sh Boot Methods
+The boot methods are affected by the boot parameters.  If no password is
+specified, RSH (remote shell) protocol is used.  If a password is specified,
+FTP protocol is used, or, if the flag is set to 0x80, TFTP protocol is used.
+
+SPECIAL CONSIDERATIONS
+
+\sh PCIe Access
+There are 3 PCIe slots on the board if you configure the PCIE1/SATA1 connector
+as PCIE mode. Now the default mode of the connector is SATA, so the board
+supports 1 PCIe x1 interface(PCIE2) and 1 PCIe x4 interface(PCIE3) by default.
+
+Note: Because of unknown hardware issue, all the devices you can find from the
+controller is the image of the first single-function endpoint device, so only
+one single-function endpoint device can be used with the 3 interfaces, and the
+bridge device is unsupported.
+
+NOTE: Link Auto-Negotiation is unsupported, so only PCIe x4 card can work with
+PCIE3 interface.
+
+The Intel PRO/1000PT 82572GI Gigabit Ethernet Adapter is the tested PCIe device
+supported in this release. INCLUDE_GEI825XX_VXB_END and DRV_PCIBUS_APM_PCIEX
+need be included to enable the Ethernet Adapter.
+
+\sh Interrupts
+
+PCI legacy interrupts are used, and MSI is unsupported.
+
+\sh USB Support
+
+The APM86x90 SOC implements three USB modules (USB0/USB1/USB2). The USB0 is
+a USB 2.0 On-The-Go (OTG) controller, which is not supported in this release.
+USB1 and USB2 are two host controllers which include one USB 2.0 EHCI host
+controller and one USB 1.1 OHCI host controller. USB1 and USB2 are supported
+in this release.
+
+For more information on configuring and using USB, please refer to:
+Wind River USB Programmer's Guide.
+
+\sh USB Host Support
+
+To use the USB modules in host mode, for command line mode, macro INCLUDE_USB
+must be defined in config.h. This will by default enable the following
+components:
+
+\cs
+    INCLUDE_USB_INIT
+    INCLUDE_OHCI
+    INCLUDE_OHCI_INIT
+    INCLUDE_EHCI
+    INCLUDE_EHCI_INIT
+    INCLUDE_USB_GEN2_STORAGE
+    INCLUDE_USB_GEN2_STORAGE_INIT
+    INCLUDE_DOSFS
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_MAIN
+\ce
+
+If you are working with Wind River Workbench to configure the project, then
+you need to manually select the above components.
+
+To use USB disk as a boot device, you should follow the instructions:
+
+For command line mode, make sure INCLUDE_USB is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the flash chip.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, besides the
+components listed above, INCLUDE_BOOT_FILESYSTEM also need to be included into
+the Kernel Configuration Window.
+
+\sh TrueFFS (only supported in UP mode)
+The standard Wind River TrueFFS product is supported in this release.
+
+This BSP uses the about 63 MBytes of the Spansion S29WS512P flash as the
+TrueFFS media. The overall FLASH address space is 0xfc000000 ~ 0xffffffff,
+subdivided as:
+
+\ts
+Start       | Size       | End         | Comment
+---------------------------------------------
+0xFF00_0000 | 128KB      | 0xFF01_FFFF | Blank
+0xFF02_0000 | 63MB-128KB | 0xFFEF_FFFF | TrueFFS
+0xFFF0_0000 | 1MB        | 0xFFFF_FFFF | VxWorks bootrom or rom_Compress image
+
+\te
+
+Note that the TFFS space cannot be extended beyond 0xffefffff, otherwise bootrom
+would be destroyed.
+
+To use TrueFFS, define INCLUDE_TFFS in config.h. When using TrueFFS on a new FLASH
+for the first time, you should format and configure the FLASH by using:
+
+\cs
+    sysTffsFormat ();
+    usrTffsConfig (0, 0, "/tffs0");
+\ce
+
+If you are using DOSFS, please use
+
+\cs
+    dosfsDiskFormat ("/tffs0");
+\ce
+
+Note: If you are running these commands in the VxWorks kernel shell, you may
+prefer to run the format operations as separate tasks, e.g.
+\cs
+    sp sysTffsFormat
+\ce
+since they can take a long time to complete.
+
+You should now be able to use VxWorks I/O and file system commands to access
+the FLASH device as if it were a disk.  For example, you can copy a vxWorks
+image from your host to TFFS by using file system 'copy'.  Of course, you should
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/tffs0/vxWorks");
+\ce
+
+If you want to use "/tffs0" as a boot device, you should follow the instructions:
+
+For command line mode, make sure INCLUDE_TFFS is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the flash chip.  Also make sure you have all the necessary file system
+components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    INCLUDE_TFFS
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_TFFS_MOUNT
+    INCLUDE_TL_FTL
+    INCLUDE_BOOT_FILESYSTEMS
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a default_romCompress.bin in the project directory, program
+it into the flash chip as a bootrom.
+
+Below is an example of using /tffs as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /tffs0/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : user
+    ftp password (pw)    : pass
+    flags (f)            : 0x0
+    target name (tn)     : serengeti
+    other (o)            : apmMac0
+\ce
+
+\sh SD memory card controller (SDHC)
+The APM86290's on chip SD host controller (SDHC) has two ports, they are
+connected to socket CON6 and CON7 on the board. Standard capacity and
+High capacity SD memory cards up to and including 4 GB are supported.
+The SDHC driver does not support MMC cards.
+
+For command line mode, make sure component DRV_STORAGE_SDHC is defined in
+config.h, re-build a bootrom from the BSP directory under VxWorks Development
+Shell, and program it into the flash chip.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    DRV_STORAGE_SDHC
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_DISK_UTIL
+    INCLUDE_BOOT_FILESYSTEMS
+\ce
+
+Use of the internal DMA engine, and selection of interrupt vs. polled mode,
+are configured by setting the values of 'dmaMode' and 'polling' in hwconf.c.
+For example, to select interrupt mode and enable use of the internal DMA engine:
+\cs
+    /@ hwconf.c @/
+    ...
+    struct hcfResource sdhcResources[] = {
+    ...
+        { "dmaMode",             HCF_RES_INT,    { (void *)1 } },
+        { "polling",             HCF_RES_INT,    { (void *)0 } },
+    ...
+    };
+    ...
+\ce
+
+When using an SD card for the first time, you should format it as a FAT file
+system by using
+\cs
+    dosFsVolFormat ("/sd0:1", 0x20, 0);    /@ FAT32 format @/
+\ce
+or
+\cs
+    dosFsVolFormat ("/sd0:1", 0x10, 0);    /@ FAT16 format @/
+\ce
+
+Now, you can use VxWorks I/O and file system commands to access the SD card
+device as if it were a disk.  For example, you can copy a vxWorks image from
+your host to the SD card by using file system copy. Of course, you should
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/sd0:1/vxWorks");
+\ce
+
+\sh SATA Support
+
+APM86290's SATA controller has two SATA ports, SATA port 0 is connected to
+SATA vertical connector (CON5)on the board, SATA port 1 is shared with
+PCI Express port 1, Which can be enabled by using PCI Express-to-SATA adapter.
+For the Serengeti 1.1 board, you should use the cross-over SATA cable provided
+by APM for SATA port 1. It is shifted in the Serengeti board package.
+For the details, please reference the
+\tb Serengeti APM86290 Evaluation Board User's Manual.
+
+To use the SATA interfaces, the macro INCLUDE_DRV_STORAGE_AHCI must be defined
+in config.h.
+
+When using an SATA disk for the first time, you should format it as a FAT file
+system by using
+\cs
+    dosFsVolFormat ("/ata0:1", 0x20, 0);    /@ FAT32 format @/
+\ce
+or
+\cs
+    dosFsVolFormat ("/ata0:1", 0x10, 0);    /@ FAT16 format @/
+\ce
+
+Now, you can use VxWorks I/O and file system commands to access the SATA card
+device as if it were a disk.  For example, you can copy a vxWorks image from
+your host to the SATA disk by using file system copy.
+
+\cs
+    copy ("vxWorks", "/ata0:1/vxWorks");
+\ce
+If you want to use SATA disk as a boot device, you should follow these steps:
+
+For command line mode, make sure INCLUDE_DRV_STORAGE_AHCI is defined in config.h,
+re-build a bootrom from the BSP directory under VxWorks Development Shell, and
+program it into the flash chip.  Also make sure you have all the necessary file
+system components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    INCLUDE_DRV_STORAGE_AHCI
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_DISK_UTIL
+    INCLUDE_BOOT_FILESYSTEMS
+\ce
+
+On APM86290, the SERDES PHY of SATA port 1 is muxed with PCIE0's, to enable PCIE0,
+parameter SATA_PORT1_ENABLE should be set as FALSE and PCIEX0_PORT0_ENABLE set as
+TRUE, vice versa.
+
+\sh Offload Ethernet Support
+
+APM86290 processor introduces the PACKETpro architecture. This architecture
+offers offload Ethernet support, including Queue Manager/Traffic Manager,
+Classifier, and Ethernet, etc.
+
+Like other offload Ethernet Controller, the Ethernet Controller is not a purely
+standalone device. It does not manage its own RX and TX DMA descriptor rings.
+Instead, Queue Manager/Traffic Manager is used to manage the queues. and
+Classifier is used to decide which packets should be forward to the queues
+belongs to the Ethernet Controller.
+
+Note: Ethernet Controller supports 2 10/100/1000M RGMII ports. But only MII
+interface attached to RGMII port 0 can be used to manage PHY device, and so many
+resources can be divided to 2 independent parts, so the drives for
+Queue Manager/Classifier/Ethernet are only implemented as 2 uniform drivers -
+vxbApmPProQman.c, vxbApmPProMacEnd.c and attached vxbApmPProMacCle.c.
+
+The Classifier can be used with Ethernet Controller only, and the packets
+received by the Ethernet Controller must be sent to this module to decide the
+next action - drop, enqueue to one RX Ingress queue, forward to another port, etc.
+
+The Queue Manager is responsible for managing the messages, queues, Prefetch
+Buffers and interrupts for Mailboxes that are just the Prefetch Buffers for PPC
+cores, and supports Traffic Management within the region of one Virtual Queue.
+It allows the sub-systems to communicate to each other through pre-programmed
+queuing points, and controls the message storage and retrieval processes plus
+the queue status advertising.
+
+The Queue Manager/Classifier drivers support the following functionality:
+
+\is
+\i Allocate/Deallocate/Enqueue/Dequeue/Query operations for message queues
+\i Interrupt driven and polled mailbox event handling
+\i Traffic Management based on Virtual Queue
+\i Software-Programmable Parser/AVL Search Tree for 124-byte RX Packet Header
+\i Dynamic switching for Parser Tree
+\ie
+
+Documentation for these APIs can be found in the following files:
+
+\is
+\i target/src/hwif/resource/vxbApmPProQman.c -- Queue Manager API
+\i target/src/hwif/end/vxbApmPProMacCle.c -- Classifier API
+\ie
+
+Also, several Qman test cases in vxbApmPProQman.c can be enabled if
+APM_QMAN_TEST is defined in vxbApmPProQman.c.
+
+
+\sh I2C controller and I2C EEPROM
+APM86290 has two I2C bus controllers, EEPROM AT24C02 on I2C bus 0 is
+supported in this release, while EEPROM AT24C256 on bus 1 is not.
+To enable I2C EEPROM function, please define the corresponding macro
+in config.h:
+
+\cs
+    #define INCLUDE_APM_I2C
+\ce
+
+I2C controller and I2C device should be initialized as the following two steps:
+
+Step1:  Create one I2C driver instance and initialize I2C controller.
+\cs
+    sysI2cDevInit
+    (
+    APM_I2C0_BASE,      /@ I2C controller registers bank base address @/
+    I2C_FRQ_400KHZ      /@ I2C bus speed frequency @/
+    )
+\ce
+Step2:  Create one I2C EEPROM device instance and set I2C EEPROM's parameters.
+\cs
+    sysI2cEepromDevinit
+    (
+    pEepromTable,       /@ I2C device parameter table @/
+    pDrvCtrl            /@ I2C bus instance @/
+    )
+\ce
+The I2C parameter table includes the device's parameters, as the following
+struct shows:
+\cs
+typedef struct
+    {
+    UINT32  i2cRegBase;         /@ I2C bus index @/
+    UINT8   devAddr;            /@ device address @/
+    UINT8   wordAddrLen;        /@ EEprom word address length @/
+    UINT32  pageSize;           /@ EEprom page size @/
+    UINT32  devSize;            /@ EEprom device size @/
+    UINT32  progTime;           /@ EEprom device byte program time (millisecond) @/
+    } I2C_EEPROM_TBL;
+\ce
+After the initialization is completed, AT24C02 could be operated with the
+EEPROM read/write functions.
+
+I2C EEPROM read function:
+\cs
+STATUS sysI2cEepromRead
+    (
+    I2C_DEV_CTRL *  i2cDevCtlr, /@ I2C EEPROM instance @/
+    UINT16          distAddr,   /@ I2C EEPROM word address @/
+    UINT32          rcvLen,     /@ data length to be read out @/
+    UINT8 *         rcvBuf      /@ receive buffer pointer @/
+    )
+\ce
+
+I2C EEPROM write function (byte mode):
+\cs
+STATUS sysI2cEepromByteWrite
+    (
+    I2C_DEV_CTRL *  i2cDevCtlr, /@ I2C EEPROM instance @/
+    UINT16          wordAddr,   /@ I2C EEPROM word address @/
+    UINT8           data        /@ data to be write into EEPROM @/
+    )
+\ce
+
+I2C EEPROM write function (page mode):
+\cs
+STATUS  sysI2cEepromPageWrite
+    (
+    I2C_DEV_CTRL *  i2cDevCtlr, /@ I2C EEPROM instance @/
+    UINT16          wordAddr,   /@ I2C EEPROM word address @/
+    UINT8 *         sourceBuf   /@ source buffer pointer @/
+    )
+\ce
+
+There is a test case sysI2cEepromTest() in file sysI2cEeprom.c, it shows
+how to operate AT24C02 I2C EEPROM with the EEPROM read/write functions.
+
+Note: The ipp_firmware is stored in AT24C256 on I2C bus 1, please do not try to
+run any EEPROM operation on it, especially the write operation, in case of
+the firmware destroyed.
+
+\sh SPI controller and SPI Flash
+The APM SPI controller and SPI flash CAT25160 are supported (only in polled mode)
+in this release. To enable this function, please define the following macro in
+config.h:
+\cs
+    #define INCLUDE_APM_SPI
+\ce
+SPI controller and SPI flash should be initialized as the following two steps:
+
+Step1:  Initialize the SPI controller and create a driver instance with function
+\cs
+SPI_DRV_CTRL * sysSpiDevInit
+    (
+    void *  regBase     /@ SPI controller register bank base address @/
+    )
+\ce
+Step2:  Create SPI Flash device instance and set the default parameters to the
+        SPI CS bank.
+\cs
+SPI_DEV_CTRL * sysSpiFlashDevinit
+    (
+    SPI_DRV_CTRL * pSpiDrvCtlr,  /@ SPI bus instance @/
+    UINT32  spiCsIndex           /@ SPI CS index @/
+    )
+\ce
+After initialization is completed, SPI flash CAT25160 could be operated with the
+EEPROM read/write functions.
+
+SPI flash read function:
+\cs
+VOID sysSpiFlashRead
+    (
+    SPI_DEV_CTRL *  spiDevCtlr, /@ SPI device instance @/
+    UINT16          distAddr,   /@ SPI flash dist address @/
+    UINT32          dataLen,    /@ data length to be read out @/
+    UINT8 *         rcvBuf      /@ data buffer pointer @/
+    )
+\ce
+
+SPI flash write function (byte mode):
+\cs
+VOID  sysSpiFlashByteWrite
+    (
+    SPI_DEV_CTRL *  spiDevCtlr, /@ SPI device instance @/
+    UINT16          byteAddr,   /@ SPI flash dist address @/
+    UINT8 *         sourceBuf   /@ source buffer pointer @/
+    )
+\ce
+
+SPI flash write function (page mode):
+\cs
+VOID  sysSpiFlashPageWrite
+    (
+    SPI_DEV_CTRL *  spiDevCtlr, /@ SPI device instance @/
+    UINT16          pageAddr,   /@ SPI flash dist address @/
+    UINT8 *         sourceBuf   /@ source buffer pointer @/
+    )
+\ce
+
+There is a test case sysSpiFlashTest() in file sysSpiFlash,c, it shows
+how to operate the SPI flash CAT25160.
+
+\sh SMP
+
+VxWorks SMP(Symmetric Multiprocessing) configuration can be used on this
+multiprocessor hardware platform supported by this BSP. Please refer to
+the chapter "VxWorks SMP" of vxworks_kernel_programmers_guide_6.9.pdf for
+more details about the SMP-specific features from software and hardware view.
+
+Here we list some key features of SMP.
+
+1. SMP build
+
+   VxWorks SMP can be configured and built using the standard Wind River
+   Workbench and vxprj facilities. VxWorks SMP images cannot be created with the
+   legacy BSP directory configuration and build method (using config.h and make).
+
+   Workbench provides a VxWorks Image Project (VIP) option for creating VxWorks
+   SMP projects. The vxprj provides the '-smp' option for configuring and
+   building VxWorks SMP from the command line. For example:
+\cs
+   vxprj create -smp apm_serengeti diab <project name>
+\ce
+
+2. Boot loader
+
+   Boot loader for VxWorks SMP must not be built with the SMP build option -
+   neither with Workbench nor with vxprj. In other words, you can build a
+   bootloader using command line or Workbench, just like the steps you follow in
+   UP system, the bootloader will support UP, SMP and AMP.
+
+3. MMU
+
+   VxWorks SMP does not support MMU-less configuration.
+
+4. Cache and bus snoop
+
+   For PPC465, snoop logic is implemented by memory coherence required (M)
+   storage attribute of MMU UTLB entries. It is defined by the architecture to
+   support cache and memory coherency within multiprocessor shared memory
+   systems.
+
+   Cache can not be disabled in a VxWorks SMP system. I.e, function
+   cacheDisable() directly returns error and does nothing.
+
+   Only copy-back mode is tested and supported officially by Wind River BSP and
+   VxWorks kernel for SMP system and this is the default configuration in BSP.
+   So system may has unpredictable behavior if you decide to change the cache
+   mode from copy-back to write-through. In addition, there are some other
+   reasons for this restriction. For example, write-through is not supported by
+   VxWorks for PowerPC processors because of the atomic operation.
+
+5. Interrupt CPU affinity
+
+   Hardware resources can be allocated via VxWorks configuration. Here we focus
+   on the interrupt to show how it's implemented. SMP hardware usually requires
+   programmable interrupt controller. VxWorks SMP makes use of this hardware to
+   allow assignment interrupts to a specific CPU. By default, interrupts are
+   routed to the VxWorks instance's logical CPU 0. Interrupt CPU affinity can be
+   useful for load balancing, for example, if there is too much total interrupt
+   traffic for one CPU to handle.
+
+   For example, in hwconf.c of this BSP, add the following data structure:
+
+   struct intrCtlrCpu mpicCpu[] = {
+       { INUM_FEMAC_DMA, 0 },
+       ...
+   };
+
+   User can reroute the Ethernet interface interrupt to other CPUs by changing 0
+   to 1 or other CPU index.
+
+6. CPU number
+
+   VxWorks project parameter, VX_SMP_NUM_CPUS, is used to represent the CPUs
+   which get involved in the SMP system, as VxWorks supports part of all the
+   CPUs to participate the SMP system and the rests keep reset or idle. The CPU
+   number we are discussing here includes all the hardware units which have the
+   same behavior as CPU, for example, the thread, hyper-thread, etc.
+
+   The maximum CPU number of this BSP is 2 and this is also the possible maximum
+   value of VX_SMP_NUM_CPUS.
+
+7. SMP M-N unsupported
+
+   Since only two cores existed for this SOC, SMP M-N is not supported.
+
+\sh AMP with wrload and MIPC
+
+AMP support, and usage of wrload() to load and start AMP CPUs, are discussed in
+detail in "VxWorks Kernel Programmer's Guide".  This man page only discusses
+some of the BSP-specific configuration, porting and maintenance issues.
+
+The default bootrom provided from the apm_serengeti BSP may be used to boot
+the board with UP or AMP images.  But AMP images must be built with Workbench or
+vxprj.
+
+Each AMP image must have its own, separate memory space.  Refer to the 20bsp.cdf
+file for examples of RAM_LOW_ADRS, LOCAL_MEM_LOCAL_ADRS and LOCAL_MEM_SIZE
+definitions.  All three definitions must be coordinated for each image.
+
+Care must be taken when considering how to assign hardware resources, including
+memory and devices, across the entire system of AMP images.  Most hardware
+resources must be owned by a single OS image, e.g. the behavior of a UART is
+undefined if the same UART is assigned to multiple OS images running on separate
+CPUs.  (It happens that the last image to boot will probably reset and own it,
+but this should not be counted upon.)
+
+Now only one Ethernet module with 2 ports - "apmMac0" and "apmMac1" is
+supported, so it is assigned to CPU 0 by default, and the images for other CPUs
+must use the built-in symbol table by including INCLUDE_STANDALONE_SYM_TBL.
+
+Currently there are 2 default AMP UP configurations defined 20bsp.cdf:
+    INCLUDE_AMP_CPU_00  - defines wrload, the multi image base
+    INCLUDE_AMP_CPU_01
+
+The image built with INCLUDE_AMP_CPU_00 has some special properties.  It can be
+built with any image type, but the image for other CPUs can be built with RAM
+based image type (vxWorks) only.  It owns the network(UART0 or UART1 can be
+assigned to it by INCLUDE_AMP_UART_0 or INCLUDE_AMP_UART_1).  More importantly,
+CPU 0 is typically the first CPU to boot, initialize the board hardware, and
+then CPU 0 is used to start the remaining CPUs.  As such, CPU 0 behaves
+differently on reboot than all other CPUs:  Rebooting, via ^X or "reboot", CPU 0
+will reset the entire board (since it's going to reset SDRAM, the board
+interrupt controller and other unique resources, probably making all the other
+CPUs unstable), and then proceed with a standard reboot sequence.  Rebooting any
+other CPU will only put that particular CPU into a state such that wrload can
+reload and restart it.  If some other CPU must be used to initialize the board,
+then sysToMonitor() and wrload support in sysLib.c should be modified to match.
+
+Default Configuration elements defined in 20bsp.cdf:
+\ts
+Component           | RAM_LOW    | LOCAL_MEM  | MEM_SIZE   | SIO |  NETWORK | WRLOAD
+------------------------------------------------------------------------------------
+INCLUDE_AMP_CPU_00  | 0x00100000 | 0x00000000 | 0x20000000 | no  |  yes     | yes
+INCLUDE_AMP_CPU_01  | 0x21000000 | 0x20000000 | 0x20000000 | no  |  no      | no
+\te
+
+SIO = yes => component INCLUDE_AMP_UART_0 or INCLUDE_AMP_UART_1 has been added
+
+NETWORK = yes => component INCLUDE_AMP_PPRO_END_DRIVER has been added
+
+WRLOAD = yes => component INCLUDE_WRLOAD  has been added
+WRLOAD = no => component INCLUDE_WRLOAD_IMAGE_BUILD has been added
+
+AMP images must be configured with exactly one INCLUDE_AMP_CPU_nn component,
+where nn is between 00 and the number of available CPUs.  INCLUDE_AMP_CPU_nn
+also determines the memory available to the system; see RAM_LOW_ADRS and
+LOCAL_MEM_LOCAL_ADRS in 20bsp.cdf.  Memory use of different images must not
+overlap, or images will corrupt each other.
+
+Note: The MIPC will use one 512Kb memory region from 0x20010000 to 0x20090000.
+
+This memory configuration is sufficient for demonstration purposes, but can be
+reworked to better meet application needs.
+
+For more detailed information about AMP, please refer to the
+\tb VxWorks Kernel Programmer's Guide.
+
+Note: The secondary CPU image uses the DEFAULT_BOOT_LINE by default, so you can
+set this parameter in your vxWorks Image Project:
+
+$ vxprj parameter set DEFAULT_BOOT_LINE "\"gei(<netUnit>, <procNum>)host:<image_dir>/vxWorks
+h=192.168.1.1 e=192.168.1.2 u=vxworks pw=vxworks f=0x0\""
+
+or in the parameter of wrload.
+
+Boot the image created with INCLUDE_AMP_CPU_00 from the bootrom, then execute
+wrload using the following either add as part of the usrAppInit or call from a
+shell such as the kernel shell.
+
+For Example:
+
+-> wrload "-file <image dir>/vxWorks -cpu 1"
+
+or
+
+-> wrload "-file <image dir>/vxWorks -cpu 1 -tsym \"*sysBootLine=gei(<netUnit>, <procNum>) f=0x0\" "
+
+The image you load should be the image built with INCLUDE_AMP_CPU_01.
+
+Note: <procNum> must be identical with CPU index, such as 1 for CPU 1.
+
+\sh Make Targets
+The make targets are listed as the names of object-format files. Append `.hex'
+to each to derive a hex-format file name. Other images not listed here may not
+be tested.
+
+\ts
+`bootrom'
+`bootrom.bin'
+`bootrom.hex'
+`vxWorks' (with `vxWorks.sym')
+`vxWorks.st'
+\te
+
+\sh BSP Bootloaders and Bootroms
+
+\ts
+Bootloader/Bootrom   | Status
+-----------------------------
+U-Boot (pre-flashed) | UNSUPPORTED
+bootrom              | SUPPORTED
+bootrom_uncmp        | UNVALIDATED
+vxWorks              | SUPPORTED
+vxWorks_rom          | UNSUPPORTED
+vxWorks_romCompress  | SUPPORTED
+vxWorks_romResident  | UNSUPPORTED
+\te
+
+\sh BSP Validated Tools
+
+\ts
+Tool                         | Connection/Type | Status
+-------------------------------------------------------
+Workbench Debugger           | ETHERNET/WDB    | SUPPORTED
+Workbench System Viewer      | ETHERNET/WDB    | SUPPORTED
+Workbench MemScope           | ETHERNET/WDB    | SUPPORTED
+Workbench ProfileScope       | ETHERNET/WDB    | SUPPORTED
+Workbench StethoScope        | ETHERNET/WDB    | SUPPORTED
+Workbench CoverageScope      | ETHERNET/WDB    | SUPPORTED
+Workbench Core File Analysis | ETHERNET/WDB    | UNVALIDATED
+Workbench Sensor Points      | ETHERNET/WDB    | UNVALIDATED
+Workbench OCD Debugger       | JTAG            | UNSUPPORTED
+Workbench OCD Flash          | JTAG            | UNSUPPORTED
+\te
+
+\sh Known Problems
+
+On APM86290, two SD interfaces share one set of Command and data signals. but
+this design is not abide by the SD Memory Card Specifications. it leads the two
+SD interfaces could not work at same tome, that is to say only one SD card could
+be installed on the Serengeti board.
+
+For APM86290's hardware issue, there is no interrupt signal for hard disk
+removal in both PCIEX-TO-SATA adapter and native SATA port. So hot-plugging is
+not supported.
+
+For SMP & AMP, warm boot would be as cold boot. Since warm boot must be set cache
+as inhibit in romInit.s currently for the system, but cache coherency has to be
+required for SMP & AMP. So some storage content would be lost after the system reboot.
+
+BOARD LAYOUT
+
+\bs
++------------------------------------------------------------------------------------+
+|                                                                                    |
+|                                                               +----------+---+     |
+|                                             PCIE1/SATA1       |  CON2    |   |     |
+|                                                               +----------+---+     |
+|                                                        +-----------------+---+     |
+|                                             PCIE3      |         CON3    |   |     |
+|                                                        +-----------------+---+     |
+|                                                               +----------+---+     |
+|                                             PCIE2/PPC_TRACE   |  CON4    |   |     |
+|                                                               +----------+---+     |
+|                                                        +-+                         |
+|                                     CON17              | |                   +-------+
+| SD_CARD_1        J5   J6           (JTAG)              | | CON5             /| CON8  | USB1 (top)
++----------+      +-+  +-+            +--+               +-+ SATA0           /||       | USB2 (bottom)
+| + ---    |      | |  | |            |  |                                   ||+-------+
+| |     \  |      | |  | |            |  |                                   |/--------/
+| |======| | CON6 | |  | |            |  |                                   +--------/
+| |     /  |      | |  | |            |  |                +--------------------------+
+| + ---    |      +-+  +-+            +--+                |                      +-----+
++----------+                                              |                     /|     |
++----------+                                              |                     ||     | ENET2 (top)
+| + ---    |          +----------+  +----------+          |                     ||     | ENET1 (bottom)
+| |     \  |          |Nand Flash|  |Nor Flash |          |                     |+-----+
+| |======| | CON7     |MT29F2G08 |  |S29WS512P |          |                     /-----/
+| |     /  |          +----------+  +----------+          +--------------------------+
+| + ---    |                                                                         |
++----------+                                                                         |
+| SD_CARD_2                                  +-------------+                     +-----+
+|                                            |             |                    /|     |
+|___                                         |             |                   /||CON10| UART3 (top)
+|_|_|                                        |   APM86290  |                   |||     | UART2 (bottom)
+|_|_|                                        |             |                   |||     |
+|_|_|                                        |             |                   ||+-----+
+|_|_|                                        +-------------+                   |/-----/
+|_|_|                                                                          +-----+
+|_|_|                                    DDR DIMM                                +-----+
+|_|_| ATX_POWER   +--------------------------------------------------------+    /|     |
+|_|_|             +--------------------------------------------------------+   /||CON9 | UART1 (top)
+|_|_|                                                                          |||     | UART0 (bottom)
+|_|_|                                                                          |||     |
+|_|_|                                                                          ||+-----+
+|_|_|                                                                          |/-----/
+|                                                                              +-----+
+|                                                                                    |
++------------------------------------------------------------------------------------+
+
+\be
+SEE ALSO
+
+\tb Workbench User's Guide: Introduction
+
+\tb VxWorks Programmer's Guide: Configuration
+
+\tb PPC465 Processor Complex User's Manual
+
+\tb APM86290/APM86190 Embedded Processor User's Manual
+
+\tb Serengeti APM86290 Evaluation Board User's Manual
+
+\tb Serengeti Evaluation Board Software User's Manual
+

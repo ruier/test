@@ -1,0 +1,22 @@
+
+           README: Freescale P2020DS (fsl_p2020_ds)
+
+This file contains board-specific information for the Freescale P2020DS
+target board.  This file documents BSP interface changes from previous software
+or hardware versions, and notifies the user of serious caveats that must be
+noted before using this BSP.  Additionally, the target board's reference entry
+(i.e. fsl_p2020_ds/target.ref) provides board-specific information necessary
+to run VxWorks and should be read fully before this BSP is used.
+
+--------------------------------------------------------------------------------
+
+Version 2.0/1
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8	
+    Remove unused INCLUDE_PPC_FPU. (WIND00153695)
+		
+Version 2.0/0
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Initial release.

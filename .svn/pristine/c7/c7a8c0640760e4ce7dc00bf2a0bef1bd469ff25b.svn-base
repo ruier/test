@@ -1,0 +1,3 @@
+#ifdef DRV_DMA_PL330
+    pl330DmaRegister ();
+#endif /* DRV_DMA_PL330 */

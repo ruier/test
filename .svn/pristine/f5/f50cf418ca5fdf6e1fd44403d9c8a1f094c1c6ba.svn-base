@@ -1,0 +1,3 @@
+#ifdef DRV_I2C_VSC3316
+IMPORT void vxbI2cVsc3316Register (void);
+#endif /* DRV_I2C_VSC3316 */

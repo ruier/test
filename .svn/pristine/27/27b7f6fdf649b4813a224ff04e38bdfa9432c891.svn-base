@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTLR_MPAPIC
+extern void vxbMpApicDrvRegister (void);
+#endif /* DRV_INTCTLR_MPAPIC */

@@ -1,0 +1,54 @@
+                 README: LSI lsi_acp34xx_elpaso BSP
+
+This file contains board-specific information for the LSI lsi_acp34xx_elpaso
+target boards. This file documents BSP interface changes from previous software
+or hardware versions, and notifies the user of serious caveats that must be
+noted before using this BSP. Additionally, the target board's reference entry
+(lsi_acp34xx_elpaso/target.ref) provides board-specific information necessary to
+run VxWorks and should be read fully before this BSP is used.
+
+-------------------------------------------------------------------------------
+
+RELEASE 6.9/5:
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+    
+    Add support for target board LSI ACP34XX JUNCTION with ACP3423(2 cores).
+
+RELEASE 6.9/4:
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Correct data cache invalidation ordering. (WIND00315270)
+    Add support for static TLB entries with TS=1. (WIND00335182)
+    Replace broadcast with local for TLB invalidation intsructions. (WIND00315259)
+    Set up L2 DCR base address in SYS_HW_INIT_0. (WIND00315263) 
+    Add support for Silicon Rev 2.1.
+
+RELEASE 6.9/3:
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Enable cache snoop mode in cache mode masks.
+    Disable MMU optimization by default.
+    Remove code for PPC 476 errata 42 and 43.
+
+RELEASE 6.9/2:
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+    Fixed CCR0 value and enabled dead code for PLB6 initialization.
+    Fixed INCLUDE_AMP_UART_1 component issue.
+
+RELEASE 6.9/1:
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+    Added support for WB, RTP and SMP(including SMP M-N).
+    Added support for LSI AXIS timer.
+
+RELEASE 6.9/0:
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+    First version.

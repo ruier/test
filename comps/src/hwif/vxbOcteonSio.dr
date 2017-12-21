@@ -1,0 +1,6 @@
+#ifdef DRV_SIO_OCTEON
+    octeonSioRegister();
+#endif /* DRV_SIO_OCTEON */
+#ifdef DRV_SIO_OCTEONII
+    octeonIISioRegister();
+#endif /* DRV_SIO_OCTEON */

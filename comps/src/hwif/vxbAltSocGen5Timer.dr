@@ -1,0 +1,3 @@
+#ifdef INCLUDE_ALT_SOC_GEN5_TIMER
+    vxbAltSocGen5TimerRegister ();
+#endif /* INCLUDE_ALT_SOC_GEN5_TIMER */

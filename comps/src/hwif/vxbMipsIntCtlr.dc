@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTLR_MIPS
+extern void  vxbMipsIntCtlrRegister (void);
+#endif /* DRV_INTCTLR_MIPS */

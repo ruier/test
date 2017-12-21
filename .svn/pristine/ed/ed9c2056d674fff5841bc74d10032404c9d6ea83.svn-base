@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTL_LPC24XX
+    vxbLpc24xxIntCtlrRegister();
+#endif /* DRV_INTCTL_LPC24XX */

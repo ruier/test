@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND2_TEI8259X
+    teiEnd2Register();
+#endif /* DRV_VXBEND2_TEI8259X */

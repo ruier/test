@@ -1,0 +1,3 @@
+#ifdef DRV_SRIO_GENERIC_SWITCH
+    rioGenSwRegister ();
+#endif /* DRV_SRIO_GENERIC_SWITCH */

@@ -1,0 +1,1 @@
+extern void vxbImx31EpitTimerDrvRegister (void);

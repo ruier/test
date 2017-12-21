@@ -1,0 +1,3 @@
+#ifdef DRV_SIO_UART_LITE
+    xlnxUartLiteRegister();
+#endif /* DRV_SIO_UART_LITE */

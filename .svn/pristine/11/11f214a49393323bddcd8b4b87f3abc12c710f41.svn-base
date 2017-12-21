@@ -1,0 +1,3 @@
+#ifdef INCLUDE_FEC_VXB_END
+    fecRegister();
+#endif /* INCLUDE_FEC_VXB_END */

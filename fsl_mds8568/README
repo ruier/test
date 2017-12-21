@@ -1,0 +1,70 @@
+
+                README: Freescale MDS8568 (fsl_mds8568)
+
+This file contains board-specific information for the Freescale MDS8568
+target board.  Specifically, this file contains information on any BSP
+interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+Additionally, the target board's reference entry (i.e., 'man fsl_mds8568')
+provides board-specific information necessary to run VxWorks, and
+should be read before this BSP is used.
+
+--------------------------------------------------------------------------------
+RELEASE 6.9/3
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Remove the component INCLUDE_AIM_MMU_SHOW for footprint. (WIND00334904)
+
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Moved L1 cache parity error handling to the arch library.  L1 cache parity
+       checking is now enabled by default. L1 parity errors now generate
+       (in many cases recoverable) machine check exceptions.  (WIND00309426)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    - Add I2C page write and sequential read support in sysMpc85xxI2c.c for
+      wrSbcP4080. (WIND00290411)
+
+    - Modify sysMpc85xxI2c.c for performance issue. (WIND00290411)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+Version 2.0/2
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    - Correct a BCSR register typo in sysPhyReset. (WIND00156916)
+    - Remove QE IO port pin mux codes.
+    - Remove qeCpcrReset().
+    - Remove unused INCLUDE_PPC_FPU. (WIND00153695)
+    - Update quiccEngine configuration.
+
+Version 2.0/1
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    - Replace old legacy drivers with corresponding vxbus versions: ppcIntCtlr,
+      epic, m85xxTimer, motetsec, qefcc, quiccEngineIntCtlr, m85xxPci.
+    - Remove old cmdLine.c dependency.
+    - Remove tffsConfig.c from the BSP directory.  INCLUDE_MTD_USR macro is
+      defined to enable the custom MTD driver.
+    - Support END2 version of ETSEC driver.
+    - Switch toolchain to e500v2diab.
+    - target.ref completely rewritten using new template.
+    - Code cleanup.
+
+Version 2.0/0
+
+    Released from Wind River for General Purpose Platform 3.5, VxWorks 6.5
+
+    Support Freescale MDS8568 board.
+
+    Initial release.

@@ -1,0 +1,115 @@
+
+                 README: Motorola MPC85XX ADS (ads8540/ads8560)
+
+This file contains board-specific information for the Motorola MPC8540/8560
+ADS target board.  Specifically, this file contains information on any BSP
+interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+Additionally, the target board's reference entry (i.e., 'man ads8540')
+provides board-specific information necessary to run VxWorks, and
+should be read before this BSP is used.
+------------------------------------------------------------------------------
+RELEASE 6.9.2.x:
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2.x
+
+    Correct SIMR_BIT_L description according to the MPC8560 reference manual. 
+    (WIND00071941) 
+
+RELEASE 6.9/2
+    TODO: 
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Fix m8260SioPollOutput. (WIND00366162)
+
+RELEASE 6.9/1
+ 
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Moved L1 cache parity error handling to the arch library.  L1 cache parity
+       checking is now enabled by default. L1 parity errors now generate
+       (in many cases recoverable) machine check exceptions.  (WIND00309426)
+    Remove the component INCLUDE_AIM_MMU_SHOW for footprint. (WIND00334904)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+    Modify CCSBAR mmu table size. (WIND00247711)
+
+RELEASE 2.0/8
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Remove unused INCLUDE_PPC_FPU. (WIND00153695)
+
+RELEASE 2.0/7
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Support END2 versions of TSEC drivers
+
+RELEASE 2.0/6
+
+    Released from Wind River for VxWorks 6.6
+
+    Add AUX_CLK_RATE related 3 macros to config.h to pass the BSPVTS 
+    auxClock test. (WIND00063379 -- ads8540; WIND00063385 -- ads8560)
+    Remove priority setting code in sysTffsFormat(). (WIND00066633)
+    Converted to VxBus, switched to new VxBus TSEC and FCC drivers
+    and VxBus PCI driver, fixed PCI interrupts and bandwidth issues,
+    added support for VxBus Intel PRO/100 and PRO/1000 PCI cards,
+    added support for fiber optic TSEC interfaces (WIND00100585).
+
+RELEASE 2.0/5
+
+    Released from Wind River for VxWorks 6.5
+
+    Added support for IPNet Network Stack.
+
+RELEASE 2.0/4
+
+    Support REVA board by default. Previous revisions of the board are no 
+    longer supportable because no working board to test with.
+    Use some additional performance enhancing h/w features. 
+    DDR support for 256MB by default.
+    Configure in MMU optimization features - vxWorks 6.0 only
+    
+    Release for vxWorks 6.0 FCS
+    
+    RELEASE 2.0/3
+    
+    Release for vxWorks 6.0 Beta
+
+RELEASE 1.2/2
+    
+    Added conditional support for Rev A of the ADS85xx Board - SPR#99928
+    Fixed slow booting, changed default RAM from 16MB to 256MB - Same as SPR#97519
+    Fixed TSEC poll mode not working for system mode debug.  SPR#91950
+    Fixed TSEC slowness in 10BaseT half-duplex mode.  SPR#91934
+    Fixed TSEC muxIoctl and motTsecIoctl prototype inconsistency.  SPR#96745
+    Fixed TSEC compilation warnings.  SPR#97410
+    Fixed TSEC reboot issue SPR#100706
+    Fixed sysMsDelay inaccuracy.  SPR#97517
+    SCCs aren't using standard 3 pin configuration for serial port SPR#100725
+
+RELEASE 1.2/1
+    
+    Fixed SPR 91818,91920,91930,91929,91924,91923
+    Added Branch Prediction support in vxWorks image.
+    Added support for Rev2 silicon.
+
+RELEASE 1.2/0
+    
+    SPR 91924 - Flash driver only works for default platform and core freq ie
+    Core 266 MHz, 133 MHz CCB, 133 MHz memory, 66 MHz PCI 
+    
+    SPR 91818 - FCC isn't working on the ADS8560 even though the driver is supplied and working on another 8560 board. 
+    
+    SPR 91921 - Bootrom fails when 128MB DDR SDRAM is set.
+    
+    SPR 91817 - TSEC may not configure correctly a link with another target/switch/hub. Fix required to plug on J56 and J47.
+    
+    SPR 91920 - Board locks and needs hreset seen on older board revisions very seldomly, cause unknown. 
+    
+    SPR 91923 - When mapping address space for DDR SDRAM, if overallocate address space in static TLB entries and then access an address beyond SDRAM the board will hang. Hreset required. Problem is 128MB isnt an available TLB size. Perhaps machine check should occur or bus error but it doesn't.

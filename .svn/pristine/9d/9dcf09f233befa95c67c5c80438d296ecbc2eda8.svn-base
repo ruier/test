@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND_QORIQMEMAC
+    vxbMemacEndRegister();
+#endif /* DRV_VXBEND_QORIQMEMAC */

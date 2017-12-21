@@ -1,0 +1,3 @@
+#ifdef INCLUDE_UCC_MDIO
+#include "../src/hwif/h/mii/uccMdio.h"
+#endif /* INCLUDE_MDIO */

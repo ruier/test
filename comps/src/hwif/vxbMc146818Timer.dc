@@ -1,0 +1,3 @@
+#ifdef DRV_TIMER_MC146818
+extern void vxbMc146818RtcDrvRegister (void);
+#endif /* DRV_TIMER_MC146818 */   

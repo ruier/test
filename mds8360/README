@@ -1,0 +1,97 @@
+
+                 README: Freescale MPC8360 MDS (mds8360)
+
+This file contains board-specific information for the Freescale MPC8360
+MDS target board.  Specifically, this file contains information on any BSP
+interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+Additionally, the target board's reference entry (i.e., 'man mds8360')
+provides board-specific information necessary to run VxWorks, and
+should be read before this BSP is used.
+
+------------------------------------------------------------------------------
+RELEASE 6.9/x
+    TODO:
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.x
+
+    Fixed potential memory corruption caused by sysNvRamGet(). (WIND00101057)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+    
+    Update the description of Security Engine. (WIND00331832)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+    
+    Delete _MMU_UBAT_VP attribute(WIND00162540)
+    Clear mot83xxPci.h. (WIND00212294)
+
+RELEASE 2.0/6
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Fixed WIND00139815 - Support net device in BootApp.
+    Remove QE IO port pin mux codes.
+    Remove qeCpcrReset().
+    Move vxSvrGet() from sysALib.s to vxALib.s.
+    Update quiccEngine configuration.
+
+2.0/5
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Switch from hEnd qeFcc driver to VxBus UCC driver
+
+2.0/4
+
+    Released from Wind River for General Purpose Platform 3.6, VxWorks 6.6
+
+    Use vxBus based drivers for interrupt controllers, timers and PCI. 
+    Intialize floating point registers during initialization.
+
+2.0/3
+
+    Released from Wind River for General Purpose Platform 3.5, VxWorks 6.5
+
+    Add modification to support MDS8360EA. This version is compatible with MDS8360.
+    The default configuration is for MDS8360EA. To support old MDS8360 board, macro
+    MPC8360EA_MDS in config.h should be undefined.
+
+2.0/2
+
+    Addition of 20bsp.cdf for project and workbench builds. 20bsp.cdf is new
+    for this release.
+
+2.0/0
+
+    PCI support is now supported and tested on Freescale Platform IO Board(PIB), 
+    however configuration of PIB through I2C is not working.
+
+    Errata ENET 15 is patched into Quicc Engine for rev1.1 silicon.
+
+    Quicc Interrupt controller was fixed.
+
+    Issue with illegal address access when MMU is enabled is hanging the board. 
+    It can cause reboot/vxMemProbe to fail on occasion. Cause is unknown yet but 
+    can clear the state with debugger using sync command, memory access and 
+    resume, not always succesful.
+    CPU4 errata means that illegal address access when MMU is disabled is hanging 
+    the board. It is possible to clear the state with debugger using sync command,
+    memory access and resume, not always succesful. 
+
+    Added support for statistics in qefcc driver but some stats not functional. 
+
+    Using more vxBus specific drivers by default.
+
+EAR:
+
+PCI is not supported as configurations cycles are broken.
+Quicc Engine is supported for FCC(UEC) only and is configured to function 
+upto Gigabit speeds. 10BaseT mode isn't supported.
+Switching between 100BaseT and Gigabit connections dynamically doesn't work. 
+Not all standard ioctls are supported by the fcc network driver such as 
+promiscuous mode and multicast support.
+

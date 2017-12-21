@@ -1,0 +1,12 @@
+#ifdef DRV_VXB_NORFLASH
+    vxbNorFlashRegister ();
+#endif /* DRV_VXB_NORFLASH */
+
+#ifdef DRV_VXB_NORFLASH_CMDSET_AMD
+    vxbNorFlashAmdCmdSetRegister ();
+#endif /* DRV_VXB_NORFLASH_CMDSET_AMD */
+
+#ifdef DRV_VXB_NORFLASH_CMDSET_ITL
+    vxbNorFlashItlCmdSetRegister ();
+#endif /* DRV_VXB_NORFLASH_CMDSET_ITL */
+

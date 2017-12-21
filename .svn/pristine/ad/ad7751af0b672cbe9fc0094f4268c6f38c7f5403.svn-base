@@ -1,0 +1,3 @@
+#ifdef INCLUDE_ALT_SOC_GEN5_DW_I2C
+    vxbAltSocGen5DwI2cRegister ();
+#endif /* INCLUDE_ALT_SOC_GEN5_DW_I2C */

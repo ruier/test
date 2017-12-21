@@ -1,0 +1,3 @@
+#ifdef DRV_SIO_AMIO
+    amioSioRegister();
+#endif /* DRV_SIO_AMIO */

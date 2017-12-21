@@ -1,0 +1,4 @@
+#ifdef DRV_TIMER_I8253
+    vxbI8253TimerDrvRegister ();
+#endif
+

@@ -1,0 +1,75 @@
+
+                 README: IBM750GX Evaluation Board BSP
+
+This file contains board-specific information for the IBM750GX Evaluation
+Board BSP. This file documents BSP interface changes from previous software 
+or hardware versions, and informs the user of serious caveats that must be 
+noted before using this BSP. The target reference entry should be read fully 
+before this BSP is used.
+
+-------------------------------------------------------------------------------
+RELEASE 6.9/2
+
+        Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+        Fix prevent errors. (WIND00419006)
+
+RELEASE 6.9/1
+
+        Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+        Exclude INCLUDE_SIO_UTILS. (WIND00338917)
+
+RELEASE 6.9/0
+
+        Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+    
+        Delete _MMU_UBAT_VP attribute. (WIND00162540)
+        
+RELEASE 2.0/5
+
+        Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+        Fix VIP with component INCLUDE_SIO_UTILS build fail. (WIND00172550) 
+
+RELEASE 2.0/4
+
+        Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+        Added VxBus support, replace legacy decrementer timer driver with
+        corresponding VxBus version.
+
+RELEASE 2.0/3
+
+        Released from Wind River for General Purpose Platform 3.6, VxWorks 6.6
+
+        Minor bug fixes in this release include the following:
+            * Undefine the second ethernet port to increase boot-up speed
+            * Fix compiler errors/warnings
+
+RELEASE 2.0/2
+
+        Released from Wind River for General Purpose Platform 3.5, VxWorks 6.5
+
+        Support for VxWorks 6.5.
+
+RELEASE 2.0/1
+
+        Released from Wind River for Workbench 2.6, VxWorks 6.4
+
+        The END, I2C, and L2 cache drivers have been replaced with new 
+        implementations from Tundra Semiconductor. 
+        
+        New features in this release of the BSP are:
+            * option to add TFFS to the "Big Flash"
+            * 'M' command for changing the MAC address in the bootrom
+
+        Minor bug fixes in this release include the following:
+            * solve the problem: Ctrl-X always results in cold-reset
+            * add support for text-only L2 caches (need patch: WIND00101523)
+
+RELEASE 2.0/0
+
+        Released from Wind River for Workbench 2.6, VxWorks 6.4
+
+        Initial Release.

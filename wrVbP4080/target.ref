@@ -1,0 +1,564 @@
+\" wrVbP4080/target.ref - WRHV Virtual Board P4080 target specific documentation
+\"
+\" Copyright (c) 2010-2012 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01d,10aug12,m_h  Remove 1.2 to be agnostic to the Hypervisor revision.
+\" 01c,02jun11,agf  Add support for timer group B; misc editing for clarity
+\" 01b,02mar11,kxb  Update; fix WIND00256163, incomplete html output
+\" 01a,11jun10,rgo  Created and modified from wrVb8572/target.ref/01g
+\"
+\"
+\TITLE wrVbP4080 - WRHV Virtual Board P4080
+
+INTRODUCTION
+
+This reference entry provides information necessary to run VxWorks
+Guest OS using the wrVbP4080 BSP, in Wind River Hypervisor using
+the Freescale P4080-DS reference board.
+
+The term <Razor> has been deprecated. It was used in prior versions of
+the product to refer to the Wind River Hypervisor run time. In this
+version, and going forward, we will use the term Hypervisor. In the
+source code this is sometimes abbreviated as <wrhv>.
+
+The board revision in use at the time of this writing is Revision 2.
+
+This BSP does not produce any VxWorks images that can run natively on the
+fsl_p4080_ds board. VxWorks images built with this BSP are referred to as
+Guest OS images, and require the Hypervisor in order to run. However, P4080
+supports Hardware Virtualization, PowerPC ISA Embedded Hypervisor, which makes
+the native and guest BSP very similar.
+
+Furthermore, a special version of the PPC run time libraries are required.
+These libraries must be built from source code using VxWorks Source Build
+(VSB) technology. This is required in order to build the PPC architecture
+and device drivers to support the use of the Hypervisor Virtual Board
+Interface (VBI), a set of system calls and macros that encapsulate a
+virtual board environment.
+
+RUNNING VXWORKS
+
+This section provides guidelines for running VxWorks Guest OS using
+the wrVbP4080 virtual board.
+
+\sh Software Hierarchy
+
+\bs
+           BOOT                                 RUN TIME
+
+                                          ---------------------------
+                                          | Hypervisor system.elf   |
+                                          |                         |
+                                          | ---------------------   |
+                                          | |  VxWorks Guest OS |   |
+                                          | ---------------------   |
+                                          |       |           |     |
+                                          |       v           |     |
+                                          | -------------     |     |
+                                          | |    VBI    |     |     |
+                                          | -------------     |     |
+                                          |       |           |     |
+                                          |       v           |     |
+                                          | --------------    |     |
+   ------------------------ (download)    | | Hypervisor |    |     |
+   | VxWorks Boot ROM/    | ------------> | --------------    |     |
+   |    Boot Loader       |               |       |           |     |
+   ------------------------               --------|-----------|------
+              |                                   |           |
+              v                                   v           v
+   ------------------------------------------------------------------
+   |                Freescale P4080-DS Hardware                     |
+   ------------------------------------------------------------------
+
+\be
+
+As shown in the above diagram, the VxWorks boot loader is used to
+initially boot the board and download a Hypervisor <system.elf>
+file. This file contains the Hypervisor run time, the Virtual Board
+Interface (VBI), and the VxWorks Guest Operating System. Once the
+<system.elf> file is downloaded, control is transferred to the
+Hypervisor, which re-initializes the physical board, and then boots
+the VxWorks Guest OS and/or any other guest operating systems.
+Depending on the level of virtualization, the VxWorks Guest OS
+interfaces to the Hypervisor through the VBI and in some cases has
+direct access to the physical hardware.
+
+In a completely virtualized environment, an unmodified fsl_p4080_ds VxWorks
+image could run under the Hypervisor's control, and the virtual
+hardware would look identical to real hardware.  This is impractical for
+several reasons, including performance and the need to share access to
+some hardware resources among multiple guests (e.g. MDIO).  So instead,
+we employ a technique called <paravirtualization> on this target.
+Essentially this means that the BSP and Architecture code is modified
+to make VBI calls to perform key hardware functions such as mapping
+memory, controlling interrupts, and sharing device register access. In
+some cases, where a device is not shared among different guest OS
+instances running on the hardware, direct hardware access is employed.
+In case of wrVbP4080, the level of paravirtualization is minimum due to
+the embedded hardware virtualization in P4080.
+
+Please refer to the BIBLIOGRAPHY for more information on this subject.
+
+\sh 1. Set Up the Hardware and VxWorks Bootrom
+
+For information on setting up the hardware and creating a VxWorks Boot ROM,
+please refer to the fsl_p4080_ds BSP target reference. The following sections
+from that document are especially relevant:
+
+\is
+\i <Setting the board Jumpers and Switches>
+\i <Flashing the Boot ROM Image Using Workbench>
+\i <Flashing the Boot ROM Image Using the on-board boot loader>
+\i <Running the VxWorks Boot ROM Program>
+\i <ROM Considerations>
+\ie
+
+\sh 2 Create and build a VSB that supports this BSP.
+
+\cs
+   $ cd $WIND_BASE/target/proj
+   $ vxprj vsb create -bsp wrVbP4080
+\ce
+
+Guest OS support will be selected by default, since this BSP requires
+it.  Once the VSB had been created, build it.
+
+\cs
+   $ cd vsb_wrVbP4080
+   $ make
+\ce
+
+\sh 3 Create and Build a VxWorks Image Project based on the wrVbP4080 VSB
+
+\cs
+   $ cd $WIND_BASE/target/proj
+   $ vxprj create -vsb $WIND_BASE/target/proj/vsb_wrVbP4080 wrVbP4080 sfdiab
+   $ cd wrVbP4080_sfdiab
+   $ vxprj build
+\ce
+
+\sh 4 Build a Hypervisor project with the VxWorks image as payload.
+
+Creating and building Hypervisor projects is beyond the scope of this
+document. Please refer to Wind River Hypervisor User's Guide.
+
+\sh 5 Load and boot the Hypervisor <system.elf> file using the VxWorks boot ROM
+
+Once you have created the Hypervisor <system.elf> file, you can load and
+run it using the VxWorks bootrom.
+
+
+BOOT DEVICES
+
+The supported boot devices are:
+\cs
+        dtsec - 10/100/1000 Triple Speed Ethernet Controller
+\ce
+
+FEATURES
+
+This section describes all features of the board, supported or not.
+It documents all configurations of the board and the interaction between
+features and configuration items.
+
+\sh List of hardware features (Freescale QorIQ P4080-DS target board)
+
+\ts
+Hardware Interface | Controller | Driver/Component    | Status
+------------------------------------------------------------------------------
+UART:0             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+UART:1             | on-chip    | vxbNs16550Sio.c     | UNVALIDATED
+UART:2             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+UART:3             | on-chip    | vxbNs16550Sio.c     | UNVALIDATED
+1GB-ETHERNET:0     | on-chip    | vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:1     | on-chip    | vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:2     | on-chip    | vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:3     | on-chip    | vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:4     | on-chip    | vxbDtsecEnd.c       | SUPPORTED
+10GB-ETHERNET:0    | on-chip    | vxbTgecEnd.c        | SUPPORTED
+10GB-ETHERNET:1    | on-chip    | vxbTgecEnd.c        | SUPPORTED
+PAMU-FMAN:0        | on-chip    | vxbQorIQFman.c      | SUPPORTED
+PAMU-FMAN:1        | on-chip    | vxbQorIQFman.c      | SUPPORTED
+PAMU-BMAN          | on-chip    | vxbQorIQBman.c      | SUPPORTED
+PAMU-QMAN          | on-chip    | vxbQorIQQman.c      | SUPPORTED
+NOR-FLASH          | S29GL01GP  | flashMem.c          | SUPPORTED (NVRAM read-only)
+TIMER              | on-chip    | vxbVbTimer.c        | SUPPORTED (system clk only)
+TIMER              | on-chip    | vxbOpenPicTimer.c   | SUPPORTED (aux & timestamp)
+PCI-E-HOST:0       | on-chip    |                     | UNSUPPORTED
+PCI-E-HOST:1       | on-chip    |                     | UNSUPPORTED
+PCI-E-HOST:3       | on-chip    |                     | UNSUPPORTED
+SRIO-E-HOST:0      | on-chip    |                     | UNSUPPORTED
+SRIO-E-HOST:1      | on-chip    |                     | UNSUPPORTED
+DMA:0              | on-chip    |                     | UNSUPPORTED
+DMA:1              | on-chip    |                     | UNSUPPORTED
+EPIC               | on-chip    |                     | UNSUPPORTED (Hypervisor)
+I2C                | on-chip    |                     | UNSUPPORTED
+SPI                | on-chip    |                     | UNSUPPORTED
+USB-HOST           | on-chip    |                     | UNSUPPORTED
+USB-TARGET         | on-chip    |                     | UNSUPPORTED
+SD-CARD            | on-chip    |                     | UNSUPPORTED
+GPIO               | on-chip    |                     | UNSUPPORTED
+SECURITY MONITOR   | on-chip    |                     | UNSUPPORTED
+PERF MONITOR       | on-chip    |                     | UNSUPPORTED
+CORENET TRACE      | on-chip    |                     | UNSUPPORTED
+\te
+
+Please note that a hardware feature that is unsupported by this BSP
+may in fact be supported by the Hypervisor. Please refer to Hypervisor
+documentation for more information about Hypervisor hardware
+support. See the BIBLIOGRAPHY.
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Memory Map
+
+The memory map for the virtual board is described by Hypervisor XML
+config files (e.g., vxworks.xml, wrhvConfig.xml), located in the
+Hypervisor install tree ($WIND_HOME/wrhv-\<revision\>). The addresses chosen in
+those configuration files must match the addresses chosen by this BSP
+to access devices and locate program memory sections.
+
+For the initial release (vxWorks 6.8/6.8.1 and HV 1.2),
+most of P4080 targets had Rev. 1 hardware
+and the Hypervisor XML configuration matched that memory map.  However,
+Rev 1. boards were never intended for production, and support for Rev 1
+boards is discontinued after 6.8.2/HV 1.2.0.1; only Rev 2 boards will
+be supported for vxWorks 6.9.
+
+On later boards, the location of the SGMII riser card was changed (from
+slot 5 to slot 3) and a different reset control word (RCW) is used that
+results in the DTSEC ports being swapped (instead of 4 DTSECs on FMAN0
+and 1 port on FMAN1, it's now the opposite). By default, the BSP assumes
+the port layout for the newer boards, but can be configured to use the
+new layout present on older Rev. 1 boards by
+undefining FMAN_SWAP in config.h. The Hypervisor XML configuration files
+should updated to match as well for proper function.
+
+Please refer to the BIBLIOGRAPHY for more documentation on this subject
+as well as target.ref in the fsl_p4080_ds BSP.
+
+The following memory-map reflects Rev. 2 hardware:
+
+\ts
+
+Start       | Size        | End         | Access to
+-------------------------------------------------------------
+0x0000_0000 | 0x0100_0000 | 0x00FF_FFFF | Virtual Board Physical Memory
+0xD000_7000 | 0x0000_1000 | 0xD000_7FFF | NVRAM/Flash
+/* 2M for BMAN | windows: 1M for | cache and 1M for | cache-inhibited */ |
+0xF400_4000 | 0x0000_4000 | 0xF400_7FFF | BMAN LAW CACHED,0
+0xF400_8000 | 0x0000_4000 | 0xF400_BFFF | BMAN LAW CACHED,1
+0xF400_C000 | 0x0000_4000 | 0xF400_FFFF | BMAN LAW CACHED,2
+0xF401_0000 | 0x0000_4000 | 0xF401_3FFF | BMAN LAW CACHED,3
+0xF401_4000 | 0x0000_4000 | 0xF401_7FFF | BMAN LAW CACHED,4
+ ... | | |
+0xF410_1000 | 0x0000_1000 | 0xF410_1FFF | BMAN LAW UNCACHED,0
+0xF410_2000 | 0x0000_1000 | 0xF410_2FFF | BMAN LAW UNCACHED,1
+0xF410_3000 | 0x0000_1000 | 0xF410_3FFF | BMAN LAW UNCACHED,2
+0xF410_4000 | 0x0000_1000 | 0xF410_4FFF | BMAN LAW UNCACHED,3
+0xF410_5000 | 0x0000_1000 | 0xF410_5FFF | BMAN LAW UNCACHED,4
+ ... | | |
+/* 2M for QMAN | windows: 1M for | cache and 1M for | cache-inhibited */ |
+0xF420_4000 | 0x0000_4000 | 0xF420_7FFF | QMAN LAW CACHED,0
+0xF420_8000 | 0x0000_4000 | 0xF420_BFFF | QMAN LAW CACHED,1
+0xF420_C000 | 0x0000_4000 | 0xF420_FFFF | QMAN LAW CACHED,2
+0xF421_0000 | 0x0000_4000 | 0xF420_3FFF | QMAN LAW CACHED,3
+0xF421_4000 | 0x0000_4000 | 0xF420_7FFF | QMAN LAW CACHED,4
+ ... | | |
+0xF430_1000 | 0x0000_1000 | 0xF430_1FFF | QMAN LAW UNCACHED,0
+0xF430_2000 | 0x0000_1000 | 0xF430_2FFF | QMAN LAW UNCACHED,1
+0xF430_3000 | 0x0000_1000 | 0xF430_3FFF | QMAN LAW UNCACHED,2
+0xF430_4000 | 0x0000_1000 | 0xF430_4FFF | QMAN LAW UNCACHED,3
+0xF430_5000 | 0x0000_1000 | 0xF430_5FFF | QMAN LAW UNCACHED,4
+ ... | | |
+0xFE00_0C00 | 0x0000_1000 | 0xFE00_1BFF | LAW
+0xFE04_10F0 | 0x0000_1000 | 0xFE04_20EF | Open PIC Timer A
+0xFE04_20F0 | 0x0000_1000 | 0xFE04_30EF | Open PIC Timer B
+0xFE11_C000 | 0x0000_1000 | 0xFE11_CFFF | NS16550 DUART
+0xFE31_8000 | 0x0000_1000 | 0xFE31_8FFF | QMAN
+0xFE31_A000 | 0x0000_1000 | 0xFE31_AFFF | BMAN
+ ... | | |
+0xFE40_0000 | 0x0010_0000 | 0xFE4F_FFFF | FMAN0
+0xFE48_9000 | 0x0000_1000 | 0xFE48_9FFF | DTSEC RX BMI 1
+0xFE4A_9000 | 0x0000_1000 | 0xFE4A_9FFF | DTSEC TX BMI 1
+0xFE4E_2000 | 0x0000_1000 | 0xFE4E_1FFF | DTSEC1
+0xFE48_A000 | 0x0000_1000 | 0xFE48_AFFF | DTSEC RX BMI 2
+0xFE4A_A000 | 0x0000_1000 | 0xFE4A_AFFF | DTSEC TX BMI 2
+0xFE4E_4000 | 0x0000_1000 | 0xFE4E_4FFF | DTSEC2
+0xFE48_B000 | 0x0000_1000 | 0xFE48_BFFF | DTSEC RX BMI 3
+0xFE4A_B000 | 0x0000_1000 | 0xFE4A_BFFF | DTSEC TX BMI 3
+0xFE4E_6000 | 0x0000_1000 | 0xFE4E_6FFF | DTSEC3
+0xFE50_0000 | 0x0010_0000 | 0xFE5F_FFFF | FMAN1
+0xFE58_8000 | 0x0000_1000 | 0xFE58_8FFF | DTSEC RX BMI 4
+0xFE5A_8000 | 0x0000_1000 | 0xFE5A_AFFF | DTSEC TX BMI 4
+0xFE5E_0000 | 0x0000_1000 | 0xFE5E_0FFF | DTSEC4
+\te
+
+Note: in the above map. DTSEC0 resources are not shown. This is because
+most Hypervisor example configurations reserve DTSEC0 for a Linux guest,
+which can run alongside VxWorks. If Linux is not used, the XML files
+may be modified to allow VxWorks to use DTSEC0 instead.
+
+(1) Virtual Board Physical Memory is actually logical (mapped) memory
+from the point of view of the hardware and the Hypervisor. To see the
+real physical mapping of these addresses, enter the VB Debug Shell and
+display the MMU. For example, starting from a VxWorks target shell
+prompt:
+
+\cs
+-> vbiDebugShellStart
+
+Hypervisor debug shell....
+
+wrhv> ps
+
+CPU 0:
+ID NAME        TYPE PRI   S     IN    OUT  LOAD ADDRESS    SIZE     PC
+ 0 odin       THR-s   0 Rcv    350    351                       0x00115250
+ 1 coreMgr0   THR-s   1 Rcv      2      2                       0x00115250
+ 2 Dispatch_0 THR-s   0 Rcv     56     56                       0x00115250
+ 3 excMgr     THR-s   2 Rcv      1      1                       0x00115250
+ 4 esh        THR-s   3 Run    118    117                       0x001037d8
+ 5 mdioThread THR-s   5 Rcv    214    214                       0x00115250
+ 9 vxworks     VM-u   7 Run   4267   4267    0x02001000 8388608 0x00115250
+
+CPU 1:
+ID NAME        TYPE PRI   S     IN    OUT  LOAD ADDRESS    SIZE     PC
+ 6 coreMgr1   THR-s   1 Rcv      2      2                       0x00115250
+ 7 Dispatch_1 THR-s   0 Rcv      2      2                       0x00115250
+ 8 excMgr     THR-s   2 Rcv      1      1                       0x00115250
+
+wrhv> ctx 9
+
+vxworks> display mmu
+
+Page table for context 9 (vxworks):
+Logical           Physical          TS TID U[0123] WIMGE S[XWR] U[XWR]
+----------------- ----------------- -- ---  ------ -----  -----  -----
+00000000-000fefff 02001000-020fffff  1   1   0000    M     XWR    XWR
+00100000-001fefff 02101000-021fffff  1   1   0000    M     XWR    XWR
+
+[etc ...]
+
+\ce
+
+\sh Memory Macros
+
+The following table lists the macros that are used to describe the
+VxWorks memory map.
+
+\ts
+
+Macro Name | Macro Definition | Description
+------------------------------
+LOCAL_MEM_LOCAL_ADRS | 0x0000_0000 | Base of virtual board memory
+RAM_LOW_ADRS         | 0x0001_0000 | VxWorks entry point
+RAM_HIGH_ADRS        | 0x0100_0000 | Top of virtual board memory
+LOCAL_MEM_SIZE       | 0x0100_0000 | Size of virtual board memory
+\te
+
+\sh Devices
+
+The device drivers include the following:
+
+\ts
+
+Driver | HW Access Model | Description
+--------------------------------------
+vxbDtsecEnd.c |  Paravirtual | DTSEC Ethernet Controller
+vxbNs16550Sio.c | Direct | Serial Port
+vxbOpenPicTimer.c | Direct |  Open PIC Timers
+vxbVbIntCtlr.c | Paravirtual | Virtual I/O APIC Interrupt Controller
+vxbVbTimer.c | Paravirtual | Virtual Board Timer
+vxbQorIQBman.c | Direct | BMAN driver
+vxbQorIQBmanPortal.c | Direct | BMAN portal support
+vxbQorIQQman.c | Direct | QMAN driver
+vxbQorIQQmanPortal.c | Direct | QMAN portal support
+vxbQorIQFman.c | Direct | FMAN driver
+\te
+
+<Paravirtual> drivers use the VBI to access key hardware resources,
+and hence may be used by more than one virtual board in
+system. <Direct> access drivers access the hardware directly, and do
+not interface with the Hypervisor. <Direct> access drivers may only be
+used by a single virtual board in a given system.
+
+\sh DTSEC Ethernet Controller (vxbDtsecEnd.c)
+
+The DTSEC port allows a 10/100/1000T connection.  The driver will
+auto-negotiate and configure the port accordingly. (The MDIO accesses
+performed by the DTSEC driver are paravirtualized, as there is only one
+MDIO port used to access all DTSEC PHYs.)
+
+\sh Serial Port (vxbNs16550Sio.c)
+
+The UART device is configured with 8 data bits, 1 stop bit, hardware
+handshaking, and parity disabled.  The device operates at 115200
+bps. The on-chip DUART on the P4080-ds is supported. However, only one
+channel of the DUART is used on the P4080-ds reference boards.
+
+\sh Open PIC Timers (vxbOpenPicTimer.c)
+
+This is the vxBus compliant timer driver which implements the
+functionality of OpenPIC timers. On this platform, up to eight timer
+instances (four per timer group) are made available to the vxBus sub-system.
+Timer device instances will be assigned to auxClk, timestamp or delay timers by
+the Timer Abstraction Layer.
+
+You can also assign the timer device instances manually to auxClk and
+timestamp by using the project parameters in the Kernel Configuration
+tool (vxprj or Workbench). Currently there is no manual assignment for
+delay timers.
+
+The sysClk timer must be assigned to the Virtual Board Timer driver
+(vxbVbTimer.c). This is required in order to take advantage of the
+relative timer tick adjustment provided by the Hypervisor (in cases
+where the virtual board misses one or more clock ticks).
+
+To enable Open PIC timer support in this BSP, include either of
+INCLUDE_AUX_CLK or INCLUDE_TIMESTAMP in the kernel configuration.
+Additionally, to assist allocating the timers separately for concurrent
+use on multiple VB's two new parameters, ENABLE_TIMER_A and ENABLE_TIMER_B,
+have been created. The 'vxprj parameter set' command can be used to configure
+which timer group is used by a kernel. The default build spec has
+group A enabled and group B disabled.
+
+\sh Virtual I/O APIC Interrupt Controller (vxbVbIntCtlr.c)
+
+This driver is paravirtualized to support the Hypervisor-provided VIO
+APIC, a virtual interrupt controller modeled after the Intel I/O
+Advanced Programmable Interrupt Controller (I/O APIC).
+
+\sh Virtual Board Timer (vxbVbTimer.c)
+
+The Virtual Board Timer driver is a vxBus-compliant timer driver that
+supports the Hypervisor supplied virtual clock. In this BSP it
+provides the system clock to the VxWorks Guest kernel.
+
+\sh BMAN, QMAN, FMAN and portal drivers
+
+Documentation for the above APIs can be found in the following files:
+
+\is
+\i target/src/hwif/resource/vxbQorIQBmanPortal.c -- Bman API
+\i target/src/hwif/resource/vxbQorIQQmanPortal.c -- Qman API
+\i target/src/hwif/resource/vxbQorIQQmanFman.c -- Fman API
+\ie
+
+CONTROL PLANE VS. DATA PLANE
+
+Some of the DPAA components have both global and per-port/per-guest resources.
+The global resources may include reset mechanisms that must me executed only
+once, and thus should only be executed on one core. Also, some global resources
+such as the Fman internal memory (which is used to hold classifier rules),
+keygen schemes and policer profiles, should only be manipulated by one core,
+since having multiple cores access them could lead to race conditions.
+
+The core that is responsible for resetting the Fman and (depending on the
+application) managing global resources is called the control plane core, and
+other cores used to execute fast path processing code are known as data plane
+cores. It's important to be able to designate which core is the control plane
+and which are data planes.
+
+By default, the control plane core is considered to be the one where the
+processor number specified in the bootline is 0. With guest OS images, the
+bootline is provided in the Hypervisor XML files for each guest. This allows
+the control plane core to be chosen automatically based on the Hypervisor
+configuration. Note that the processor number specified in the bootline is
+not actually tied to the real core number, meaning it's possible for the
+guest on core 4 to be told it's the control plane by setting the processor
+number in the bootline for core 4's XML file to indicare processor 0. Note
+also that care should be taken not to specify the bootline with processor 0
+in more than one XML file, otherwise two VxWorks guest instances will think
+they're supposed to be control plane images.
+
+The control plane core can also be manually specified using a special
+parameter called CONTROL_PLANE_CORE. This parameter defaults to -1, which
+allows the automatic selection of the control plane via the processor number
+in the bootline. If set to any value from 0 to 7, it will manually set the
+control plane to be a specific core, regardless of the bootline configuration.
+CONTROL_PLANE_CORE can be specified either via the project facility or by
+editing the config.h file.
+
+Currently, the difference between control plane and data place cores are
+that only the control plane will perform a full frame manager reset, and the
+date place cores will wait for the control plane to finish initializing
+before proceeding. The control plane will notify the data plane by creating
+a "vxControl" entry in the Hypervisor namespace. The data plane cores will
+poll, waiting for this namespace entry to appear. This is necessary because
+all cores will be running asynchronously of each other, and it could happen
+that the control plane won't execute the frame manager reset until after one
+of the data plane cores has already initialized its DTSEC port (or done other
+frame manager setup). The frame manager reset would flush any configuration
+performed by the data plane, without the data plane code necessarily being
+aware of it. The polling loop will only execute for a limited period of time
+(at most a few seconds), after which it will allow the core to continue booting
+even if the control plane never creates the "vxControl" namespace entry.
+
+This latter behavior is needed for interoperability with Linux, which does not
+manipulate the Hypervisor namespace. When running VxWorks and Linux together,
+Linux is assumed to always be the control plane, and VxWorks must not boot
+until Linux has finished initializing the frame manager.
+
+SPECIAL CONSIDERATIONS
+
+This section describes miscellaneous information that you need to know
+before using this BSP.
+
+\sh General
+
+Command line builds do not work in this BSP. You must build VxWorks
+images using vxprj or Workbench. Furthermore, the VxWorks Image
+Project must link to a VxWorks Source Build that supports PPC Guest
+OS. See the build instructions above.
+
+WRLOAD is supported to load an image into a virtual board. Note however
+that to be able to properly set the guest OS bootline using wrload
+"-tsym" option, the -fno-zero-initialized-in-bss compiler option should
+be specified when using GNU. Contrary to Diab, which puts zero
+initialized variables into the data section, the GNU compiler does not
+do so without this option. If this option is not specified, the bootline
+set by wrload will not be correctly transferred to the loaded image.
+
+\sh Known Issues
+
+None.
+
+\sh Delivered Objects
+
+There are no delivered objects for this BSP.
+
+BIBLIOGRAPHY
+
+For further information on VxWorks Guest OS and Hypervisor, refer to
+the following documents:
+
+\tb VxWorks Guest OS for Hypervisor Programmer's Guide
+
+\tb Wind River Hypervisor Release Notes
+
+\tb Wind River Hypervisor Getting Started
+
+\tb Wind River Hypervisor User's Guide
+
+\tb Wind River Hypervisor Virtual Board Interface Guide
+
+\tb Wind River MIPC Programmer's Guide
+
+\tb QorIQ P4080 Reference Manual
+
+\tb PowerPC E500MC Core Reference Manual
+
+\tb Motorola PowerPC Microprocessor Family: The Programming Environments
+
+For further information on the Freescale P4080-DS Board, as well as bootrom
+programming instructions, please see fsl_p4080_ds/target.ref

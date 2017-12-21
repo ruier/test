@@ -1,0 +1,3 @@
+#ifdef INCLUDE_QCOM_AR8021PHY
+    qcomAr8021PhyRegister ();
+#endif /* INCLUDE_QCOM_AR8021PHY */

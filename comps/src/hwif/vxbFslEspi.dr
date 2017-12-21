@@ -1,0 +1,3 @@
+#ifdef DRV_ESPI_FSL
+    fslEspiRegister();
+#endif /* DRV_ESPI_FSL */

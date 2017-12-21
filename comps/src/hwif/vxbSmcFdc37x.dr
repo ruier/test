@@ -1,0 +1,3 @@
+#ifdef	DRV_SUPERIO_SMCFDC37X
+    vxbSmcFdc37xRegister();
+#endif	/* DRV_SUPERIO_SMCFDC37X */

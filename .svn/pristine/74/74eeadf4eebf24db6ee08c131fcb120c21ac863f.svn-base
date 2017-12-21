@@ -1,0 +1,3 @@
+#ifdef DRV_PCIBUS_COMCERTO
+    comcertoPciRegister ();
+#endif /* DRV_PCIBUS_COMCERTO */

@@ -1,0 +1,3 @@
+#ifdef DRV_MII_QORIQMEMAC_MDIO
+    qmmRegister();
+#endif

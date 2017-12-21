@@ -1,0 +1,4 @@
+#ifdef DRV_RESOURCE_FMN_XLP
+    fmnRegister();
+#endif /* DRV_RESOURCE_FMN_XLP */
+

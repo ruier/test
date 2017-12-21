@@ -1,0 +1,3 @@
+#ifdef DRV_MII_DTSEC_MDIO
+    dtmRegister();
+#endif

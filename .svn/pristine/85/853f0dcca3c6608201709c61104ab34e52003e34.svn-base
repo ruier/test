@@ -1,0 +1,841 @@
+\" fsl_mpc8536_ds/target.ref - Freescale MPC8536DS target specific documentation
+\"
+\" Copyright (c) 2008, 2010-2012 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01h,28feb12,c_l  Description change for Security Engine.(WIND00331832)
+\" 01g,28apr11,y_c  Description change for Boot Devices. (WIND00270140)
+\" 01f,28apr11,y_c  Description change for Tffs. (WIND00270313)
+\" 01e,10mar11,my_  rename DRV_STORAGE_FSL_SDHC to DRV_STORAGE_SDHC.
+\" 01d,02apr11,y_c  Support VxWorks native bootrom. (WIND00240155)
+\" 01c,18nov10,pgh  Name change for USB file system boot device.
+\" 01b,05jun10,sye  BSP_REV bump up.
+\" 01a,25dec08,b_m  written.
+\"
+\TITLE fsl_mpc8536_ds - Freescale MPC8536DS
+
+NAME
+`Freescale MPC8536DS'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks for the fsl_mpc8536_ds BSP. Please read the section "Getting the board
+running VxWorks" in order to configure the board to run VxWorks.
+
+\sh Switches
+
+There are ten switches in the bottom left corner of the MPC8536DS board.
+Be careful about the SW3 & SW4 order.
+
+Default Switch Settings:
+
+\ts
+Switch Number | Switch ON       | Switch OFF
+--------------------------------------------
+SW1           | 2,4,8           | 1,3,5,6,7
+SW2           | 3,4,5,6,7       | 1,2,8
+SW3           | 3,4,5,7,8       | 1,2,6
+SW4           | 3,4,5,6,7,8     | 1,2
+SW5           | 1,2,3,4,5,6,7,8 |
+SW6           | 8               | 1,2,3,4,5,6,7
+SW7           | 1,3,5,6,8       | 2,4,7
+SW8           | 3,4,8           | 1,2,5,6,7
+SW9           | 4               | 1,2,3,5,6,7,8
+SW10          | 1,3,4,5,6,7,8   | 2
+\te
+
+\sh Getting the board running VxWorks (boot from VxWorks Bootrom)
+This section will guide you how to run VxWorks on the Freescale MPC8536DS board.
+
+1. Creating a bootrom.bin:
+
+    Open the VxWorks Development Shell, change directory to fsl_mpc8536_ds
+    BSP directory, and then build the VxWorks bootrom image.
+
+\cs
+    cd target/config/fsl_mpc8536_ds
+    make bootrom.bin
+\ce
+
+2. Flashing the VxWorks bootrom image
+
+    This section will describe how to program VxWorks bootrom to the flash
+    by using Workbench.
+
+    2.1 Install Wind River Probe or Wind River ICE and power it on.
+
+          Connect the JTAG interface cable from the Wind River Probe or Wind
+          River ICE to the Freescale MPC8536DS board's JTAG connector (J35).
+          Once the connections have been made, power up the target board and
+          launch Workbench on the host.
+
+    2.2 Configure the Wind River Probe or Wind River ICE connection.
+
+          In Workbench on the left pane, there is a "Remote Systems" window.
+          Click on the "Define a connection to remote system" button. In the popup
+          "New Connection" window, select the Connection type as
+          "Wind River OCD ICE Connection" for Wind River ICE and "Wind River
+          OCD Probe Connection" for Wind River Probe. If the Wind River ICE
+          is connected via serial port, specify the configuration else select
+          "Specify all communication settings manually".
+
+          In the "Wind River ICE Settings" or "Wind River Probe Settings",
+          select the Board file by clicking on the "Processor" radio button and
+          browse to the appropriate CPU type. For example: "MPC8536E".
+          Connect Workbench OCD with the Wind River Probe or Wind River ICE
+          by clicking the "Next" and then "Finish" button. A New connection
+          appears in the "Remote Systems" window.
+
+    2.3 Program Wind River Probe / ICE with the proper register
+          settings for the Freescale MPC8536DS board.
+
+          To view/modify the Wind River ICE firmware setting, terminate the
+          debug session for Wind River ICE. In the "Remote Systems" window,
+          right click on the newly connected OCD connection. Select
+          "OCD Utilities". To know about the current firmware information,
+          select "Emulator firmware version information". To download the new
+          firmware, Select "Firmware Download" and select appropriate file
+          from "$WIND_OCD_PATH/CommonHardwareFiles/*.bin".
+
+          Go to the "OCD Command Shell" and click on the "Settings" button.
+          The OCD Command Shell Settings dialog appears, where you can select
+          the appropriate register file, which is "Freescale_MPC8536E_DS.reg"
+          After choosing the register file, press the "OK" button. In the OCD
+          Command Shell, click the "Playback File" button. The selected register
+          file is downloaded to the target and the commands from the file appear
+          in the OCD command shell. When playback is finished the ">BKM>" or
+          the ">ERR>" prompt returns.
+
+    2.4 Get into Background Mode.
+
+          Execute the "IN" command to reset the board and initialize it with
+          the register setting.
+\cs
+              IN
+\ce
+
+    2.5 Program the MPC8536DS Flash.
+
+          In WindRiver OCD, Select the "Flash Programmer". The "Flash Programmer"
+          view has three tabs: "Configuration", "Programming" and "Memory/Diagnostics".
+
+          2.5.1 Select the "Configuration" tab. In the "Device Selection'
+                  field, select the "AMD--> S29GL01GP--> 65536 x 16--> 1 Device"
+
+                  In "Flash Bank Address" group for the "Base" enter "e8000000" .
+                  In the "RAM Workspace" group for the "Workspace Start at"
+                  enter "0x00005000" and for the "Workspace Size" enter "0xff58".
+
+          2.5.2 Click on the "Programming" tab. Select the "Add File" button, in
+                  the popup window, select the newly generated
+                  "$(WIND_BASE)/target/config/fsl_mpc8536_ds/bootrom.bin", and click
+                  the "This is a raw binary file" checkbox then click "OK" to finish
+                  file adding. Click the "Start Address" and set it as "0xeff00000",
+                  the "End Address" will be fixed automatically. Please notice that
+                  the "Start Address" should include the "Offset bias".
+                  Enable a file by clicking on the checkbox under the "Enabled" heading.
+
+          2.5.3 In the "Erase Sector Selection" pane, select addresses eff00000
+                  through efffffff.  Press the "Erase/Program" button to erase the
+                  flash and then program the flash with selected "bootrom.bin" file.
+                  A window pops up to show the progress of the Flash device
+                  programming. When it is complete, the Flash should contain the
+                  new boot program.
+
+3. Running the VxWorks bootrom
+
+    Re-power on the board, then the VxWorks bootrom should run up.
+
+FEATURES
+
+This section describes all features of the board, supported or not.
+It documents all configurations of the board and the interaction between
+features and configuration items.
+
+\sh List of Hardware Features (Freescale MPC8536DS board)
+
+\ts
+Hardware Interface | Controller | Driver/Component     | Status
+--------------------------------------------------------------
+UART:0             | on-chip    | vxbNs16550Sio.c      | SUPPORTED
+UART:1             | on-chip    | vxbNs16550Sio.c      | SUPPORTED
+1GB-ETHERNET:0     | on-chip    | vxbEtsecEnd.c        | SUPPORTED
+1GB-ETHERNET:1     | on-chip    | vxbEtsecEnd.c        | SUPPORTED
+NOR-FLASH          | S29GL01GP  | flashmem.c/TFFS      | SUPPORTED
+NAND-FLASH         | Samsung    | -                    | UNSUPPORTED
+TIMER              | on-chip    | vxbM85xxTimer.c      | SUPPORTED
+TIMER              | on-chip    | vxbOpenPicTimer.c    | SUPPORTED
+PCI-MASTER         | on-chip    | m85xxPci.c           | SUPPORTED
+PCI-E-HOST:0       | on-chip    | m85xxPci.c           | SUPPORTED
+PCI-E-HOST:1       | on-chip    | m85xxPci.c           | SUPPORTED
+PCI-E-HOST:2       | on-chip    | m85xxPci.c           | SUPPORTED
+SATA:0             | on-chip    | vxbFslSataStorage.c  | SUPPORTED
+SATA:1             | on-chip    | -                    | UNSUPPORTED
+I2C                | on-chip    | sysMpc85xxI2c.c      | SUPPORTED
+RTC                | DS3232     | ds1339Rtc.c          | SUPPORTED
+SPI                | on-chip    | -                    | UNSUPPORTED
+USB2-HOST:0        | on-chip    | EHCI                 | SUPPORTED
+USB2-HOST:1        | on-chip    | EHCI                 | SUPPORTED
+USB2-DEVICE        | on-chip    | -                    | UNSUPPORTED
+ENCRYPTION         | on-chip    | ipfreescale          | SUPPORTED
+SD-CARD            | on-chip    | vxbSdhcStorage.c     | SUPPORTED
+\te
+
+\sh Feature Interactions
+Refer to the board vendor's documentation.
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Verified Hardware
+This BSP has been verified on Rev.A of Freescale MPC8536DS board.
+The default clock speed for MPC8536DS is 1.25GHz core, 500MHz CCB.
+
+\sh Memory Maps
+The following table describes the default memory map of this BSP.
+
+\ts
+Start       | Size  | End         | Access to
+---------------------------------------------
+0x0000_0000 | 512MB | 0x1FFF_FFFF | DDR SDRAM
+0x8000_0000 |  64MB | 0x83FF_FFFF | PCI Prefetchable Memory
+0x8400_0000 |  64MB | 0x87FF_FFFF | PCI Non-Prefetchable Memory
+0x8800_0000 |  64MB | 0x8BFF_FFFF | PCI IO
+0x9000_0000 |  64MB | 0x93FF_FFFF | PCIe 1 Prefetchable Memory
+0x9400_0000 |  64MB | 0x97FF_FFFF | PCIe 1 Non-Prefetchable Memory
+0x9800_0000 |  64MB | 0x9BFF_FFFF | PCIe 1 IO
+0xA000_0000 |  64MB | 0xA3FF_FFFF | PCIe 2 Prefetchable Memory
+0xA400_0000 |  64MB | 0xA7FF_FFFF | PCIe 2 Non-Prefetchable Memory
+0xA800_0000 |  64MB | 0xABFF_FFFF | PCIe 2 IO
+0xB000_0000 |  64MB | 0xB3FF_FFFF | PCIe 3 Prefetchable Memory
+0xB400_0000 |  64MB | 0xB7FF_FFFF | PCIe 3 Non-Prefetchable Memory
+0xB800_0000 |  64MB | 0xBBFF_FFFF | PCIe 3 IO
+0xF800_0000 | 128MB | 0xFFFF_FFFF | NOR FLASH
+0xEFDF_0000 |  32KB | 0xEFDF_7FFF | PIXIS FPGA
+0xE000_0000 |   1MB | 0xE00F_FFFF | CCSR
+\te
+
+\sh Serial Configuration
+No special configuration needed.
+Default configuration is:
+    Baud Rate: 115200
+    Data: 8 bit
+    Parity: None
+    Stop: 1 bit
+    Flow Control: None
+
+\sh Network Configuration
+The ETSEC ports allows 10/100/1000 connection. The driver will auto-negotiate
+and configure the port accordingly.  The BSP also supports Intel e100/e1000
+series NICs via PCI/PCIe.  See the fei8255xVxbEnd/gei825xxVxbEnd driver for
+the supported model numbers.
+
+The following END and corresponding END2 drivers are supported in this BSP.
+However, only END driver is enabled by default.
+
+\ts
+Driver | END                   | END2
+-------------------------------------
+ETSEC  | INCLUDE_ETSEC_VXB_END | INCLUDE_ETSEC_VXB_END2
+\te
+
+To enable the END2 driver, you should modify as follows:
+
+For command line build, add INCLUDE_END2 into config.h right after the
+definition of INCLUDE_END.  Also replace the END driver name with corresponding
+END2 driver name, then rebuild the bootrom and vxWorks image.
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, add INCLUDE_END2 component and corresponding END2
+component, this will un-define the default END component automatically. 
+Then rebuild your project.
+
+\sh Boot Devices
+The supported boot devices are:
+
+\ts
+    `motetsec0' | ETSEC1
+    `motetsec1' | ETSEC3
+    `fs'        | SATA
+    `fs'        | USB
+    `fs'        | SD
+    `tffs'      | TFFS
+\te
+
+\sh Boot Methods
+The boot methods are affected by the boot parameters.  If no password is
+specified, RSH (remote shell) protocol is used.  If a password is specified,
+FTP protocol is used, or, if the flag is set to 0x80, TFTP protocol is used.
+
+\sh PCI/PCIe Access
+There are three PCIe and one PCI slots on the Freescale MPC8536DS board.
+PCI supports +3.3V 33/66MHz interface and the select between 33MHz and 66MHz
+can be automatically done. The default PCIe settings are one PCIe x4 (PCIe 1)
+and two PCIe x2 (PCIe 2 & 3) slots.
+
+In order to support PCI/PCIe devices in this BSP, please define following
+macro in config.h:
+
+\cs
+    #define DRV_PCIBUS_M85XX
+\ce
+
+The Intel 8257x Gigabit Ethernet adapter is one of the tested PCIe device
+supported in this release.  Define INCLUDE_GEI825XX_VXB_END in config.h to
+enable this device.
+
+This BSP defaults to use PCIe legacy interrupts.  To enable PCIe MSI interrupt,
+please define following macro in config.h:
+
+\cs
+    #define INCLUDE_INTCTLR_DYNAMIC_LIB
+\ce
+
+\sh SATA
+The board has two SATA ports, port#0 at J15 and port#1 at J2.  Only port#0 is
+supported in this release.  To enable SATA support with DOSFS, make sure the
+following components are included:
+
+\cs
+    DRV_STORAGE_FSLSATA
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_MAIN
+\ce
+
+Then build the image and boot the target.  In the vxWorks target shell, type
+
+\cs
+    devs
+\ce
+
+you will see something similar to "/s0p0:1" which is the SATA disk partition.
+
+\sh Security Engine
+Freescale Security Engine (SEC) 3.0 is supported in this release.
+VxWorks MSP must be installed to enable security engine offload.
+
+The following steps describe how to enable SEC support of this BSP.
+
+1. Create a VSB (VxWorks Source Build)
+
+    1.1 Create a VSB project
+
+        Open the VxWorks Development Shell, type the following command to create
+        a VSB project based on fsl_mpc8536_ds BSP.
+
+\cs
+        vxprj vsb create -bsp fsl_mpc8536_ds -S
+\ce
+
+        This command creates a VSB projcet based on BSP fsl_mpc8536_ds in a sub
+        directoy vsb_fsl_mpc8536_ds under current directoy.
+
+    1.2 Configure VSB
+
+        Change directoy to vsb_fsl_mpc8536_ds, and open vsb.config file.
+        Modify the file to make sure the following components are enabled.
+
+\cs
+        _WRS_CONFIG_MSP_FEATURE_PNE=y
+        _WRS_CONFIG_COMPONENT_IPCRYPTO=y
+        _WRS_CONFIG_COMPONENT_IPFREESCALE=y
+        _WRS_CONFIG_COMPONENT_IPHWCRYPTO=y   
+
+        and optionally if IPsec is required:
+        _WRS_CONFIG_COMPONENT_IPIPSEC=y        
+\ce
+
+        then type the following command to configure the VSB
+
+\cs
+        vxprj vsb config -s
+\ce
+
+        or
+
+\cs
+        vxprj vsb config -D vsb.config
+\ce
+
+    1.3 Build VSB
+
+        Run the following command in vsb_fsl_mpc8536_ds directory to build
+        the VSB libraries.
+
+\cs
+        make
+\ce
+
+2. Create a VIP based on the new VSB
+
+    2.1 Create a VIP, in the step of "Project Setup", select new VSB which is
+        created above as the configuration of "A source build project", and
+        select the correct BSP.
+
+    2.2 Configure and build VIP
+
+        In the Kernel Configuration editor include INCLUDE_IPFREESCALE.
+        Set two parameters as follows:
+
+\cs
+        SEC2_CORE_VERSION = "3.0"
+        SEC2_DEVICE_FAMILY = "3"
+\ce
+
+        Build vxWorks image of this VIP.
+
+    2.3 Test the Security Engine
+
+        Boot the target with the image file, and type the following command
+        in the VxWorks target shell to test the security engine.
+
+\cs
+        -> ipcom_run_cmd "freescale test all"                                          
+        freescale :: testing md5 hash...success                                        
+        freescale :: testing md5 hmac...success                                        
+        freescale :: testing sha1 hash...success                                       
+        freescale :: testing sha1 hmac...success                                       
+        freescale :: testing des cbc cipher...success                                  
+        freescale :: testing des ecb cipher...success                                  
+        freescale :: testing 3des cbc cipher...success                                 
+        freescale :: testing 3des ecb cipher...success                                 
+        freescale :: testing aes cbc cipher...success                                  
+        freescale :: testing aes ecb cipher...success                                  
+        freescale :: testing rc4 cipher...success                                      
+        freescale :: testing rng oper...success                                        
+        freescale :: testing mod exp...success  
+\ce
+
+SPECIAL CONSIDERATIONS
+
+\sh TrueFFS
+The standard Wind River TrueFFS product is supported in this release.
+
+This BSP uses the Spansion S29GL01GP flash as the TrueFFS media.
+The FLASH address space that is used as TrueFFS is 0xf8000000 - 0xfbffffff.
+
+Note: Bootloader and TFFS are sharing the same flash part, so please be very
+careful because misusing of TFFS may damage the bootloader and cause the
+board failure to boot up.
+
+To use it, define INCLUDE_TFFS in config.h.  If you want to use TFFS with DOSFS
+file system, please define the following macros in config.h.
+
+\cs
+    #define INCLUDE_ERF
+    #define INCLUDE_DEVICE_MANAGER
+    #define INCLUDE_FS_EVENT_UTIL
+    #define INCLUDE_FS_MONITOR
+    #define INCLUDE_XBD
+    #define INCLUDE_XBD_BLK_DEV
+    #define INCLUDE_XBD_TRANS
+    #define INCLUDE_DOSFS
+    #define INCLUDE_DOSFS_DIR_FIXED
+    #define INCLUDE_DOSFS_DIR_VFAT
+    #define INCLUDE_DOSFS_FAT
+    #define INCLUDE_DOSFS_FMT
+    #define INCLUDE_DOSFS_MAIN
+    #define INCLUDE_TL_FTL
+\ce
+
+When using TrueFFS on a new FLASH for the first time, you should format and
+configure the FLASH by using:
+
+\cs
+    sysTffsFormat ();
+    usrTffsConfig (0, 0, "/tffs0");
+\ce
+
+If you are using DOSFS, please use
+
+\cs
+    dosfsDiskFormat ("/tffs0");
+\ce
+
+Note: If you are running these commands in the VxWorks target shell, please use
+
+\cs
+    sp sysTffsFormat
+\ce
+
+to format the FLASH as it would take long time to complete.
+
+You should now be able to use VxWorks I/O and file system commands to access
+the FLASH device as if it is a disk.  For example, you can copy a vxWorks
+image from your host to TFFS by using file system 'copy'.  Of course, you should
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/tffs0/vxWorks");
+\ce
+
+If you want to use "/tffs0" as a boot device, you should follow the instructions:
+
+For command line mode, make sure INCLUDE_TFFS is defined in config.h, re-build
+a bootrom from the BSP directory under VxWorks Development Shell, and program
+it into the flash chip.  Also make sure you have all the necessary file system
+components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_TFFS
+    INCLUDE_TFFS_MOUNT
+    INCLUDE_TL_FTL
+    INCLUDE_BOOT_FILESYSTEMS
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a default_romCompress.bin in the project directory, program
+it into the flash chip as a bootrom.
+
+Below is an example by using /tffs as a boot device:
+
+\cs
+    boot device          : tffs=0,0
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /tffs0/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : user
+    ftp password (pw)    : pass
+    flags (f)            : 0x0
+    target name (tn)     : mpc8536ds
+    other (o)            : motetsec0
+\ce
+
+\sh USB Host
+The board has 3 USB ports, two of which are working in host mode while the third
+one is working in device mode.  Only USB host is supported in this BSP.
+To enable USB host support, you should modify as follows:
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, add INCLUDE_EHCI_INIT component, which will
+automatically include EHCI host controller driver, then add USB class drivers
+which you want, then rebuild your project. For example:
+
+To support USB mass storage device, you need include the following components:
+
+\cs
+INCLUDE_FS_MONITOR
+INCLUDE_ERF
+INCLUDE_XBD
+INCLUDE_XBD_BLK_DEV
+INCLUDE_DEVICE_MANAGER
+INCLUDE_XBD_PART_LIB
+\ce
+
+And the following components for GEN1 mass storage driver:
+
+\cs
+INCLUDE_USB_MS_BULKONLY
+INCLUDE_USB_MS_BULKONLY_INIT
+\ce
+
+or the following components for GEN2 mass storage driver:
+
+\cs
+INCLUDE_USB_GEN2_STORAGE_INIT
+INCLUDE_USB_GEN2_STORAGE
+INCLUDE_USB_GEN2_HELPER
+\ce
+
+Note: if you want to use GEN2 usb boot, the below components are necessary:
+
+\cs
+INCLUDE_BOOT_USB_FS_LOADER
+INCLUDE_BOOT_FILESYSTEMS
+INCLUDE_IO_SYSTEM
+\ce
+
+Then add the following components if you want to use the DOSFS file system with
+U-Disk:
+
+\cs
+INCLUDE_DOSFS
+INCLUDE_DOSFS_MAIN
+INCLUDE_DOSFS_CHKDSK
+INCLUDE_DOSFS_FMT
+INCLUDE_DOSFS_FAT
+INCLUDE_DOSFS_DIR_VFAT
+\ce
+
+or the following components for the HRFS file system:
+
+\cs
+INCLUDE_HRFS
+INCLUDE_HRFS_CHKDSK
+INCLUDE_HRFS_HISPEED_WRITE_MODE
+INCLUDE_HRFS_FORMAT
+\ce
+
+Note: only Mass storage device has been verified on the target.
+
+NOTE: for command line build, you must include the components manually in
+config.h.
+
+For more information, please refer to
+\tb Wind River USB for VxWorks 6 PROGRAMMER'S GUIDE
+
+\sh SD memory card controller (eSDHC)
+The MPC8536's on chip enhanced SD host controller (eSDHC), connected to socket
+J37 on the board, supports standard SD memory cards compatible with SD memory 
+card specification 2.0. But the eSDHC driver does not support MMC cards and 
+high speed SD memory cards.
+
+To enable eSDHC support, make sure the following feature definitions are
+added in config.h:
+
+\cs
+    #define DRV_STORAGE_SDHC
+\ce
+
+Use of the internal DMA engine, and selection of interrupt vs. polling mode,
+are configured by setting the values of 'dmaMode' and 'polling' in hwconf.c.
+For example, to select interrupt mode and enable use of the internal DMA engine:
+
+\cs
+    /@ hwconf.c @/
+    ...
+    struct hcfResource sdhcResources[] = {
+    ...
+        { "dmaMode",      HCF_RES_INT,    { (void *)0 } },
+        { "polling",      HCF_RES_INT,    { (void *)0 } },
+    };
+    ...
+\ce
+
+When using an SD card for the first time, you should format it as a FAT file
+system by using:
+
+\cs
+    dosFsVolFormat ("/sd0:1", 0x20, 0);    /@ FAT32 format @/
+\ce
+
+or
+
+\cs
+    dosFsVolFormat ("/sd0:1", 0x10, 0);    /@ FAT16 format @/
+\ce
+
+Now, you can use VxWorks I/O and file system commands to access the SD card
+device as if it is a disk.  For example, you can copy a vxWorks image from
+your host to the SD card by using file system copy. Of course, you should
+define INCLUDE_DISK_UTIL in config.h first.
+
+\cs
+    copy ("vxWorks", "/sd0:1/vxWorks");
+\ce
+
+If you want to use SD card as a boot device, you should follow these steps:
+
+For command line mode, make sure DRV_STORAGE_SDHC, INCLUDE_BOOT_FILESYSTEMS
+is defined in config.h, re-build a bootrom from the BSP directory under VxWorks
+Development Shell, and program it into the flash chip. Also make sure you have
+all the necessary file system components defined in config.h.
+
+For project mode with PROFILE_BOOTAPP profile under Workbench, you should make
+sure to include the following components in the Kernel Configuration Window:
+
+\cs
+    DRV_STORAGE_SDHC
+    INCLUDE_ERF
+    INCLUDE_DEVICE_MANAGER
+    INCLUDE_FS_EVENT_UTIL
+    INCLUDE_FS_MONITOR
+    INCLUDE_XBD
+    INCLUDE_XBD_BLK_DEV
+    INCLUDE_XBD_TRANS
+    INCLUDE_DOSFS
+    INCLUDE_DOSFS_DIR_FIXED
+    INCLUDE_DOSFS_DIR_VFAT
+    INCLUDE_DOSFS_FAT
+    INCLUDE_DOSFS_FMT
+    INCLUDE_DOSFS_MAIN
+    INCLUDE_BOOT_FILESYSTEMS
+    INCLUDE_DISK_UTIL   
+\ce
+
+Then right click the project, select "Build Options\Set Active Build Spec...",
+check the "default_romCompress" box, you will see "vxWorks.bin(default_romCompress)"
+item is listed in the project, right click it and select "Build Target", this
+will generate a default_romCompress.bin in the project directory, program
+it into the flash chip as a bootrom.
+
+Below is an example by using SD card "/sd0:1" as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /sd0:1/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : target
+    ftp password (pw)    : vxTarget
+    flags (f)            : 0x0
+    target name (tn)     : fsl_mpc8536_ds
+    other (o)            : motetsec0
+\ce
+
+Note: INCLUDE_BOOT_FILESYSTEMS macro is only used for bootrom/bootapp stage, and conflict
+with vxWorks image, so undef it after you've finished startup.
+
+\sh Ethernet Address
+A unique Ethernet address is absolutely necessary if the user wishes to connect 
+the Freescale MPC8536DS board to a network. Thus, the user must provide a suitable
+6-byte Ethernet address for each on-board network interface.
+
+The definition of macro ETHERNET_MAC_HANDLER in config.h indicates the MAC
+address is stored in NVRAM and alterable via the 'M' bootrom command.  This
+option allows only the last three bytes to be changed. To use this option,
+open a console window and reset the hardware. When the bootrom banner appears
+and the countdown starts, press any key to get the "[VxWorks Boot]:" prompt.
+Type 'M' and follow the instructions.
+
+\sh Make Targets
+The make targets are listed as the names of object-format files. Append `.hex'
+to each to derive a hex-format file name. Other images not listed here may not
+be tested.
+
+\ts
+`bootrom'
+`bootrom.bin'
+`bootrom.hex'
+`vxWorks' (with `vxWorks.sym')
+`vxWorks.st'
+\te
+
+\sh BSP Bootloaders and Bootroms
+
+\ts
+Bootloader/Bootrom   | Status
+-----------------------------
+U-Boot (pre-flashed) | UNSUPPORTED
+bootrom              | SUPPORTED
+bootrom_uncmp        | SUPPORTED
+vxWorks              | SUPPORTED
+vxWorks_rom          | UNSUPPORTED
+vxWorks_romCompress  | SUPPORTED
+vxWorks_romResident  | UNSUPPORTED
+\te
+
+\sh BSP Validated Tools
+
+\ts
+Tool                         | Connection/Type | Status
+-------------------------------------------------------
+Workbench Debugger           | ETHERNET/WDB    | SUPPORTED
+Workbench System Viewer      | ETHERNET/WDB    | SUPPORTED
+Workbench MemScope           | ETHERNET/WDB    | SUPPORTED
+Workbench ProfileScope       | ETHERNET/WDB    | SUPPORTED
+Workbench StethoScope        | ETHERNET/WDB    | SUPPORTED
+Workbench CoverageScope      | ETHERNET/WDB    | SUPPORTED
+Workbench Core File Analysis | ETHERNET/WDB    | UNVALIDATED
+Workbench Sensor Points      | ETHERNET/WDB    | UNVALIDATED
+Workbench OCD Debugger       | JTAG            | UNSUPPORTED
+Workbench OCD Flash          | JTAG            | SUPPORTED
+\te
+
+\sh Known Problems
+The size of default vxWorks_rom image is grater than 1 MB, which is bigger than
+the default ROM_SIZE.  ROM_SIZE and the corresponding link addresses can be
+adjusted to make vxWorks_rom work, however it is an unsupported configuration.
+
+This vxWorks_romResident image is unsupported in this release, as it will take
+several minutes to boot up.  For more details, or to check if a workaround has
+been posted since the writing of this document, see WIND00136433.
+
+When rebooting a vxWorks romCompress image using Ctrl+X, it will take several
+minutes to boot up.  For more details, or to check if a workaround has been
+posted since the writing of this document, see WIND00149773.
+
+BOARD LAYOUT
+
+\bs
++------------------------------------------------------------------------------+
+|                 |eSATA| |SD/MMC| |ETSEC1(bot)| |COM0(bot)| |USB2| |USB0(bot)||
+|                 +-----+ +------+ |ETSEC0(top)| |COM1(top)| +----+ |USB1(top)||
+|                                  +-----------+ +---------+        +---------+|
+|                                                                              |
+| +---+ +---+ +---+ +---+ +---+                                                |
+| |   | |   | |   | |   | |   |                                                |
+| |   | | S | | P | | P | | P | +-+                            +---+           |
+| | P | | G | | C | | C | | C | |S|        +-----------+       |   |           |
+| | C | | M | | I | | I | | I | |A|        |           |       |   |           |
+| | I | | I | | E | | E | | E | |T|        |   M P C   |       | D |           |
+| |   | | I | | 3 | | 2 | | 1 | |A|        |   8536E   |       | D |           |
+| |   | |   | |   | |   | |   | +-+        |           |       | R |           |
+| +---| +---| +---| +---| +---|            +-----------+       |   |           |
+|                                                              |   |           |
+|                                                              +---+           |
+|                 +--------+                                                   |
+|                 |  FPGA  |                                             +---+ |
+|                 +--------+                                             |   | |
+|                                                +-------+  +--------+   |   | |
+| SW1 SW2                                        |  NOR  |  |  NAND  |   | A | |
+| SW4 SW3                                        +-------+  +--------+   | T | |
+| SW5 SW6                                                                | X | |
+| SW7 SW8         +--------+       +----------+                          |   | |
+| SW9 SW10        |  JTAG  |       |  SD/MMC  |               oBattery   |   | |
+|                 +--------+       +----------+                          +---+ |
++------------------------------------------------------------------------------+
+\be
+
+SEE ALSO
+
+\tb Workbench User's Guide: Introduction
+
+\tb VxWorks Programmer's Guide: Configuration
+
+\tb VxWorks Programmer's Guide: Architecture Appendix
+
+BIBLIOGRAPHY
+
+\tb MPC8536E Reference Manual
+
+\tb MPC8536E Development System Reference Manual
+
+\tb PowerPC E500 Core Reference Manual
+
+\tb Motorola PowerPC Microprocessor Family: The Programming Environments

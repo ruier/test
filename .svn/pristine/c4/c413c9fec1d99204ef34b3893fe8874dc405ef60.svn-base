@@ -1,0 +1,3 @@
+#ifdef INCLUDE_FEI8255X_VXB_END
+    feiRegister();
+#endif

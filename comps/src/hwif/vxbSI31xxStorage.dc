@@ -1,0 +1,3 @@
+#ifdef DRV_STORAGE_SI31XX
+    extern void vxbSI31xxStorageRegister (void);
+#endif /* DRV_STORAGE_SI31XX */

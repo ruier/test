@@ -1,0 +1,3 @@
+#ifdef INCLUDE_NE2000_VXB_END
+    eneRegister();
+#endif

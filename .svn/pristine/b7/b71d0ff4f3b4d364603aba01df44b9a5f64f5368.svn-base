@@ -1,0 +1,3 @@
+#ifdef	DRV_SUPERIO_SMCFDC37X
+    extern void vxbSmcFdc37xRegister (void);
+#endif	/* DRV_SUPERIO_SMCFDC37X */

@@ -1,0 +1,4 @@
+#ifdef INCLUDE_MSC01_PCI
+extern void vxbMsc01PciRegister(void);
+#endif /* INCLUDE_MSC01_PCI */
+

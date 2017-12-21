@@ -1,0 +1,3 @@
+#ifdef DRV_ESPI_FSL
+IMPORT void fslEspiRegister(void);
+#endif /* DRV_ESPI_FSL */

@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTLR_ADS5121E_CPLD
+    ads5121eCpldIntCtlrRegister ();
+#endif /* DRV_INTCTLR_ADS5121E_CPLD */

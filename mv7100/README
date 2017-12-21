@@ -1,0 +1,71 @@
+
+             README: Emerson MVME7100 (mv7100)
+
+This file contains board-specific information for the Emerson MVMVE7100
+target board.  Specifically, this file contains information on any BSP
+interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+Additionally, the target board's reference entry (i.e., 'man mv7100')
+provides board-specific information necessary to run VxWorks, and
+should be read before this BSP is used.
+ 
+------------------------------------------------------------------------------
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    Fix high impact prevent errors. (WIND00423743)
+    Fix NV_BOOT_OFFSET issue for AMP build. (WIND00423673)
+
+RELEASE 6.9/x
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.x
+
+    correct PCI int line assignment function. (WIND00221935)
+    Fix the AMP device filter. (WIND00387606)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    fix document error for NVRAM. (WIND00309132)
+    fix build error with component INCLUDE_USB_TARG. (WIND00255092)
+    fix the macro VME_IN0_CFG_PARAMS definiation error. (WIND00261050)
+    update BOOT ROMS section in documentation. (WIND00266582)
+    added sync for flash read/write. (WIND00335163)
+    fix NV_BOOT_OFFSET for AMP. (WIND00328678)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+    delete _MMU_UBAT_VP attribute(WIND00162540)
+    add description for smNet comunication. (WIND00208858)
+    add include pci/pciConfigLib.c to avoid build error. (WIND00225346)
+
+Version 2.0/2
+
+    Re-released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+    
+    Add MIPC2.0 feature support.
+    	
+Version 2.0/1
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+    
+    Remove the M command support.
+    Changed flag that tracks if I2C should use locking from global variable 
+    to UART scratch register, fixing issue with bootrom_uncmp. (WIND00179587)
+    Replace sysSvrGet() with vxSvrGet() of vxALib.s.
+        
+Version 2.0/0_1
+
+    Re-released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+    
+    Add AMP feature support.
+    
+Version 2.0/0
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Initial release.

@@ -1,0 +1,3 @@
+#ifdef DRV_I2CBUS_FSL
+    fslI2cRegister();
+#endif /* DRV_I2CBUS_FSL */

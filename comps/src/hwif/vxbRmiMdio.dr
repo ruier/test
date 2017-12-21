@@ -1,0 +1,3 @@
+#ifdef INCLUDE_RMI_MDIO
+    rmRegister();
+#endif

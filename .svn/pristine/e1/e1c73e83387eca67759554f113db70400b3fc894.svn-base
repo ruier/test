@@ -1,0 +1,3 @@
+#ifdef INCLUDE_MVYUKONII_VXB_END
+    ynRegister();
+#endif

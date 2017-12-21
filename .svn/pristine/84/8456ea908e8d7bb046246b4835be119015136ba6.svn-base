@@ -1,0 +1,3 @@
+IMPORT void vxbNorFlashRegister (void);
+IMPORT void vxbNorFlashAmdCmdSetRegister (void);
+IMPORT void vxbNorFlashItlCmdSetRegister (void);

@@ -1,0 +1,4 @@
+#ifdef INCLUDE_IPIIX4_MF
+extern void vxbIPiix4MfRegister (void);
+#endif
+

@@ -1,0 +1,3 @@
+#ifdef INCLUDE_SPI4000_MDIO
+    spi4000MdioRegister();
+#endif

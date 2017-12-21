@@ -1,0 +1,3 @@
+#ifdef DRV_TIMER_AT91
+    vxbAt91TimerDrvRegister ();
+#endif

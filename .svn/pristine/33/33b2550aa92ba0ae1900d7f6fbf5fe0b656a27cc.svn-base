@@ -1,0 +1,3 @@
+#ifdef INCLUDE_RTL8139_VXB_END
+    rtlRegister();
+#endif

@@ -1,0 +1,3 @@
+#ifdef INCLUDE_I2C_BUS
+    i2cRegister();
+#endif /* INCLUDE_I2C_BUS */

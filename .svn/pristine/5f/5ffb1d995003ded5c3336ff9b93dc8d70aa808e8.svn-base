@@ -1,0 +1,4 @@
+#ifdef DRV_INTCTLR_PXA3XX
+    vxbPxa3xxIntCtlrRegister();
+#endif /* DRV_INTCTLR_PXA3XX */
+    

@@ -1,0 +1,684 @@
+\" hpc2_7448/target.ref - hpc2_7448 target specific documentation
+\"
+\" Copyright (c) 2006, 2008 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01d,22apr08,z_l  Add vxBus system clock support.
+\" 01c,20mar06,dtr  Now support tsi108End.
+\" 01b,07feb06,avb  added board specific details.
+\" 01a,10jan06,dtr  derived from template
+\"
+\TITLE hpc2_7448 - Freescale HPC-II
+
+NAME
+`Freescale HPC-II'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks for the hpc2 BSP. Before using a board with VxWorks,
+verify that the board runs in the factory configuration by using
+vendor-supplied ROMs and jumper settings and checking the RS-232
+connection.
+
+\sh Boot ROM
+
+The 32-bit boot ROM consists of two on-board 16-bit flash devices AMD AM29LV641.
+It is addressed from 0xFF000000 to 0xFFFFFFFF (16MB). The ROM resides 
+on the HLP_CS0 line of local bus (HLP). The local bus configuration
+hardware divides ROM on two halves:
+\ml
+\m -
+low at 0xFF000000, and
+\m -
+high at 0xFF800000
+\me
+
+The FLASH_SECT switch (SW3.4) allows select which half of the ROM is used to
+boot processor.
+
+In addition to ROM devices, local bus provides support for boot ROM code
+development using PromJet ROM emulator. To connect PromJet ROM emulator use
+two 2x25 headers J1 and J2. The FLASH_SEL switch (SW3.8) allows to select
+between on-board ROM or PromJet ROM emulator as active boot device. Details on
+the local bus implementation are provided in section 4.4 of
+\tb HPC II User's Guide    
+
+\sh RTC and NVRAM
+
+The BSP supports non-volatile RAM; thus boot parameters will be preserved
+whenever the system is powered off.  HPC-II board incorporates an 32KB battery
+backed SRAM, which is organized as 32kbx8 and is used for the storage of
+system configuration information.
+
+To load VxWorks, and for more information, follow the instructions in the
+\tb Tornado User's Guide: Getting Started. 
+
+\sh Jumpers and Switches
+In order to get the board running with the default VxWorks configuration, no
+jumper's and switch's need to be changed from default configuration settings
+described in board's hardware manual. However, the following switches affect
+boot ROM programming and boot code selection (see 'Boot ROM' section above):
+
+\cs
+NOTE: For all switches in this document: 1 = ON position, 0 = OFF position
+      (*) - default configuration
+
+Boot ROM Configuration
+----------------------
+
+Switch |  Function  | Description
+------------------------------
+ SW3.4 | FLASH_SECT | 0 - CPU boots from low half of flash (*)
+       |            | 1 - CPU boots from high half of flash
+ SW3.7 | FLASH_WP   | 0 - Flash is write-protected (*)
+       |            | 1 - Flash is not write-protected
+ SW3.8 | FLASH_SEL  | 0 - Boot CPU from flash (*)
+       |            | 1 - Boot CPU from PromJet ROM emulator
+\ce
+
+One of the board features is ability to isolate unused portions of PCI/PCI-X
+bus to maximize frequency. This bus isolation is controlled by switches shown
+below.
+
+\cs
+PCI/PCI-X Bus Isolation
+-----------------------
+
+Switch |  Function  | Description
+------------------------------
+ SW3.5 | PCI_ISO_A  | 0 - SATA and Slot 2 connected to the PCI bus (*)
+       |            | 1 - Only Slot 1 connected to the PCI bus
+ SW3.6 | PCI_ISO_B  | 0 - USB controller connected to the PCI bus (*)
+       |            | 1 - USB controller disconnected from the PCI bus
+\ce
+
+For details of jumper configuration, see the board diagram at the end
+of this entry.  Also see the board's hardware manual for other jumpers
+not directly related to VxWorks operation.
+
+FEATURES
+
+The High Performance Computing Platform II (HPC-II) is a high-performance
+PowerPC server reference design, which is optimized for high speed throughput
+between the processor and the memory, disk drive and Ethernet port subsystems.
+HPC II is designed using the micro-ATX form factor, allowing it to be used in
+standard ATX/Micro-ATX chassis.
+
+The HPC-II board has the following features: 
+
+\sh Supported Features
+
+\ml
+\m -
+
+Processor MPC7448 or MPC7447A (200 MHz front-side bus)
+\m -
+
+Tsi108 Host Bridge
+\m -
+
+Two DDR2 DIMM Sockets support up to 4GB at 400 MHz. The HPC-II BSP provides
+a Serial Presence Detect (SPD) routine to automatically configure SDRAM
+controller using DIMM parameters.
+\m -
+
+Integrated Ethernet controller with two 10/100/1000 base T ports
+\m -
+
+PCI/PCI-X Bus with two slots supporting PCI 2.3 at 33-66 MHz and PCI-X
+at up to 133 MHz with isolation of unused portions of bus to maximize frequency
+\m -
+
+Host Local Port with 16Mbyte Flash (32-bits wide), PromJet flash emulator
+support option, and 8K non-volatile SRAM
+\m -
+
+Programmable interrupt controller
+\m -
+
+System clock (PPC decrementer)
+\m -
+
+Dual UART
+\m -
+
+Integrated clock generator
+\m -
+
+I2C interface
+\m - 
+
+Intel 8254x Ethernet Controller (PCI card)
+
+\me
+
+\sh Unsupported Features
+
+The features listed below are implemented on the HPC-II board but do not have
+software support at the time of this BSP release: 
+
+\ml
+\m -
+
+SATA Disk Controller: on-board four-channel PCI device with RAID-1 support 
+\m -
+
+On-board PCI USB Controller that provides:
+  a. UHCI/EHCI USB 2.0 Interface
+  b. Two ports on stacked USB header
+  c. Two ports on PCB header (mates with standard PC chassis connectors)
+\m -
+
+Real-time Clock	on Host Local Port
+\m -
+
+Four programmable timers as part of integrated interrupt controller
+
+\me
+
+\sh Feature Interactions
+
+The PCI bus isolation feature affects availability of PCI Slot 2, SATA,
+and USB controller depending on selected configuration. The highest speed
+for PCI	bus Slot 1 may be achieved only by blocking all other devices on the bus.
+
+
+HARDWARE DETAILS
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Devices
+
+The chip drivers included are:
+
+\cs
+    sysTsi108Mpic.c     - embedded interrupt controller driver
+    ns16550Sio.c        - national 16550 UART driver (with modifications)
+    byteNvRam.c         - byte-oriented generic non-volatile RAM library
+    flashMem.c          - flash memory device driver.
+    i2c.c               - I2C controller driver
+    pciConfigLib.c      - PCI Configuration Space Access Library
+    pciConfigShow.c     - PCI Configuration Space Display Library
+    pciIntLib.c         - PCI Interrupt Support Library
+    pciAutoconfigLib.c  - PCI Bus Auto-configuration Library
+    altiVecLib.c        - AltiVec support
+    gei82543End.c       - Intel 82543, 82545, 82546 END driver
+    tsi108End.c         - Tsi108 Gigabit Ethernet Controller END driver
+\ce
+
+The user configurable options are in config.h.
+
+\sh Memory Maps
+
+The following table describes the HPC-II memory map.
+
+\bs
+     VxWorks_rom Memory Image:
+
+    _______________________________________________________________
+   |                   |  FLASH_SIZE                   0x0100 0000 |
+   |                   |                                           |
+   | Boot ROM          |                                           |
+   |                   |  ROM_TEXT_ADRS                0xFFF0 0100 |
+   |                   |  ROM_BASE_ADRS                0xFFF0 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   | On-board FLASH    |                                           |
+   | (includes boot    |                                           |
+   | ROM space)        |  FLASH_ADRS                   0xFF00 0000 |
+   |___________________|___________________________________________|
+   |                   |  PCI_MSTR_CFG_SIZE            0x0100 0000 |
+   | Memory mapped     |                                           |
+   | PCI Configuration |                                           |
+   | space             |  PCI_MSTR_CFG_LOCAL           0xFE00 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   | Reserved          |                                           |
+   |                   |                               0xFD01 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   | Memory mapped     |  PCI_MSTR_IO_SIZE             0x0001 0000 |
+   | PCI I/O space     |                                           |
+   |                   |  PCI_MSTR_IO_LOCAL            0xFD00 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   | Reserved          |                                           |
+   |                   |                               0xFC00 8000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   |                   |  NV_RAM_SIZE_PHYS             0x8000      |
+   | NV RAM            |                                           |
+   |                   |  NV_RAM_BASE_PHYS             0xFC00 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   |                   |                                           |
+   | Reserved          |                                           |
+   |                   |                               0xF000 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   |                   |  PCI_MSTR_MEM_SIZE            0x0800 0000 |
+   | Prefetchable      |                                           |
+   | PCI Memory        |                                           |
+   | space             |                                           |
+   |                   |  PCI_MSTR_MEM_LOCAL           0xE800 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   |                   |  PCI_MSTR_MEMIO_SIZE          0x0800 0000 |
+   | Non-prefetchable  |                                           |
+   | PCI Memory        |                                           |
+   | space             |                                           |
+   |                   |                                           |
+   |                   |  PCI_MSTR_MEMIO_LOCAL         0xE000 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   | Reserved          |                                           |
+   |                   |                               0xC001 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   | TSI108 CSR        |  TSI108_CSR_BASE              0xC000 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   |                   |                                           |
+   | Reserved          |                                           |
+   |                   |                                           |
+   |                   |                               0x2000 0000 |
+   |___________________|___________________________________________|
+   |                   |  LOCAL_MEM_SIZE               0x2000 0000 |
+   |                   |                                           |
+   | Non allocated or  |  USER_RESERVED_MEM            0x1E00 0000 |
+   | uninstalled RAM   |                                           |
+   |                   |                                           |
+   | Top of RAM        |                               0x0200 0000 |
+   |___________________|__________________________________________ |
+   |                   |                                           |
+   | Zeroed out        |                                           |
+   | by boot code      |                                           |
+   |                   |                                           |
+   |___________________|___________________________________________|
+   | Top of RAM        |  RAM_HIGH_ADRS                0x0040 0000 |
+   | containing VxWorks|                                           |
+   | (VxWorks code is  |                                           |
+   | copied here from  |                                           |
+   | ROM)              |  RAM_LOW_ADRS                 0x0001 0000 |
+   |___________________|__________________________________________ |
+   |                   |                                           |
+   |                   |                                           |
+   | Zeroed out        |                                           |
+   | by boot code      |                                           |
+   |                   |  Start Of Interrupt Vectors   0x0000 0100 |
+   |                   |  Physical Start Of RAM        0x0000 0000 |
+   |___________________|___________________________________________|
+\be
+
+
+\sh Shared Memory
+
+The HPC-II does not support a shared memory driver.
+
+\sh Interrupts
+
+The HPC-II BSP uses programmable interrupt controller (PIC) integrated in
+the Tsi108 host bridge. Interrupt lines of PCI devices are connected to the
+PCI interrupt lines of Tsi108 bridge and are forwarded to the PIC internally.
+Interrupt lines from the serial ports, DMA controller, and Gigabit Ethernet
+controller have internal connections as well.
+
+Interrupt functions that initialize and support the interrupt
+controller module are contained in the sysTsi108Mpic.c and sysTsi108Mpic.h
+files.
+
+Assignment of interrupt vectors is defined in the sysTsi108Mpic.h file.
+
+This default assignment is summarized in the tables below.
+
+\cs
+
+External interrupt sources
+--------------------------
+
+Vector # | Interrupt source
+---------------------------------------
+   0     | XINT0 at INT[0] line
+   1     | XINT1 at INT[1] line
+   2     | PHY interrupt at INT[2] line
+   3     | Reserved (Source at INT[3] line)
+
+
+Tsi108 internal interrupt sources
+----------------------------------
+
+Vector # | Interrupt source
+---------------------------------------
+   4     | Reserved IRQ
+   5     | Reserved IRQ
+   6     | Reserved IRQ
+   7     | Reserved IRQ
+   8     | DMA channel 0
+   9     | DMA channel 1
+  10     | DMA channel 2
+  11     | DMA channel 3
+  12     | UART port 0
+  13     | UART port 1
+  14     | I2C controller
+  15     | GPIO port
+  16     | GIGE Port 0
+  17     | GIGE Port 1
+  18     | Reserved IRQ
+  19     | HLP block
+  20     | SDC block
+  21     | Processor IF block
+  22     | Reserved IRQ
+  23     | PCI/X block
+
+Tsi108 PIC internal interrupt sources
+-------------------------------------
+
+Vector # | Interrupt source
+---------------------------------------
+  24     | Mailbox register 0
+  25     | Mailbox register 1
+  26     | Mailbox register 2
+  27     | Mailbox register 3
+  28     | Doorbell 0
+  29     | Doorbell 1
+  30     | Doorbell 2
+  31     | Doorbell 3
+  32     | Global Timer 0
+  33     | Global Timer 1
+  34     | Global Timer 2
+  35     | Global Timer 3
+\ce
+
+Interrupts on PCI bus INTA# - INTD# lines are delivered to PIC using
+combined interrupt signaling from the PCI/PCI-X block. The logical 
+demultiplexing process uses following interrupt vectors for PCI bus.
+
+\cs
+PCI bus INTA# - INTD# lines demultiplexor
+-----------------------------------------
+
+Vector # | Interrupt source
+---------------------------------------
+  36     | PCI Interrupt line INTA#
+  37     | PCI Interrupt line INTB#
+  38     | PCI Interrupt line INTC#
+  39     | PCI Interrupt line INTD#
+\ce
+
+
+Interrupt routing for PCI slots and on-board PCI devices (SATA and USB) 
+is defined in the sysBusPci.c file.
+
+The table below demonstrates PCI interrupt vector assignment for each
+interrupt line associated with device.
+
+\cs
+PCI bus INTA# - INTD# lines routing table (vectors for device)
+--------------------------------------------------------------
+
+ Line  | Slot 1 | Slot 2 | SATA | USB  |
+----------------------------------------
+ INTA# |   36   |   37   |  38  |  39  |
+ INTB# |   37   |   38   |  39  |  36  |
+ INTC# |   38   |   39   |  36  |  37  |
+ INTD# |   39   |   36   |  37  |  38  |
+\ce
+
+
+
+\sh Serial Configuration
+
+The default kernel configuration, as delivered, includes two serial
+communication ports com1 and com2.
+
+Com1: is used for terminal display. The VxWorks banner, all VxWorks
+error messages, and all output generated by printfs in applications
+programs are displayed on this terminal. Either a vt100 type dumb
+terminal can be connected via a standard serial cable, or a vt100 type
+terminal emulator program on a PC can be connected via a null modem
+type serial cable.
+
+Com2: is used for the WDB communication port. A null modem serial
+cable can be connected to the com2 port of a PC or UNIX machine. The
+Tornado program uses host shells to communicate to VxWorks on the
+target.
+
+The UART ports of Tsi108 do not support hardware flow control. If flow
+control is required the XON/XOFF protocol shall be used.
+
+Com1 and com2 are interrupt driven drivers using the code in
+sysSerial.c. Com1 and com2 are internally hardwired to internal inputs of
+Tsi108 interrupt controller. The two serial communication channels are
+defined in hpc2.h as COM1_BASE_ADR, INT_VEC_UART0 and corresponding com2
+macros. sysLib.c calls the serial driver initialization functions
+during sysHwInit calling sysSerialHwInit() and sysHwInit2() and
+sysSerialHwInit2(). The serial communications inclusion is determined
+by the macros INCLUDE_SERIAL and NUM_TTY in config.h.
+
+\sh SCSI Configuration
+
+This BSP does not support any SCSI devices at this time.
+
+\sh Network Configuration
+
+Ethernet communication is determined by the macro INCLUDE_NET in config.h.
+
+The HPC-II board has support for Tsi108 on-chip Gigabit Ethernet controller.
+Ethernet PCI support uses the Intel 8254x PCI NIC as a network device. It is implemented as an END driver.
+
+\sh VME Access
+
+No VME bus is present on the HPC-II board.
+
+\sh PCI Access
+
+PCI access is controlled via the Tsi108 Host Bridge device. The PCI bus
+mapping into memory space is shown in the section above.
+
+This BSP supports PCI Autoconfig and it is used to configure the resources for
+each PCI device being used on the HPC-II board.
+
+Interrupt vector assignment to the PCI devices is described in the interrupt
+section above.
+
+
+For more details, see Tsi108 Host Bridge User's Manual.
+
+
+\sh Boot Devices
+
+Currently supported boot devices include PCI network controller (gei) or 
+Tsi108 on-chip network controller (tsiG).
+
+\sh Boot Methods
+
+The network support available for booting includes:
+bootp, ftp, tftp, slip, and rsh.
+
+\sh ROM Considerations
+
+The FLASH_SECT switch (SW3.4) allows select which half of the ROM is used to
+boot processor. On-board 29LV641 devices may be reprogrammed from the VxWorks
+kernel using the BSP routines sysCopyFileToFlash() and sysCopyMemToFlash(),
+from sysLib.c. It is recommended to reprogram unused (non-boot) half
+of the ROM, if possible. This leaves possibility of easy recovery in case of
+error during ROM programming. Make sure that hardware write protection is
+disabled if you want to program ROM. The write protection mode is set using 
+option switch FLASH_WP (SW3.7).
+
+In addition to ROM devices, local bus provides support for boot ROM code
+development using PromJet ROM emulator. To connect PromJet ROM emulator use
+two 2x25 headers J1 and J2. The FLASH_SEL switch (SW3.8) allows to select
+between on-board ROM or PromJet ROM emulator as active boot device. Details on
+the local bus implementation are provided in section 4.4 of
+\tb HPC II User's Guide    
+
+By default, HPC II board has ROM preprogrammed with U-Boot bootloader.
+Use the following steps to program VxWorks bootloader into the alternative 
+boot ROM location using U-Boot commands:
+\ml
+\m a. 
+Turn off flash programming protection:
+<U-Boot-\>>'prot off 1:64-72'
+
+\m b.
+Erase the flash region:
+<U-Boot-\>>'erase 1:64-72'
+
+\m c.
+Download a binary image if VxWorks bootloader: 
+<U-Boot-\>>'tftpboot 0x10000 bootrom.bin'
+
+\m d.
+Copy bootrom image from RAM to flash:
+<U-Boot-\>>'cp.b 0x10000 0xff800000 size',
+where: size is the image size reported by tftpboot command above.
+
+\m e.
+Turn off the board
+
+\m f.
+Toggle FLASH_SECT switch SW3.4 on HPC-II board to enable the alternative
+boot region
+
+\m g.
+Turn on the board and push reset button. VxWorks (or bootloader) prompt should
+appear on the terminal. Make sure that your terminal has correct serial port baud
+rate settings. By default the serial port in VxWorks BSP for HPC-II
+is configured for 9600 baud while default U-Boot setting is 115200.
+\me
+
+In case if run-time flash programming is impossible (no boot) the ROM content
+can be reprogrammed using JTAG-based hardware debugging tools such as
+Wind River Power ICE or BDI-2000.
+
+Contact Wind River support for the latest firmware for the WR ICE/Probe to 
+support the 7448 and HPC2 board.
+
+SPECIAL CONSIDERATIONS
+
+The HPC-II hardware does not include an PCI Ethernet controller supported by
+this BSP. The user will need to supply a PCI Ethernet controller card.
+The supported PCI Ethernet controller is Intel PRO/1000.
+
+\sh Delivered Objects
+No pre-compiled objects are delivered with the HPC-II BSP.
+
+\sh Support for L2 Cache
+L2 Cache is available for MPC7447A and MPC7448 processors used on HPC-II.
+Callback function pointers for L2 cache Global Invalidation, L2 Cache Enable,
+L2 Cache Flush and L2 Cache Disable are initialized in sysHwInit().
+
+\sh Support for cache snooping
+
+By default it is enabled by defining SNOOP_ENABLE in config.h.
+When enabled, access to a system memory by peripheral devices such
+as PCI masters, on-chip DMA, and Ethernet controller will be directed via
+processor bus master path (by configuring switching fabric destination port).
+
+\sh Support for AltiVec
+
+MPC7447A and MPC7448 support an altiVec sub-system that implements
+vector processing. Support for altiVec is now available, but an
+altiVec aware compiler must be used to create applications that
+use altiVec instructions. AltiVec support can be enabled by
+defining INCLUDE_ALTIVEC in config.h .
+
+\sh Make Targets
+
+Currently there are no known restrictions on target build.
+
+\sh Special Routines
+None.
+
+\sh Known Problems
+No at this time.
+
+BOARD LAYOUT
+The diagram below shows jumpers relevant to VxWorks configuration.
+
+\bs
+
+
+
+ _______________________________________RJ45___RJ45___COM2___COM1___USB___
+|                                      |    | |    | |    | |    | |   |  |
+|                                      | #1 | | #2 | |    | |    | |   |  |
+|                                      |____| |____| |____| |____| |___|  |
+|                                                                         |
+|                                                                         |
+|                                                      P3   P4            |
+|           J13      J9                                 _   _             |
+|           ___     ___                                | | | |            |
+|          |   |   |   |                               |D| |D|            |
+|          |   |   |   |                               |D| |D|            |
+|          |   |   |   |       _____________           |R| |R|            |
+|          |   |   |   |      |             |          |2| |2|            |
+|          | P |   | P |      |             |          | | | |            |
+|          | C |   | C |      |             |          |D| |D|            |
+|          | I |   | I |      |   TSI108    |          |I| |I|            |
+|          |   |   |   |      |             |          |M| |M|            |
+|          |   |   |   |      |             |          |M| |M|            |
+|          | S |   | S |      |             |          | | | |            |
+|          | L |   | L |      |_____________|          |#| |#|            |
+|          | O |   | O |                               |1| |2|            |
+|          | T |   | T |      _________________        | | | |            |
+|          |   |   |   |     |                 |       | | | |            |
+|          | # |   | # |     |                 |       | | | |            |
+|          | 2 |   | 1 |     |    C P U        |       | | | |            |
+|          |   |   |   |     |                 |       | | | |            |
+|          |   |   |   |     |   MPC7447A      |       | | | |            |
+|          |   |   |   |     |      or         |       | | | |            |
+|          |   |   |   |     |   MPC7448       |       | | | |            |
+|          |   |   |   |     |                 |       | | | |            |
+|          |   |   |   |     |                 |       | | | |            |
+|          |   |   |   |     |                 |       | | | |            |
+| _____    |___|   |___|     |_________________|       | | | |            |
+|| SW1 |                                               | | | |            |
+| -----                                 ________       | | | |            |
+| _____                             J12|CPU JTAG|      |_| |_|            |
+|| SW2 |                                --------                          |
+| -----                                                                   |
+| _____                                 ____________                      |
+|| SW3 |                            J1 | PromJet    |                     |
+| -----                                 ------------                      |
+| _____                                 ____________                      |
+|| SW4 |                            J2 | PromJet    |                     |
+| -----                                 ------------                      |
+|                                                                         |
+|                                                                         |
+|_________________________________________________________________________|
+\be
+    Key: 
+    SW1  - DIP switch SW1
+    SW2  - DIP switch SW2
+    SW3  - DIP switch SW3
+    SW4  - DIP switch SW4
+    J1   - PromJet connector
+    J2   - PromJet connector
+    J12  - CPU COP header 
+    J9   - PCI Slot #1
+    J13  - PCI Slot #2
+    P3   - DDR2 DIMM #1
+    P4   - DDR2 DIMM #2
+
+SEE ALSO
+\tb Tornado User's Guide: Getting Started, 
+\tb VxWorks Programmer's Guide: Configuration,  
+\tb VxWorks Programmer's Guide: Architecture Appendix 
+
+BIBLIOGRAPHY
+
+\tb HPC-II A High-Performance, Low-Profile Server System User's Manual, Rev.1.1. Freescale Semiconductor, HPCIIUG 
+
+\tb MPC7450 RISC Microprocessor Reference Manual, Rev.5. Freescale Semiconductor, MPC7450UM
+
+\tb Tsi108 User Manual, Tundra Semiconductor 
+
+\tb PCI Local Bus Specification Revision 2.3 

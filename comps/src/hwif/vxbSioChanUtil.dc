@@ -1,0 +1,3 @@
+#ifdef	INCLUDE_SIO_UTILS
+#include <../config/comps/src/usrVxbSioChanUtil.c>
+#endif	/* INCLUDE_SIO_UTILS */

@@ -1,0 +1,3 @@
+#ifdef DRV_SIO_ZYNQ7K
+    vxbZynqSioRegister();
+#endif /* DRV_SIO_ZYNQ7K */

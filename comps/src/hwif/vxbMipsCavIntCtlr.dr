@@ -1,0 +1,4 @@
+#ifdef DRV_INTCTLR_MIPS_CAV
+    vxbMipsCavIntCtlrRegister ();
+#endif /* DRV_INTCTLR_MIPS_CAV */
+    

@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTLR_UIC
+    uicIntCtlrRegister ();
+#endif /* DRV_INTCTLR_UIC */

@@ -1,0 +1,3 @@
+#ifdef INCLUDE_SPI_BUS
+    spiRegister();
+#endif /* INCLUDE_SPI_BUS */

@@ -1,0 +1,4 @@
+#ifdef DRV_INTCTLR_MIPS_XLP
+IMPORT void xlpIntCtlrRegister(void); 
+#endif /* DRV_INTCTLR_MIPS_XLP */
+

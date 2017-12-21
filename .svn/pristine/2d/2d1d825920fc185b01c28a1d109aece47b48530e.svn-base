@@ -1,0 +1,3 @@
+#ifdef DRV_RESOURCE_M85XXCCSR
+    m85xxCCSRRegister();
+#endif /* DRV_RESOURCE_M85XXCCSR */

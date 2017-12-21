@@ -1,0 +1,3 @@
+#ifdef INCLUDE_VXB_IBM_ZMII
+    zmiiRegister();
+#endif /* INCLUDE_VXB_IBM_ZMII */

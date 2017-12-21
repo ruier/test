@@ -1,0 +1,4 @@
+#ifdef INCLUDE_EMAC_VXB_END
+#include "../src/hwif/h/end/vxbIbmEmacEnd.h"
+#endif
+

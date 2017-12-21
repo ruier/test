@@ -1,0 +1,3 @@
+#ifdef DRV_TIMER_IA_TIMESTAMP
+    vxbIaTimestampDrvRegister ();
+#endif

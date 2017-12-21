@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTLR_EPIC
+    vxbEpicIntCtlrRegister();
+#endif /* DRV_INTCTLR_EPIC */

@@ -1,0 +1,3 @@
+#ifdef INCLUDE_XLR_FMN
+IMPORT void xlrFmnRegister();
+#endif

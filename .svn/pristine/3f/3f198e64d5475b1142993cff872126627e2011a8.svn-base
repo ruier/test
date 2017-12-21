@@ -1,0 +1,3 @@
+#ifdef INCLUDE_DM9161PHY
+    dmPhyRegister();
+#endif

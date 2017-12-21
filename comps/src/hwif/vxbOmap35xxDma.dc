@@ -1,0 +1,1 @@
+IMPORT void omap35xxDmaRegister(void);

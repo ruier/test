@@ -1,0 +1,3 @@
+#ifdef INCLUDE_PPC440GX_PCI
+extern void vxbPpc440gxPciRegister(void);
+#endif /* INCLUDE_PPC440GX_PCI */

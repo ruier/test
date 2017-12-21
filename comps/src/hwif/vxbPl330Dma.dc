@@ -1,0 +1,1 @@
+IMPORT void pl330DmaRegister(void);

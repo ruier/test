@@ -1,0 +1,4 @@
+#ifdef DRV_TIMER_M85XX
+    m85xxTimerDrvRegister ();
+#endif /* DRV_TIMER_M85XX */  
+    

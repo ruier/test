@@ -1,0 +1,3 @@
+#ifdef DRV_KBD_I8042
+extern void i8042vxbRegister (void);
+#endif

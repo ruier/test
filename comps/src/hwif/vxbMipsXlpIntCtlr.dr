@@ -1,0 +1,4 @@
+#ifdef DRV_INTCTLR_MIPS_XLP
+    xlpIntCtlrRegister();
+#endif /* DRV_INTCTLR_MIPS_XLP */
+

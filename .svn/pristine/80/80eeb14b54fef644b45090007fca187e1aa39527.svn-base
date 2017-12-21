@@ -1,0 +1,3 @@
+#ifdef INCLUDE_PPC440GX_PCI
+    vxbPpc440gxPciRegister();   /* PowerPC 440GX PCI host controller */
+#endif /* INCLUDE_PPC440GX_PCI */

@@ -1,0 +1,120 @@
+
+                 README: IBM PPC405GP EVB (Walnut)
+
+This file contains board-specific information for the IBM PPC405GP 
+target board.  Specifically, this file contains information on any BSP
+interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+Additionally, the target board's reference entry (i.e., man walnut for
+UNIX or the HTML reference entries) provides board-specific information
+necessary to run VxWorks, and should be read before this BSP is used.
+
+--------------------------------------------------------------------------------
+RELEASE 6.9/x
+    TODO:
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.x
+
+    Fixed potential memory corruption caused by sysNvRamGet(). (WIND00101057)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+    Remove the component INCLUDE_AIM_MMU_SHOW for footprint. (WIND00334904)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+BSP RELEASE 2.0/12
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+    
+    Fixed sysStartType handling missed in sysALib.s issue. (WIND00132564)
+    Fixed compiler warnings. (WIND00068436)
+
+BSP Version 2.0/11
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+    Added support for vxBus 
+    Replace sysDcrInLong/sysDcrOutLong with dcrInLong/dcrOutLong 
+    (WIND00132797)
+    Add support for bootApp
+		
+BSP Version 1.2/10
+
+    Release from Wind River for VxWorks 6.5
+
+    Added support for the IPNet Network Stack
+        
+BSP Version 1.2/8
+	Add support for PPC405GPr processor (Sycamore board).  Improve warm
+	boot support and coexistence of Emac and PCI network drivers.
+	Cleanup: SPR 77088, 84584 
+
+BSP Version 1.2/7
+	Update for Tornado 2.2
+	Removed support for Rev B and Rev C silicon
+	Update to ibmEmac, miiLib and malLib to support multiple MAC's.
+	Renamed ibmEmacEnd macros SYS_* to EMAC_* to fix conflict with
+	identically-named but incompatible macros in generic device drivers.
+
+BSP Version 1.2/6
+	Update to T2CP4 (especially network stack support, NPT, THG, TMS)
+
+FCS RELEASE (1.2/5)
+
+First release for Tornado 2.0 with architecture support for PPC405 core.
+This release supports MMU and caches on the PPC405 core. This release
+adds new registers and assembly instruction support for the PPC405GP. 
+MAC instruction support has also been added to the assembler and debugger.
+An optional FPU used with the PPC405 core is also supported, though
+the PPC405GP does not support this. This bsp uses the cpu type PPC405
+in the bsp makefile, to take advantage of the PPC405 architecture
+support. Future versions of the PPC405 having a FPU will need to use 
+the cpu type PPC405F in the bsp makefile.
+
+ALPHA RELEASE (1.2/4)
+
+Because of the similarities between the IBM 403 and 405 architectures,
+the 405GP BSP is able to use the VxWorks architecture support for the
+PowerPC 403 family of processors with minor modifications and no
+limitations in performance or functionality. The MMU is not supported
+in the current VxWorks 403 architecture libraries. Wind River is currently
+updating the libraries to include basic MMU support. This BSP will be
+modified to use these updates when they are available, and the BSP will be
+folded into a Wind River Tornado Development Kit update around the end
+of 4Q2000.
+
+This BSP supports the PowerPC 405GP Rev B, Rev C, and Rev D parts.  Rev A
+parts are no longer supported with this release.
+
+PROBLEMS FIXED FROM LAST RELEASE:
+
+ - Initialization of the Individual Address Register in the EMAC controller
+   (ibmEmacEnd.c)
+ - I-cache and D-cache are now disabled almost immediately in romInit.s and
+   sysALib.s to fix warm start problem.
+
+
+What is new in this release?
+
+   - patch405 tools are not required if a Rev. D processor is being used.
+   - Wind River pciAutoConfigLib is now being used to configure PCI devices.
+     See sysBusPci.c in this BSP, and see header files in
+     \Tornado\target\h\drv\pci for available PCI functions.
+   - Compressed bootrom, downloadable application files are supported now, but
+     only for Rev D. processors because the patch405 tool is not necessary
+     for Rev D.
+   - More error handling in Ethernet (EMAC) driver (RX Descriptor error)
+   - Many registers have been renamed to match the new scheme devised for
+     the 405GP User Manual.
+   - Internally derived serial clock source support has been added.
+     (see UART_CLOCK_EXTERNAL in config.h)
+   - sysInfoGet() and sysInfoShow() functions were added to determine and show
+     CPU and various bus speed information at run time.
+   - Improved PHY auto-negotiation.  EMAC full duplex operation is supported.
+   - DCR register access fuctions have been added to access register for the
+     on-chip memory controller (OCM), DMA controller, etc.
+   - The allocation of descriptor table memory has been moved from ibmEmacEnd.c
+     to malLib.c.

@@ -1,0 +1,3 @@
+#ifdef	INCLUDE_GEI_HEND
+extern void geiHEndRegister (void);
+#endif	/* INCLUDE_GEI_HEND */

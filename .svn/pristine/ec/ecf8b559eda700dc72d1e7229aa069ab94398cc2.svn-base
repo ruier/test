@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTLR_PXA3XXGPIO
+    vxbPxa3xxGpioIntCtlrRegister();
+#endif /* DRV_INTCTLR_PXA3XXGPIO */

@@ -1,0 +1,3 @@
+#ifdef DRV_TIMER_M5XXX_GPT
+    m5xxxGPTimerRegister();
+#endif /* DRV_TIMER_M5XXX_GPT */

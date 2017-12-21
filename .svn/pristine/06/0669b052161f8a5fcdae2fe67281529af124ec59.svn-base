@@ -1,0 +1,1081 @@
+\" fsl_rdb8313/target.ref - Freescale MPC8313ERDB target specific documentation
+\"
+\" Copyright (c) 2007-2009, 2011-2013 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01m,10jun13,y_y Update the description of GTM 64 bit timer.(WIND00392055)
+\" 01l,28feb12,c_l Update the description of Security Engine.(WIND00331832)
+\" 01k,07apr11,swu Correct building instruction for native boot.(WIND00256035)
+\" 01j,09sep09,s_z Integrate the USB TCD support by INCLUDE_FSL_TCD(WIND00180575)
+\" 01i,07may09,wap Mention support for rev B boards
+\" 01h,25dec08,e_d corrected serial default baud from 9600 to 115200.
+\" 01g,03sep08,z_l added SEC test instructions.
+\" 01f,07aug08,l_g update IPNET native driver description
+\" 01e,04jul08,l_g modified the description of TFFS
+\" 01d,03mar08,z_l released against VxWorks6.6
+\" 01c,23jan08,l_g added support for freescale security engine 2.2.
+\" 01b,18sep07,l_g add support of REVA3 board, nand boot, vsc7385 switch and
+\"                 usb target driver.
+\" 01a,28jun07,l_g created
+\"
+\TITLE fsl_rdb8313 - Freescale MPC8313ERDB
+
+EXTERNAL DEPENDENCIES
+
+The support of Security Engine requires VxWorks 6.7 MSP be installed. Please refer 
+to "Security Engine" section of this documentation for more detailed information.
+
+INTRODUCTION
+This reference entry provides board-specific information necessary to run
+VxWorks for the fsl_rdb8313 BSP.
+
+The BSP will work with the REVA3 and REVA4 of the MPC8313ERDB board by default,
+if you want to use this BSP work on REVA2 board, undefine the macro REVA3_BOARD
+in config.h.
+
+This BSP will work with REVB versions of the MPC8313ERDB board by default as
+well. This board is mostly the same as the REVA3/REVA4, except that it has
+rev 2 of the MPC8313E silicon on it.
+
+BOARD SWITCH SETTINGS
+The board must have the switch and jumpers set to appropriate values before
+software can be loaded into the memory, or before flash memory can be
+programmed as described below.
+
+\sh Jumpers & Switches
+
+1. Setting the board Jumpers & Switches:
+   To boot from the image at 0xFE000000 in NOR flash, using the Hardware Reset
+   Configuration set on the DIP switches as follows:
+
+\bs
+     SW3         SW4
+   +------+    +------+
+   |      |    | **** |
+   | **** |    |      |
+   +------+ ON +------+ ON
+     4321        4321
+\be
+
+  (where the '*' indicates the position of the tab of the switch.)
+
+  To boot from an image in NAND Flash set the DIP switches as follows:
+
+\bs
+     SW3         SW4
+   +------+    +------+
+   | *    |    |  *** |
+   |  *** |    | *    |
+   +------+ ON +------+ ON
+     4321        4321
+\be
+
+  (where the '*' indicates the position of the tab of the switch.)
+
+
+2. Creating a bootrom.bin:
+
+   2.1 Boot from NOR flash:
+
+       2.1.1 Boot from UBOOT
+
+           2.1.1.1 Define BOOT_FROM_UBOOT and undefine BOOT_FROM_NAND
+                   in config.h
+
+           2.1.1.2 Launch VxWorks Development Shell, go to the BSP directory
+                   "$(WIND_BASE)/target/config/fsl_rdb8313".
+
+           2.1.1.3 Type "make bootrom.bin" and press ENTER.
+
+           2.1.1.4 Once the make process finish successfully, you will find
+                   the file "bootrom.bin" in the BSP directory
+                   "$(WIND_BASE)/target/config/fsl_rdb8313".
+
+       2.1.2 Boot from VxWorks bootrom
+
+           2.1.2.1 Undefine BOOT_FROM_UBOOT and BOOT_FROM_NAND in config.h
+
+           2.1.2.2 Unmask constants ROM_TEXT_ADRS, ROM_SIZE, and RAM_HIGH_ADRS
+                   under "# boot from NOR flash BootRom", and mask them
+                   under "# boot from U-Boot"
+
+           2.1.2.3 Launch VxWorks Development Shell, go to the BSP directory
+                   "$(WIND_BASE)/target/config/fsl_rdb8313".
+
+           2.1.2.4 Type "make bootrom.bin" and press ENTER.
+
+           2.1.2.5 Once the make process finish successfully, you will find
+                   the file "bootrom.bin" in the BSP directory
+                   "$(WIND_BASE)/target/config/fsl_rdb8313".
+
+   2.2 Boot from NAND flash:
+
+       2.2.1 Define BOOT_FROM_NAND and undefine BOOT_FROM_UBOOT in config.h.
+
+       2.2.2 Launch VxWorks Development Shell, go to the BSP directory
+             "$(WIND_BASE)/target/config/fsl_rdb8313".
+
+       2.2.3 Type "make -f Makefile_nand bootrom.bin" and press ENTER.
+
+       2.2.4 Type "make -f Makefile_nand nand_bootloader" and press ENTER.
+
+       2.2.5 Type "cat nand_bootloader.bin bootrom.bin > nand_bootrom.bin"
+             and press ENTER.
+
+       2.2.6 Once the command process finish successfully, you will find
+             the file "nand_bootrom.bin" in the BSP directory
+             "$(WIND_BASE)/target/config/fsl_rdb8313".
+
+       NOTE: If you want to build a vxWorks_rom.bin image, you can change
+             step 3 and step 5, then combine nand_bootloader.bin and
+             vxWorks_rom.bin together. Make sure that the Makefile you used is
+             Makefile_nand, not Makefile. Because we only reserved 1M memory
+             for the image, you must take care of the image size. If the
+             image size is larger than 1M, you can change USER_RESERVED_MEM
+             in config.h to fit the size. Rom resident image is not supported
+             when boot from nand flash.
+
+3. Programming bootrom to the fsl_rdb8313 FLASH:
+
+   3.1 Using UBOOT Command:
+
+       3.1.1 Connect the UART1 on your MPC8313ERDB board to the designated
+             serial port of your host, start the terminal program, and power
+             up your board. You should see messages like this:
+
+\bs
+             U-Boot 1.1.6 (Apr 24 2007 - 16:44:16) MPC83XX
+
+             Clock configuration:
+               Coherent System Bus:  166 MHz
+               Core:                 333 MHz
+               Local Bus Controller: 166 MHz
+               Local Bus:             41 MHz
+               DDR:                  333 MHz
+               SEC:                   55 MHz
+               I2C1:                 166 MHz
+               I2C2:                 166 MHz
+               TSEC1:                166 MHz
+               TSEC2:                166 MHz
+               USB MPH:                0 MHz
+               USB DR:                55 MHz
+             CPU: MPC8313E, Rev: 10 at 333.333 MHz
+             Board: Freescale MPC8313ERDB
+             I2C:   ready
+             DRAM:  Initializing
+             DDR RAM: 128 MB
+             FLASH:  8 MB
+             NAND:  32 MiB
+             In:    serial
+             Out:   serial
+             Err:   serial
+             Net:   TSEC0, TSEC1
+             Hit any key to stop autoboot:  0
+\be
+
+             You can interrupt the "Count-Down" by pressing any key. If you
+             don't you will probably see some (harmless) error messages because
+             the system has not been initialized yet.
+
+             NOTE: In some cases you may see a message
+
+\bs
+             *** Warning - bad CRC, using default environment
+\be
+
+             This is harmless and will go away as soon as you have initialized
+             and saved the environment variables.
+
+       3.1.2 At first you have to set the environment variables of your board,
+             which includes:
+
+\cs
+             ethact     -- should be set to TSEC1
+             baudrate   -- should be set to 115200, because the uboot mounted 
+                           on this bsp uses this baudrate
+             ipaddr     -- ip address of your board
+             serverip   -- ip address of your host
+\ce
+
+             For example, the ip address of your board is 92.0.0.2 and of your
+             host is 92.0.0.1, the command you should execute is :
+
+\cs
+             => setenv baudrate 115200
+             => setenv ethact TSEC1
+             => setenv ipaddr 92.0.0.2
+             => setenv serverip 92.0.0.1
+\ce
+
+             Then save environment variables:
+
+\cs
+             => saveenv
+             Saving Environment to Flash...
+             Un-Protected 1 sectors
+             Erasing Flash...
+             . done
+             Erased 1 sectors
+             Writing to Flash... done
+             Protected 1 sectors
+\ce
+
+             Use the printenv command to verify that you have entered the correct
+             values.
+
+       3.1.3 Run a TFTP server program on your PC system. Make sure that the
+             bootrom.bin or nand_bootrom.bin is in the TFTP current directory.
+
+       3.1.4 Download bootrom.bin by TFTP. In U-Boot command line interface, type
+
+\cs
+             => tftp 4000000 bootrom.bin
+\ce
+
+             This command will download bootrom.bin from your host to the address
+             0x4000000 of your MPC8313ERDB board.
+
+             If boot from NAND Flash, type
+
+\cs
+             => tftp 4000000 nand_bootrom.bin
+\ce
+
+             This command will download nand_bootrom.bin from your host to the
+             address 0x4000000 of your MPC8313ERDB board.
+
+       3.1.5 Program bootrom to Flash
+
+             3.1.5.1 Boot from NOR Flash
+
+                     Burn the bootrom.bin to the address 0xfe060000 of Flash as
+                     the procedure below:
+
+\cs
+                     => protect off all
+                     Un-Protect Flash Bank # 1
+                     => erase fe060000 fe0fffff
+
+                     ........ done
+                     Erased 10 sectors
+                     => cp.b 4000000 fe060000 $filesize
+                     Copy to Flash... done
+
+                     This command will program the flash with vxWorks bootrom
+                     binary file. If fail, it's probably caused by the un-erased
+                     flash sector. You should adjust the erase flash size
+                     according to the binary file. See erase command above.
+
+                     => protect on all
+                     Protect Flash Bank # 1
+\ce
+
+             3.1.5.2 Boot from NAND Flash
+
+                     Burn the nand_bootrom.bin to the NAND Flash as the procedure
+                     below:
+
+\cs
+                     => nand erase 0 60000
+                     => nand write.jffs2 4000000 0 60000
+\ce
+
+       3.1.6 Run bootrom
+
+             3.1.6.1 Boot from NOR Flash:
+
+                     Reboot the board, and in U-Boot command line interface, type
+
+\cs
+                     => go fe060100
+\ce
+
+             3.1.6.2 Boot from NAND Flash:
+
+                     Change the DIP switches to NAND boot mode and reboot the board.
+
+             After waiting for a few seconds, you can see the boot info of VxWorks
+             bootrom as below:
+
+\bs
+                                        VxWorks System Boot
+
+             Copyright 1984-2008  Wind River Systems, Inc.
+
+             CPU: Freescale MPC8313E
+             Version: VxWorks 6.7
+             BSP version: 2.0/5
+             Creation date: Apr 07 2008, 11:01:59
+
+             Press any key to stop auto-boot...
+\be
+
+   3.2 Using workbench:
+
+       Select the configuration tab and choose the following device:
+       AMD -> 29LV64xDx -> 4096 x 16 -> 1 Device.
+
+       Set the base address to 0xfe000000.
+       Set the start address to 0x10000.
+       Set the size to 20000.
+
+       Select programming tab and set the following options:
+
+       Set the erase from setting to 0xfe000000.
+
+       Go to OCD command shell and type IN. Be sure this returns the BKM
+       prompt and is OK. Return to the flash programmer and select the
+       Batch Program tab and then select the Erase and Program checkboxes.
+
+       If you have problems resetting the board using ICE/Probe you can use
+       from bkm prompt in the OCD command shell
+
+\cs
+       BKM>cf rcw 0x65040000 0xa0606c00
+       BKM>in
+\ce
+
+       This will use the above as a default reset configuration word which
+       overrides the one stored in the flash just in case it get overwritten.
+
+FEATURES
+This section describes the support and unsupported features of the MPC8313ERDB
+
+\sh SUPPORTED FEATURES
+The supported features of the MPC8313ERDB board are:
+
+  MPC8313E processor
+  Board initialization
+  Boot from NAND flash
+  Cache support
+  MPC8313E DUART
+  On-chip 10/100/1000 ETSEC 1 with VSC7385 switch
+  On-chip 10/100/1000 ETSEC 2
+  On-chip Programmable Interrupt Controller
+  System Clock
+  Auxiliary clock and timestamp clock
+  128MB DDR SDRAM
+  NVRAM using one sector of flash to simulate
+  Saving boot parameters on the NVRAM
+  TFFS support
+  PCI host controller tested by Intel fei82557
+  Mini-PCI(Untested)
+  I2C controller
+  DS1339 RTC
+  Boot from UBOOT
+  USB EHCI mode and on-chip PHY
+  USB target controller driver and USB peripheral mass storage emulation
+  DMA support
+  Security Engine
+  NAND flash driver
+
+\sh Unsupported Features
+
+  SPI
+  SD interface
+
+\sh Feature Interactions
+None known
+
+HARDWARE DETAILS
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Devices
+The chip drivers included are:
+
+\cs
+  vxbNs16550Sio.c       - serial driver
+  vxbQuiccIntCtlr.c     - interrupt controller driver
+  vxbPpcDecTimer.c      - system clock driver
+  vxbPpcQuiccTimer.c    - 32bit GTM timer driver
+  vxbPpcQuiccTimer64.c  - 64bit GTM timer driver
+  vxbEtsecEnd.c         - On chip TSEC Ethernet END driver
+  vxbDummyMdio.c        - dummy mdio driver
+  f2xFlashMtd.c         - TFFS MTD driver
+  ds1339Rtc.c           - DS1339 RTC driver
+  sysNandFlash.c        - NAND flash driver
+\ce
+
+\sh Memory Maps
+
+The following table describes the fsl_rdb8313 memory map:
+
+\ts
+   Start    | Size  |    End      | Access to
+---------------------------------------------
+0x0000_0000 | 128MB | 0x07FF_FFFF | DDR SDRAM
+0x8000_0000 | 256MB | 0x8FFF_FFFF | PCI1
+0x9000_0000 | 256MB | 0x9FFF_FFFF | PCI2
+0xE000_0000 | 1MB   | 0xE00F_FFFF | Configuration Registers
+0xF000_0000 | 128KB | 0xF001_FFFF | VSC7385
+0xFA00_0000 | 32KB  | 0xFA00_7FFF | LED/status buffers
+0xFE00_0000 | 8MB   | 0xFE7F_FFFF | NOR Flash
+\te
+
+\sh Network Configuration
+eTSEC2 is configured as an Ethernet port
+
+The IPNET native driver of ETSEC is tested on this BSP. However, it is disabled
+by defaut. To enable the IPNET native driver of ETSEC, you should modify as
+follows:
+
+For commmand line build, modify following lines of config.h
+
+\cs
+    #define INCLUDE_ETSEC_VXB_END
+\ce
+
+to:
+
+\cs
+    #define INCLUDE_END2
+    #define INCLUDE_ETSEC_VXB_END2
+\ce
+
+Then rebuild the bootrom or VxWorks image.
+
+For project build under Workbench, in the Kernel Configuration tab of your
+created VxWorks Image Project:
+
+    Exclude INCLUDE_ETSEC_VXB_END and INCLUDE_END
+    Include INCLUDE_ETSEC_VXB_END2 and INCLUDE_END2
+
+Then rebuild your project.
+
+\sh Serial Configuration
+The default configuration for VxWorks bootrom is 115200 baud, 8 data bits,
+no parity, 1 stop bit.
+
+\sh GTM Timer Configuration
+The global timer module (GTM) includes four identical 16-bit general-purpose
+timers, which can cascade to form two 32-bit timers or one 64-bit timer.
+Two 32-bit timers are enabled by default.
+
+To enable the 64bit timer, you should modify as follows:
+For commmand line build, modify following lines of config.h
+
+\cs
+    #define  DRV_TIMER_QUICC_PPC
+    #undef DRV_TIMER64_QUICC_PPC
+\ce
+
+to:
+
+\cs
+    #undef  DRV_TIMER_QUICC_PPC
+    #define DRV_TIMER64_QUICC_PPC
+\ce
+
+For project build under Workbench, in the Kernel Configuration tab of your
+created VxWorks Image Project:
+
+    Exclude DRV_TIMER_QUICC_PPC
+    Include DRV_TIMER64_QUICC_PPC
+
+Note: The two timer driver couldn't be used at the same time since they share the hardware.
+And the parameter restartEnable in hwconf.c "MUST" be set to "TRUE" when use GTM 64bit
+timer as system clock. It could be set to FALSE when use it as AUX or timestamp
+since timer count continues to increment even the reference value is reached.
+
+\sh Boot Devices
+motetsec1
+
+\sh VSC7385 Switch
+This BSP supports the Vitesse VSC7385 ethernet switch which is connected to
+eTSEC1. The switch chip must be loaded with a firmware image which is supplied in
+binary form in the file vsc2bin. This file is converted into an ELF object
+using objcopyppc and is then compiled into the VxWorks image (or bootrom).
+
+Note that link events triggered by unplugging or replugging cables on the
+external Vitesse switch ports have no bearing on the link state of the
+eTSEC1 port itself: eTSEC1 always has a valid link, even if all external
+switch ports are disconnected.
+
+\sh Boot Methods
+Ethernet
+
+\sh Delivered Objects
+
+\sh Make Targets
+The make targets are listed as the names of object-format files.
+Append `.hex' to each to derive a hex-format file name.
+
+\ts
+`bootrom'
+`bootrom.hex'
+'bootrom.bin'
+`vxWorks' (with `vxWorks.sym')
+`vxWorks.st'
+\te
+
+\sh Special Routines
+None
+
+\sh Serial Connections
+Most VxWorks BSPs do not use hardware handshaking in the serial
+interface, and thus a simple 3 wire connection is commonly used.
+
+\sh Ethernet Address
+The MPC8313ERDB boards do not have a unique Ethernet hardware
+address assigned to each board.  A unique address is absolutely necessary if
+the user wishes to connect the board to a network.  Thus, the user
+must provide a suitable 6 byte Ethernet address for each board used
+on a network. The address is now stored in flash with the bootline.
+Use the 'M' command to modify for a distinct MAC address.
+
+\sh USB target controller and DMA driver
+USB 2.x Target Controller Driver (TCD) for the Freescale MPC8313ERDB, USB
+peripheral mass storage emulation, and DMA support have been added and
+integrated to the standard fsl_rdb8313 BSP.
+
+1. USB Target Controller Setup
+
+
+    The following USB target controller related modifications should be 
+    done if you want to include it.
+
+   1.1 Define INCLUDE_FSL_TCD in BSP's config.h(change "#undef INCLUDE_FSL_TCD" 
+       to "define INCLUDE_FSL_TCD" and then the relative macros will be defined 
+       automatically) to support USB target.
+
+   1.2 Add USB TCD and mass storage emulation feature definition in config.h:
+
+    NOTE: Please refer to the USB programmers guide for further information
+    about the configuration parameters.
+\cs
+
+        /@ Defines for USB Device support @/
+
+        #define INCLUDE_FSL_TCD
+
+        #ifdef INCLUDE_FSL_TCD
+        #   ifndef _ASMLANGUAGE
+        IMPORT void fslUsbDrDeviceHwInit (void);
+        #   endif
+        #   define FSL_USB_DR_DEVICE_IO_BASE      M83XX_DR_USB_BASE
+        #   define FSL_USB_DR_DEVICE_INT_NUM      INUM_USB2_DR
+        #   define FSL_USB_DR_DEVICE_HW_INIT      fslUsbDrDeviceHwInit
+        #   define FSL_USB_DR_DEVICE_BE_REG       FALSE
+        #   define FSL_USB_DR_DEVICE_BE_DESC      FALSE
+        #   define FSL_USB_DR_DEVICE_BE_SETUP     TRUE
+        #   define FSL_USB_DR_DEVICE_SYS_CONF     TRUE
+        #   define FSL_USB_DR_DEVICE_BUFFER_ES    FALSE
+        #   define FSL_USB_DR_DEVICE_PHY_MODE     FSL_USB_DR_PHY_UTMI8
+        #   define INCLUDE_USB_TARG
+        #   define INCLUDE_MS_EMULATOR
+        #   define INCLUDE_MS_EMULATOR_INIT
+        #endif /@ INCLUDE_FSL_TCD @/
+
+        #ifdef INCLUDE_MS_EMULATOR
+        #   define INCLUDE_DOSFS
+        #   define INCLUDE_XBD_RAMDRV
+        #endif /@ INCLUDE_MS_EMULATOR @/
+
+
+        /@  Define for FS @/
+
+        #ifdef INCLUDE_DOSFS
+        #   define INCLUDE_DOSFS_MAIN
+        #   define INCLUDE_DOSFS_CHKDSK
+        #   define INCLUDE_DOSFS_FMT
+        #   define INCLUDE_FS_MONITOR
+        #   define INCLUDE_ERF
+        #   define INCLUDE_XBD
+        #   define INCLUDE_DEVICE_MANAGER
+        #   define INCLUDE_XBD_PART_LIB
+        #   define INCLUDE_DOSFS_FAT
+        #   define INCLUDE_DOSFS_DIR_VFAT
+        #   define INCLUDE_XBD_BLKDEV
+        #endif
+
+\ce
+
+   1.3 Compiling the BSP
+
+        If you are planning to compile the BSP from Windows, in the VxWorks
+        Development Shell, please execute the following commands in fsl_imx31lite
+        BSP directory:
+
+\cs
+        make clean
+        make vxWorks.st
+\ce
+
+2. USB Command Verifier Compliance Test
+
+   The MPC 8313 TCD and mass storage emulation driver has been tested against
+   USB Implementers Forum, Inc.'s (http://www.usb.org) USB Command Verifier
+   (USBCV) available at http://www.usb.org/developers/tools/.
+
+   2.1 Test Setup
+
+       2.1.1 Install USB Command Verifier (USBCV) from www.usb.org on Windows
+             XP PC to perform Chapter 9 and Mass Storage Class Compliance Tests.
+             Only a beta version, version R1.3 beta 3 (USBCVr13Beta3.msi), was
+             available at the time of testing.
+
+       2.1.2 Attach USB cable from target to Windows PC EHCI controller.
+
+       2.1.3 Execute "usbTargMsInit" on the VxWorks target to start the MPC8313
+             TCD and mass storage emulation drivers.
+
+   2.2 Chapter 9 Compliance Test
+
+       2.2.1 Start USB Command Verifier.
+
+       2.2.2 Select Test Mode: Compliance Test.
+
+       2.2.3 Select Test Suite: Chapter 9 Tests.
+
+       2.2.4 Click "Run".
+
+       2.2.5 Window pops up. Select Device Address: VID=0781,PID=0000. Click "OK".
+
+       2.2.6 Click "Launch Report Viewer" to see results.
+
+   2.3 Mass Storage Class Compliance Test
+
+       2.3.1 Start USB Command Verifier.
+
+       2.3.2 Select Test Mode: Compliance Test.
+
+       2.3.3 Select Test Suite: MSC Tests.
+
+       2.3.4 Click "Run".
+
+       2.3.5 Window pops up saying "This USB Mass Storage Tests is for INFORMATIONAL
+             purposes only." Click "OK".
+
+       2.3.6 Window pops up. Select Device Address: VID=0781,PID=0000. Click "OK".
+
+       2.3.7 Window pops up saying "WARNING: The following test might destroy ALL
+             data on this disk. To continue with all tests, click OK. To abort this
+             test, click ABORT." Click "OK".
+
+       2.3.8 A series of windows pops up and disappears.
+
+       2.3.9 When window saying "Disconnect and power off MSC device, then click OK.
+             To abort this test, click ABORT." pops up, disconnect USB cable from
+             target and power off target. Then, click "OK".
+
+       2.3.10 When window saying "Please plug device into the original port and
+              turn on power to the device." pops up, Reconnect USB cable to target,
+              power on target, and start MPC 8313 TCD and mass storage emulation
+              drivers.
+
+       2.3.11 Click "Launch Report Viewer" to see results.
+
+\sh TrueFFS
+This BSP uses the En29lv640 flash as the TrueFFS media.
+To use it, define INCLUDE_TFFS in config.h.
+When using TrueFFS on a new flash for the first time, you should format the
+flash using
+\cs
+   sysTffsFormat();
+\ce
+Then
+\cs
+   usrTffsConfig(0, 0, "/tffs0");
+\ce
+at last
+\cs
+   dosfsDiskFormat("/tffs0");
+\ce
+
+\sh Security Engine.
+The Freescale Security Engine (SEC) 2.2 is supported in this release.
+The VxWorks PNE MSP must be installed to enable security engine offload.
+
+1. Create a VSB(VxWorks Source Build).
+
+   1.1 Create a VSB in any directory. For instance, run the command:
+
+\cs
+       $WIND_BASE/target/proj/vxprj vsb create -bsp fsl_rdb8313 myVsb_bsp_fsl_rdb8313
+\ce
+
+       This command creates a VSB for the BSP fsl_rdb8313, myVsb_bsp_fsl_rdb8313 is 
+       the name of this VSP.
+
+   1.2 Configure VSB
+
+       After run the command in 1.1, you will be prompted to select the 
+       configuration options of this new VSB. Below is a example of 
+       configuration result:
+
+\cs
+        starting VSB configuration...
+        *
+        * VxWorks Source Build (VSB) Configuration
+        *
+        *
+        * VxWorks Global Configuration Options for BSP fsl_rdb8313
+        *
+        Set advanced options  (ADVANCED_OPT) [N/y/?] (NEW) y
+        *
+        * fsl_rdb8313_CPU = PPC32
+        *
+        Select the Floating Point configuration
+        > 1. hard (FP_hard) (NEW)
+        choice[1]: 1
+        Select the ENDIAN configuration
+        > 1. big (ENDIAN_big) (NEW)
+        choice[1]: 1
+        Select the Primary Tool
+        > 1. diab (PRI_TOOL_ILP32_diab) (NEW)
+        choice[1]: 1
+        optional compiler flags for fsl_rdb8313_TOOL [?]  (ADDEDCFLAGS) [] (NEW)
+        Enable use of Secondary TOOL to build kernel libraries.  (ENABLE_TOOL2_ILP32) [Y/n/?] (NEW) Y
+          Select the Secondary Tool
+          > 1. gnu (SEC_TOOL_ILP32_gnu) (NEW)
+          choice[1]: 1
+        optional compiler flags for fsl_rdb8313_TOOL2 [?]  (ADDEDCFLAGS2) [] (NEW)
+        Select the Applications Tool
+        > 1. diab (APP_TOOL_ILP32_diab) (NEW)
+          2. gnu (APP_TOOL_ILP32_gnu) (NEW)
+        choice[1-2?]: 1
+        optional compiler flags for fsl_rdb8313_APP_TOOL [?]  (ADDEDCFLAGS_APP) [] (NEW)
+        *
+        * ppc Architecture Options
+        *
+        Low-level arch code need not support inconsistent cache modes  (PPC_CACHE_MODE_IS_CONSISTENT) [N/y/?] (NEW)
+        System Viewer Instrumentation  (SV_INSTRUMENTATION) [Y/n/?] (NEW) Y
+        Global Debug Flag  (DEBUG_FLAG) [N/y/?] (NEW)
+        Real-Time Process (RTP)  (RTP) [Y/n/?] (NEW) Y
+        *
+        * VxWorks Kernel Configuration Options
+        *
+        *
+        * VxWorks Kernel Component Configuration
+        *
+        WIND Object Management  (OBJECT_MANAGEMENT) [Y/n/?] (NEW) Y
+          WIND Object ID Validation  (OBJECT_VERIFICATION) [Y/n/?] (NEW) Y
+        Task Create Hooks  (TASK_CREATE_HOOKS_D) [Y/n/?] (NEW) Y
+        Task Switch Hooks  (TASK_SWITCH_HOOKS_D) [Y/n/?] (NEW) Y
+        CPU Power Management  (CPU_PWR_MGMT_D) [Y/n/?] (NEW) Y
+        *
+        * Multi-OS Support
+        *
+        MIPC  (COMPONENT_MIPC) [Y/n/?] (NEW) n
+        WRLOAD  (COMPONENT_WRLOAD) [Y/n/?] (NEW) n
+        *
+        * Optional Kernel Features
+        *
+        Enable Kernel Per-Task CWD  (PERTASK_CWD) [Y/n/?] (NEW)
+        *
+        * File System Configuration
+        *
+        Set Maximum Device Name Length  (MAX_DEVNAME) [10] (NEW)
+        Optimize NFS3 server read/write procedure  (NFS3_RWOPT) [N/y/?] (NEW)
+        Set factor for maximum block size transferred in NFS3 server  (NFS3_BLKSIZE_FACTOR) [1] (NEW)
+        Enable VXTESTV2  (COMPONENT_VXTESTV2_D) [Y/n/?] (NEW)
+        Enable BENCHMARK tests  (COMPONENT_BENCHMARK) [N/y/?] (NEW)
+        Enable Code Coverage Analyzer test instrumentation of VSB   (COMPONENT_COVERAGE) [N/y/?] (NEW)
+        *
+        * VxWorks Applications Configuration Options
+        *
+        Select networking code to be built
+        > 1. Build Networking IPNET Libraries (COMPONENT_IPNET) (NEW)
+          2. No Networking Libraries (NO_IP) (NEW)
+        choice[1-2]: 1
+        *
+        * Networking Build Options
+        *
+        Set the IPNET build mode
+        > 1. speed mode (BUILD_MODE_speed) (NEW)
+          2. debug mode (BUILD_MODE_debug) (NEW)
+        choice[1-2]: 1
+        Enable VERBOSE mode  (FEATURE_IPNET_VERBOSE) [N/y] (NEW) y
+        Generate IPNET Dependencies  (FEATURE_IPNET_GEN_DEPEND) [Y/n] (NEW) Y
+        Build basic IPNET support libraries  (BUILD_BASIC_IPNET) [Y/n/?] (NEW) Y
+        Choose the Networking Libraries to be built
+        > 1. Build libraries with IPV4 support (FEATURE_IPNET_INET4_ONLY) (NEW)
+          2. Build libraries with IPV4 and IPV6 support (FEATURE_IPNET_INET6) (NEW)
+          3. Build libraries with IPV6 support (FEATURE_IPNET_INET6_ONLY) (NEW)
+        choice[1-3]: 1
+        Select the default Build-time Syslog level for Networking Components
+          1. Emergency level (IPCOM_DEFAULT_SYSLOG_PRIORITY_EMERG) (NEW)
+          2. Critical level (IPCOM_DEFAULT_SYSLOG_PRIORITY_CRIT) (NEW)
+          3. Error level (IPCOM_DEFAULT_SYSLOG_PRIORITY_ERR) (NEW)
+        > 4. Warning level (IPCOM_DEFAULT_SYSLOG_PRIORITY_WARNING) (NEW)
+          5. Notice level (IPCOM_DEFAULT_SYSLOG_PRIORITY_NOTICE) (NEW)
+          6. Informational level (IPCOM_DEFAULT_SYSLOG_PRIORITY_INFO) (NEW)
+          7. Debug level (IPCOM_DEFAULT_SYSLOG_PRIORITY_DEBUG) (NEW)
+          8. Detailed debug level (IPCOM_DEFAULT_SYSLOG_PRIORITY_DEBUG2) (NEW)
+        choice[1-8?]: 4
+        Enable selection of Advanced Debugging Build Options for Networking Component   (IPCOM_DEBUG_ADVANCED) [N/y/?] (NEW)
+        Enable MSP Feature Set PAD  (MSP_FEATURE_PAD) [Y/n/?] (NEW) n
+        Enable MSP Feature Set PCD  (MSP_FEATURE_PCD) [Y/n/?] (NEW) n
+        Enable MSP Feature Set PID  (MSP_FEATURE_PID) [Y/n/?] (NEW) n
+        Enable MSP Feature Set PNE  (MSP_FEATURE_PNE) [Y/n/?] (NEW) Y
+        *
+        * VxWorks Networking Component Configuration
+        *
+        *
+        * Layer 2 (Link) Components
+        *
+        Enable L2TP  (COMPONENT_IPL2TP) [N/y/?] (NEW)
+        Enable MACsec  (COMPONENT_IPMACSEC) [N/y/?] (NEW)
+        Enable PPP  (COMPONENT_IPPPP) [Y/n/?] (NEW)
+        Enable 802.1ad VLAN stacking  (COMPONENT_VLAN_STACKING) [N/y/?] (NEW)
+        Enable WLAN  (COMPONENT_WLAN) [N/y/?] (NEW)
+        *
+        * Layer 3 (Network) Components
+        *
+        Enable FIREWALL  (COMPONENT_IPFIREWALL) [N/y/?] (NEW)
+        Enable IPSEC  (COMPONENT_IPIPSEC) [N/y/?] (NEW)
+        Enable MPLS  (COMPONENT_IPMPLS) [N/y] (NEW)
+        Enable ROHC  (COMPONENT_IPROHC) [N/y/?] (NEW)
+        Enable IPNET Network Address Translation (NAT)  (COMPONENT_NAT) [Y/n/?] (NEW) n
+        Enable Quality of Service and Differentiated Services  (COMPONENT_DIFF_SERV) [Y/n/?] (NEW) n
+        Enable tunneling support  (COMPONENT_TUNNEL_SUPPORT) [Y/n/?] (NEW) n
+        *
+        * Layer 4 (Transport) Components
+        *
+        Enable SCTP  (COMPONENT_IPSCTP) [N/y/?] (NEW)
+        *
+        * Layer 5 (Applications) Components
+        *
+        Enable 802.1X Authenticator  (COMPONENT_DOT1X) [N/y/?] (NEW)
+        Enable 802.1X Supplicant  (COMPONENT_IP8021X) [N/y/?] (NEW)
+        Enable APPL  (COMPONENT_IPAPPL) [Y/n/?] (NEW) Y
+        Enable DHCPR  (COMPONENT_IPDHCPR) [N/y] (NEW)
+        Enable DHCPS  (COMPONENT_IPDHCPS) [N/y/?] (NEW)
+        *
+        * Diameter Components
+        *
+        Enable DIAMETER Client  (COMPONENT_IPDIAMETERC) [N/y/?] (NEW)
+        Enable DIAMETER Proxy  (COMPONENT_IPDIAMETERP) [N/y/?] (NEW)
+        Enable IKE  (COMPONENT_IPIKE) [N/y/?] (NEW)
+        Enable Multicast Proxy daemon  (COMPONENT_IPMCP) [N/y/?] (NEW)
+        Enable MIP  (COMPONENT_IPMIP) [N/y/?] (NEW)
+        Enable MIP4  (COMPONENT_IPMIP4) [N/y/?] (NEW)
+        Enable MIPFA  (COMPONENT_IPMIPFA) [N/y/?] (NEW)
+        Enable MIPHA  (COMPONENT_IPMIPHA) [N/y/?] (NEW)
+        Enable MIPMN  (COMPONENT_IPMIPMN) [N/y/?] (NEW)
+        Enable MIPPM  (COMPONENT_IPMIPPM) [N/y/?] (NEW)
+        Enable RADIUS  (COMPONENT_IPRADIUS) [Y/n/?] (NEW) n
+        Enable RIP  (COMPONENT_IPRIP) [N/y] (NEW)
+        Enable SNMP  (COMPONENT_SNMP) [Y/n/?] (NEW) n
+        Enable SNTP  (COMPONENT_IPSNTP) [Y/n/?] (NEW) n
+        Enable SSH  (COMPONENT_IPSSH) [N/y/?] (NEW) y
+        Enable SSL  (COMPONENT_IPSSL) [Y/n/?] (NEW) Y
+        *
+        * WPS requires COMPONENT_WLAN and COMPONENT_IPEAP and COMPONENT_IP8021X to be selected and COMPONENT_IPCRYPTO_USE_FIPS_140_2 to be deselected
+        *
+        *
+        * Cryptography Components
+        *
+        *
+        * Component CRYPTO preselected - required by  Component SSL
+        *
+        Enable CRYPTO  (COMPONENT_IPCRYPTO) [Y/?] (NEW) y
+          Enable FIPS 140-2 validated crypto libraries  (COMPONENT_IPCRYPTO_USE_FIPS_140_2) [N/y/?] (NEW)
+        Enable FREESCALE  (COMPONENT_IPFREESCALE) [N/y/?] (NEW) y
+        Enable HWCRYPTO  (COMPONENT_IPHWCRYPTO) [N/y/?] (NEW) y
+        *
+        * Networking Library Components
+        *
+        Enable EAP  (COMPONENT_IPEAP) [N/y/?] (NEW)
+        Enable VXCOMPAT  (COMPONENT_VXCOMPAT) [Y/n/?] (NEW) Y
+        *
+        * Networking Acceleration Platform Components
+        *
+        Enable IFPROXY  (COMPONENT_IFPROXY) [N/y/?] (NEW)
+        Enable WRNAD  (COMPONENT_WRNAD) [N/y/?] (NEW)
+        *
+        * Common Analysis Framework Components
+        *
+        *
+        * COMPONENT CAFE and COMPONENT_STACKTRACE are used by analysis tools
+        *
+        Enable CAFE framework  (COMPONENT_CAFE) [Y/n/?] (NEW) n
+        *
+        * Stacktrace Debug Component
+        *
+        Enable stacktrace debugging output  (COMPONENT_STACKTRACE_DEBUG) [N/y] (NEW)
+        Route stacktrace debugging output to a session logger  (COMPONENT_STACKTRACE_SESSION_LOGGER) [N/y] (NEW)
+        *
+        * Target Communication Framework (TCF) Agent Component
+        *
+        Enable TCF_AGENT  (COMPONENT_TCF_AGENT) [Y/n/?] (NEW) n
+        Enable WM  (COMPONENT_WM) [Y/n/?] (NEW) n
+        Enable XML  (COMPONENT_XML) [Y/n/?] (NEW) Y
+        *
+        * VxWorks User Library Configuration
+        *
+        Build User-side libraries  (FEATURE_USR) [Y/n/?] (NEW) Y
+          Choose the User Networking Libraries to be built
+          > 1. Build libraries with IPV4 support (USR_INET4_ONLY) (NEW)
+            2. Build libraries with IPV4 and IPV6 support (USR_INET6) (NEW)
+            3. Build libraries with IPV6 support (USR_INET6_ONLY) (NEW)
+          choice[1-3]: 1
+          Build User Networking Libraries  (COMPONENT_USR_IPNET) [Y/n/?] (NEW) Y
+          Build core USR APPS  (COMPONENT_USR_APPS) [Y/n/?] (NEW) Y
+            Build test USR APPS  (COMPONENT_USR_TEST) [Y/n/?] (NEW) n
+          Build USR libraries for DOT1X  (COMPONENT_USR_DOT1X) [N/y/?] (NEW)
+          Build USR libraries for SNMP  (COMPONENT_USR_SNMP) [N/y/?] (NEW)
+          Build USR libraries for WM  (COMPONENT_USR_WM) [N/y/?] (NEW)
+          Build USR libraries for XML  (COMPONENT_USR_XML) [Y/n/?] (NEW) Y
+          Build USR libraries for SNMP_V3  (COMPONENT_USR_SNMP_V3) [N/y/?] (NEW)
+          Build USR libraries for SNMP_AGENTX  (COMPONENT_USR_SNMP_AGENTX) [N/y/?] (NEW)
+          
+        This VSB supports the following BSPs: fsl_rdb8313
+\ce
+
+        Note that 'Enable MSP Feature Set PNE' must be set to 'Yes' and other 'Enable MSP Feature 
+        Set' must be set to 'No'. And some options like "Enable FREESCALE" are 
+        also required to test Freescale's SEC.
+
+    1.3 Build VSB. 
+
+        Run the following command to build the libraries based on the selected 
+        options.
+
+\cs
+        cd myVsb_bsp_fsl_rdb8313
+        make
+\ce
+
+2. Create a VIP based on the new VSB.
+
+    2.1 Create a VIP, in the step of "Project Setup", select new VSB which is created 
+        above as the configuration of "A source build project", and select the 
+        correct BSP.
+
+    2.2 Configure and build VIP.
+    
+        In the Kernel Configuration editor include INCLUDE_IPFREESCALE. For 
+        Freescale MPC8313ERDB board set two parameters as follows:
+
+\cs
+        SEC2_CORE_VERSION = "2.2"
+        SEC2_DEVICE_FAMILY = "2".
+\ce
+
+        build this VIP.
+
+    2.3 Test the Security Engine
+
+        Download the image file, then issue the command 'freescale test all'  from the VxWorks target shell .
+
+        For Freescale MPC8313ERDB board you should see:
+
+\cs
+        -> ipcom_run_cmd "freescale test all"                                          
+        freescale :: testing md5 hash...success                                        
+        freescale :: testing md5 hmac...success                                        
+        freescale :: testing sha1 hash...success                                       
+        freescale :: testing sha1 hmac...success                                       
+        freescale :: testing des cbc cipher...success                                  
+        freescale :: testing des ecb cipher...success                                  
+        freescale :: testing 3des cbc cipher...success                                 
+        freescale :: testing 3des ecb cipher...success                                 
+        freescale :: testing aes cbc cipher...success                                  
+        freescale :: testing aes ecb cipher...success                                  
+\ce
+
+\sh Known Problems
+VxWorks does not implement support of critical exceptions.
+
+\sh Power-on Reset Initialization
+
+The state of the chip post reset is controlled via the HRCW.
+
+The hardware reset configuration word(HRCW) is set via programming a bootrom.
+
+The definitions are in config.h. To change this setting you must modify config.h
+and rebuild and replace the bootrom.
+
+eTSECs default is RGMII. 16bit flash is assumed. For more details see the board
+manual and also MPC8313E Reference manual.
+
+\sh SYSCLK Frequency
+66MHz is supported
+
+BOARD LAYOUT
+
+The diagram below shows jumpers and connectors relevant to
+VxWorks configuration for MPC8313ERDB board.
+
+\bs
+___________________________________________________________________________
+|                    _________________________________                    |
+|                    |   PCI Slot [IDSEL-AD15]  P2    |                   |
+|                    |________________________________|         __________|
+|                                                               |   P5    |
+|                                                               |         |
+|                                                               |_________|
+|                                                               |   P6    |
+|                                                               |         |
+|                                                               |_________|
+|                                                               |   P7    |
+|___                                                            |         |
+|   |                  Programmable                             |_________|
+|   |   _                 LED0-7                                          |
+|   |  |_|S2(Power on)      |                                        _____|
+|J20|   _             _  _  _  _                                     | P8 |
+|   |  |_|S1(Reset)  |_||_||_||_|                                    |____|
+|   |                 _  _  _  _                                          |
+|   |                |_||_||_||_|                                    _____|
+|___|                         _____________                          | P4 |
+|                            |            |                          |____|
+|                            |            |                               |
+|P9(Power Connector)         |  MPC8313E  |                               |
+|____                        |            |                               |
+||_|_|                       |            |                               |
+||_|_|                       |____________|                          _____|
+||_|_|                                                              |     |_
+||_|_|                                                              |     | |
+||_|_|                            __________________                |     | |
+||_|_|                           | P1(COP Connector)|               | P11 | |
+||_|_|                           |__________________|               |     | |
+||_|_|                                 _______      _______         |     | |
+|                                      |  S4  |     |  S3  |        |     |_|
+|______________________________________|______|_____|______|________|_____|
+\be
+    Key:
+    P1  14-pin COP/JTAG connector
+    P2  3.3 V PCI Slot [IDSEL - AD15]
+    P4  USB mini-AB Connector (on-chip PHY)
+    P5  RJ-45 LAN connectors Enet4 (top motetsec0), Enet5 (bottom motetsec1)
+    P6  RJ-45 LAN connectors Enet2 (top motetsec0), Enet3 (bottom motetsec0)
+    P7  RJ-45 LAN connectors Enet0 (top motetsec0), Enet1 (bottom motetsec0)
+    P8  USB mini-AB Connector (external ULPI USB PHY)
+    P9  ATX type power supply connector
+    P11 Dual UART connector. UART1 (top), UART2 (bottom)
+    J20 Connector for chassis connection (power on, power LED, reset)
+    S1  System reset button. Resets the MPC8313E RDB
+    S2  Power ON button. Press once to power ON/OFF
+
+BIBLIOGRAPHY
+
+\tb MPC8313E Reference Manual
+
+\tb MPC8313E Reference Design Board Board Manual
+
+\tb E300 Core Reference Manual
+
+\tb PowerPC Microprocessor Family: The Programming Environments for 32-bit Microprocessors MPCFPE32B/AD
+
+WEB RESOURCES
+
+Much of the Freescale documentation can be found on line. The following
+URL was correct at the time of writing for semiconductor area. You'll have to
+search the documentation using processor name for specific documentation.
+
+http://www.freescale.com/
+
+SEE ALSO
+
+\tb Workbench User's Guide: Getting Started
+
+\tb VxWorks Programmer's Guide: Configuration
+
+\tb VxWorks Programmer's Guide: Architecture Supplement

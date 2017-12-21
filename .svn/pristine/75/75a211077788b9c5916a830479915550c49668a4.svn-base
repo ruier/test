@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND_LPC24XXEMAC
+    lpc24xxEndRegister();
+#endif /* DRV_VXBEND_LPC24XXEMAC */

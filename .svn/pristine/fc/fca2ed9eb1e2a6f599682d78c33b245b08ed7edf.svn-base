@@ -1,0 +1,124 @@
+VxBus command-line support STUB file directory.
+
+Modification history
+01b,04jul07,ami  Comments about Makefile added
+01a,08Nov06,tor  created
+
+This directory contains configlettes and source code stubs for
+VxBus drivers and other HWIF modules.
+
+This file is used to generate the vxbUsrCmdLine.c file in the 
+<WIND_BASE>/target/config/all directory. This file is included 
+by usrConfig.c. This file consists of all the components of 
+vxBus. It defines the initiazation sequences for vxBus components
+and associated drivers.
+The file vxbUsrCmdLine.c gets created automatically by the post-
+installation scripts.  During driver development, developers who
+modify their stub files can re-create this file. Please refer to
+section RE-CREATING vxbUsrCmdLine.c on how to create the file.
+
+There are three types of modules using this scheme: driver modules,
+bus support modules, and utility modules.
+
+The stub files require the following naming convention:
+
+DRIVER MODULES
+------ -------
+
+{driver}.dc: forward declaration code
+{driver}.dr: registration code
+
+The forward declaration code contained in {driver}.dc should
+consist of either a simple forward declaration of the driver's
+registration function, or if the driver supports BSP-provided
+access macros, then the forward declaration code must provide
+the mechanism to switch beteen inclusion of the source code to
+support the BSP-provided macros, or a simple forward declaration.
+
+simple {driver}.dc:
+
+IMPORT void {driver}Registration();
+
+full functionality {driver}.dc:
+
+#if ! defined({DRIVER}_REGISTER_READ32) && ! defined({DRIVER}_REGISTER_WRITE32)
+IMPORT void {driver}Register(void);
+#else /* BSP-provided read macros */
+#include <{class}/{driver}.c>
+#endif /* BSP-provided read macros */
+
+The registration code contained in {driver}.dr should consist
+of a call to the driver's registration function.  It must be
+surrounded by #ifdef with an appropriate macro.
+
+{driver}.dr:
+
+#ifdef DRV_{CLASS}_{DRIVER}
+    {driver}Register();
+#endif /* DRV_{CLASS}_{DRIVER} */
+
+BUS SUPPORT MODULES
+--- ------- -------
+
+{bus}.bc: forward declaration code
+{bus}.br: registration code
+
+The forward declaration code contained in {bus}.bc should consist
+of either a simple forward declaration of the bus type registration
+function, or if necessary, inclusion of an appropriate header
+file.
+
+{bus}.bc:
+
+IMPORT void {busType}Register();
+
+The registration code contained in {bus}.br should consist of a
+call to the bus registration function.  It must be surrounded by
+#ifdef with an appropriate macro.
+
+{bus}.br:
+
+#ifdef VXBUS_{BUS_TYPE}
+    {busType}Register();
+#endif /* VXBUS_{BUS_TYPE} */
+
+UTILITY MODULES
+------- -------
+
+{util}.uc: forward declaration code
+{util}.ur: initialization code, registration time
+{util}.u1: initialization code, pre-device init
+{util}.u2: initialization code, post-device init
+
+The forward declaration code contained in {util}.uc should consist
+of a forward declaration for the utility module's initialization
+routine(s), or a #include of an appropriate header file.
+
+There are three types of utility module stubs containing
+initialization code.  It is expected that utility modules may use
+one or more of these stub files, but it would be unusual for any
+module to use all three.  The difference among the three files
+is where they are included.
+
+The initialization code contained in {util}.u1 is included before
+drivers register and before the VxBus library is initialized..
+
+The registration time initialization code contained in {util}.ur
+is run at the time driver registration occurs.
+
+The initilization code contained in {util}.u2 is included after
+drivers have been initialized.  That is, this init code is called
+when all instances have had their init1 routine called.
+
+RE-CREATING vxbUsrCmdLine.c
+---------------------------
+
+During driver development, developers may add/delete/ modify the 
+stub files in /target/config/comps/src/hwif folder. In such case,
+developers are expected to re-create the vxbUsrCmdLine.c file. 
+
+In order to do the same, please follow the below mention steps:
+1) Move to directory location <WIND_BASE>/target/config/comps/src/hwif
+2) execute the command "make vxbUsrCmdLine.c"
+
+The file will get re-created.

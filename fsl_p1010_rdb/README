@@ -1,0 +1,24 @@
+
+           README: Freescale P1010RDB (fsl_p1010_rdb)
+
+This file contains board-specific information for the Freescale P1010RDB
+target board.  This file documents BSP interface changes from previous software
+or hardware versions, and notifies the user of serious caveats that must be
+noted before using this BSP.  Additionally, the target board's reference entry
+(i.e. fsl_p1010_rdb/target.ref) provides board-specific information necessary
+to run VxWorks and should be read fully before this BSP is used.
+
+--------------------------------------------------------------------------------
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Added vxBus I2C support. (WIND00243089)
+    Fix motetsec1 and motetsec2 in gigabit mode. (WIND00391142)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Initial release to support Freescale P1010/P1014 RDB board.

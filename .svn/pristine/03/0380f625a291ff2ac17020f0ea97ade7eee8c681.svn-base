@@ -1,0 +1,4 @@
+#ifdef DRV_PCIBUS_OCTEON_PCIEX
+    octPciExRegister();
+#endif /* DRV_PCIBUS_OCTEON_PCIEX */
+

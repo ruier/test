@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND_XLRSPI4
+IMPORT void xlrSpi4Register(void);
+#endif

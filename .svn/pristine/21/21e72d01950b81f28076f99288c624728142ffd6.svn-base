@@ -1,0 +1,8 @@
+#ifdef INCLUDE_HWMEM_ALLOC
+#ifndef INIT_HWMEMPOOL_IN_BSP
+    /* Pre-Kernel Memory Allocation */
+    hwMemLibInit();
+    hwMemPoolCreate(&hwMemPool[0], HWMEM_POOL_SIZE);
+#define INIT_HWMEMPOOL_GLOBAL
+#endif /* INIT_HWMEMPOOL_IN_BSP */
+#endif /* INCLUDE_HWMEM_ALLOC */

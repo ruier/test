@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND_ALTERA_TSE
+    alteraTseRegister ();
+#endif /* DRV_VXBEND_ALTERA_TSE */

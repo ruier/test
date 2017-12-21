@@ -1,0 +1,4 @@
+#ifdef DRV_TIMER_AMBA
+    vxbAmbaTimerDrvRegister ();
+#endif
+

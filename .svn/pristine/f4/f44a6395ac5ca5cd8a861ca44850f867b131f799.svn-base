@@ -1,0 +1,3 @@
+#ifdef INCLUDE_M85XX_CPU
+    m85xxCpuRegister();
+#endif /* INCLUDE_M85XX_CPU */

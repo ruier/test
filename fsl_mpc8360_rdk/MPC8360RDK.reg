@@ -1,0 +1,1404 @@
+
+REM *******************************************
+REM CF CONFIGURATION
+REM *******************************************
+
+CF TAR                             8360                             ;  OPERATION
+CF SB                              SB                               ;  OPERATION
+CF VECTOR                          LOW                              ;  OPERATION
+CF RST                             YES                              ;  OPERATION
+CF CLK                             16                               ;  OPERATION
+CF AIMMRER                         OFF                              ;  OPERATION
+CF AIMMRVAL                        0e000000                         ;  OPERATION
+CF RTP                             NO                               ;  OPERATION
+CF LENDIAN                         NO                               ;  OPERATION
+CF MODE                            64                               ;  OPERATION
+CF HRESET                          ENABLE                           ;  OPERATION
+CF WSPACE                          00020000 8000                    ;  OPERATION
+CF TGTCONS                         BDM                              ;  OPERATION
+CF TRESET                          ACTIVE                           ;  OPERATION
+CF INVCI                           YES                              ;  OPERATION
+CF DLD                             NORMAL                           ;  OPERATION
+CF RPL                             1                                ;  OPERATION
+CF CHECKSTOP                       YES                              ;  OPERATION
+CF SPOWER                          YES                              ;  OPERATION
+CF PONR                            0                                ;  OPERATION
+CF RESET                           HRESET                           ;  OPERATION
+CF TRPEXP                          YES                              ;  OPERATION
+CF INCOLD                          NO                               ;  OPERATION
+CF MMU                             DISABLE                          ;  OPERATION
+CF BL                              DISABLE                          ;  OPERATION
+CF TMD                             DISABLE                          ;  OPERATION
+CF DRST                            25                               ;  OPERATION
+CF RCW                             NO                               ;  OPERATION
+REM *******************************************
+REM SC CONFIGURATION
+REM ******************************************* 
+SC GRP ERASE
+SCGA SYSCFG                          IMMRBAR                         00000000  E0000000 SYSCFG                          /va_dr /ua:0 /sa:0 /ue:0 
+SCGA SYSCFG                          ALTCBAR                         00000008  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          LBLAWBAR0                       00000020  FF800000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          LBLAWAR0                        00000024  80000016 SYSCFG                          /ua:0 
+SCGA SYSCFG                          LBLAWBAR1                       00000028  E0000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          LBLAWAR1                        0000002C  8000001C SYSCFG                          /ua:0 
+SCGA SYSCFG                          LBLAWBAR2                       00000030  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          LBLAWAR2                        00000034  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          LBLAWBAR3                       00000038  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          LBLAWAR3                        0000003C  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          PCILAWBAR0                      00000060  80000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          PCILAWAR0                       00000064  8000001B SYSCFG                          /ua:0 
+SCGA SYSCFG                          PCILAWBAR1                      00000068  90000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          PCILAWAR1                       0000006C  8000001B SYSCFG                          /ua:0 
+SCGA SYSCFG                          DDRLAWBAR0                      000000A0  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          DDRLAWAR0                       000000A4  8000001B SYSCFG                          /ua:0 
+SCGA SYSCFG                          DDRLAWBAR1                      000000A8  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          DDRLAWAR1                       000000AC  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          SDDRLAWBAR0                     000000E0  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          SDDRLAWAR0                      000000E4  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          SDDRLAWBAR1                     000000E8  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          SDDRLAWAR1                      000000EC  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          LBMCSAR                         00001800  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          SDMCSAR                         00001804  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          LBMCEAR                         00001840  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          SDMCEAR                         00001844  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          LBMCAR                          00001880  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          SDMCAR                          00001884  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          SGPRL                           00000100  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          SGPRH                           00000104  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          SPRIDR                          00000108  80480021 SYSCFG                          /ua:0 
+SCGA SYSCFG                          SPCR                            00000110  00400000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          SICRL                           00000114  C0000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          SICRH                           00000118  00000002 SYSCFG                          /ua:0 
+SCGA SYSCFG                          SWCRR                           00000204  FFFF0003 SYSCFG                          /ua:0 
+SCGA SYSCFG                          SWCNR                           00000208  0000FFFF SYSCFG                          /r /ua:0 
+SCGA SYSCFG                          SWSRR                           0000020E  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          RTCNR                           00000300  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          RTLDR                           00000304  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          RTPSR                           00000308  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          RTCTR                           0000030C  00000000 SYSCFG                          /r /ua:0 
+SCGA SYSCFG                          RTEVR                           00000310  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          RTALR                           00000314  FFFFFFFF SYSCFG                          /ua:0 
+SCGA SYSCFG                          PTCNR                           00000400  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          PTLDR                           00000404  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          PTPSR                           00000408  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          PTCTR                           0000040C  00000000 SYSCFG                          /r /ua:0 
+SCGA SYSCFG                          PTEVR                           00000410  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1CFG1                         00000500  91       SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1CFG2                         00000504  00       SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1MDR1                         00000510  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1MDR2                         00000512  001A     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1RFR1                         00000514  0043     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1RFR2                         00000516  A5B5     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1CPR1                         00000518  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1CPR2                         0000051A  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1CNR1                         0000051C  000A     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1CNR2                         0000051E  61A5     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1MDR3                         00000520  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1MDR4                         00000522  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1RFR3                         00000524  FFFF     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1RFR4                         00000526  FFFF     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1CPR3                         00000528  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1CPR4                         0000052A  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1CNR3                         0000052C  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1CNR4                         0000052E  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1EVR1                         00000530  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1EVR2                         00000532  0002     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1EVR3                         00000534  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1EVR4                         00000536  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1PSR1                         00000538  0003     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1PSR2                         0000053A  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1PSR3                         0000053C  0003     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT1PSR4                         0000053E  0003     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2CFG1                         00000600  00       SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2CFG2                         00000604  00       SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2MDR1                         00000610  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2MDR2                         00000612  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2RFR1                         00000614  FFFF     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2RFR2                         00000616  FFFF     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2CPR1                         00000618  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2CPR2                         0000061A  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2CNR1                         0000061C  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2CNR2                         0000061E  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2MDR3                         00000620  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2MDR4                         00000622  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2RFR3                         00000624  FFFF     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2RFR4                         00000626  FFFF     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2CPR3                         00000628  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2CPR4                         0000062A  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2CNR3                         0000062C  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2CNR4                         0000062E  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2EVR1                         00000630  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2EVR2                         00000632  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2EVR3                         00000634  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2EVR4                         00000636  0000     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2PSR1                         00000638  0003     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2PSR2                         0000063A  0003     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2PSR3                         0000063C  0003     SYSCFG                          /ua:0 
+SCGA SYSCFG                          GT2PSR4                         0000063E  0003     SYSCFG                          /ua:0 
+SCGA SYSCFG                          PMCCR                           00000B00  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          PMCER                           00000B04  00000000 SYSCFG                          /ua:0 
+SCGA SYSCFG                          PMCMR                           00000B08  00000000 SYSCFG                          /ua:0 
+SCGA IPIC                            SICFR                           00000700  00000000 IPIC                            /ua:0 
+SCGA IPIC                            SIVCR                           00000704  00000000 IPIC                            /r /ua:0 
+SCGA IPIC                            SIPNR_H                         00000708  00000000 IPIC                            /r /ua:0 
+SCGA IPIC                            SIPNR_L                         0000070C  00000000 IPIC                            /r /ua:0 
+SCGA IPIC                            SIPRR_A                         00000710  05309770 IPIC                            /ua:0 
+SCGA IPIC                            SIPRR_D                         0000071C  05309770 IPIC                            /ua:0 
+SCGA IPIC                            SIMSR_H                         00000720  00000000 IPIC                            /ua:0 
+SCGA IPIC                            SIMSR_L                         00000724  00000000 IPIC                            /ua:0 
+SCGA IPIC                            SEPNR                           0000072C  00000000 IPIC                            /ua:0 
+SCGA IPIC                            SMPRR_A                         00000730  05309770 IPIC                            /ua:0 
+SCGA IPIC                            SMPRR_B                         00000734  05309770 IPIC                            /ua:0 
+SCGA IPIC                            SEMSR                           00000738  00000000 IPIC                            /ua:0 
+SCGA IPIC                            SECNR                           0000073C  00000000 IPIC                            /ua:0 
+SCGA IPIC                            SERSR                           00000740  00000000 IPIC                            /ua:0 
+SCGA IPIC                            SERMR                           00000744  FF000000 IPIC                            /ua:0 
+SCGA IPIC                            SERCR                           00000748  00000000 IPIC                            /ua:0 
+SCGA IPIC                            SIFCR_H                         00000750  00000000 IPIC                            /ua:0 
+SCGA IPIC                            SIFCR_L                         00000754  00000000 IPIC                            /ua:0 
+SCGA IPIC                            SEFCR                           00000758  00000000 IPIC                            /ua:0 
+SCGA IPIC                            SERFR                           0000075C  00000000 IPIC                            /ua:0 
+SCGA IPIC                            SCVCR                           00000760  00000000 IPIC                            /r /ua:0 
+SCGA IPIC                            SMVCR                           00000764  00000000 IPIC                            /r /ua:0 
+SCGA IPIC                            CEPIER                          00000C0C  00000000 IPIC                            /ua:0 
+SCGA IPIC                            CEPIMR                          00000C10  00000000 IPIC                            /ua:0 
+SCGA IPIC                            CEPICR                          00000C14  00000000 IPIC                            /ua:0 
+SCGA SYSARB                          ACR                             00000800  00000000 SYSARB                          /ua:0 
+SCGA SYSARB                          ATR                             00000804  00FF00FF SYSARB                          /ua:0 
+SCGA SYSARB                          AER                             0000080C  00000004 SYSARB                          /ua:0 
+SCGA SYSARB                          AIDR                            00000810  00000000 SYSARB                          /ua:0 
+SCGA SYSARB                          AMR                             00000814  00000000 SYSARB                          /ua:0 
+SCGA SYSARB                          AEATR                           00000818  0200020C SYSARB                          /r /ua:0 
+SCGA SYSARB                          AEADR                           0000081C  E4010000 SYSARB                          /r /ua:0 
+SCGA SYSARB                          AERR                            00000820  00000000 SYSARB                          /ua:0 
+SCGA RESET                           RCWLR                           00000900  04040006 RESET                           /r /ua:0 
+SCGA RESET                           RCWHR                           00000904  80600000 RESET                           /r /ua:0 
+SCGA RESET                           RSR                             00000910  00000000 RESET                           /ua:0 
+SCGA RESET                           RMR                             00000914  00000001 RESET                           /ua:0 
+SCGA RESET                           RPR                             00000918  00000000 RESET                           /ua:0 
+SCGA RESET                           RCR                             0000091C  00000000 RESET                           /ua:0 
+SCGA RESET                           RCER                            00000920  00000000 RESET                           /ua:0 
+SCGA CLOCK                           SPMR                            00000A00  04040006 CLOCK                           /r /ua:0 
+SCGA CLOCK                           OCCR                            00000A04  00000000 CLOCK                           /ua:0 
+SCGA CLOCK                           SCCR                            00000A08  FFFFFFFF CLOCK                           /ua:0 
+SCGA CLOCK                           MCKENR                          00001010  FC000000 CLOCK                           /ua:0 
+SCGA CLOCK                           LCLKENR                         00001110  FC000000 CLOCK                           /ua:0 
+SCGA QEIO                            CPODRA                          00001400  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPDATA                          00001404  60000000 QEIO                            /ua:0 
+SCGA QEIO                            CPDIR1A                         00001408  34000000 QEIO                            /ua:0 
+SCGA QEIO                            CPDIR2A                         0000140C  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPPAR1A                         00001410  24000000 QEIO                            /ua:0 
+SCGA QEIO                            CPPAR2A                         00001414  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPODRB                          00001418  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPDATB                          0000141C  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPDIR1B                         00001420  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPDIR2B                         00001424  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPPAR1B                         00001428  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPPAR2B                         0000142C  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPODRC                          00001430  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPDATC                          00001434  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPDIR1C                         00001438  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPDIR2C                         0000143C  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPPAR1C                         00001440  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPPAR2C                         00001444  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPODRD                          00001448  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPDATD                          0000144C  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPDIR1D                         00001450  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPDIR2D                         00001454  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPPAR1D                         00001458  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPPAR2D                         0000145C  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPODRE                          00001460  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPDATE                          00001464  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPDIR1E                         00001468  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPDIR2E                         0000146C  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPPAR1E                         00001470  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPPAR2E                         00001474  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPODRF                          00001478  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPDATF                          0000147C  0D000000 QEIO                            /ua:0 
+SCGA QEIO                            CPDIR1F                         00001480  0097FFFF QEIO                            /ua:0 
+SCGA QEIO                            CPDIR2F                         00001484  CFE35010 QEIO                            /ua:0 
+SCGA QEIO                            CPPAR1F                         00001488  00FFFFFF QEIO                            /ua:0 
+SCGA QEIO                            CPPAR2F                         0000148C  CFE3A030 QEIO                            /ua:0 
+SCGA QEIO                            CPODRG                          00001490  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPDATG                          00001494  00000000 QEIO                            /ua:0 
+SCGA QEIO                            CPDIR1G                         00001498  FFFFFFFF QEIO                            /ua:0 
+SCGA QEIO                            CPDIR2G                         0000149C  FFFFFFFF QEIO                            /ua:0 
+SCGA QEIO                            CPPAR1G                         000014A0  FFFFFFFF QEIO                            /ua:0 
+SCGA QEIO                            CPPAR2G                         000014A4  FFFFFFFF QEIO                            /ua:0 
+SCGA DDRMEMC                         CS0_BNDS                        00002000  0000000F DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         CS1_BNDS                        00002008  00000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         CS2_BNDS                        00002010  00000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         CS3_BNDS                        00002018  00000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         CS0_CONFIG                      00002080  80000102 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         CS1_CONFIG                      00002084  00000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         CS2_CONFIG                      00002088  00000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         CS3_CONFIG                      0000208C  00000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         TIMING_CFG1                     00002108  3835A322 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         TIMING_CFG2                     0000210C  00104909 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         DDR_SDRAM_CFG                   00002110  43000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         DDR_SDRAM_MODE                  00002118  47800432 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         DDR_SDRAM_INT                   00002124  045B0100 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         DDR_SDRAM_CLK                   00002130  02000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         DATA_ERR_INJHI                  00002E00  00000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         DATA_ERR_INJLO                  00002E04  00000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         ECC_ERR_INJECT                  00002E08  00000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         CAPTURE_DATAHI                  00002E20  00000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         CAPTURE_DATALO                  00002E24  00000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         CAPTURE_ECC                     00002E28  00000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         ERR_DETECT                      00002E40  00000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         ERR_DISABLE                     00002E44  00000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         ERR_INT_EN                      00002E48  00000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         CAPTURE_ATTRI                   00002E4C  00000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         CAPTURE_ADDR                    00002E50  00000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         ERR_SBE                         00002E58  00000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         DEBUG1                          00002F00  00000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         DDR_SDRAM_CFG1                  00002110  e3000000 DDRMEMC                         /ua:0 
+SCGA DDRMEMC                         DDR_SDRAM_CFG2                  00002110  C3000000 DDRMEMC                         /ua:0 
+SCGA I2C                             I2C1ADR                         00003000  7E       I2C                             /ua:0 
+SCGA I2C                             I2C1FDR                         00003004  3F       I2C                             /ua:0 
+SCGA I2C                             I2C1CR                          00003008  80       I2C                             /ua:0 
+SCGA I2C                             I2C1SR                          0000300C  81       I2C                             /ua:0 
+SCGA I2C                             I2C1DR                          00003010  00       I2C                             /ua:0 
+SCGA I2C                             I2C1DFSRR                       00003014  10       I2C                             /ua:0 
+SCGA I2C                             I2C2ADR                         00003100  7E       I2C                             /ua:0 
+SCGA I2C                             I2C2FDR                         00003104  3F       I2C                             /ua:0 
+SCGA I2C                             I2C2CR                          00003108  80       I2C                             /ua:0 
+SCGA I2C                             I2C2SR                          0000310C  81       I2C                             /ua:0 
+SCGA I2C                             I2C2DR                          00003110  00       I2C                             /ua:0 
+SCGA I2C                             I2C2DFSRR                       00003114  10       I2C                             /ua:0 
+SCGA DUART                           URBR1                           00004500  00       DUART                           /r /ua:0 
+SCGA DUART                           UTHR1                           00004500  00       DUART                           /w /ua:0 
+SCGA DUART                           UDLB1                           00004500  00       DUART                           /ua:0 
+SCGA DUART                           UIER1                           00004501  00       DUART                           /ua:0 
+SCGA DUART                           UDMB1                           00004501  00       DUART                           /ua:0 
+SCGA DUART                           UIIR1                           00004502  C1       DUART                           /r /ua:0 
+SCGA DUART                           UFCR1                           00004502  C1       DUART                           /w /ua:0 
+SCGA DUART                           UAFR1                           00004502  C1       DUART                           /ua:0 
+SCGA DUART                           ULCR1                           00004503  03       DUART                           /ua:0 
+SCGA DUART                           UMCR1                           00004504  03       DUART                           /ua:0 
+SCGA DUART                           ULSR1                           00004505  60       DUART                           /r /ua:0 
+SCGA DUART                           UMSR1                           00004506  00       DUART                           /r /ua:0 
+SCGA DUART                           USCR1                           00004507  00       DUART                           /ua:0 
+SCGA DUART                           UDSR1                           00004510  01       DUART                           /r /ua:0 
+SCGA DUART                           URBR2                           00004600  00       DUART                           /r /ua:0 
+SCGA DUART                           UTHR2                           00004600  00       DUART                           /w /ua:0 
+SCGA DUART                           UDLB2                           00004600  00       DUART                           /ua:0 
+SCGA DUART                           UIER2                           00004601  00       DUART                           /ua:0 
+SCGA DUART                           UDMB2                           00004601  00       DUART                           /ua:0 
+SCGA DUART                           UIIR2                           00004602  C1       DUART                           /r /ua:0 
+SCGA DUART                           UFCR2                           00004602  C1       DUART                           /w /ua:0 
+SCGA DUART                           UAFR2                           00004602  C1       DUART                           /ua:0 
+SCGA DUART                           ULCR2                           00004603  03       DUART                           /ua:0 
+SCGA DUART                           UMCR2                           00004604  03       DUART                           /ua:0 
+SCGA DUART                           ULSR2                           00004605  60       DUART                           /r /ua:0 
+SCGA DUART                           UMSR2                           00004606  00       DUART                           /r /ua:0 
+SCGA DUART                           USCR2                           00004607  00       DUART                           /ua:0 
+SCGA DUART                           UDSR2                           00004610  01       DUART                           /r /ua:0 
+SCGA LBC                             OR0                             00005004  FF006FF7 LBC                             /ua:0 
+SCGA LBC                             BR0                             00005000  FF801001 LBC                             /ua:0 
+SCGA LBC                             OR1                             0000500C  00000000 LBC                             /ua:0 
+SCGA LBC                             BR1                             00005008  00000000 LBC                             /ua:0 
+SCGA LBC                             OR2                             00005014  00000000 LBC                             /ua:0 
+SCGA LBC                             BR2                             00005010  00000000 LBC                             /ua:0 
+SCGA LBC                             OR3                             0000501C  00000000 LBC                             /ua:0 
+SCGA LBC                             BR3                             00005018  00000000 LBC                             /ua:0 
+SCGA LBC                             OR4                             00005024  00000000 LBC                             /ua:0 
+SCGA LBC                             BR4                             00005020  00000000 LBC                             /ua:0 
+SCGA LBC                             OR5                             0000502C  00000000 LBC                             /ua:0 
+SCGA LBC                             BR5                             00005028  00000000 LBC                             /ua:0 
+SCGA LBC                             OR6                             00005034  00000000 LBC                             /ua:0 
+SCGA LBC                             BR6                             00005030  00000000 LBC                             /ua:0 
+SCGA LBC                             OR7                             0000503C  00000000 LBC                             /ua:0 
+SCGA LBC                             BR7                             00005038  00000000 LBC                             /ua:0 
+SCGA LBC                             MAR                             00005068  00000000 LBC                             /ua:0 
+SCGA LBC                             MAMR                            00005070  00000000 LBC                             /ua:0 
+SCGA LBC                             MBMR                            00005074  00000000 LBC                             /ua:0 
+SCGA LBC                             MCMR                            00005078  00000000 LBC                             /ua:0 
+SCGA LBC                             MRTPR                           00005084  00000000 LBC                             /ua:0 
+SCGA LBC                             MDR                             00005088  00000000 LBC                             /ua:0 
+SCGA LBC                             LSDMR                           00005094  00000000 LBC                             /ua:0 
+SCGA LBC                             LURT                            000050A0  00000000 LBC                             /ua:0 
+SCGA LBC                             LSRT                            000050A4  00000000 LBC                             /ua:0 
+SCGA LBC                             LTESR                           000050B0  00000000 LBC                             /ua:0 
+SCGA LBC                             LTEDR                           000050B4  00000000 LBC                             /ua:0 
+SCGA LBC                             LTEIR                           000050B8  00000000 LBC                             /ua:0 
+SCGA LBC                             LTEATR                          000050BC  00000000 LBC                             /ua:0 
+SCGA LBC                             LTEAR                           000050C0  00000000 LBC                             /ua:0 
+SCGA LBC                             LBCR                            000050D0  00000000 LBC                             /ua:0 
+SCGA LBC                             LCRR                            000050D4  80000004 LBC                             /ua:0 
+SCGA UPMA                            UPMA_T0                         00005088  00000000 UPMA                            /tclr:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T1                         00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T2                         00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T3                         00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T4                         00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T5                         00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T6                         00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T7                         00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T8                         00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T9                         00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T10                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T11                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T12                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T13                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T14                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T15                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T16                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T17                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T18                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T19                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T20                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T21                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T22                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T23                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T24                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T25                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T26                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T27                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T28                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T29                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T30                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T31                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T32                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T33                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T34                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T35                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T36                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T37                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T38                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T39                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T40                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T41                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T42                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T43                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T44                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T45                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T46                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T47                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T48                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T49                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T50                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T51                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T52                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T53                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T54                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T55                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T56                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T57                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T58                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T59                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T60                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T61                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T62                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMA                            UPMA_T63                        00005088  00000000 UPMA                            /tp1:3 /ua:0 /ue:3 
+SCGA UPMB                            UPMB_T0                         00005088  00000000 UPMB                            /tclr:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T1                         00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T2                         00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T3                         00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T4                         00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T5                         00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T6                         00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T7                         00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T8                         00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T9                         00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T10                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T11                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T12                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T13                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T14                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T15                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T16                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T17                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T18                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T19                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T20                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T21                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T22                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T23                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T24                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T25                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T26                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T27                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T28                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T29                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T30                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T31                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T32                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T33                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T34                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T35                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T36                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T37                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T38                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T39                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T40                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T41                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T42                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T43                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T44                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T45                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T46                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T47                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T48                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T49                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T50                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T51                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T52                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T53                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T54                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T55                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T56                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T57                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T58                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T59                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T60                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T61                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T62                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMB                            UPMB_T63                        00005088  00000000 UPMB                            /tp1:4 /ua:0 /ue:4 
+SCGA UPMC                            UPMC_T0                         00005088  00000000 UPMC                            /tclr:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T1                         00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T2                         00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T3                         00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T4                         00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T5                         00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T6                         00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T7                         00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T8                         00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T9                         00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T10                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T11                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T12                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T13                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T14                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T15                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T16                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T17                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T18                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T19                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T20                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T21                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T22                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T23                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T24                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T25                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T26                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T27                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T28                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T29                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T30                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T31                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T32                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T33                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T34                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T35                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T36                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T37                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T38                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T39                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T40                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T41                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T42                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T43                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T44                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T45                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T46                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T47                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T48                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T49                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T50                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T51                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T52                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T53                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T54                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T55                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T56                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T57                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T58                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T59                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T60                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T61                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T62                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA UPMC                            UPMC_T63                        00005088  00000000 UPMC                            /tp1:5 /ua:0 /ue:5 
+SCGA DMA                             OMISR                           00008030  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             OMIMR                           00008034  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             IMR0                            00008050  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             IMR1                            00008054  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             OMR0                            00008058  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             OMR1                            0000805C  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             ODR                             00008060  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             IDR                             00008068  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             IMISR                           00008080  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             IMIMR                           00008084  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMAMR0                          00008100  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMASR0                          00008104  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMACDAR0                        00008108  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMASAR0                         00008110  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMADAR0                         00008118  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMABCR0                         00008120  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMANDAR0                        00008124  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMAMR1                          00008180  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMASR1                          00008184  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMACDAR1                        00008188  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMASAR1                         00008190  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMADAR1                         00008198  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMABCR1                         000081A0  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMANDAR1                        000081A4  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMAMR2                          00008200  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMASR2                          00008204  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMACDAR2                        00008208  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMASAR2                         00008210  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMADAR2                         00008218  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMABCR2                         00008220  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMANDAR2                        00008224  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMAMR3                          00008280  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMASR3                          00008284  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMACDAR3                        00008288  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMASAR3                         00008290  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMADAR3                         00008298  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMABCR3                         000082A0  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMANDAR3                        000082A4  00000000 DMA                             /lendian /ua:0 
+SCGA DMA                             DMAGSR                          000082A8  00000000 DMA                             /lendian /ua:0 
+SCGA PCI                             MAP                             01234567  00008300 PCI                             /no_addr /no_in /hide /tld:0 /ue:6 
+SCGA PCI                             XOFFSET                         76543210  00000004 PCI                             /no_addr /no_in /hide /tld:1 /ue:6 
+SCGA PCI                             ANCHOR0                         89ABCDEF  00000000 PCI                             /no_addr /no_in /hide /sa:4 /ue:6 
+SCGA PCI                             ANCHOR1                         FEDCBA98  00000000 PCI                             /no_addr /no_in /hide /sa:5 /ue:6 
+SCGA PCI                             VENDORID                        00000000  1957     PCI                             /r(nwf) /w(nwf) /lendian /r /ua:5 
+SCGA PCI                             ADDR_00                         00000000  80000000 PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             DEVICEID                        00000002  0090     PCI                             /r(nwf) /w(nwf) /lendian /r /ua:5 
+SCGA PCI                             ADDR_02                         00000000  80000002 PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             PCICMD                          00000000  0004     PCI                             /r(nwf) /w(nwf) /lendian /ua:5 
+SCGA PCI                             ADDR_04                         00000000  80000004 PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             PCISTAT                         00000002  00B0     PCI                             /r(nwf) /w(nwf) /lendian /r /ua:5 
+SCGA PCI                             ADDR_06                         00000000  80000006 PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             REVID                           00000000  11       PCI                             /r(nwf) /w(nwf) /lendian /r /ua:5 
+SCGA PCI                             ADDR_08                         00000000  80000008 PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             PIR                             00000001  00       PCI                             /r(nwf) /w(nwf) /lendian /r /ua:5 
+SCGA PCI                             ADDR_09                         00000000  80000009 PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             SUBCCODE                        00000002  20       PCI                             /r(nwf) /w(nwf) /lendian /r /ua:5 
+SCGA PCI                             ADDR_0A                         00000000  8000000A PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             PBCCR                           00000003  0B       PCI                             /r(nwf) /w(nwf) /lendian /r /ua:5 
+SCGA PCI                             ADDR_0B                         00000000  8000000B PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             PCLSR                           00000000  00       PCI                             /r(nwf) /w(nwf) /lendian /ua:5 
+SCGA PCI                             ADDR_0C                         00000000  8000000C PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             PLTR                            00000001  00       PCI                             /r(nwf) /w(nwf) /lendian /ua:5 
+SCGA PCI                             ADDR_0D                         00000000  8000000D PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             HTR                             00000002  00       PCI                             /r(nwf) /w(nwf) /lendian /r /ua:5 
+SCGA PCI                             ADDR_0E                         00000000  8000000E PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             BISTCTRL                        00000003  00       PCI                             /r(nwf) /w(nwf) /lendian /r /ua:5 
+SCGA PCI                             ADDR_0F                         00000000  8000000F PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             PIMMRBAR                        00000000  00000000 PCI                             /r(nwf) /w(nwf) /lendian /ua:5 
+SCGA PCI                             ADDR_10                         00000000  80000010 PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             GPLBAR0                         00000000  00000000 PCI                             /r(nwf) /w(nwf) /lendian /ua:5 
+SCGA PCI                             ADDR_14                         00000000  80000014 PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             GPLBAR1                         00000000  00000004 PCI                             /r(nwf) /w(nwf) /lendian /ua:5 
+SCGA PCI                             ADDR_18                         00000000  80000018 PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             GPLEBAR1                        00000000  00000000 PCI                             /r(nwf) /w(nwf) /lendian /ua:5 
+SCGA PCI                             ADDR_1C                         00000000  8000001C PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             GPLBAR2                         00000000  00000004 PCI                             /r(nwf) /w(nwf) /lendian /ua:5 
+SCGA PCI                             ADDR_20                         00000000  80000020 PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             GPLEBAR2                        00000000  00000000 PCI                             /r(nwf) /w(nwf) /lendian /ua:5 
+SCGA PCI                             ADDR_24                         00000000  80000024 PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             SUBVENDOR                       00000000  0000     PCI                             /r(nwf) /w(nwf) /lendian /ua:5 
+SCGA PCI                             ADDR_2C                         00000000  8000002C PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             SUBID                           00000002  0000     PCI                             /r(nwf) /w(nwf) /lendian /ua:5 
+SCGA PCI                             ADDR_2E                         00000000  8000002E PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             CP                              00000000  48       PCI                             /r(nwf) /w(nwf) /lendian /r /ua:5 
+SCGA PCI                             ADDR_34                         00000000  80000034 PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             ILR                             00000000  00       PCI                             /r(nwf) /w(nwf) /lendian /ua:5 
+SCGA PCI                             ADDR_3C                         00000000  8000003C PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             INTPIN                          00000001  01       PCI                             /r(nwf) /w(nwf) /lendian /r /ua:5 
+SCGA PCI                             ADDR_3D                         00000000  8000003D PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             MIN_GNT                         00000002  00       PCI                             /r(nwf) /w(nwf) /lendian /r /ua:5 
+SCGA PCI                             ADDR_3E                         00000000  8000003E PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             MAX_LAT                         00000003  00       PCI                             /r(nwf) /w(nwf) /lendian /r /ua:5 
+SCGA PCI                             ADDR_3F                         00000000  8000003F PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             PCIFUNC                         00000000  0020     PCI                             /r(nwf) /w(nwf) /lendian /ua:5 
+SCGA PCI                             ADDR_44                         00000000  80000044 PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             PCIARBC                         00000002  8000     PCI                             /r(nwf) /w(nwf) /lendian /ua:5 
+SCGA PCI                             ADDR_46                         00000000  80000046 PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             PCIHSWAP                        00000000  00000006 PCI                             /r(nwf) /w(nwf) /lendian /ua:5 
+SCGA PCI                             ADDR_48                         00000000  80000048 PCI                             /wo /hide /lendian /w /ua:4 
+SCGA PCI                             PCICFGADDR                      00008300  48000080 PCI                             /no_in /lendian /ua:0 
+SCGA PCI                             PCICFGDATA                      00008304  00000000 PCI                             /no_in /lendian /ua:0 /ue:6 
+SCGA PCI                             PCIINTACK                       00008308  00000000 PCI                             /lendian /ua:0 /ue:6 
+SCGA PCI                             PCIESR                          00008500  00000000 PCI                             /ua:0 
+SCGA PCI                             PCIECDR                         00008504  00000000 PCI                             /ua:0 
+SCGA PCI                             PCIEER                          00008508  00000000 PCI                             /ua:0 
+SCGA PCI                             PCIEATCR                        0000850C  00000000 PCI                             /ua:0 
+SCGA PCI                             PCIEACR                         00008510  00000000 PCI                             /r /ua:0 
+SCGA PCI                             PCIEEACR                        00008514  00000000 PCI                             /r /ua:0 
+SCGA PCI                             PCIEDCR                         00008518  00000000 PCI                             /r /ua:0 
+SCGA PCI                             PCIGCR                          00008520  00000000 PCI                             /ua:0 
+SCGA PCI                             PCIECR                          00008524  00000000 PCI                             /ua:0 
+SCGA PCI                             PCIGSR                          00008528  00000001 PCI                             /r /ua:0 
+SCGA PCI                             PITAR2                          00008538  00000000 PCI                             /ua:0 
+SCGA PCI                             PIBAR2                          00008540  00000000 PCI                             /ua:0 
+SCGA PCI                             PIEBAR2                         00008544  00000000 PCI                             /ua:0 
+SCGA PCI                             PIWAR2                          00008548  00000000 PCI                             /ua:0 
+SCGA PCI                             PITAR1                          00008550  00000000 PCI                             /ua:0 
+SCGA PCI                             PIBAR1                          00008558  00000000 PCI                             /ua:0 
+SCGA PCI                             PIEBAR1                         0000855C  00000000 PCI                             /ua:0 
+SCGA PCI                             PIWAR1                          00008560  00000000 PCI                             /ua:0 
+SCGA PCI                             PITAR0                          00008568  00000000 PCI                             /ua:0 
+SCGA PCI                             PIBAR0                          00008570  00000000 PCI                             /ua:0 
+SCGA PCI                             PIWAR0                          00008578  00000000 PCI                             /ua:0 
+SCGA IOS                             POTAR0                          00008400  00000000 IOS                             /ua:0 
+SCGA IOS                             POBAR0                          00008408  00000000 IOS                             /ua:0 
+SCGA IOS                             POCMR0                          00008410  00000000 IOS                             /ua:0 
+SCGA IOS                             POTAR1                          00008418  00000000 IOS                             /ua:0 
+SCGA IOS                             POBAR1                          00008420  00000000 IOS                             /ua:0 
+SCGA IOS                             POCMR1                          00008428  00000000 IOS                             /ua:0 
+SCGA IOS                             POTAR2                          00008430  00000000 IOS                             /ua:0 
+SCGA IOS                             POBAR2                          00008438  00000000 IOS                             /ua:0 
+SCGA IOS                             POCMR2                          00008440  00000000 IOS                             /ua:0 
+SCGA IOS                             POTAR3                          00008448  00000000 IOS                             /ua:0 
+SCGA IOS                             POBAR3                          00008450  00000000 IOS                             /ua:0 
+SCGA IOS                             POCMR3                          00008458  00000000 IOS                             /ua:0 
+SCGA IOS                             POTAR4                          00008460  00000000 IOS                             /ua:0 
+SCGA IOS                             POBAR4                          00008468  00000000 IOS                             /ua:0 
+SCGA IOS                             POCMR4                          00008470  00000000 IOS                             /ua:0 
+SCGA IOS                             POTAR5                          00008478  00000000 IOS                             /ua:0 
+SCGA IOS                             POBAR5                          00008480  00000000 IOS                             /ua:0 
+SCGA IOS                             POCMR5                          00008488  00000000 IOS                             /ua:0 
+SCGA IOS                             PMCR                            000084F0  00000001 IOS                             /ua:0 
+SCGA IOS                             DTCR                            000084F8  00000000 IOS                             /ua:0 
+SCGA SDDRMEMC                        S_CS0_BNDS                      0000D000  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_CS1_BNDS                      0000D008  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_CS2_BNDS                      0000D010  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_CS3_BNDS                      0000D018  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_CS0_CONFIG                    0000D080  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_CS1_CONFIG                    0000D084  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_CS2_CONFIG                    0000D088  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_CS3_CONFIG                    0000D08C  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_TIMING_CFG1                   0000D108  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_TIMING_CFG2                   0000D10C  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_DDR_SDRAM_CFG                 0000D110  02000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_DDR_SDRAM_MODE                0000D118  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_DDR_SDRAM_INT                 0000D124  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_DDR_SDRAM_CLK                 0000D130  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_DATA_ERR_INJHI                0000DE00  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_DATA_ERR_INJLO                0000DE04  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_ECC_ERR_INJECT                0000DE08  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_CAPTURE_DATAHI                0000DE20  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_CAPTURE_DATALO                0000DE24  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_CAPTURE_ECC                   0000DE28  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_ERR_DETECT                    0000DE40  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_ERR_DISABLE                   0000DE44  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_ERR_INT_EN                    0000DE48  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_CAPTURE_ATTRI                 0000DE4C  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_CAPTURE_ADDR                  0000DE50  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_ERR_SBE                       0000DE58  00000000 SDDRMEMC                        /ua:0 
+SCGA SDDRMEMC                        S_DEBUG1                        0000DF00  00000000 SDDRMEMC                        /ua:0 
+SCGA SEC                             IMR                             00031008  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             ISR                             00031010  0000000000000000 SEC                             /r /ua:0 
+SCGA SEC                             ICR                             00031018  0000000000000000 SEC                             /w /ua:0 
+SCGA SEC                             ID                              00031020  0000000000000041 SEC                             /r /ua:0 
+SCGA SEC                             EUASR                           00031028  F0F0F0F000FFF0F0 SEC                             /r /ua:0 
+SCGA SEC                             MCR                             00031030  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             CCCR1                           00031108  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             CCPSR1                          00031110  0000000000000007 SEC                             /r /ua:0 
+SCGA SEC                             CDPR1                           00031140  0000000000000000 SEC                             /r /ua:0 
+SCGA SEC                             FFR1                            00031148  0000000000000000 SEC                             /w /ua:0 
+SCGA SEC                             CCCR2                           00031208  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             CCPSR2                          00031210  0000000000000007 SEC                             /r /ua:0 
+SCGA SEC                             CDPR2                           00031240  0000000000000000 SEC                             /r /ua:0 
+SCGA SEC                             FFR2                            00031248  0000000000000000 SEC                             /w /ua:0 
+SCGA SEC                             CCCR3                           00031308  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             CCPSR3                          00031310  0000000000000007 SEC                             /r /ua:0 
+SCGA SEC                             CDPR3                           00031340  0000000000000000 SEC                             /r /ua:0 
+SCGA SEC                             FFR3                            00031348  0000000000000000 SEC                             /w /ua:0 
+SCGA SEC                             CCCR4                           00031308  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             CCPSR4                          00031310  0000000000000007 SEC                             /r /ua:0 
+SCGA SEC                             CDPR4                           00031340  0000000000000000 SEC                             /r /ua:0 
+SCGA SEC                             FFR4                            00031348  0000000000000000 SEC                             /w /ua:0 
+SCGA SEC                             DEUMR                           00032000  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             DEUKSR                          00032008  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             DEUDSR                          00032010  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             DEURCR                          00032018  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             DEUSR                           00032028  0000000000000001 SEC                             /r /ua:0 
+SCGA SEC                             DEUISR                          00032030  0000000000000000 SEC                             /r /ua:0 
+SCGA SEC                             DEUICR                          00032038  0000000000003000 SEC                             /ua:0 
+SCGA SEC                             DEUEUG                          00032050  0000000000000000 SEC                             /w /ua:0 
+SCGA SEC                             DEUIV                           00032100  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             DEUK1                           00032400  0000000000000000 SEC                             /w /ua:0 
+SCGA SEC                             DEUK2                           00032408  0000000000000000 SEC                             /w /ua:0 
+SCGA SEC                             DEUK3                           00032410  0000000000000000 SEC                             /w /ua:0 
+SCGA SEC                             AESUMR                          00034000  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             AESUKSR                         00034008  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             AESUDSR                         00034010  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             AESURCR                         00034018  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             AESUSR                          00034028  0000000000000001 SEC                             /r /ua:0 
+SCGA SEC                             AESUISR                         00034030  0000000000000000 SEC                             /r /ua:0 
+SCGA SEC                             AESUICR                         00034038  0000000000001000 SEC                             /ua:0 
+SCGA SEC                             AESUEMR                         00034050  0000000000000000 SEC                             /w /ua:0 
+SCGA SEC                             MDEUMR                          00036000  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             MDEUKSR                         00036008  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             MDEUDSR                         00036010  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             MDEURCR                         00036018  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             MDEUSR                          00036028  0000000203000001 SEC                             /r /ua:0 
+SCGA SEC                             MDEUISR                         00036030  0000000000000000 SEC                             /r /ua:0 
+SCGA SEC                             MDEUICR                         00036038  0000000000001000 SEC                             /ua:0 
+SCGA SEC                             MDEUEUG                         00036050  0000000000000000 SEC                             /w /ua:0 
+SCGA SEC                             AFEUMR                          00038000  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             AFEUKSR                         00038008  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             AFEUDSR                         00038010  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             AFEURCR                         00038018  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             AFEUSR                          00038028  0000000000000001 SEC                             /r /ua:0 
+SCGA SEC                             AFEUISR                         00038030  0000000000000000 SEC                             /r /ua:0 
+SCGA SEC                             AFEUICR                         00038038  0000000000001000 SEC                             /ua:0 
+SCGA SEC                             AFEUEMR                         00038050  0000000000000000 SEC                             /w /ua:0 
+SCGA SEC                             AFEUCMP                         00038200  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             AFEUK0                          00038400  0000000000000000 SEC                             /w /ua:0 
+SCGA SEC                             AFEUK1                          00038408  0000000000000000 SEC                             /w /ua:0 
+SCGA SEC                             RNGMR                           0003A000  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             RNGDSR                          0003A010  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             RNGRCR                          0003A018  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             RNGSR                           0003A028  0000000000000301 SEC                             /r /ua:0 
+SCGA SEC                             RNGISR                          0003A030  0000000000000000 SEC                             /r /ua:0 
+SCGA SEC                             RNGICR                          0003A038  0000000000001000 SEC                             /ua:0 
+SCGA SEC                             RNGEUG                          0003A050  0000000000000000 SEC                             /w /ua:0 
+SCGA SEC                             PKEUMR                          0003C000  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             PKEUKSR                         0003C008  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             PKEUDSR                         0003C010  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             PKEURCR                         0003C018  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             PKEUSR                          0003C028  0000000000000001 SEC                             /r /ua:0 
+SCGA SEC                             PKEUISR                         0003C030  0000000000000000 SEC                             /r /ua:0 
+SCGA SEC                             PKEUICR                         0003C038  0000000000001000 SEC                             /ua:0 
+SCGA SEC                             PKEUABS                         0003C040  0000000000000000 SEC                             /ua:0 
+SCGA SEC                             PKEUEUG                         0003C050  0000000000000000 SEC                             /w /ua:0 
+SCGA QESYSI                          SDSR                            00104000  00000000 QESYSI                          /ua:0 
+SCGA QESYSI                          SDMR                            00104004  0000A000 QESYSI                          /ua:0 
+SCGA QESYSI                          SDTR1                           00104008  09300030 QESYSI                          /ua:0 
+SCGA QESYSI                          SDTR2                           0010400C  09300030 QESYSI                          /ua:0 
+SCGA QESYSI                          SDHY1                           00104010  06200020 QESYSI                          /ua:0 
+SCGA QESYSI                          SDHY2                           00104014  06200020 QESYSI                          /ua:0 
+SCGA QESYSI                          SDTA1                           00104018  4E650828 QESYSI                          /ua:0 
+SCGA QESYSI                          SDTA2                           0010401C  0A00FF6E QESYSI                          /ua:0 
+SCGA QESYSI                          SDTM1                           00104020  A2000000 QESYSI                          /ua:0 
+SCGA QESYSI                          SDTM2                           00104024  60000000 QESYSI                          /ua:0 
+SCGA QESYSI                          SDAQR                           00104038  00000000 QESYSI                          /ua:0 
+SCGA QESYSI                          SDAQMR                          0010403C  00000000 QESYSI                          /ua:0 
+SCGA QESYSI                          SDEBCR                          00104044  00000000 QESYSI                          /ua:0 
+SCGA QESYSI                          CICR                            00100080  00000000 QESYSI                          /ua:0 
+SCGA QESYSI                          CIVEC                           00100084  00000000 QESYSI                          /ua:0 
+SCGA QESYSI                          CRIPNR                          00100088  00000000 QESYSI                          /ua:0 
+SCGA QESYSI                          CIPNR                           0010008C  00000000 QESYSI                          /ua:0 
+SCGA QESYSI                          CIPXCC                          00100090  05309770 QESYSI                          /ua:0 
+SCGA QESYSI                          CIPYCC                          00100094  05309770 QESYSI                          /ua:0 
+SCGA QESYSI                          CIPWCC                          00100098  05309770 QESYSI                          /ua:0 
+SCGA QESYSI                          CIPZCC                          0010009C  05309770 QESYSI                          /ua:0 
+SCGA QESYSI                          CIMR                            001000A0  00000000 QESYSI                          /ua:0 
+SCGA QESYSI                          CRIMR                           001000A4  00000000 QESYSI                          /ua:0 
+SCGA QESYSI                          CICNR                           001000A8  00000000 QESYSI                          /ua:0 
+SCGA QESYSI                          CIPRTA                          001000B0  05309770 QESYSI                          /ua:0 
+SCGA QESYSI                          CIPRTB                          001000B4  05309770 QESYSI                          /ua:0 
+SCGA QESYSI                          CRICR                           001000BC  00000000 QESYSI                          /ua:0 
+SCGA QESYSI                          CHIVEC                          001000E0  00000000 QESYSI                          /ua:0 
+SCGA QECTRL                          IADD                            00100000  00000000 QECTRL                          /ua:0 
+SCGA QECTRL                          IDATA                           00100004  B3FF0006 QECTRL                          /ua:0 
+SCGA QECTRL                          CECR                            00100100  00000000 QECTRL                          /ua:0 
+SCGA QECTRL                          CECCR                           00100104  00000000 QECTRL                          /ua:0 
+SCGA QECTRL                          CECDR                           00100108  00000000 QECTRL                          /ua:0 
+SCGA QECTRL                          CETER                           00100116  0000     QECTRL                          /ua:0 
+SCGA QECTRL                          CETMR                           0010011A  0000     QECTRL                          /ua:0 
+SCGA QECTRL                          CETSCR                          0010011C  00000000 QECTRL                          /ua:0 
+SCGA QECTRL                          CETSR1                          00100120  00000000 QECTRL                          /ua:0 
+SCGA QECTRL                          CETSR2                          00100124  00000000 QECTRL                          /ua:0 
+SCGA QECTRL                          CEVTER                          00100130  00000000 QECTRL                          /ua:0 
+SCGA QECTRL                          CEVTMR                          00100134  00000000 QECTRL                          /ua:0 
+SCGA QECTRL                          CERCR                           00100138  0000     QECTRL                          /ua:0 
+SCGA QECTRL                          CEEXE1                          00100160  0000     QECTRL                          /ua:0 
+SCGA QECTRL                          CEEXM1                          00100164  0000     QECTRL                          /ua:0 
+SCGA QECTRL                          CEEXE2                          00100168  0000     QECTRL                          /ua:0 
+SCGA QECTRL                          CEEXM2                          0010016C  0000     QECTRL                          /ua:0 
+SCGA QECTRL                          CEEXE3                          00100170  0000     QECTRL                          /ua:0 
+SCGA QECTRL                          CEEXM3                          00100174  0000     QECTRL                          /ua:0 
+SCGA QECTRL                          CEEXE4                          00100178  0000     QECTRL                          /ua:0 
+SCGA QECTRL                          CEEXM4                          0010017C  0000     QECTRL                          /ua:0 
+SCGA QECMX                           CMXGCR                          00100400  00000000 QECMX                           /ua:0 
+SCGA QECMX                           CMXSI1CR_L                      00100404  00000000 QECMX                           /ua:0 
+SCGA QECMX                           CMXSI1CR_H                      00100408  00000000 QECMX                           /ua:0 
+SCGA QECMX                           CMXSI1SYR                       0010040C  00000000 QECMX                           /ua:0 
+SCGA QECMX                           CMXUCR1                         00100410  00000000 QECMX                           /ua:0 
+SCGA QECMX                           CMXUCR2                         00100414  00000000 QECMX                           /ua:0 
+SCGA QECMX                           CMXUCR3                         00100418  00000000 QECMX                           /ua:0 
+SCGA QECMX                           CMXUCR4                         0010041C  00000000 QECMX                           /ua:0 
+SCGA QECMX                           CMXUPCR                         00100420  00000000 QECMX                           /ua:0 
+SCGA QECMX                           BRGC1                           00100640  00000000 QECMX                           /ua:0 
+SCGA QECMX                           BRGC2                           00100644  00000000 QECMX                           /ua:0 
+SCGA QECMX                           BRGC3                           00100648  00000000 QECMX                           /ua:0 
+SCGA QECMX                           BRGC4                           0010064C  00000000 QECMX                           /ua:0 
+SCGA QECMX                           BRGC5                           00100650  00000000 QECMX                           /ua:0 
+SCGA QECMX                           BRGC6                           00100654  00000000 QECMX                           /ua:0 
+SCGA QECMX                           BRGC7                           00100658  00000000 QECMX                           /ua:0 
+SCGA QECMX                           BRGC8                           0010065C  00000000 QECMX                           /ua:0 
+SCGA QECMX                           BRGC9                           00100660  00000000 QECMX                           /ua:0 
+SCGA QECMX                           BRGC10                          00100664  00000000 QECMX                           /ua:0 
+SCGA QECMX                           BRGC11                          00100668  00000000 QECMX                           /ua:0 
+SCGA QECMX                           BRGC12                          0010066C  00000000 QECMX                           /ua:0 
+SCGA QECMX                           BRGC13                          00100670  00000000 QECMX                           /ua:0 
+SCGA QECMX                           BRGC14                          00100674  00000000 QECMX                           /ua:0 
+SCGA QECMX                           BRGC15                          00100678  00000000 QECMX                           /ua:0 
+SCGA QECMX                           BRGC16                          0010067C  00000000 QECMX                           /ua:0 
+SCGA QECMX                           GTCFR1                          00100440  00       QECMX                           /ua:0 
+SCGA QECMX                           GTCFR2                          00100444  00       QECMX                           /ua:0 
+SCGA QECMX                           GTMDR1                          00100450  0000     QECMX                           /ua:0 
+SCGA QECMX                           GTMDR2                          00100452  0000     QECMX                           /ua:0 
+SCGA QECMX                           GTRFR1                          00100454  FFFF     QECMX                           /ua:0 
+SCGA QECMX                           GTRFR2                          00100456  FFFF     QECMX                           /ua:0 
+SCGA QECMX                           GTCPR1                          00100458  0000     QECMX                           /ua:0 
+SCGA QECMX                           GTCPR2                          0010045A  0000     QECMX                           /ua:0 
+SCGA QECMX                           GTCNR1                          0010045C  0000     QECMX                           /ua:0 
+SCGA QECMX                           GTCNR2                          0010045E  0000     QECMX                           /ua:0 
+SCGA QECMX                           GTMDR3                          00100460  0000     QECMX                           /ua:0 
+SCGA QECMX                           GTMDR4                          00100462  0000     QECMX                           /ua:0 
+SCGA QECMX                           GTRFR3                          00100464  FFFF     QECMX                           /ua:0 
+SCGA QECMX                           GTRFR4                          00100466  FFFF     QECMX                           /ua:0 
+SCGA QECMX                           GTCPR3                          00100468  0000     QECMX                           /ua:0 
+SCGA QECMX                           GTCPR4                          0010046A  0000     QECMX                           /ua:0 
+SCGA QECMX                           GTCNR3                          0010046C  0000     QECMX                           /ua:0 
+SCGA QECMX                           GTCNR4                          0010046E  0000     QECMX                           /ua:0 
+SCGA QECMX                           GTEVR1                          00100470  0000     QECMX                           /ua:0 
+SCGA QECMX                           GTEVR2                          00100472  0000     QECMX                           /ua:0 
+SCGA QECMX                           GTEVR3                          00100474  0000     QECMX                           /ua:0 
+SCGA QECMX                           GTEVR4                          00100476  0000     QECMX                           /ua:0 
+SCGA QECMX                           GTPSR1                          00100478  0003     QECMX                           /ua:0 
+SCGA QECMX                           GTPSR2                          0010047A  0003     QECMX                           /ua:0 
+SCGA QECMX                           GTPSR3                          0010047C  0003     QECMX                           /ua:0 
+SCGA QECMX                           GTPSR4                          0010047E  0003     QECMX                           /ua:0 
+SCGA QESPI                           SPMODE1                         001004E0  00000000 QESPI                           /ua:0 
+SCGA QESPI                           SPIE1                           001004E6  00       QESPI                           /ua:0 
+SCGA QESPI                           SPIM1                           001004EA  00       QESPI                           /ua:0 
+SCGA QESPI                           SPCOM1                          001004ED  00       QESPI                           /ua:0 
+SCGA QESPI                           SPITD1                          001004F0  00000000 QESPI                           /ua:0 
+SCGA QESPI                           SPIRD1                          001004F4  FFFFFFFF QESPI                           /ua:0 
+SCGA QESPI                           SPMODE2                         00100520  00000000 QESPI                           /ua:0 
+SCGA QESPI                           SPIE2                           00100526  00       QESPI                           /ua:0 
+SCGA QESPI                           SPIM2                           0010052A  00       QESPI                           /ua:0 
+SCGA QESPI                           SPCOM2                          0010052D  00       QESPI                           /ua:0 
+SCGA QESPI                           SPITD2                          00100530  00000000 QESPI                           /ua:0 
+SCGA QESPI                           SPIRD2                          00100534  FFFFFFFF QESPI                           /ua:0 
+SCGA QEUCC                           GUMR1                           00102000  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UPSMR1                          00102004  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UTODR1                          00102008  0000     QEUCC                           /ua:0 
+SCGA QEUCC                           UDSYNCR1                        0010200C  7E7E     QEUCC                           /ua:0 
+SCGA QEUCC                           UCCE1                           00102010  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UCCM1                           00102014  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UCCS1                           00102018  00       QEUCC                           /ua:0 
+SCGA QEUCC                           URFB1                           00102020  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           URFS1                           00102024  0080     QEUCC                           /ua:0 
+SCGA QEUCC                           URFET1                          00102028  0040     QEUCC                           /ua:0 
+SCGA QEUCC                           URFSET1                         0010202A  FFFF     QEUCC                           /ua:0 
+SCGA QEUCC                           UTFB1                           0010202C  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UTFS1                           00102030  0080     QEUCC                           /ua:0 
+SCGA QEUCC                           UTFET1                          00102034  0040     QEUCC                           /ua:0 
+SCGA QEUCC                           UTFTT1                          00102038  0020     QEUCC                           /ua:0 
+SCGA QEUCC                           UTPT1                           0010203C  0100     QEUCC                           /ua:0 
+SCGA QEUCC                           URTRY1                          00102040  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           GUEMR1                          00102090  13       QEUCC                           /ua:0 
+SCGA QEUCC                           GUMR2                           00103000  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UPSMR2                          00103004  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UTODR2                          00103008  0000     QEUCC                           /ua:0 
+SCGA QEUCC                           UDSYNCR2                        0010300C  7E7E     QEUCC                           /ua:0 
+SCGA QEUCC                           UCCE2                           00103010  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UCCM2                           00103014  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UCCS2                           00103018  00       QEUCC                           /ua:0 
+SCGA QEUCC                           URFB2                           00103020  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           URFS2                           00103024  0080     QEUCC                           /ua:0 
+SCGA QEUCC                           URFET2                          00103028  0040     QEUCC                           /ua:0 
+SCGA QEUCC                           URFSET2                         0010302A  FFFF     QEUCC                           /ua:0 
+SCGA QEUCC                           UTFB2                           0010302C  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UTFS2                           00103030  0080     QEUCC                           /ua:0 
+SCGA QEUCC                           UTFET2                          00103034  0040     QEUCC                           /ua:0 
+SCGA QEUCC                           UTFTT2                          00103038  0020     QEUCC                           /ua:0 
+SCGA QEUCC                           UTPT2                           0010303C  0100     QEUCC                           /ua:0 
+SCGA QEUCC                           URTRY2                          00103040  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           GUEMR2                          00103090  13       QEUCC                           /ua:0 
+SCGA QEUCC                           GUMR3                           00102200  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UPSMR3                          00102204  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UTODR3                          00102208  0000     QEUCC                           /ua:0 
+SCGA QEUCC                           UDSYNCR3                        0010220C  7E7E     QEUCC                           /ua:0 
+SCGA QEUCC                           UCCE3                           00102210  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UCCM3                           00102214  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UCCS3                           00102218  00       QEUCC                           /ua:0 
+SCGA QEUCC                           URFB3                           00102220  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           URFS3                           00102224  0080     QEUCC                           /ua:0 
+SCGA QEUCC                           URFET3                          00102228  0040     QEUCC                           /ua:0 
+SCGA QEUCC                           URFSET3                         0010222A  FFFF     QEUCC                           /ua:0 
+SCGA QEUCC                           UTFB3                           0010222C  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UTFS3                           00102230  0080     QEUCC                           /ua:0 
+SCGA QEUCC                           UTFET3                          00102234  0040     QEUCC                           /ua:0 
+SCGA QEUCC                           UTFTT3                          00102238  0020     QEUCC                           /ua:0 
+SCGA QEUCC                           UTPT3                           0010223C  0100     QEUCC                           /ua:0 
+SCGA QEUCC                           URTRY3                          00102240  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           GUEMR3                          00102290  13       QEUCC                           /ua:0 
+SCGA QEUCC                           GUMR4                           00103200  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UPSMR4                          00103204  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UTODR4                          00103208  0000     QEUCC                           /ua:0 
+SCGA QEUCC                           UDSYNCR4                        0010320C  7E7E     QEUCC                           /ua:0 
+SCGA QEUCC                           UCCE4                           00103210  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UCCM4                           00103214  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UCCS4                           00103218  00       QEUCC                           /ua:0 
+SCGA QEUCC                           URFB4                           00103220  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           URFS4                           00103224  0080     QEUCC                           /ua:0 
+SCGA QEUCC                           URFET4                          00103228  0040     QEUCC                           /ua:0 
+SCGA QEUCC                           URFSET4                         0010322A  FFFF     QEUCC                           /ua:0 
+SCGA QEUCC                           UTFB4                           0010322C  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UTFS4                           00103230  0080     QEUCC                           /ua:0 
+SCGA QEUCC                           UTFET4                          00103234  0040     QEUCC                           /ua:0 
+SCGA QEUCC                           UTFTT4                          00103238  0020     QEUCC                           /ua:0 
+SCGA QEUCC                           UTPT4                           0010323C  0100     QEUCC                           /ua:0 
+SCGA QEUCC                           URTRY4                          00103240  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           GUEMR4                          00103290  13       QEUCC                           /ua:0 
+SCGA QEUCC                           GUMRL5                          00102400  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           GUMRH5                          00102404  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UPSMR5                          00102408  0000     QEUCC                           /ua:0 
+SCGA QEUCC                           UTODR5                          0010240C  0000     QEUCC                           /ua:0 
+SCGA QEUCC                           UDSR5                           0010240E  7E7E     QEUCC                           /ua:0 
+SCGA QEUCC                           UCCE5                           00102410  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UCCM5                           00102414  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UCCS5                           00102417  00       QEUCC                           /ua:0 
+SCGA QEUCC                           UTPT5                           0010243C  0100     QEUCC                           /ua:0 
+SCGA QEUCC                           GUEMR5                          00102490  10       QEUCC                           /ua:0 
+SCGA QEUCC                           GUMRL6                          00103400  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           GUMRH6                          00103404  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UPSMR6                          00103408  0000     QEUCC                           /ua:0 
+SCGA QEUCC                           UTODR6                          0010340C  0000     QEUCC                           /ua:0 
+SCGA QEUCC                           UDSR6                           0010340E  7E7E     QEUCC                           /ua:0 
+SCGA QEUCC                           UCCE6                           00103410  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UCCM6                           00103414  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UCCS6                           00103417  00       QEUCC                           /ua:0 
+SCGA QEUCC                           UTPT6                           0010343C  0100     QEUCC                           /ua:0 
+SCGA QEUCC                           GUEMR6                          00103490  10       QEUCC                           /ua:0 
+SCGA QEUCC                           GUMRL7                          00102600  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           GUMRH7                          00102604  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UPSMR7                          00102608  0000     QEUCC                           /ua:0 
+SCGA QEUCC                           UTODR7                          0010260C  0000     QEUCC                           /ua:0 
+SCGA QEUCC                           UDSR7                           0010260E  7E7E     QEUCC                           /ua:0 
+SCGA QEUCC                           UCCE7                           00102610  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UCCM7                           00102614  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UCCS7                           00102617  00       QEUCC                           /ua:0 
+SCGA QEUCC                           UTPT7                           0010263C  0100     QEUCC                           /ua:0 
+SCGA QEUCC                           GUEMR7                          00102690  10       QEUCC                           /ua:0 
+SCGA QEUCC                           GUMRL8                          00103600  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           GUMRH8                          00103604  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UPSMR8                          00103608  0000     QEUCC                           /ua:0 
+SCGA QEUCC                           UTODR8                          0010360C  0000     QEUCC                           /ua:0 
+SCGA QEUCC                           UDSR8                           0010360E  7E7E     QEUCC                           /ua:0 
+SCGA QEUCC                           UCCE8                           00103610  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UCCM8                           00103614  00000000 QEUCC                           /ua:0 
+SCGA QEUCC                           UCCS8                           00103617  00       QEUCC                           /ua:0 
+SCGA QEUCC                           UTPT8                           0010363C  0100     QEUCC                           /ua:0 
+SCGA QEUCC                           GUEMR8                          00103690  10       QEUCC                           /ua:0 
+SCGA QEUPC                           UPC1_UPGCR                      00102E00  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPLPA                      00102E04  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPHEC                      00102E08  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPUC                       00102E0C  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDC1                      00102E10  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDC2                      00102E14  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDC3                      00102E18  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDC4                      00102E1C  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPSTPA                     00102E20  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDRS1H                    00102E30  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDRS1L                    00102E34  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDRS2H                    00102E38  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDRS2L                    00102E3C  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDRS3H                    00102E40  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDRS3L                    00102E44  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDRS4H                    00102E48  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDRS4L                    00102E4C  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDRP1                     00102E50  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDRP2                     00102E54  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDRP3                     00102E58  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDRP4                     00102E5C  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDE1                      00102E60  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDE2                      00102E64  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDE3                      00102E68  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPDE4                      00102E6C  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPRP1                      00102E70  0007     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPRP2                      00102E72  0007     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPRP3                      00102E74  0007     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPRP4                      00102E76  0007     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPTIRR1_0                  00102E80  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPTIRR1_1                  00102E82  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPTIRR1_2                  00102E84  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPTIRR1_3                  00102E86  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPTIRR2_0                  00102E88  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPTIRR2_1                  00102E8A  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPTIRR2_2                  00102E8C  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPTIRR2_3                  00102E8E  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPTIRR3_0                  00102E90  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPTIRR3_1                  00102E92  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPTIRR3_2                  00102E94  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPTIRR3_3                  00102E96  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPTIRR4_0                  00102E98  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPTIRR4_1                  00102E9A  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPTIRR4_2                  00102E9C  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPTIRR4_3                  00102E9E  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPER1                      00102EA0  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPER2                      00102EA4  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPER3                      00102EA8  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC1_UPER4                      00102EAC  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPGCR                      00103E00  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPLPA                      00103E04  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPHEC                      00103E08  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPUC                       00103E0C  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDC1                      00103E10  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDC2                      00103E14  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDC3                      00103E18  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDC4                      00103E1C  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPSTPA                     00103E20  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDRS1H                    00103E30  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDRS1L                    00103E34  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDRS2H                    00103E38  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDRS2L                    00103E3C  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDRS3H                    00103E40  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDRS3L                    00103E44  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDRS4H                    00103E48  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDRS4L                    00103E4C  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDRP1                     00103E50  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDRP2                     00103E54  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDRP3                     00103E58  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDRP4                     00103E5C  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDE1                      00103E60  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDE2                      00103E64  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDE3                      00103E68  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPDE4                      00103E6C  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPRP1                      00103E70  0007     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPRP2                      00103E72  0007     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPRP3                      00103E74  0007     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPRP4                      00103E76  0007     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPTIRR1_0                  00103E80  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPTIRR1_1                  00103E82  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPTIRR1_2                  00103E84  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPTIRR1_3                  00103E86  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPTIRR2_0                  00103E88  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPTIRR2_1                  00103E8A  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPTIRR2_2                  00103E8C  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPTIRR2_3                  00103E8E  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPTIRR3_0                  00103E90  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPTIRR3_1                  00103E92  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPTIRR3_2                  00103E94  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPTIRR3_3                  00103E96  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPTIRR4_0                  00103E98  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPTIRR4_1                  00103E9A  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPTIRR4_2                  00103E9C  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPTIRR4_3                  00103E9E  0000     QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPER1                      00103EA0  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPER2                      00103EA4  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPER3                      00103EA8  00000000 QEUPC                           /ua:0 
+SCGA QEUPC                           UPC2_UPER4                      00103EAC  00000000 QEUPC                           /ua:0 
+SCGA QEMCC                           MCCE                            00100540  00000000 QEMCC                           /ua:0 
+SCGA QEMCC                           MCCM                            00100544  00000000 QEMCC                           /ua:0 
+SCGA QEMCC                           MCCF                            00100548  00000000 QEMCC                           /ua:0 
+SCGA QEMCC                           MERL                            0010054C  40004000 QEMCC                           /ua:0 
+SCGA QESI                            SIAMR                           00100700  0000     QESI                            /ua:0 
+SCGA QESI                            SIBMR                           00100702  0000     QESI                            /ua:0 
+SCGA QESI                            SICMR                           00100704  0000     QESI                            /ua:0 
+SCGA QESI                            SIDMR                           00100706  0000     QESI                            /ua:0 
+SCGA QESI                            SIGLMRH                         00100708  00       QESI                            /ua:0 
+SCGA QESI                            SICMDRH                         0010070A  00       QESI                            /ua:0 
+SCGA QESI                            SISTRH                          0010070C  00       QESI                            /ua:0 
+SCGA QESI                            SIRSRH                          0010070E  0000     QESI                            /ua:0 
+SCGA QESI                            SITARC                          00100710  00       QESI                            /ua:0 
+SCGA QESI                            SITBRC                          00100711  00       QESI                            /ua:0 
+SCGA QESI                            SITCRC                          00100712  00       QESI                            /ua:0 
+SCGA QESI                            SITDRC                          00100713  00       QESI                            /ua:0 
+SCGA QESI                            SIRARC                          00100714  00       QESI                            /ua:0 
+SCGA QESI                            SIRBRC                          00100715  00       QESI                            /ua:0 
+SCGA QESI                            SIRCRC                          00100716  00       QESI                            /ua:0 
+SCGA QESI                            SIRDRC                          00100717  00       QESI                            /ua:0 
+SCGA QESI                            SIEMR                           00100720  0000     QESI                            /ua:0 
+SCGA QESI                            SIFMR                           00100722  0000     QESI                            /ua:0 
+SCGA QESI                            SIGMR                           00100724  0000     QESI                            /ua:0 
+SCGA QESI                            SIHMR                           00100726  0000     QESI                            /ua:0 
+SCGA QESI                            SIGLMRL                         00100728  00       QESI                            /ua:0 
+SCGA QESI                            SICMDRL                         0010072A  00       QESI                            /ua:0 
+SCGA QESI                            SISTRL                          0010072C  00       QESI                            /ua:0 
+SCGA QESI                            SIRSRL                          0010072E  0000     QESI                            /ua:0 
+SCGA QESI                            SITERC                          00100730  00       QESI                            /ua:0 
+SCGA QESI                            SITFRC                          00100731  00       QESI                            /ua:0 
+SCGA QESI                            SITGRC                          00100732  00       QESI                            /ua:0 
+SCGA QESI                            SITHRC                          00100733  00       QESI                            /ua:0 
+SCGA QESI                            SIRERC                          00100734  00       QESI                            /ua:0 
+SCGA QESI                            SIRFRC                          00100735  00       QESI                            /ua:0 
+SCGA QESI                            SIRGRC                          00100736  00       QESI                            /ua:0 
+SCGA QESI                            SIRHRC                          00100737  00       QESI                            /ua:0 
+SCGA QESI                            SIML                            00100740  0000     QESI                            /ua:0 
+SCGA QESI                            SIEDM                           00100744  00       QESI                            /ua:0 
+SCGA ETHERNET                        MACCFG1_1                       00102100  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MACCFG1_2                       00102104  00007000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        IPGIFG1                         00102108  40605060 ETHERNET                        /ua:0 
+SCGA ETHERNET                        HAFDUP1                         0010210C  00A1F037 ETHERNET                        /ua:0 
+SCGA ETHERNET                        EMTR1                           0010211C  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMCFG1                        00102120  00000007 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMCOM1                        00102124  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMADD1                        00102128  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMCON1                        0010212C  00001000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMSTAT1                       00102130  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMIND1                        00102134  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        IFCTL1                          00102138  01000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        IFSTAT1                         0010213C  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MACSTNADDR1_1                   00102140  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MACSTNADDR1_2                   00102144  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        UEMPR1                          00102150  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        UTBIPA1                         00102154  0000001F ETHERNET                        /ua:0 
+SCGA ETHERNET                        UESCR1                          00102158  0804     ETHERNET                        /ua:0 
+SCGA ETHERNET                        MACCFG2_1                       00103100  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MACCFG2_2                       00103104  00007000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        IPGIFG2                         00103108  40605060 ETHERNET                        /ua:0 
+SCGA ETHERNET                        HAFDUP2                         0010310C  00A1F037 ETHERNET                        /ua:0 
+SCGA ETHERNET                        EMTR2                           0010311C  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMCFG2                        00103120  00000007 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMCOM2                        00103124  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMADD2                        00103128  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMCON2                        0010312C  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMSTAT2                       00103130  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMIND2                        00103134  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        IFCTL2                          00103138  01000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        IFSTAT2                         0010313C  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MACSTNADDR2_1                   00103140  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MACSTNADDR2_2                   00103144  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        UEMPR2                          00103150  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        UTBIPA2                         00103154  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        UESCR2                          00103158  0804     ETHERNET                        /ua:0 
+SCGA ETHERNET                        MACCFG3_1                       00102300  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MACCFG3_2                       00102304  00007000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        IPGIFG3                         00102308  40605060 ETHERNET                        /ua:0 
+SCGA ETHERNET                        HAFDUP3                         0010230C  00A1F037 ETHERNET                        /ua:0 
+SCGA ETHERNET                        EMTR3                           0010231C  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMCFG3                        00102320  00000007 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMCOM3                        00102324  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMADD3                        00102328  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMCON3                        0010232C  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMSTAT3                       00102330  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMIND3                        00102334  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        IFCTL3                          00102338  01000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        IFSTAT3                         0010233C  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MACSTNADDR3_1                   00102340  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MACSTNADDR3_2                   00102344  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        UEMPR3                          00102350  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        UTBIPA3                         00102354  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        UESCR3                          00102358  0804     ETHERNET                        /ua:0 
+SCGA ETHERNET                        MACCFG4_1                       00103300  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MACCFG4_2                       00103304  00007000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        IPGIFG4                         00103308  40605060 ETHERNET                        /ua:0 
+SCGA ETHERNET                        HAFDUP4                         0010330C  00A1F037 ETHERNET                        /ua:0 
+SCGA ETHERNET                        EMTR4                           0010331C  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMCFG4                        00103320  00000007 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMCOM4                        00103324  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMADD4                        00103328  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMCON4                        0010332C  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMSTAT4                       00103330  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MIIMIND4                        00103334  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        IFCTL4                          00103338  01000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        IFSTAT4                         0010333C  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MACSTNADDR4_1                   00103340  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        MACSTNADDR4_2                   00103344  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        UEMPR4                          00103350  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        UTBIPA4                         00103354  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        UESCR4                          00103358  0804     ETHERNET                        /ua:0 
+SCGA ETHERNET                        TX64_1                          00102180  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TX127_1                         00102184  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TX255_1                         00102188  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RX64_1                          0010218C  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RX127_1                         00102190  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RX255_1                         00102194  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TXOK_1                          00102198  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TXCFRM_1                        0010219C  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TXMCA_1                         001021A0  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TXBCA_1                         001021A4  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXFOK_1                         001021A8  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXBYT_1                         001021AC  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXBOK_1                         001021B0  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXMCA_1                         001021B4  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXBCA_1                         001021B8  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        SCAR_1                          001021BC  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        SCAM_1                          001021C0  FFFE0000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TX64_2                          00103180  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TX127_2                         00103184  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TX255_2                         00103188  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RX64_2                          0010318C  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RX127_2                         00103190  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RX255_2                         00103194  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TXOK_2                          00103198  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TXCFRM_2                        0010319C  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TXMCA_2                         001031A0  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TXBCA_2                         001031A4  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXFOK_2                         001031A8  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXBYT_2                         001031AC  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXBOK_2                         001031B0  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXMCA_2                         001031B4  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXBCA_2                         001031B8  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        SCAR_2                          001031BC  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        SCAM_2                          001031C0  FFFE0000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TX64_3                          00102380  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TX127_3                         00102384  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TX255_3                         00102388  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RX64_3                          0010238C  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RX127_3                         00102390  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RX255_3                         00102394  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TXOK_3                          00102398  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TXCFRM_3                        0010239C  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TXMCA_3                         001023A0  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TXBCA_3                         001023A4  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXFOK_3                         001023A8  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXBYT_3                         001023AC  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXBOK_3                         001023B0  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXMCA_3                         001023B4  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXBCA_3                         001023B8  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        SCAR_3                          001023BC  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        SCAM_3                          001023C0  FFFE0000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TX64_4                          00103380  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TX127_4                         00103384  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TX255_4                         00103388  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RX64_4                          0010338C  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RX127_4                         00103390  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RX255_4                         00103394  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TXOK_4                          00103398  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TXCFRM_4                        0010339C  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TXMCA_4                         001033A0  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        TXBCA_4                         001033A4  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXFOK_4                         001033A8  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXBYT_4                         001033AC  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXBOK_4                         001033B0  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXMCA_4                         001033B4  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        RXBCA_4                         001033B8  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        SCAR_4                          001033BC  00000000 ETHERNET                        /ua:0 
+SCGA ETHERNET                        SCAM_4                          001033C0  FFFE0000 ETHERNET                        /ua:0 
+SCGA USB                             USMOD                           001006C0  00       USB                             /ua:0 
+SCGA USB                             USADD                           001006C1  00       USB                             /ua:0 
+SCGA USB                             USCOM                           001006C2  00       USB                             /ua:0 
+SCGA USB                             USEP0                           001006C4  0000     USB                             /ua:0 
+SCGA USB                             USEP1                           001006C6  0000     USB                             /ua:0 
+SCGA USB                             USEP2                           001006C8  0000     USB                             /ua:0 
+SCGA USB                             USEP3                           001006CA  0000     USB                             /ua:0 
+SCGA USB                             USBER                           001006D0  0000     USB                             /ua:0 
+SCGA USB                             USBMR                           001006D4  0000     USB                             /ua:0 
+SCGA USB                             USBS                            001006D7  00       USB                             /ua:0 
+SCGA USB                             USSFT                           001006D8  2ED8     USB                             /ua:0 
+SCGA USB                             USFRN                           001006DC  0000     USB                             /ua:0 
+SCGA DEBUG                           BPDCR                           00104080  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           BPDSR                           00104084  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           BPDMR                           00104088  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           BPRMRR0                         0010408C  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           BPRMRR1                         00104090  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           BPRMTR0                         0010409C  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           BPRMTR1                         001040A0  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           BPRMIR                          001040AC  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           BPRMSR                          001040B0  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           BPEMR                           001040B4  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_TIBCR0                     00104100  00414802 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_TIBCR1                     00104104  00080202 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_TIBCR2                     00104108  404F0022 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_TIBCR3                     0010410C  40060281 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_TIBCR4                     00104110  40090042 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_TIBCR5                     00104114  40185632 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_TIBCR6                     00104118  40470902 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_TIBCR7                     0010411C  00010820 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_TIBCR8                     00104120  00109800 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_TIBCR9                     00104124  40001102 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_TIBCR10                    00104128  40010A40 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_TIBCR11                    0010412C  0000684E DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_TIBCR12                    00104130  40051080 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_TIBCR13                    00104134  002C0001 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_TIBCR14                    00104138  00040008 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_TIBCR15                    0010413C  00406100 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_IBCR0                      00104180  6A6D8200 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_IBS0                       00104184  00200020 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_IBCNR0                     00104188  00151005 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_IBCR1                      00104190  00970142 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_IBS1                       00104194  00A20060 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_IBCNR1                     00104198  691AE802 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_NPCR                       0010419C  80000131 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_DBCR                       001041A0  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_DBAR                       001041A4  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_DBAMR                      001041A8  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_DBSR                       001041AC  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_DBCNR                      001041B0  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_DBDRH                      001041C0  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_DBDRL                      001041C4  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_DBDMRH                     001041C8  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_DBDMRL                     001041CC  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_BSR                        001041D0  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_BOR                        001041D4  00268714 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_ECCR                       001041F0  00809200 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP1_EICR                       001041F4  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_TIBCR0                     00104200  000101B5 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_TIBCR1                     00104204  40010011 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_TIBCR2                     00104208  00102800 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_TIBCR3                     0010420C  40001095 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_TIBCR4                     00104210  4001A340 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_TIBCR5                     00104214  00CD80D8 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_TIBCR6                     00104218  4001A830 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_TIBCR7                     0010421C  00090000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_TIBCR8                     00104220  40020042 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_TIBCR9                     00104224  00ED4089 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_TIBCR10                    00104228  00002060 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_TIBCR11                    0010422C  40000800 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_TIBCR12                    00104230  40B94100 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_TIBCR13                    00104234  000202A0 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_TIBCR14                    00104238  4008A020 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_TIBCR15                    0010423C  40002A00 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_IBCR0                      00104280  22800681 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_IBS0                       00104284  00A00008 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_IBCNR0                     00104288  28CE006B DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_IBCR1                      00104290  0069A000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_IBS1                       00104294  80028000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_IBCNR1                     00104298  3705FD80 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_NPCR                       0010429C  8000602C DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_DBCR                       001042A0  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_DBAR                       001042A4  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_DBAMR                      001042A8  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_DBSR                       001042AC  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_DBCNR                      001042B0  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_DBDRH                      001042C0  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_DBDRL                      001042C4  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_DBDMRH                     001042C8  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_DBDMRL                     001042CC  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_BSR                        001042D0  00000000 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_BOR                        001042D4  00068008 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_ECCR                       001042F0  0000BA00 DEBUG                           /ua:0 
+SCGA DEBUG                           RSP2_EICR                       001042F4  00000000 DEBUG                           /ua:0 
+
+REM *******************************************
+REM CF GROUP CONFIGURATION
+REM *******************************************
+CF GRP                  SYSCFG ENABLED            ;  GROUP 
+CF GRP                  IPIC DISABLED             ;  GROUP 
+CF GRP                  SYSARB DISABLED           ;  GROUP 
+CF GRP                  RESET DISABLED            ;  GROUP 
+CF GRP                  CLOCK DISABLED            ;  GROUP 
+CF GRP                  QEIO DISABLED             ;  GROUP 
+CF GRP                  DDRMEMC ENABLED           ;  GROUP 
+CF GRP                  I2C DISABLED              ;  GROUP 
+CF GRP                  DUART DISABLED            ;  GROUP 
+CF GRP                  LBC ENABLED               ;  GROUP 
+CF GRP                  UPMA DISABLED             ;  GROUP 
+CF GRP                  UPMB DISABLED             ;  GROUP 
+CF GRP                  UPMC DISABLED             ;  GROUP 
+CF GRP                  DMA DISABLED              ;  GROUP 
+CF GRP                  PCI DISABLED              ;  GROUP 
+CF GRP                  IOS DISABLED              ;  GROUP 
+CF GRP                  SDDRMEMC DISABLED         ;  GROUP 
+CF GRP                  SEC DISABLED              ;  GROUP 
+CF GRP                  QESYSI DISABLED           ;  GROUP 
+CF GRP                  QECTRL DISABLED           ;  GROUP 
+CF GRP                  QECMX DISABLED            ;  GROUP 
+CF GRP                  QESPI DISABLED            ;  GROUP 
+CF GRP                  QEUCC DISABLED            ;  GROUP 
+CF GRP                  QEUPC DISABLED            ;  GROUP 
+CF GRP                  QEMCC DISABLED            ;  GROUP 
+CF GRP                  QESI DISABLED             ;  GROUP 
+CF GRP                  ETHERNET DISABLED         ;  GROUP 
+CF GRP                  USB DISABLED              ;  GROUP 
+CF GRP                  DEBUG DISABLED            ;  GROUP 
+
+REM *******************************************
+REM TF CONFIGURATION
+REM *******************************************
+TF CONF 281 00020000 32604 FF800000 'INTEL 28F640P30T( 4096 x 16 )  1 Device ';
+REM *******************************************
+REM BL CONFIGURATION
+REM *******************************************
+
+BL DELETE

@@ -1,0 +1,3 @@
+#ifdef INCLUDE_SBE_VXB_END
+    sbeRegister();
+#endif

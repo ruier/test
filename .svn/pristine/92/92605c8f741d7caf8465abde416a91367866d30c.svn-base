@@ -1,0 +1,3 @@
+#ifdef DRV_PCIBUS_M83XX
+    m83xxPciRegister ();		/* M83xx PCI host controller */
+#endif /* DRV_PCIBUS_M83XX */

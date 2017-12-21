@@ -1,0 +1,3 @@
+#ifdef DRV_TI_EDMA3
+    tiEdma3Register();
+#endif /* DRV_TI_EDMA3 */

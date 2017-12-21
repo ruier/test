@@ -1,0 +1,3 @@
+#ifdef DRV_PCIBUS_DM81XX_EX
+IMPORT void vxbTi81xxPcieRegister(void);
+#endif /* DRV_PCIBUS_DM81XX_EX */

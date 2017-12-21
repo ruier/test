@@ -1,0 +1,75 @@
+                 README: Wind River SBC 8540
+
+This file contains board-specific information for the Wind River SBC 85xx
+target boards.  Specifically, this file contains information on any BSP
+interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+Additionally, the target board's manual page entry (i.e., wrSbc8540/target.nr
+or wrSbc8560/target.nr) provides board-specific information necessary to 
+run VxWorks, and should be read before this BSP is used.
+
+-------------------------------------------------------------------------------
+RELEASE 6.9/x:
+    TODO:
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.x
+
+    Fixed potential memory corruption caused by sysNvRamGet(). (WIND00101057)
+
+RELEASE 6.9/1:
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2.1
+
+    Moved L1 cache parity error handling to the arch library.  L1 cache parity
+       checking is now enabled by default. L1 parity errors now generate
+       (in many cases recoverable) machine check exceptions.  (WIND00309426)
+    Remove the component INCLUDE_AIM_MMU_SHOW for footprint. (WIND00334904)
+
+RELEASE 6.9/0:
+
+	Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+RELEASE 2.0/8:
+
+        Released from Wind River for General Purpose Platform 3.8, VxWorks6.8
+
+        Remove unused INCLUDE_PPC_FPU. (WIND00153695)
+
+RELEASE 2.0/7:
+
+        Released from Wind River for General Purpose Platform 3.7, VxWorks6.7
+
+        Fixed CQ:WIND00100828 -- modify AUX clock rate macros to pass BSPVTS.
+
+RELEASE 2.0/6:
+
+        Released from Wind River for VxWorks 6.5
+
+        Added support for the IPNet Network Stack.
+        Fixed CQ:WIND00083778 -- serial initialization
+        Fixed CQ:WIND00086517 -- modify AUX clock rate macros to pass BSPVTS.
+        Fixed CQ:WIND00086526 -- modify sysInit function to solve the failure 
+        to print a cold startup banner. 
+
+RELEASE (2.0/5):
+	Updated release for VxBus support, VxWorks 6.3
+
+RELEASE (2.0/4):
+	Updated release for VxWorks 6.2
+
+RELEASE (1.2/3):
+        Updated release for VxWorks 5.5.1.
+
+RELEASE (2.0/3):
+        Updated for VxWorks 6.0 from 1.2/2.
+
+RELEASE (1.2/2):
+        Updated release for VxWorks 5.5.1.
+
+RELEASE (2.0/2):
+        Released for VxWorks 6.0.
+
+RELEASE (1.2/1):
+        Updated release for VxWorks 5.5.1.
+
+RELEASE (1.2/0):
+        First release of the wrSbc85xx BSP.

@@ -1,0 +1,839 @@
+\" ibm_evb750gx/target.ref - IBM750GX target specific documentation
+\"
+\" Copyright (c) 2007-2008 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01e,03jul08,y_w  remove legacy ppcDecTimer and format upgrade
+\" 01d,15nov07,y_w  update to support vxWorks 6.6
+\" 01c,20jul07,y_w  add 'M' command for changing the MAC address in the bootrom
+\" 01b,10jul07,y_w  add option to support TFFS to the "Big Flash"
+\" 01a,25jan07,y_w  Created based on PPC750GX/GL EVB
+\" 
+\"
+\TITLE ibm_evb750gx - IBM PowerPC 750GX/GL Evaluation Board (Hickory)
+
+NAME
+`IBM750GX Evaluation Board (Hickory)'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks for the ibm_evb750gx BSP. Before using a board with VxWorks,
+verify that the board runs in the factory configuration by using
+vendor-supplied ROMs and jumper settings and checking the RS-232
+connection.
+
+\sh Memory devices
+
+Big FLASH configuration is two 8Mx16 FLASH from Intel (28F128J). The data bus 
+width is 32 bits. The two FLASH devices share the same chip select.
+
+Small FLASH is composed of one socketed 512-Kbyte FLASH from AMD (Am29LV040B) 
+in PLCC-32 package. The data bus width is 8 bits.
+
+SRAM is composed of one 512Kx8 chip from Samsung. The data bus width is 
+8 bits.
+
+NVRAM is composed of a single 32Kx8 FRAM (Ferroelectric RAM) from RAMTRON 
+(FM18L08-70-S). The data bus width is 8 bits.
+
+The memory devices are connected on Tsi108's Host Local Port (HLP). Each 
+memory "type" is connected to a separate Chip Select output of the Tsi108. 
+The default Chip Select assignment is:
+\ml
+\m -
+
+Small FLASH - CS0
+\m -
+
+Big FLASH   - CS1
+\m -
+
+SRAM        - CS2
+\m -
+
+NVRAM       - CS3
+\me
+
+Details on the local bus implementation are provided in section 2.5 of
+\tb PowerPC 750GX/GL Evaluation Board User's Manual.
+
+\sh Jumpers
+In order to get the board running with the default VxWorks configuration, no
+jumper's and switch's need to be changed from default configuration settings
+described in board's hardware manual. However, different configurations are
+supported by vxWorks. The following discusses those jumpers which effect
+operation of vxWorks.
+
+\cs
+NOTE: For all jumpers in this document: IN = ON position, OUT = OFF position
+      (*) - default configuration
+
+J14 Small FLASH Chip Select
+----------------------
+
+Jumper | Description
+----------------------
+  3-1  | Small FLASH chip select is connected to Tsi108 HLP CS0 (*)
+  3-4  | Small FLASH chip select is connected to Tsi108 HLP CS1
+  3-5  | Small FLASH chip select is connected to Tsi108 HLP CS2
+
+J15 Big FLASH Chip Select
+----------------------
+
+Jumper | Description
+----------------------
+  3-1  | Big FLASH chip select is connected to Tsi108 HLP CS0
+  3-4  | Big FLASH chip select is connected to Tsi108 HLP CS1 (*)
+  3-5  | Big FLASH chip select is connected to Tsi108 HLP CS2
+
+J1 Tsi108 Power-up Configuration
+----------------------------------
+
+Signal | Jumper | Description
+-------------------------------
+  AD2  |  1-2   | PCI/X reset released after board reset is released (*)
+       |  2-3   | PCI/X reset held in software reset after board reset is 
+       |        | released
+  AD4  |  4-5   | Host Local Port bus width is 8 bits (*) (See Note)
+       |  5-6   | Host Local Port bus width is 32 bits
+  AD7  |  7-8   | Enable processor bus interface after board reset is (*)
+       |        | released
+       |  8-9   | Hold processor bus in software reset after board reset is
+       |        | released
+  AD9  | 10-11  | Host Local Port latch mode enabled
+       | 11-12  | Host Local Port latch mode disabled (*) (See Note)
+
+Note: This option is available on Tsi108A-equipped boards only.
+       
+\ce
+
+J19 is required to be "IN" for fast PCI devices such as the i82540EM gigabit 
+ethernet adapters on Hickory board.
+
+\cs
+J19 - PCI M66EN
+-----------------------
+
+jumper | Description
+-----------------------
+  IN   | Connects M66EN to ground, override the PCI/X card's setting and 
+       | force the PCI signal, M66EN
+  OUT  | M66EN is driven by PCI cards (*)
+\ce
+
+J11 is required to be "OUT" for 133-MHz PCI-X device in PCI slot 0.
+
+\cs
+J11 - Bus Switch
+-----------------------
+
+jumper | Description
+-----------------------
+  IN   | PCI slot 1 and 2 are connected to slot 0 and Tsi108 (*)
+  OUT  | PCI slot 1 and 2 are isolated from slot 0 and Tsi108
+\ce
+
+For details of jumpers location, see the board diagram at the end
+of this entry.  Also see the board's hardware manual for other jumpers
+not directly related to VxWorks operation.
+
+\sh Getting the board running vxWorks
+
+This section provides a step-by-step guide to running vxWorks on the IBM 
+750GX/GL Evaluation Board. For connecting the Evaluation Board to the Host, 
+please refer to section 5.1 in PowerPC 750GX/GL Evaluation Board Kit User's 
+Manual.
+
+1. Booting vxWorks from PIBS2
+   By default, PIBS2 is the bootloader shipped from the factory. It resides in
+   the Small Flash which is a PLCC-32 socketed part (U11). The board's default 
+   jumper and switch configurations should be set correctly at the factory for
+   Small Flash to boot the board.
+
+   1.1 Setting environment parameters for PIBS2
+       Boot up the board with PIBS2 and set following parameters:
+       set bootfilename=vxWorks
+       set ipdstaddr0=<host computer's IP addr>
+
+       set dhcp0=true
+       set ifconfigcmd0=<empty>
+
+       If DHCP can't work, exchange above 2 settings to:
+       set dhcp0=false
+       set ifconfigcmd0=ent0 <target board IP addr> netmask 255.255.255.0 up
+
+       Where "target board IP addr" should be in the same sub net with host
+       computer. For example: if Host's IP address = 192.168.118.24, target 
+       board's IP address could be 192.168.1.xxx.
+
+       After setting the parameters, the network connection can be tested using
+       the ping command from the host computer:
+       ping <target board IP addr>
+
+   1.2 TFTP Server configuration
+       Set up a TFTP server in the host. Copy vxWorks to a directory 
+       from which the TFTP client can download. 
+
+   1.3 Create a vxWorks image
+       In the BSP directory, make sure LOAD_VXWORKS_FROM_PIBS2 macro is 
+       defined in config.h. Type "make" in command line or use Workbench's 
+       "Create VxWorks Image Project" to build a vxWorks image.
+
+   1.4 Booting vxWorks
+       If the network connection is ok, use the following command to 
+       boot the vxWorks Image:
+       bootfile eth
+
+2. Booting vxWorks from Big Flash
+   This function is believed to be available on Tsi108A-equipped boards. However,
+   as of this writing, a Tsi108A-equipped board was not available for verification.
+   Users in possession of a Tsi108A-equipped board desiring to boot vxWorks from 
+   the Big Flash are referred to the documentation in the IBM 750CL evaluation 
+   board BSP. The IBM 750CL evaluation board is equipped with a Tsi109. The 
+   procedure for booting from Big Flash is believed to be identical between Tsi109
+   and Tsi108A targets. For more detailed information please refer to the vendor
+   documentation on the Tundra 108/108A/109 host controllers and the IBM 750GX/GL
+   evaluation board.
+
+3. Booting vxWorks from Small Flash
+   This is different from Big Flash booting. Booting this way, PIBS2 
+   bootloader will be over-written or exchanged by another Small Flash device. 
+   The entire large flash becomes available for other uses like TFFS. Also, users
+   can store a vxWorks image in TFFS, and the vxWorks system can be booted
+   completely without a network.
+
+   3.1 Building bootrom.hex or bootrom_uncmp.hex
+       Building any of the following targets will create a Motorola S-record 
+       file suitable for downloading to most Flash programmers:
+
+       - bootrom.hex
+       - bootrom_uncmp.hex
+
+       Note that the make will abort if the image cannot fit in the 512KB 
+       Flash. 
+
+       In the BSP directory, type "make bootrom.hex"; or Using Workbench's 
+       "VxWorks Boot Loader Project" build a bootrom.hex. The same method
+       can be used for creating bootrom_uncmp.hex.
+
+   3.2 Program Small Flash by a device programmer
+       The Small Flash is a AM29LV040B, or equivalent, in position U11. Use
+       a device programmer to program the Small Flash. Alternately, Workbench
+       and a WindProbe or WindICE JTAG debugger can be used. Note that the 
+       offset should be 0xFFF00000.
+
+   3.3 Program Small Flash by PIBS2
+       PIBS2 can also be used to program Small Flash. In this way, PIBS2
+       is overwriting itself, so please do it cautiously. The PIBS2 command 
+       is:
+       storefile pibs eth
+
+   3.4 Loading vxWorks
+       Enter the appropriate bootrom parameters. The following screen dump 
+       illustrates an example for loading vxWorks via the Small Flash:
+\bs
+                               VxWorks System Boot
+   
+   
+   Copyright 1984-2007  Wind River Systems, Inc.
+   
+   
+   
+   
+   
+   CPU: IBM750 Eval. Board - PPC750GX
+   Version: VxWorks 6.6
+   BSP version: 2.0/3
+   Creation date: Nov  8 2007, 15:15:30
+   
+   
+   
+   
+   Press any key to stop auto-boot...
+    3
+   
+   [VxWorks Boot]: 
+   [VxWorks Boot]: @
+   
+   boot device          : tsiG
+   unit number          : 0 
+   processor number     : 0 
+   host name            : host
+   file name            : 750gx.vxWorks
+   inet on ethernet (e) : 128.224.163.75
+   host inet (h)        : 128.224.162.131
+   gateway inet (g)     : 128.224.162.1
+   user (u)             : target
+   ftp password (pw)    : vxTarget
+   flags (f)            : 0x0 
+   target name (tn)     : Hickory-1
+   
+   Loading... 1503024 + 364 + 239432
+   Starting at 0x200000...
+   
+   
+   Adding 5930 symbols for standalone.
+   
+   
+                   VxWorks
+   
+   Copyright 1984-2007  Wind River Systems, Inc.
+   
+                CPU: IBM750 Eval. Board - PPC750GX
+       Runtime Name: VxWorks
+    Runtime Version: 6.6
+        BSP version: 2.0/3
+            Created: Nov  8 2007, 15:18:18
+   ED&R Policy Mode: Deployed
+      WDB Comm Type: WDB_COMM_END
+                WDB: Ready.
+\be
+
+FEATURES
+
+The IBM PPC750GX is a 32-bit implementation of the IBM PowerPC family of 
+reduced instruction set computer (RISC) microprocessors. The PPC750GX is 
+targeted for high performance, low power systems that use a PowerPC 60x 
+bus. The evaluation board has the following features:  
+
+\sh Supported Features
+
+\ml
+\m -
+
+Processor IBM750GX (200 MHz front-side bus)
+\m -
+
+Tsi108 Host Bridge
+\m -
+
+Two DDR2 DIMM Sockets support up to 4GB at 400 MHz. The ibm_evb750gx BSP 
+provides a Serial Presence Detect (SPD) routine to automatically configure 
+SDRAM controller using DIMM parameters.
+\m -
+
+Integrated Ethernet controller with two 10/100/1000BASE-TX Ethernet ports
+\m -
+
+PCI/PCI-X Bus with Three slots supporting PCI 2.3 at 33-66 MHz and PCI-X
+at up to 133 MHz with isolation of unused portions of bus to maximize frequency
+\m -
+
+512KB 8-bit wide socketed Flash (BootROM)
+\m -
+
+512KB 8-bit wide SRAM
+\m -
+
+32MB 32-bit wide Flash
+\m -
+
+32KB Ferroelectric Nonvolatile RAM (FRAM)
+\m -
+
+Two RS-232 serial ports
+\m -
+
+Common IEEE 1149.1 (JTAG) header
+\m -
+
+Powered by a standard ATX power supply
+\m - 
+
+Intel 8254x Ethernet Controller (PCI card)
+
+\me
+
+\sh Unsupported Features
+
+The devices listed below are present on the 750GX/GL evaluation board, 
+but do not have software support in the BSP at this time.
+
+\ml
+\m -
+
+Three programmable timers as part of integrated interrupt controller
+
+\me
+
+HARDWARE DETAILS
+This section documents the details of the device drivers and board
+hardware elements.
+
+\sh Devices
+
+The chip drivers included are:
+
+\cs
+    sysTsi108Mpic.c     - embedded interrupt controller driver
+    ns16550Sio.c        - national 16550 UART driver (with modifications)
+    byteNvRam.c         - byte-oriented generic non-volatile RAM library
+    flashMem.c          - flash memory device driver.
+    i2c.c               - I2C controller driver
+    pciConfigLib.c      - PCI Configuration Space Access Library
+    pciConfigShow.c     - PCI Configuration Space Display Library
+    pciIntLib.c         - PCI Interrupt Support Library
+    pciAutoconfigLib.c  - PCI Bus Auto-configuration Library
+    sysGei8254xEnd.c    - Intel 82543, 82545, 82546 END driver
+    tsi108End.c         - Tsi108 Gigabit Ethernet Controller END driver
+    sysTsi108AuxClk.c   - Tsi108 MPIC auxiliary timer driver
+    sysNet.c            - System-dependent Network Library 
+\ce
+
+The user configurable options are in config.h.
+
+\sh Memory Maps
+
+The following table describes the Hickory memory map.
+
+\bs
+   VxWorks_rom Memory Image:
+
+    _______________________________________________________________
+   |                   |  FLASH_SIZE                   0x0100 0000 |
+   |                   |                                           |
+   | Boot ROM          |                                           |
+   |                   |  ROM_TEXT_ADRS                0xFFF0 0100 |
+   |                   |  ROM_BASE_ADRS                0xFFF0 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   | Reserved          |                                           |
+   |                   |                               0xE800 8000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   | On-board FLASH    |  FLASH_SIZE                   0x0200 0000 |
+   | (includes boot    |                                           |
+   | ROM space)        |  FLASH_ADRS                   0xE600 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   | Reserved          |                                           |
+   |                   |                               0xE100 8000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   |                   |  SRAM_SIZE                    0x8000      |
+   | SRAM              |                                           |
+   |                   |  SRAM_BASE_ADRS               0xE100 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   | Reserved          |                                           |
+   |                   |                               0xE000 8000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   |                   |  NV_RAM_SIZE_PHYS             0x8000      |
+   | NV RAM            |                                           |
+   |                   |  NV_RAM_BASE_PHYS             0xE000 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   | Reserved          |                                           |
+   |                   |                               0xC001 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   | TSI108 CSR        |  TSI108_CSR_BASE              0xC000 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   | Reserved          |                                           |
+   |                   |                               0x7E01 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   | Memory mapped     |  PCI_MSTR_IO_SIZE             0x0001 0000 |
+   | PCI I/O space     |                                           |
+   |                   |  PCI_MSTR_IO_LOCAL            0x7E00 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   | Reserved          |                                           |
+   |                   |                               0x7D00 0000 |
+   |___________________|___________________________________________|
+   |                   |  PCI_MSTR_CFG_SIZE            0x0100 0000 |
+   | Memory mapped     |                                           |
+   | PCI Configuration |                                           |
+   | space             |  PCI_MSTR_CFG_LOCAL           0x7C00 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   | Reserved          |                                           |
+   |                   |                               0x6000 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   |                   |  PCI_MSTR_MEM_SIZE            0x1000 0000 |
+   | Prefetchable      |                                           |
+   | PCI Memory        |                                           |
+   | space             |                                           |
+   |                   |  PCI_MSTR_MEM_LOCAL           0x5000 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   |                   |  PCI_MSTR_MEMIO_SIZE          0x1000 0000 |
+   | Non-prefetchable  |                                           |
+   | PCI Memory        |                                           |
+   | space             |                                           |
+   |                   |                                           |
+   |                   |  PCI_MSTR_MEMIO_LOCAL         0x4000 0000 |
+   |___________________|___________________________________________|
+   |                   |                                           |
+   |                   |                                           |
+   | Reserved          |                                           |
+   |                   |                                           |
+   |                   |                               0x2000 0000 |
+   |___________________|___________________________________________|
+   |                   |  LOCAL_MEM_SIZE               0x2000 0000 |
+   |                   |                                           |
+   | Non allocated or  |  USER_RESERVED_MEM            0x1E00 0000 |
+   | uninstalled RAM   |                                           |
+   |                   |                                           |
+   | Top of RAM        |                               0x0200 0000 |
+   |___________________|__________________________________________ |
+   |                   |                                           |
+   | Zeroed out        |                                           |
+   | by boot code      |                                           |
+   |                   |                                           |
+   |___________________|___________________________________________|
+   | Top of RAM        |  RAM_HIGH_ADRS                0x0060 0000 |
+   | containing VxWorks|                                           |
+   | (VxWorks code is  |                                           |
+   | copied here from  |                                           |
+   | ROM)              |  RAM_LOW_ADRS                 0x0020 0000 |
+   |___________________|__________________________________________ |
+   |                   |                                           |
+   |                   |                                           |
+   | Zeroed out        |                                           |
+   | by boot code      |                                           |
+   |                   |  Start Of Interrupt Vectors   0x0000 0100 |
+   |                   |  Physical Start Of RAM        0x0000 0000 |
+   |___________________|___________________________________________|
+\be
+
+
+\sh Shared Memory
+
+The Hickory does not support a shared memory driver.
+
+\sh Interrupts
+
+The ibm_evb750gx BSP uses programmable interrupt controller (PIC) integrated 
+in the Tsi108 host bridge. Interrupt lines of PCI devices are connected to the
+PCI interrupt lines of Tsi108 bridge and are forwarded to the PIC internally.
+Interrupt lines from the serial ports, DMA controller, and Gigabit Ethernet
+controller have internal connections as well.
+
+Interrupt functions that initialize and support the interrupt controller 
+module are contained in the sysTsi108Mpic.c and sysTsi108Mpic.h files.
+
+Assignment of interrupt vectors is defined in the sysTsi108Mpic.h file.
+
+This default assignment is summarized in the tables below.
+
+\cs
+
+External interrupt sources
+--------------------------
+
+Vector # | Interrupt source
+-------------------------------------------
+   0     | Reserved (Source at INT[0] line)
+   1     | Reserved (Source at INT[1] line)
+   2     | Reserved (Source at INT[2] line)
+   3     | Reserved (Source at INT[3] line)
+
+
+Tsi108 internal interrupt sources
+-------------------------------------
+
+Vector # | Interrupt source
+--------------------------------
+   4     | Reserved IRQ
+   5     | Reserved IRQ
+   6     | Reserved IRQ
+   7     | Reserved IRQ
+   8     | DMA channel 0
+   9     | DMA channel 1
+  10     | DMA channel 2
+  11     | DMA channel 3
+  12     | UART port 0
+  13     | UART port 1
+  14     | I2C controller
+  15     | GPIO port
+  16     | GIGE Port 0
+  17     | GIGE Port 1
+  18     | Reserved IRQ
+  19     | HLP block
+  20     | SDC block
+  21     | Processor IF block
+  22     | Reserved IRQ
+  23     | PCI/X block
+
+Tsi108 PIC internal interrupt sources
+-----------------------------------------
+
+Vector # | Interrupt source
+---------------------------------------
+  24     | Mailbox register 0
+  25     | Mailbox register 1
+  26     | Mailbox register 2
+  27     | Mailbox register 3
+  28     | Doorbell 0
+  29     | Doorbell 1
+  30     | Doorbell 2
+  31     | Doorbell 3
+  32     | Global Timer 0 (Aux Clock)
+  33     | Global Timer 1
+  34     | Global Timer 2
+  35     | Global Timer 3
+\ce
+
+Interrupts on PCI bus INTA# - INTD# lines are delivered to PIC using
+combined interrupt signaling from the PCI/PCI-X block. The logical 
+de-multiplexing process uses following interrupt vectors for PCI bus.
+
+\cs
+PCI bus INTA# - INTD# lines de-multiplexer
+------------------------------------------
+
+Vector # | Interrupt source
+------------------------------------
+  36     | PCI Interrupt line INTA#
+  37     | PCI Interrupt line INTB#
+  38     | PCI Interrupt line INTC#
+  39     | PCI Interrupt line INTD#
+\ce
+
+
+Interrupt routing for PCI slots is defined in the sysBusPci.c file.
+
+The table below demonstrates PCI interrupt vector assignment for each
+interrupt line associated with device.
+
+\cs
+PCI bus INTA# - INTD# lines routing table (vectors for device)
+--------------------------------------------------------------
+
+ Line  | Slot 0 | Slot 1 | slot2
+--------------------------------
+ INTA# |   36   |   37   |  38  
+ INTB# |   37   |   38   |  39  
+ INTC# |   38   |   39   |  36  
+ INTD# |   39   |   36   |  37  
+\ce
+
+\sh Serial Configuration
+
+The default kernel configuration, as delivered, includes two serial
+communication ports com1 and com2.
+
+Com1: is used for terminal display. The VxWorks banner, all VxWorks
+error messages, and all output generated by printfs in applications
+programs are displayed on this terminal. Either a vt100 type dumb
+terminal can be connected via a standard serial cable, or a vt100 type
+terminal emulator program on a PC can be connected via a null modem
+type serial cable. The default baud rate set in config.h is 115200.
+
+Com2: is used for the WDB communication port. A null modem serial
+cable can be connected to the com2 port of a PC or UNIX machine. The
+Workbench program uses host shells to communicate to VxWorks on the
+target.
+
+The UART ports of Tsi108 do not support hardware flow control. If flow
+control is required the XON/XOFF protocol shall be used.
+
+Com1 and com2 are interrupt driven drivers using the code in
+sysSerial.c. Com1 and com2 are internally hardwired to internal inputs of
+Tsi108 interrupt controller. The two serial communication channels are
+defined in ppc750evb.h as COM1_BASE_ADR, INT_VEC_UART0 and corresponding 
+com2 macros. sysLib.c calls the serial driver initialization functions
+during sysHwInit() calling sysSerialHwInit() and sysHwInit2() calling
+sysSerialHwInit2(). The serial communications inclusion is determined
+by the macros INCLUDE_SERIAL and NUM_TTY in config.h.
+
+\sh Network Configuration
+
+Ethernet networking support is enabled by the macro INCLUDE_NET in config.h. 
+Two devices are supported by this BSP. The Tsi108 on-chip gigabit controller 
+is enabled by the macro INCLUDE_TSI108_END. Alternately, the Intel 8254x NIC 
+can be inserted into a PCI slot and used. The Intel 8254x driver is enabled 
+by the macro INCLUDE_GEI8254X_END.
+
+\sh Setting the Ethernet Address
+
+The ibm_evb750xx boards are assigned unique Ethernet hardware or MAC addresses
+at the factory. These MAC addresses should be listed on label affixed to the board.
+A unique 6 byte address is absolutely necessary if the board will be connected
+to a network. The first 3 bytes are a Wind River-specific prefix. The last 3
+bytes are unique.
+
+The MAC addresses can be set by writing them directly to NVRAM using the
+'M' command from the boot ROM prompt.  This option allows only the last three
+bytes to be changed.  To use this option, open a console window and reset the
+hardware.  When the bootrom banner appears and the countdown starts, press any
+key to get the "[VxWorks Boot]:" prompt.  Type 'M' and follow the instructions.
+
+The BSP supports storage of 2 MAC addresses in NVRAM, one for each on-board
+Ethernet device.  Ethernet Addresses are assigned and stored by END device
+number:
+\cs
+END device # | Boot Device
+----------------------------
+     0       |    tsiG0
+     1       |    tsiG1
+\ce
+
+\sh PCI Access
+
+PCI access is controlled via the Tsi108 Host Bridge device. The PCI bus
+mapping into memory space is shown in the section above.
+
+This BSP supports PCI Autoconfig and it is used to configure the resources for
+each PCI device being used on the Hickory board.
+
+Interrupt vector assignment to the PCI devices is described in the interrupt
+section above.
+
+
+For more details, see Tsi108x Host Bridge for PowerPC User Manual.
+
+\sh TrueFFS
+This BSP uses 2 16-bit Intel 28F128J3 flash as the TrueFFS media.
+To use it, define INCLUDE_TFFS in config.h. When booting from the flash,
+only first 8M size of flash is used as the TrueFFS media.
+When using TrueFFS on a new flash for the first time, you should format the
+flash using
+\cs
+    sysTffsFormat();
+\ce
+Then
+\cs
+    usrTffsConfig(0, 0, "/tffs0");
+    dosfsDiskFormat("/tffs0");
+\ce
+If you want to know the current format process when calling the sysTffsFormat,
+add define TFFS_DEBUG in sysTffs.c.
+
+
+\sh Boot Devices
+
+Currently supported boot devices include PCI network controller (gei) or 
+Tsi108 on-chip network controller (tsiG), or TrueFFS (tffs).
+
+\sh Boot Methods
+
+The network support available for booting includes:
+bootp, ftp, tftp.
+
+SPECIAL CONSIDERATIONS
+
+The Hickory board hardware does not include a PCI Ethernet controller. The user 
+will need to supply a PCI Ethernet controller card. The supported PCI Ethernet
+controller is Intel PRO/1000.
+
+\sh Support for L2 Cache
+L2 Cache is available for IBM750GX processors used on Hickory. Callback function
+pointers for L2 cache Global Invalidation, L2 Cache Enable, L2 Cache Flush and
+L2 Cache Disable are initialized in sysHwInit().
+
+\sh Support for cache snooping
+
+By default it is enabled by defining SNOOP_ENABLE in config.h. When enabled, 
+access to a system memory by peripheral devices such as PCI masters, on-chip 
+DMA, and Ethernet controller will be directed via processor bus master path 
+(by configuring switching fabric destination port).
+
+\sh Make Targets
+
+Currently there are no known restrictions on target build.
+
+\sh Known Problems
+The 750GX L2 cache can optionally be set to operate in an instructions-only mode. 
+Selecting this mode will break cacheTextUpdate, because the icbi operation does 
+not affect the L2. In order to add support for text-only L2 caches, it is necessary 
+to apply a patch - WIND00101523. 
+
+BOARD LAYOUT
+The diagram below shows jumpers relevant to VxWorks configuration.
+
+\bs
+
+
+
+ ____________________________________________COM______RJ45__RJ45__________
+|     _   _   _                   ____   |  TOP #1 | |tsiG||tsiG|         |
+|    | | | | | |                 |    |  |  BOT #2 | | #0 || #1 |         |
+|    |_| |_| |_|             U11 |BOOT|  |_________| |____||____|     J1  |
+| || J17 J15 J14                 |ROM |                               ___ |
+| ||                              ----                               |   ||
+| ||                                                        J4   J3  |   ||
+| ||                                                         _   _   |___||
+| _                     J11                                 | | | |       |
+||_|J19                ||                                   | | | |       |
+| _        J13     J12     J10                              | | | |       |
+|| |J20    ___     ___     ___                              | | | |       |
+||_|      |   |   |   |   |   |                             | | | |       |
+|         |   |   |   |   |   |                             | | | |       |
+|         |   |   |   |   |   |                             |D| |D|       |
+|         |   |   |   |   |   |                             |D| |D|       |
+|         | P |   | P |   | P |          _____________      |R| |R|       |
+|         | C |   | C |   | C |         |             |     |2| |2|       |
+|         | I |   | I |   | I |         |             |     | | | |       |
+|         |   |   |   |   |   |         |             |     |D| |D|       |
+|         |   |   |   |   |   |         |    Tundra   |     |I| |I|       |
+|         | S |   | S |   | S |         |    Tsi108   |     |M| |M|       |
+|         | L |   | L |   | L |         |             |     |M| |M|       |
+|         | O |   | O |   | O |         |             |     | | | |       |
+|         | T |   | T |   | T |         |_____________|     |#| |#|       |
+|         |   |   |   |   |   |                             |1| |2|       |
+|         | # |   | # |   | # |                             | | | |       |
+|         | 2 |   | 1 |   | 0 |                             | | | |       |
+|         |   |   |   |   |   |      _________________      | | | |       |
+|         |   |   |   |   |   |     |                 |     | | | |       |
+|         |   |   |   |   |   |     |                 |     | | | |       |
+|         |   |   |   |   |   |     |                 |     | | | |       |
+|         |   |   |   |   |   |     |                 |     | | | |       |
+|         |   |   |   |   |   |     |      C P U      |     | | | |       |
+|         |   |   |   |   |   |     |                 |     | | | |       |
+|         |___|   |___|   |___|     |     IBM750GX    |     |_| |_|       |
+| ___                               |                 |                   |
+||   |                              |                 |                   |
+||   |                              |                 |                   |
+||   |                              |_________________|                   |
+||   |                                                                    |
+||ATX| J22                                                                |
+||   |                                                                    |
+||   |                                       ________                     |
+||   |                                    J7|CPU JTAG|                    |
+||___|                                       --------                     |
+|_________________________________________________________________________|
+\be
+    Key: 
+    J1   - Power-up Configuration
+    J11  - PCI/X Bus FET Switch Control
+    J14  - Small FLASH Chip Select
+    J15  - Big FLASH CS
+    J17  - SRAM CS
+    J19  - PCI M66EN
+
+    J7   - CPU COP header 
+    J10  - PCI Slot #0
+    J12  - PCI Slot #1
+    J13  - PCI Slot #2
+    J4   - DDR2 DIMM #1
+    J3   - DDR2 DIMM #2
+    J22  - ATX Power connector
+
+BIBLIOGRAPHY
+
+\tb IBM PowerPC 750GX/GL Evaluation Board User's Manual
+
+\tb IBM PowerPC 750GX and 750GL RISC Microprocessor User's Manual
+
+\tb Tsi108/Tsi109 User Manual, Tundra Semiconductor 
+
+\tb Tsi108x Host Bridge for PowerPC User Manual
+
+\tb PCI Local Bus Specification Revision 2.3
+
+SEE ALSO
+
+\tb Workbench User's Guide: Introduction
+\tb VxWorks Programmer's Guide: Configuration
+\tb VxWorks Programmer's Guide: Architecture Appendix 

@@ -1,0 +1,4 @@
+#ifdef DRV_PCIBUS_XLP_IO_MGMT
+    xlpIoMgmtRegister();
+#endif /* DRV_PCIBUS_XLP_IO_MGMT */
+

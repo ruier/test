@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND_ZYNQMAC
+    zynq7kGemRegister();
+#endif /* DRV_VXBEND_ZYNQMAC */

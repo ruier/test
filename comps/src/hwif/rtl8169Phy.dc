@@ -1,0 +1,1 @@
+IMPORT void rtgPhyRegister(void);

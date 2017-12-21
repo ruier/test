@@ -1,0 +1,3 @@
+#ifdef DRV_SRIO_LSI
+    lsiRioRegister ();
+#endif /* DRV_SRIO_LSI */

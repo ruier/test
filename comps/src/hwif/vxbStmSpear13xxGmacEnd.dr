@@ -1,0 +1,3 @@
+#ifdef DRV_VXBEND_STMSPEAR13XX_GEMAC
+    stmSpear13xxGmacRegister ();
+#endif /* DRV_VXBEND_STMSPEAR13XX_GEMAC */

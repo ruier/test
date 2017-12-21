@@ -1,0 +1,4 @@
+#ifdef DRV_VXBEND_XLRXGMAC
+IMPORT void xlrXgmacRegister(void);
+#endif
+

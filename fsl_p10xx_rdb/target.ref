@@ -1,0 +1,1573 @@
+\" fsl_p10xx_rdb/target.ref - Freescale P10XXRDB target specific documentation
+\"
+\" Copyright (c) 2012, 2013 Wind River Systems, Inc.
+\"
+\" The right to copy, distribute, modify or otherwise make use
+\" of this software may be licensed only pursuant to the terms
+\" of an applicable Wind River license agreement.
+\"
+\" modification history
+\" --------------------
+\" 01d,21may13,wyt  added support for P1023RDB
+\" 01c,07aug12,syt  added support for P1021RDB and P1024RDB board
+\" 01b,18jul12,syt  correct some errors and add description of on board NAND Flash.
+\" 01a,02may12,syt  written.
+\"
+\TITLE fsl_p10xx_rdb - Freescale P10XXRDB
+
+NAME
+`Freescale P10XXRDB'
+
+INTRODUCTION
+
+This reference entry provides board-specific information necessary to run
+VxWorks for the fsl_p10xx_rdb BSP. A series of Freescale's P10XXRDB boards
+are planned to be supported by this BSP. Now, P1021RDB-PC, P1024RDB-PA, P1025RDB-PA
+and P1023RDB boards have been supported in this release version. Please read
+the section "Getting the board running VxWorks" to get how to configure
+the board to run VxWorks.
+
+This BSP is designed to support these boards without rebuilding the vxWorks image. 
+Thereby, some data structures are adjusted dynamically during the system boot period 
+to cater for different board characters. As a tradeoff, the footprint of the 
+bootloader or vxWorks image is increased in a way.
+
+\sh Switches
+
+There are two switches on all the boards supported by this BSP:
+
+Default Switch Settings for P1021RDB-PC board:
+
+\ts
+Switch Number   | Switch ON           | Switch OFF
+--------------------------------------------------
+SW2             | 2,3,4,6,7,8         | 1,5
+SW3             | 2,3,6,7,8           | 1,4,5
+\te
+
+Default Switch Settings for P1024RDB-PA board:
+
+\ts
+Switch Number   | Switch ON           | Switch OFF
+--------------------------------------------------
+SW3             | 2,4,5,6,7,8         | 1,3
+SW4             | 1,2,7               | 3,4,5,6,8
+\te
+
+Default Switch Settings for P1025RDB-PA board:
+
+\ts
+Switch Number   | Switch ON           | Switch OFF
+--------------------------------------------------
+SW3             | 2,4,6,7,8           | 1,3,5
+SW4             | 1,2,7               | 3,4,5,6,8
+\te
+
+Default Switch Settings for P1023RDB board:
+
+\ts
+Switch Number   | Switch ON           | Switch OFF
+--------------------------------------------------
+SW2             | 1,2                 | 3,4
+SW3             | 1,2,3               | 4
+\te
+
+\sh Dual or single e500v2 cores Processor
+
+Seeing from
+\tb P1021 QorIQ Integrated Processor Reference Manual
+and
+\tb P1021RDB-PC Specification
+The platform can be selected for either P1012 (single core) or
+P1021 (dual core) mode, all other chip-level features are the same.
+Set some bits of switch SW2 to change the SOC model,
+    P1021: SW2[5]=OFF SW2[6]=OFF
+    P1012: SW3[5]=OFF SW2[6]=ON
+
+Seeing from
+\tb P1024 QorIQ Integrated Processor Reference Manual
+and
+\tb P1024RDB-PA Specification
+The platform can be selected for either P1015 (single core) or
+P1024 (dual core) mode, all other chip-level features are the same.
+Set some bits of switch SW3 to change the SOC model,
+    P1024: SW3[2]=ON  SW3[3]=OFF  SW3[5]=ON
+    P1015: SW3[2]=OFF SW3[3]=ON
+
+Seeing from
+\tb P1025 QorIQ Integrated Processor Reference Manual
+and
+\tb P1025RDB-PA Specification
+The platform can be selected for either P1016 (single core) or
+P1025 (dual core) mode, all other chip-level features are the same.
+Set some bits of switch SW3 to change the SOC model,
+    P1025: SW3[2]=ON  SW3[3]=OFF  SW3[5]=OFF
+    P1016: SW3[2]=OFF SW3[3]=ON
+
+Seeing from
+\tb P1023RDB QorIQ Integrated Communication Processor
+The platform can be selected for either P1017 (single core) or
+P1023 (dual core) mode, all other chip-level features are the same.
+Set some bit of switch SW3 to change the SOC model,
+    P1023: SW3[4]=ON
+    P1017: SW3[4]=OFF
+
+\sh Getting the board running VxWorks (boot from VxWorks Bootrom)
+This section will guide you how to run VxWorks on the Freescale P10XXRDB boards.
+
+1. Creating a bootrom:
+
+    Open the VxWorks Development Shell, go to the BSP directory and
+    build the VxWorks bootrom image.
+
+\cs
+    cd target/config/fsl_p10xx_rdb
+    make bootrom.bin
+\ce
+
+2. Flashing the VxWorks bootrom with U-boot (P1021RDB-PC, P1024RDB-PA, P1025RDB-PA)
+
+    This section will describe how to program a VxWorks bootrom into the flash
+    using the manufacturer¡¯s U-Boot.
+
+    2.1 Setting the Boot Flash Switch
+
+        Set the Boot ROM Location to U-Boot: 
+\cs
+            SW4#8=ON  (for P1025RDB-PA 700-26826 REV A board
+                       and P1024RDB-PA 700-26815 REV A board)
+            SW3#8=OFF (for P1021RDB-PC 700-26803 REV B board
+\ce
+
+    2.2 Starting a TFTP server
+
+        Open a TFTP server on your host. Make sure the root directory is the
+        fsl_p10xx_rdb BSP directory which contains the VxWorks bootrom image.
+
+    2.3 Setting host serial port's configurations to:
+
+        Baud Rate: 115200
+        Data: 8 bit
+        Parity: None
+        Stop: 1 bit
+        Flow Control: None
+
+    2.4 Connecting P10XXRDB board to host through network,
+        eTSEC1 should be used for P1024RDB and P1025RDB, and eTSEC2 for P1021RDB.
+
+    2.5 Configuring the U-Boot environment
+
+        Power up the board, you'll see the U-Boot shell prompt, something like:
+
+\cs
+U-Boot 2010.12-00063-g8669298-dirty (Jul 09 2011 - 14:37:56)
+
+CPU0:  P1025E, Version: 1.1, (0x80ec0311)
+Core:  E500, Version: 5.1, (0x80212051)
+Clock Configuration:
+       CPU0:533.333 MHz, CPU1:533.333 MHz, 
+       CCB:266.667 MHz,
+       DDR:333.333 MHz (666.667 MT/s data rate) (Asynchronous), LBC:16.667 MHz
+       QE:266.667 MHz
+L1:    D-cache 32 kB enabled
+       I-cache 32 kB enabled
+Board: P1025RDB CPLD: V2.6 PCBA: V3.0
+rom_loc: nor lower bank
+SD/MMC : 4-bit Mode
+eSPI : Enabled
+I2C:   ready
+SPI:   ready
+DRAM:  DIMM 0: is not a DDR3 SPD.
+SPD error! Trying fallback to raw timing calculation
+Detected UDIMM(s)
+DDR: 1 GiB (DDR3, 32-bit, CL=5, ECC off)
+FLASH: 16 MiB
+L2:    256 KB enabled
+NAND:  32 MiB
+MMC:  FSL_ESDHC: 0
+Firmware 'Microcode version 0.0.1 for P1021 r1.0' for 1021 V1.0
+QE: uploading microcode 'Microcode for P1021 r1.0' version 0.0.1
+PCIe1: Root Complex of mini PCIe SLOT, no link, regs @ 0xffe0a000
+PCIe1: Bus 00 - 00
+PCIe2: Root Complex of PCIe SLOT, no link, regs @ 0xffe09000
+PCIe2: Bus 01 - 01
+Video: No radeon video card found!
+In:    serial
+Out:   serial
+Err:   serial
+Net:   eTSEC2 is in sgmii mode.
+eTSEC1, eTSEC2, eTSEC3
+Hit any key to stop autoboot:  0 
+=>
+
+\ce
+
+        Type the following commands to setup the U-Boot environment.
+
+\cs
+        setenv ethaddr 00:04:9f:ef:01:01
+        setenv eth1addr 00:04:9f:ef:01:02
+        setenv eth2addr 00:04:9f:ef:01:03
+        setenv ipaddr 192.168.0.3
+        setenv netmask 255.255.255.0
+        setenv serverip 192.168.0.2
+        setenv gatewayip 192.168.0.1
+        saveenv
+\ce
+
+        Note: This is just one example, you must change the network parameters
+        according to your actual circumstances and provide a suitable 6 byte
+        Ethernet addresses ('ethaddr') for each port used on the network.
+        'ipaddr' is the target IP address while 'serverip' is your host IP address.
+
+    2.6 Programming the Freescale P10XXRDB flash
+
+        Type the following commands in the U-Boot shell.
+
+\cs
+        setenv ethact eTSEC2  (this command only applied for P1021RDB)
+        tftp 100000 bootrom.bin
+        erase ef700000 +100000
+        cp.b 100000 ef700000 $filesize
+\ce
+
+    2.7 Reset the Boot Flash Switch
+\cs
+        SW4#8=OFF (for P1025RDB-PA 700-26826 REV A board
+                   and P1024RDB-PA 700-26815 REV A board)
+        SW3#8=ON  (for P1021RDB-PC 700-26803 REV B board)
+\ce
+
+2. Flashing the VxWorks bootrom with Code Warrior (P1023RDB)
+
+    This section will describe how to program a VxWorks bootrom into the flash
+    using the Code Warrior.
+
+a.  Installing the CodeWarrior IDE.
+
+    Install the CodeWarrior Development Studio software (CW for PA 10.1.2).
+    Install the CodeWarrior Patch for P1023RDB. Please check with the hardware
+    provider for the CodeWarrior Development Studio and the patch.
+    Connect the P1023RDB board to the USB tap which is connected to your computer 
+    and power the board on.
+
+b.  Programming the P1023RDB NOR flash.
+
+    Create a new Power Architecture Project based on P1023RDB:
+
+    New -> Power Architecture Project -> Set a project name ->
+    Choose P1023 as the Processor -> Choose AMP (One build configuration per core)
+    -> Choose the default build settings for this project -> Choose Core0 and Core1
+    for this project -> Choose the hardware P1023RDB and Connection Type USB TAP ->
+    Click Finish.
+
+    Click "Flash File To Target" menu to program bootrom.bin to NOR flash:
+
+    In the Connection option, select 1023RDB_RAM_core0_P1023_Download. 
+    In the Flash Configuration option, select P1023RDB_NOR_FLASH_512S.
+    Browse to the appropriate bootrom.bin image and set the Offset to 0xfff00000.
+    Click Erase and Program.
+
+3. Running the VxWorks bootrom
+
+    Re-power on or reset the board, the VxWorks bootrom would boot up.
+
+FEATURES
+
+This section describes all features of the board, supported or not.
+It documents all configurations of the board and the interaction between
+features and configuration items.
+
+\sh List of Hardware Features (Freescale P1021RDB board)
+
+\ts
+Hardware Interface | Controller | Driver/Component    | Status
+--------------------------------------------------------------
+UART:0             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+UART:1             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+1GB-ETHERNET:0     | on-chip    | vxbEtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:1     | on-chip    | vxbEtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:2     | on-chip    | vxbEtsecEnd.c       | SUPPORTED
+NOR-FLASH          | S29GL128P  | vxbNorFlash.c       | SUPPORTED
+TIMER              | on-chip    | vxbM85xxTimer.c     | SUPPORTED
+TIMER              | on-chip    | vxbOpenPicTimer.c   | SUPPORTED
+PCI-E-HOST:0       | on-chip    | m85xxPci.c          | SUPPORTED
+PCI-E-HOST:1       | on-chip    | m85xxPci.c          | SUPPORTED
+SATA               | SiI3132    | vxbSI31xxStorage.c  | SUPPORTED
+DMA:0              | on-chip    | vxbFslDma.c         | SUPPORTED
+I2C:0              | on-chip    | vxbFslI2c.c         | SUPPORTED
+I2C:1              | on-chip    | vxbFslI2c.c         | SUPPORTED
+SPI                | on-chip    | sysFslSpi.c         | SUPPORTED
+SPI-FLASH          | S25FL128P  | spS25flxxSpiFlash.c | SUPPORTED
+RTC                | PT7C4338   | vxbI2cRtc.c         | SUPPORTED
+EEPROM             | M24256     | vxbI2cEeprom.c      | SUPPORTED
+EEPROM             | AT24C01    | vxbI2cEeprom.c      | SUPPORTED
+USB-HOST:1         | on-chip    | INCLUDE_USB         | SUPPORTED
+SD-CARD            | on-chip    | DRV_STORAGE_SDHC    | SUPPORTED
+ENCRYPTION         | on-chip    | 'ipfreescale'       | SUPPORTED
+GPIO               | on-chip    |                     | UNSUPPORTED
+USB-TARGET         | on-chip    |                     | UNSUPPORTED
+NAND-FLASH         | K9F5608U0D |                     | UNSUPPORTED
+QUICC Engine PMC   | on-chip    |                     | UNSUPPORTED
+\te
+
+\sh List of Hardware Features (Freescale P1024RDB board)
+
+\ts
+Hardware Interface | Controller | Driver/Component    | Status
+--------------------------------------------------------------
+UART:0             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+UART:1             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+1GB-ETHERNET:0     | on-chip    | vxbEtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:1     | on-chip    | vxbEtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:2     | on-chip    | vxbEtsecEnd.c       | SUPPORTED
+NOR-FLASH          | S29GL128P  | vxbNorFlash.c       | SUPPORTED
+TIMER              | on-chip    | vxbM85xxTimer.c     | SUPPORTED
+TIMER              | on-chip    | vxbOpenPicTimer.c   | SUPPORTED
+PCI-E-HOST:0       | on-chip    | m85xxPci.c          | SUPPORTED
+PCI-E-HOST:1       | on-chip    | m85xxPci.c          | SUPPORTED
+DMA:0              | on-chip    | vxbFslDma.c         | SUPPORTED
+I2C:0              | on-chip    | vxbFslI2c.c         | SUPPORTED
+I2C:1              | on-chip    | vxbFslI2c.c         | SUPPORTED
+SPI                | on-chip    | sysFslSpi.c         | SUPPORTED
+SPI-FLASH          | S25FL128P  | spS25flxxSpiFlash.c | SUPPORTED
+RTC                | PT7C4338   | vxbI2cRtc.c         | SUPPORTED
+EEPROM             | M24256     | vxbI2cEeprom.c      | SUPPORTED
+EEPROM             | AT24C01    | vxbI2cEeprom.c      | SUPPORTED
+USB-HOST:1         | on-chip    | INCLUDE_USB         | SUPPORTED
+SD-CARD            | on-chip    | DRV_STORAGE_SDHC    | SUPPORTED
+ENCRYPTION         | on-chip    | 'ipfreescale'       | SUPPORTED
+GPIO               | on-chip    |                     | UNSUPPORTED
+USB-TARGET         | on-chip    |                     | UNSUPPORTED
+NAND-FLASH         | K9F5608U0D |                     | UNSUPPORTED
+TDM                | Le88266    |                     | UNSUPPORTED
+\te
+
+\sh List of Hardware Features (Freescale P1025RDB board)
+
+\ts
+Hardware Interface | Controller | Driver/Component    | Status
+--------------------------------------------------------------
+UART:0             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+UART:1             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+1GB-ETHERNET:0     | on-chip    | vxbEtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:1     | on-chip    | vxbEtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:2     | on-chip    | vxbEtsecEnd.c       | SUPPORTED
+QE_UART:0          | on-chip    | vxbUccSio.c         | SUPPORTED
+QE_UART:1          | on-chip    | vxbUccSio.c         | SUPPORTED
+QE_ETHERNET:0      | on-chip    | vxbUccEnd.c         | SUPPORTED
+QE_ETHERNET:1      | on-chip    | vxbUccEnd.c         | SUPPORTED
+NOR-FLASH          | S29GL128P  | vxbNorFlash.c       | SUPPORTED
+TIMER              | on-chip    | vxbM85xxTimer.c     | SUPPORTED
+TIMER              | on-chip    | vxbOpenPicTimer.c   | SUPPORTED
+PCI-E-HOST:0       | on-chip    | m85xxPci.c          | SUPPORTED
+PCI-E-HOST:1       | on-chip    | m85xxPci.c          | SUPPORTED
+DMA:0              | on-chip    | vxbFslDma.c         | SUPPORTED
+I2C:0              | on-chip    | vxbFslI2c.c         | SUPPORTED
+I2C:1              | on-chip    | vxbFslI2c.c         | SUPPORTED
+SPI                | on-chip    | sysFslSpi.c         | SUPPORTED
+SPI-FLASH          | S25FL128P  | spS25flxxSpiFlash.c | SUPPORTED
+RTC                | PT7C4338   | vxbI2cRtc.c         | SUPPORTED
+EEPROM             | M24256     | vxbI2cEeprom.c      | SUPPORTED
+EEPROM             | AT24C02    | vxbI2cEeprom.c      | SUPPORTED
+USB-HOST:1         | on-chip    | INCLUDE_USB         | SUPPORTED
+SD-CARD            | on-chip    | DRV_STORAGE_SDHC    | SUPPORTED
+ENCRYPTION         | on-chip    | 'ipfreescale'       | SUPPORTED
+GPIO               | on-chip    |                     | UNSUPPORTED
+USB-TARGET         | on-chip    |                     | UNSUPPORTED
+NAND-FLASH         | K9F5608U0D |                     | UNSUPPORTED
+\te
+
+\sh List of Hardware Features (Freescale P1023RDB board)
+
+\ts
+Hardware Interface | Controller | Driver/Component    | Status
+--------------------------------------------------------------
+UART:0             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+UART:1             | on-chip    | vxbNs16550Sio.c     | SUPPORTED
+1GB-ETHERNET:0     | on-chip    | vxbDtsecEnd.c       | SUPPORTED
+1GB-ETHERNET:1     | on-chip    | vxbDtsecEnd.c       | SUPPORTED
+NOR-FLASH          | S29GL512S  | vxbNorFlash.c       | SUPPORTED
+TIMER              | on-chip    | vxbM85xxTimer.c     | SUPPORTED
+TIMER              | on-chip    | vxbOpenPicTimer.c   | SUPPORTED
+PCI-E-HOST:0       | on-chip    | vxbQorIQPciEx.c     | SUPPORTED
+PCI-E-HOST:1       | on-chip    | vxbQorIQPciEx.c     | SUPPORTED
+PCI-E-HOST:2       | on-chip    | vxbQorIQPciEx.c     | SUPPORTED
+DMA:0              | on-chip    | vxbFslDma.c         | SUPPORTED
+NAND-FLASH         | K9F1G08U0B |                     | UNSUPPORTED
+I2C:0              | on-chip    | vxbFslI2c.c         | UNSUPPORTED
+RTC                | PT7C4338   | vxbI2cRtc.c         | UNSUPPORTED
+EEPROM             | M24256     | vxbI2cEeprom.c      | UNSUPPORTED
+USB-HOST:1         | on-chip    |                     | UNSUPPORTED
+USB-TARGET         | on-chip    |                     | UNSUPPORTED
+GPIO               | on-chip    |                     | UNSUPPORTED
+ENCRYPTION         | on-chip    | 'ipfreescale'       | UNSUPPORTED
+\te
+
+\sh Feature Interactions
+Refer to the board vendor's documentation.
+
+HARDWARE DETAILS
+
+This section documents the details of the device drivers and hardware elements.
+
+\sh Verified Hardware
+This BSP has been verified on the following board and silicon:
+
+\cs
+P1025RDB-PA Rev A
+P1024RDB-PA Rev A
+P1021RDB-PC Rev B
+P1023RDB (MINI ITX) REV LEVEL 2.0
+\ce
+
+The default clock speed for cores and CCB are as bellows:
+
+\ts
+Board type  | Core Speed    | CCB Speed
+----------------------------------------
+P1021RDB-PC | 800 MHz       | 400 MHz
+P1024RDB-PA | 533.333 MHz   | 266.667MHz
+P1025RDB-PA | 533.333 MHz   | 266.667MHz
+P1023RDB    | 800 MHz       | 320MHz
+\te
+
+\sh Memory Maps
+The default memory map of this BSP is as bellows:
+
+\ts
+Start       | Size  | End         | Access to
+---------------------------------------------
+0x0000_0000 | 1GB   | 0x3FFF_FFFF | DDR3 SDRAM (P1021RDB, P1024RDB and P1025RDB)
+0x0000_0000 | 512MB | 0x1FFF_FFFF | DDR3 SDRAM (P1023RDB)
+0x8000_0000 | 64MB  | 0x83FF_FFFF | PCIe-1 Memory
+0x8400_0000 | 64MB  | 0x87FF_FFFF | PCIe 1 Non-Prefetchable Memory
+0x8800_0000 | 64MB  | 0x8BFF_FFFF | PCIe 1 I/O Memory
+0x9000_0000 | 64MB  | 0x93FF_FFFF | PCIe-2 Memory
+0x9400_0000 | 64MB  | 0x97FF_FFFF | PCIe 2 Non-Prefetchable Memory
+0x9800_0000 | 64MB  | 0x9BFF_FFFF | PCIe 2 I/O Memory
+0xb000_0000 | 64MB  | 0xb3FF_FFFF | PCIe-3 Memory (P1023RDB)
+0xb400_0000 | 64MB  | 0xb7FF_FFFF | PCIe 3 Non-Prefetchable Memory (P1023RDB)
+0xb800_0000 | 64MB  | 0xbBFF_FFFF | PCIe 3 I/O Memory (P1023RDB)
+0xF100_0000 | 1MB   | 0xF10F_FFFF | CPLD Interface
+0xF200_0000 | 512KB | 0xF207_FFFF | L2_SRAM
+0xF400_0000 | 128KB | 0xF401_FFFF | VSC7385
+0xFC00_0000 | 48MB  | 0xFEFF_FFFF | NOR Flash Part0 (P1023RDB)
+0xFF00_0000 | 6MB   | 0xFF5F_FFFF | NOR Flash (P1021RDB, P1024RDB and P1025RDB)
+0xFF00_0000 | 6MB   | 0xFF5F_FFFF | QMAN/BMAN portals, Scratch RAM (P1023RDB)
+0xFF60_0000 | 1MB   | 0xFF6F_FFFF | CCSBAR (P1021RDB, P1024RDB and P1025RDB)
+0xFF60_0000 | 2MB   | 0xFF7F_FFFF | CCSBAR (P1023RDB)
+0xFF80_0000 | 8MB   | 0xFFFF_FFFF | NOR Flash Part1 
+\te
+
+\sh Serial Connections
+Most VxWorks BSPs do not use hardware handshaking in the serial interface,
+and thus a simple 3 wire connection is commonly used.
+
+P1021RDB, P1023RDB and P1024RDB board have two RS-232 standard UART ports.
+P1025RDB board has four UART ports, two are RS-232 standard, the others
+are RS-422 standard.
+\sh Serial Configuration
+No special configuration needed.
+Default configuration is:
+    Baud Rate: 115200
+    Data: 8 bit
+    Parity: None
+    Stop: 1 bit
+    Flow Control: None
+
+Note: DUART(UART0 and UART1) are enabled and the two QE_UARTs (only P1025RDB has)
+are disabled by default. COM1(UART0) is the default console port. If the
+two QE_UART ports are needed to be used, some modifications must have to be done
+as the follows:
+
+For command line build, modify the following lines in config.h
+\cs
+    #define DRV_SIO_UCC
+\ce
+Then rebuild the bootrom or VxWorks image.
+
+For project build, include component DRV_SIO_UCC and set parameter NUM_TTY to 4
+Then rebuild the project.
+
+\sh Ethernet Address
+
+The P10XXRDB boards do not have unique Ethernet hardware addresses assigned
+to each eTSEC port and dTSEC port. A unique address is absolutely necessary
+if the user wishes to connect the board to a network. Thus, user must provide
+6-byte Ethernet addresses for each eTSEC, dTSEC and qeFcc (only P1025RDB has)
+port used on a network. 
+
+The definition of macro ETHERNET_MAC_HANDLER in config.h indicates the MAC
+address is stored in NVRAM and alterable via the 'M' bootrom command.  This
+option allows only the last three bytes to be changed. To use this option,
+open a console window and reset the hardware. When the bootrom banner appears
+and the countdown starts, press any key to get the "[VxWorks Boot]:" prompt.
+Type 'M' and follow the instructions.
+
+\sh Network Configuration
+P1021RDB and P1024RDB have three eTSEC Ethernet ports, P1023RDB has two dTSEC
+Ethernet ports, and P1025RDB has three eTSEC and two QE_UCC ports. The eTSEC
+and dTSEC ports allow 10/100/1000 connection and the QE_UCC ports allow 10/100
+connection. The driver will auto-negotiate and configure the port accordingly.
+In addition, the BSP also supports Intel e100/e1000 series NICs via PCIe on
+P1021RBD, P1024RDB and P1025RDB. Please see the gei825xxVxbEnd driver for the
+supported model numbers.
+
+The following END and corresponding END2 drivers are supported in this BSP.
+However, only the END driver is enabled by default.
+
+\ts
+Driver | END                     | END2
+---------------------------------------
+ETSEC  | INCLUDE_ETSEC_VXB_END   | INCLUDE_ETSEC_VXB_END2
+UCC    | INCLUDE_UCC_VXB_END     |
+DTSEC  | DRV_VXBEND_DTSEC
+\te
+
+To enable the END2 driver, you should modify the BSP as follows:
+
+In config.h, INCLUDE_END should be undefined when defining INCLUDE_END2
+for a command line build. Replace the END driver name with corresponding
+END2 driver name, then rebuild the bootrom and vxWorks image.
+
+For project build under Workbench, in the Kernel Configuration Window of your
+created VxWorks Image Project, include INCLUDE_END2 and corresponding END2
+driver, exclude INCLUDE_END and END driver, then rebuild your project.
+
+\sh Boot Devices
+The supported boot devices are:
+
+\ts
+    `dtsec0'    | DTSEC1
+    `dtsec1'    | DTSEC2
+    `motetsec0' | ETSEC1
+    `motetsec1' | ETSEC2
+    `motetsec2' | ETSEC3
+    `gei'       | Intel Pro1000 Ethernet PCI adaptor when the PCIe bus is enabled
+    `fs'        | USB/TFFS/SD/SATA
+\te
+Note: SATA ports are only available on P1021RDB.
+
+\sh Boot Methods
+The boot methods are affected by the boot parameters. If no password is
+specified, RSH (remote shell) protocol is used. If a password is specified,
+FTP protocol is used, or, if the flag is set to 0x80, TFTP protocol is used.
+
+\sh PCIe Access
+There are one PCIe slot and one mini PCIe slot on Freescale P1021RDB, P1024RDB
+and P1025RDB board. The PCIe settings are PCIe x1 slots. There are three mini
+PCIe slots on P1023RDB.
+
+In order to support PCI devices in this BSP, please define the following macros in
+config.h first:
+
+\cs
+    #define INCLUDE_PCI_BUS
+\ce
+
+Intel PRO/1000PT 82572GI Gigabit Ethernet Adapter is tested and supported 
+in this release. The following components
+
+\cs
+    #define INCLUDE_GEI825XX_VXB_END
+    #define INCLUDE_GENERICPHY
+\ce
+
+are needed to enable the Ethernet Adapter.
+
+The convertor to connect mini PCIe and SATA controller is tested and supported in this 
+release. The following component
+
+\cs
+    #define INCLUDE_DRV_STORAGE_AHCI
+\ce
+
+is needed to enable the SATA controller.
+
+MSI interrupt is used by default. For P1023RDB, PCI Express 2 INTA, INTB,
+INTC and PCI Express 3 INTD signals are not logically combined with the interrupt
+request IRQn signals, so legacy interrupt is not supported for P1023RDB. 
+To enable PCIe MSI interrupt, please define the following component in config.h:
+
+\cs
+    #define INCLUDE_INTCTLR_DYNAMIC_LIB
+\ce
+
+For P1021RDB board, to use the PCIe slot, switch SW2#7 should be set to ON position.
+
+\sh DMA
+Freescale DMA Controller 0 is supported in this release.
+To enable DMA controller support, please define the following component in config.h:
+\cs
+    #define DRV_DMA_FSL
+\ce
+The maximum transfer size of a single transaction is (64M - 1) bytes.
+
+\sh eSPI and SPI Flash
+The Freescale eSPI Controller and SPI Flash S25F128 are supported (only in polled mode)
+in this release. To enable this function, please define the following component in
+config.h:
+\cs
+    #define DRV_SPI_S25FLXX
+\ce
+
+\sh I2C
+The PT7C4338 RTC, Atmel EEPROM M24256 are supported via I2C bus in this release.
+The I2C controllers use the interrupt mode as default.
+ 
+To enable I2C function, please define the corresponding components in config.h:
+ 
+\cs
+    #define INCLUDE_I2C_BUS
+    #define DRV_I2CBUS_FSL
+\ce
+ 
+To use the PT7C4338 RTC device, please define the following components in config.h:
+
+\cs
+    #define DRV_I2C_RTC
+    #define INCLUDE_TIMER_RTC
+\ce
+
+Then you can use the routine sysRtcSet() that is a command-line utility for 
+setting the RTC from the VxWorks kernel prompt. The user will be prompted for 
+the appropriate input. To read the date and the time, the sysRtcGet() routine 
+can be called. 
+
+To use the EEPROM, define the following components in config.h
+
+\cs
+    #define DRV_I2C_EEPROM
+    #define INCLUDE_EEPROMDRV
+    #define INCLUDE_TIMER_STUB
+\ce
+INCLUDE_TIMER_STUB is used to optimize delay time when writing EEPROM.
+
+The EEPROM will be used as I/O device, which can be listed by "devs" command:
+
+\cs
+-> devs
+drv name                
+  0 /null               
+  1 /tyCo/0             
+  1 /tyCo/1             
+  5 /eeprom/0           
+  5 /eeprom/1           
+value = 25 = 0x19
+-> 
+\ce
+
+The standard I/O routines, such as open(), read(), write(), ioctl(), close()...,
+can be used to access them.
+
+Note: The I2C devices are only supported on UP mode, SMP not ready.
+
+\sh USB
+P1021E, P1024E and P1025E have one high-speed USB controllers USB1. This BSP
+only supports USB host mode.
+
+To enable USB host support, make sure the following component is included
+in config.h or your VIP:
+
+\cs
+    #define INCLUDE_USB
+\ce
+
+For more information, please refer to
+\tb Wind River USB for VxWorks 6 PROGRAMMER'S GUIDE
+
+\sh TrueFFS 
+The standard Wind River TrueFFS product is supported in this release.
+
+P1021RDB, P1024RDB and P1025RDB use the 16MB Spansion S29GL128P flash as the
+TrueFFS media. P1023RDB use the 64MB Spansion S29GL512S flash as the TrueFFS
+media.
+
+Note: For P1021RDB, P1024RDB and P1025RDB U-Boot is stored in 0xFF780000~0xFF7FFFFF.
+For all boards VxWorks Bootrom.bin is stored in 0xFFF00000~0xFFFFFFFF,
+4 MBytes space (0xFF800000~0xFFBFFFFF) is used for TFFS, please don't extend
+the TFFS space before you carefully check the flash memory map, otherwise
+misusing of TFFS may damage the bootloader (bootrom or u-boot) would cause the
+board boot up failure.
+
+\ts
+Start       | Size     | End         | Comment
+------------------------------------------------
+0xFC00_0000 |          | 0xFF5F_FFFF | unused (P1023RDB)
+0xFF00_0000 |          | 0xFF5F_FFFF | unused (P1021RDB, P1024RDB and P1025RDB)
+0xFF78_0000 | 512KB    | 0xFF7F_FFFF | U-Boot (P1021RDB, P1024RDB and P1025RDB)
+0xFF80_0000 | 4MB      | 0xFFBF_FFFF | TrueFFS
+0xFFC0_0000 |          | 0xFFED_FFFF | unused
+0xFFEE_0000 | 128KB    | 0xFFEF_FFFF | NVRAM
+0xFFF0_0000 | 1MB      | 0xFFFF_FFFF | VxWorks bootrom or rom_Compress image
+\te
+
+To use it, define INCLUDE_TFFS in config.h or your VIP and file system configuration 
+is usually needed. Please refer to"Block Device File System Configuration" chapter 
+below for more details about how to use TrueFFS device on VxWorks file system.
+
+When using TrueFFS on a new FLASH for the first time, you should format and
+configure the FLASH by using:
+
+\cs
+    sysTffsFormat ();
+    usrTffsConfig (0, 0, "/tffs0");
+\ce
+
+If you are using DOSFS, please use
+
+\cs
+    dosfsDiskFormat ("/tffs0");
+\ce
+
+Note: If you are running these commands in the VxWorks kernel shell, you may
+prefer to run the format operations as separate tasks, e.g.
+\cs
+    sp sysTffsFormat
+\ce
+since it would take a long time to complete.
+
+\sh SD memory card controller (eSDHC)
+
+For P1021E, P1024E and P1025E, on chip enhanced SD host controller (eSDHC) is
+supported in this release. Both standard capacity and high capacity SD memory 
+cards are supported, but MMC cards are not.
+
+To enable eSDHC support, make sure the following component is defined in config.h.
+
+\cs
+    #define DRV_STORAGE_SDHC
+\ce
+
+Use of the internal DMA engine, and selection of interrupt vs. polled mode,
+are configured by setting the values of 'dmaMode' and 'polling' in hwconf.c.
+For example, to select interrupt mode and enable use of the internal DMA engine:
+
+\cs
+    /@ hwconf.c @/
+    ...
+    struct hcfResource sdhciResources[] = {
+    ...
+        { "dmaMode",             HCF_RES_INT,    { (void *)1 } },
+        { "polling",             HCF_RES_INT,    { (void *)0 } },
+    ...
+    };
+    ...
+\ce
+
+To use SD, file system configuration is usually needed. Please refer to
+"Block Device File System Configuration" chapter below for more details
+about how to use SD on VxWorks file system.
+
+\sh Serial ATA storage interface (SATA)
+
+SATA ports are only available on P1021RDB, lanes of PCIe 1 is also connected to
+PCIe to 2x SATA controller SiI3132 via PCI Express Mux/DeMux Switch PI2PCIE212.
+SiI3132 supports 1-lane 2.5Gbit/s PCI Express and the Serial ATA Generation 2
+transfer rate of 3.0Gbit/s.
+
+To use the two SATA ports, switch SW2#7 should be set to OFF position.
+
+To enable the SATA interfaces, make sure the following component is defined in
+config.h before you create the VIP, or add it in your VIP dynamically.
+
+\cs
+    #define DRV_STORAGE_SI31XX
+\ce
+
+To use SATA, file system configuration is usually needed. Please refer to
+"Block Device File System Configuration" chapter below for more details
+about how to use SATA on VxWorks file system.
+
+\sh Block Device File System Configuration 
+Block devices such as SD/USB/SATA are usually used based on file system.
+VxWorks supports 2 kinds of file system: dosFs and HRFS. Below are some 
+sample component definitions which can be added in VIP to use dosFs:
+
+\cs
+    #define INCLUDE_DOSFS
+    #define INCLUDE_DOSFS_MAIN
+    #define INCLUDE_DOSFS_CHKDSK
+    #define INCLUDE_DOSFS_FMT
+    #define INCLUDE_DOSFS_FAT
+    #define INCLUDE_DOSFS_SHOW
+    #define INCLUDE_DOSFS_DIR_VFAT
+    #define INCLUDE_DOSFS_DIR_FIXED
+    #define INCLUDE_FS_MONITOR
+    #define INCLUDE_FS_EVENT_UTIL
+    #define INCLUDE_ERF
+    #define INCLUDE_XBD
+    #define INCLUDE_XBD_TRANS
+    #define INCLUDE_DEVICE_MANAGER
+    #define INCLUDE_XBD_BLK_DEV
+    #define INCLUDE_XBD_PART_LIB
+    #define INCLUDE_DISK_UTIL
+\ce
+
+When using a VxWorks block device for the first time, you should format it as 
+a FAT file system by using
+\cs
+    dosFsVolFormat ("NameOfTheBlockDevice", 0x20, 0);    /@ FAT32 format @/
+\ce
+or
+\cs
+    dosFsVolFormat ("NameOfTheBlockDevice", 0x10, 0);    /@ FAT16 format @/
+\ce
+
+Then, you can use VxWorks I/O and file system commands to access the block
+device as if it were a disk.  For example, you can copy a vxWorks image from
+your host to the SD card by using file system copy.
+
+\cs
+    copy ("vxWorks", "NameOfTheBlockDevice/vxWorks");
+\ce
+
+NOTE. According to the current design, SD/USB/SATA may be shown with different
+name in VxWorks though all of them are block devices from the perspective of 
+application. To get the correct device name, use "devs" command in targe shell:
+
+\cs
+    devs
+\ce
+
+All available devices will then be displayed with concrete name. Below are some
+typical names of block devices:
+
+\ts
+/sd0:1
+/s0p0:1
+/ata0:1
+/bd0
+\te
+
+Block device can also be used as the boot device in bootloader. Below is an 
+example by using USB disk "/bd0" as a boot device:
+
+\cs
+    boot device          : fs
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /bd0/vxWorks
+    inet on ethernet (e) : 192.168.0.3:ffffff00
+    host inet (h)        : 192.168.0.2
+    gateway inet (g)     : 192.168.0.1
+    user (u)             : target
+    ftp password (pw)    : vxTarget
+    flags (f)            : 0x0
+    target name (tn)     :
+    other (o)            : dtsec4
+\ce
+
+Below is another example by using TrueFFS device as a boot device:
+
+\cs
+    boot device          : tffs=0,0
+    unit number          : 0
+    processor number     : 0
+    host name            : host
+    file name            : /tffs0/vxWorks
+    inet on ethernet (e) : 128.224.163.75:fffff000
+    host inet (h)        : 128.224.162.146
+    gateway inet (g)     : 128.224.162.1
+    user (u)             : user
+    ftp password (pw)    : pass
+    flags (f)            : 0x0
+    target name (tn)     : mds8568
+    other (o)            : motetsec0
+\ce
+
+\sh Security Engine
+Freescale Security Engine (SEC) 3.3 is supported in this release.
+Note that VxWorks PNE MSP must be installed to enable security engine offload.
+
+The following steps describe how to enable SEC support in this BSP.
+
+1. Create a VSB (VxWorks Source Build)
+
+    1.1 Create a VSB in any directory. For instance, run the command:
+
+\cs
+       $WIND_BASE/target/proj/vxprj vsb create -bsp fsl_p10xx_rdb vsb_fsl_p10xx_rdb
+\ce
+
+        This command creates a VSB for the BSP fsl_p10xx_rdb, vsb_fsl_p10xx_rdb
+        is the name of this VSP.
+
+    1.2 Configure VSB
+
+        After running the command in step 1.1, you will be prompted to select the
+        configuration dialog of this new VSB. The following settings
+        are significant in enabling the security engine:
+\cs
+        OBJECT_MANAGEMENT
+        OBJECT_VERIFICATION
+        TASK_CREATE_HOOKS_D
+        TASK_SWITCH_HOOKS_D
+        CPU_PWR_MGMT_D        
+        COMPONENT_IPNET
+        FEATURE_IPNET_VERBOSE
+        FEATURE_IPNET_GEN_DEPEND
+        FEATURE_IPNET_INET4_ONLY
+        MSP_FEATURE_PNE
+        COMPONENT_IPAPPL
+        COMPONENT_IPCRYPTO
+        COMPONENT_IPFREESCALE
+        COMPONENT_IPHWCRYPTO        
+        COMPONENT_IPSSH
+        COMPONENT_IPSSL
+        COMPONENT_VXCOMPAT
+        COMPONENT_XML        
+        FEATURE_USR
+        USR_INET4_ONLY
+        COMPONENT_USR_IPNET
+        COMPONENT_USR_APPS
+        COMPONENT_USR_XML   
+        
+        and optionally if IPsec is required:
+        COMPONENT_IPIPSEC        
+\ce
+        Below is an example of the configuration dialog:
+
+\cs
+        starting VSB configuration...
+        *
+        * VxWorks Source Build (VSB) Configuration
+        *
+        *
+        * VxWorks Global Configuration Options for BSP fsl_p10xx_rdb
+        *
+        Set advanced options  (ADVANCED_OPT) [N/y/?] (NEW) y
+        *
+        * fsl_p10xx_rdb_CPU = PPC32
+        *
+        Select the Floating Point configuration
+        > 1. e500v2 (FP_e500v2) (NEW)
+          2. soft (FP_soft) (NEW)
+        choice[1-2?]: 1
+        Select the ENDIAN configuration
+        > 1. big (ENDIAN_big) (NEW)
+        choice[1]: 1
+        Select the Primary Tool
+        > 1. diab (PRI_TOOL_ILP32_diab) (NEW)
+        choice[1]: 1
+        optional compiler flags for fsl_p10xx_rdb_TOOL [?]  (ADDEDCFLAGS) [] (NEW)
+        Enable use of Secondary TOOL to build kernel libraries.  (ENABLE_TOOL2_ILP32) [Y/n/?] (NEW) Y
+          Select the Secondary Tool
+          > 1. gnu (SEC_TOOL_ILP32_gnu) (NEW)
+          choice[1]: 1
+        optional compiler flags for fsl_p10xx_rdb_TOOL2 [?]  (ADDEDCFLAGS2) [] (NEW)
+        Select the Applications Tool
+        > 1. diab (APP_TOOL_ILP32_diab) (NEW)
+          2. gnu (APP_TOOL_ILP32_gnu) (NEW)
+        choice[1-2?]: 1
+        optional compiler flags for fsl_p10xx_rdb_APP_TOOL [?]  (ADDEDCFLAGS_APP) [] (NEW)
+        *
+        * ppc Architecture Options
+        *
+        Symmetric Multiprocessing (SMP)  (SMP) [N/y/?] (NEW) N
+        Low-level arch code need not support inconsistent cache modes  (PPC_CACHE_MODE_IS_CONSISTENT) [N/y/?] (NEW)
+        System Viewer Instrumentation  (SV_INSTRUMENTATION) [Y/n/?] (NEW) Y
+        Global Debug Flag  (DEBUG_FLAG) [N/y/?] (NEW)
+        Real-Time Process (RTP)  (RTP) [Y/n/?] (NEW) Y
+        *
+        * VxWorks Kernel Configuration Options
+        *
+        *
+        * VxWorks Kernel Component Configuration
+        *
+        WIND Object Management  (OBJECT_MANAGEMENT) [Y/n/?] (NEW) Y
+          WIND Object ID Validation  (OBJECT_VERIFICATION) [Y/n/?] (NEW) Y
+        Task Create Hooks  (TASK_CREATE_HOOKS_D) [Y/n/?] (NEW) Y
+        Task Switch Hooks  (TASK_SWITCH_HOOKS_D) [Y/n/?] (NEW) Y
+        CPU Power Management  (CPU_PWR_MGMT_D) [Y/n/?] (NEW) Y
+        *
+        * Multi-OS Support
+        *
+        MIPC  (COMPONENT_MIPC) [Y/n/?] (NEW) n
+        WRLOAD  (COMPONENT_WRLOAD) [Y/n/?] (NEW) n
+        *
+        * Optional Kernel Features
+        *
+        Enable Kernel Per-Task CWD  (PERTASK_CWD) [Y/n/?] (NEW)
+        *
+        * File System Configuration
+        *
+        Set Maximum Device Name Length  (MAX_DEVNAME) [10] (NEW)
+        Optimize NFS3 server read/write procedure  (NFS3_RWOPT) [N/y/?] (NEW)
+        Set factor for maximum block size transferred in NFS3 server  (NFS3_BLKSIZE_FACTOR) [1] (NEW)
+        Enable VXTESTV2  (COMPONENT_VXTESTV2_D) [Y/n/?] (NEW)
+        Enable BENCHMARK tests  (COMPONENT_BENCHMARK) [N/y/?] (NEW)
+        Enable Code Coverage Analyzer test instrumentation of VSB   (COMPONENT_COVERAGE) [N/y/?] (NEW)
+        *
+        * VxWorks Applications Configuration Options
+        *
+        Select networking code to be built
+        > 1. Build Networking IPNET Libraries (COMPONENT_IPNET) (NEW)
+          2. No Networking Libraries (NO_IP) (NEW)
+        choice[1-2]: 1
+        *
+        * Networking Build Options
+        *
+        Set the IPNET build mode
+        > 1. speed mode (BUILD_MODE_speed) (NEW)
+          2. debug mode (BUILD_MODE_debug) (NEW)
+        choice[1-2]: 1
+        Enable VERBOSE mode  (FEATURE_IPNET_VERBOSE) [N/y] (NEW) y
+        Generate IPNET Dependencies  (FEATURE_IPNET_GEN_DEPEND) [Y/n] (NEW) Y
+        Build basic IPNET support libraries  (BUILD_BASIC_IPNET) [Y/n/?] (NEW) Y
+        Choose the Networking Libraries to be built
+        > 1. Build libraries with IPV4 support (FEATURE_IPNET_INET4_ONLY) (NEW)
+          2. Build libraries with IPV4 and IPV6 support (FEATURE_IPNET_INET6) (NEW)
+          3. Build libraries with IPV6 support (FEATURE_IPNET_INET6_ONLY) (NEW)
+        choice[1-3]: 1
+        Select the default Build-time Syslog level for Networking Components
+          1. Emergency level (IPCOM_DEFAULT_SYSLOG_PRIORITY_EMERG) (NEW)
+          2. Critical level (IPCOM_DEFAULT_SYSLOG_PRIORITY_CRIT) (NEW)
+          3. Error level (IPCOM_DEFAULT_SYSLOG_PRIORITY_ERR) (NEW)
+        > 4. Warning level (IPCOM_DEFAULT_SYSLOG_PRIORITY_WARNING) (NEW)
+          5. Notice level (IPCOM_DEFAULT_SYSLOG_PRIORITY_NOTICE) (NEW)
+          6. Informational level (IPCOM_DEFAULT_SYSLOG_PRIORITY_INFO) (NEW)
+          7. Debug level (IPCOM_DEFAULT_SYSLOG_PRIORITY_DEBUG) (NEW)
+          8. Detailed debug level (IPCOM_DEFAULT_SYSLOG_PRIORITY_DEBUG2) (NEW)
+        choice[1-8?]: 4
+        Enable selection of Advanced Debugging Build Options for Networking Component   (IPCOM_DEBUG_ADVANCED) [N/y/?] (NEW)
+        Enable MSP Feature Set PAD  (MSP_FEATURE_PAD) [Y/n/?] (NEW) n
+        Enable MSP Feature Set PCD  (MSP_FEATURE_PCD) [Y/n/?] (NEW) n
+        Enable MSP Feature Set PID  (MSP_FEATURE_PID) [Y/n/?] (NEW) n
+        Enable MSP Feature Set PNE  (MSP_FEATURE_PNE) [Y/n/?] (NEW) Y
+        *
+        * VxWorks Networking Component Configuration
+        *
+        *
+        * Layer 2 (Link) Components
+        *
+        Enable L2TP  (COMPONENT_IPL2TP) [N/y/?] (NEW)
+        Enable MACsec  (COMPONENT_IPMACSEC) [N/y/?] (NEW)
+        Enable PPP  (COMPONENT_IPPPP) [Y/n/?] (NEW)
+        Enable 802.1ad VLAN stacking  (COMPONENT_VLAN_STACKING) [N/y/?] (NEW)
+        Enable WLAN  (COMPONENT_WLAN) [N/y/?] (NEW)
+        *
+        * Layer 3 (Network) Components
+        *
+        Enable FIREWALL  (COMPONENT_IPFIREWALL) [N/y/?] (NEW)
+        Enable IPSEC  (COMPONENT_IPIPSEC) [N/y/?] (NEW)
+        Enable MPLS  (COMPONENT_IPMPLS) [N/y] (NEW)
+        Enable ROHC  (COMPONENT_IPROHC) [N/y/?] (NEW)
+        Enable IPNET Network Address Translation (NAT)  (COMPONENT_NAT) [Y/n/?] (NEW) n
+        Enable Quality of Service and Differentiated Services  (COMPONENT_DIFF_SERV) [Y/n/?] (NEW) n
+        Enable tunneling support  (COMPONENT_TUNNEL_SUPPORT) [Y/n/?] (NEW) n
+        *
+        * Layer 4 (Transport) Components
+        *
+        Enable SCTP  (COMPONENT_IPSCTP) [N/y/?] (NEW)
+        *
+        * Layer 5 (Applications) Components
+        *
+        Enable 802.1X Authenticator  (COMPONENT_DOT1X) [N/y/?] (NEW)
+        Enable 802.1X Supplicant  (COMPONENT_IP8021X) [N/y/?] (NEW)
+        Enable APPL  (COMPONENT_IPAPPL) [Y/n/?] (NEW) Y
+        Enable DHCPR  (COMPONENT_IPDHCPR) [N/y] (NEW)
+        Enable DHCPS  (COMPONENT_IPDHCPS) [N/y/?] (NEW)
+        *
+        * Diameter Components
+        *
+        Enable DIAMETER Client  (COMPONENT_IPDIAMETERC) [N/y/?] (NEW)
+        Enable DIAMETER Proxy  (COMPONENT_IPDIAMETERP) [N/y/?] (NEW)
+        Enable IKE  (COMPONENT_IPIKE) [N/y/?] (NEW)
+        Enable Multicast Proxy daemon  (COMPONENT_IPMCP) [N/y/?] (NEW)
+        Enable MIP  (COMPONENT_IPMIP) [N/y/?] (NEW)
+        Enable MIP4  (COMPONENT_IPMIP4) [N/y/?] (NEW)
+        Enable MIPFA  (COMPONENT_IPMIPFA) [N/y/?] (NEW)
+        Enable MIPHA  (COMPONENT_IPMIPHA) [N/y/?] (NEW)
+        Enable MIPMN  (COMPONENT_IPMIPMN) [N/y/?] (NEW)
+        Enable MIPPM  (COMPONENT_IPMIPPM) [N/y/?] (NEW)
+        Enable RADIUS  (COMPONENT_IPRADIUS) [Y/n/?] (NEW) n
+        Enable RIP  (COMPONENT_IPRIP) [N/y] (NEW)
+        Enable SNMP  (COMPONENT_SNMP) [Y/n/?] (NEW) n
+        Enable SNTP  (COMPONENT_IPSNTP) [Y/n/?] (NEW) n
+        Enable SSH  (COMPONENT_IPSSH) [N/y/?] (NEW) y
+        Enable SSL  (COMPONENT_IPSSL) [Y/n/?] (NEW) Y
+        *
+        * WPS requires COMPONENT_WLAN and COMPONENT_IPEAP and COMPONENT_IP8021X to be selected and COMPONENT_IPCRYPTO_USE_FIPS_140_2 to be deselected
+        *
+        *
+        * Cryptography Components
+        *
+        *
+        * Component CRYPTO preselected - required by  Component SSL
+        *
+        Enable CRYPTO  (COMPONENT_IPCRYPTO) [Y/?] (NEW) y
+          Enable FIPS 140-2 validated crypto libraries  (COMPONENT_IPCRYPTO_USE_FIPS_140_2) [N/y/?] (NEW)
+        Enable FREESCALE  (COMPONENT_IPFREESCALE) [N/y/?] (NEW) y
+        Enable HWCRYPTO  (COMPONENT_IPHWCRYPTO) [N/y/?] (NEW) y
+        *
+        * Networking Library Components
+        *
+        Enable EAP  (COMPONENT_IPEAP) [N/y/?] (NEW)
+        Enable VXCOMPAT  (COMPONENT_VXCOMPAT) [Y/n/?] (NEW) Y
+        *
+        * Networking Acceleration Platform Components
+        *
+        Enable IFPROXY  (COMPONENT_IFPROXY) [N/y/?] (NEW)
+        Enable WRNAD  (COMPONENT_WRNAD) [N/y/?] (NEW)
+        *
+        * Common Analysis Framework Components
+        *
+        *
+        * COMPONENT CAFE and COMPONENT_STACKTRACE are used by analysis tools
+        *
+        Enable CAFE framework  (COMPONENT_CAFE) [Y/n/?] (NEW) n
+        *
+        * Stacktrace Debug Component
+        *
+        Enable stacktrace debugging output  (COMPONENT_STACKTRACE_DEBUG) [N/y] (NEW)
+        Route stacktrace debugging output to a session logger  (COMPONENT_STACKTRACE_SESSION_LOGGER) [N/y] (NEW)
+        *
+        * Target Communication Framework (TCF) Agent Component
+        *
+        Enable TCF_AGENT  (COMPONENT_TCF_AGENT) [Y/n/?] (NEW) n
+        Enable WM  (COMPONENT_WM) [Y/n/?] (NEW) n
+        Enable XML  (COMPONENT_XML) [Y/n/?] (NEW) Y
+        *
+        * VxWorks User Library Configuration
+        *
+        Build User-side libraries  (FEATURE_USR) [Y/n/?] (NEW) Y
+          Choose the User Networking Libraries to be built
+          > 1. Build libraries with IPV4 support (USR_INET4_ONLY) (NEW)
+            2. Build libraries with IPV4 and IPV6 support (USR_INET6) (NEW)
+            3. Build libraries with IPV6 support (USR_INET6_ONLY) (NEW)
+          choice[1-3]: 1
+          Build User Networking Libraries  (COMPONENT_USR_IPNET) [Y/n/?] (NEW) Y
+          Build core USR APPS  (COMPONENT_USR_APPS) [Y/n/?] (NEW) Y
+            Build test USR APPS  (COMPONENT_USR_TEST) [Y/n/?] (NEW) n
+          Build USR libraries for DOT1X  (COMPONENT_USR_DOT1X) [N/y/?] (NEW) n
+          Build USR libraries for SNMP  (COMPONENT_USR_SNMP) [N/y/?] (NEW) n
+          Build USR libraries for WM  (COMPONENT_USR_WM) [N/y/?] (NEW) n
+          Build USR libraries for XML  (COMPONENT_USR_XML) [Y/n/?] (NEW) Y
+          Build USR libraries for SNMP_V3  (COMPONENT_USR_SNMP_V3) [N/y/?] (NEW)
+          Build USR libraries for SNMP_AGENTX  (COMPONENT_USR_SNMP_AGENTX) [N/y/?] (NEW)
+
+        This VSB supports the following BSPs: fsl_p10xx_rdb
+\ce
+
+        Note that 'Enable MSP Feature Set PNE' must be set to 'Yes' and other
+        'Enable MSP Feature Set' must be set to 'No'. And some options like
+        "Enable FREESCALE" are also required to test Freescale's SEC.
+
+    1.3 Build VSB
+
+        Run the following command to build the libraries based on the selected
+        options.
+
+\cs
+        cd vsb_fsl_p10xx_rdb
+        make
+\ce
+
+2. Create a VIP based on the new VSB
+
+    2.1 Create a VIP, in the step of "Project Setup", select new VSB which is
+        created above as the configuration of "A source build project", and
+        select the correct BSP.
+
+    2.2 Configure and build VIP
+
+        In the Kernel Configuration editor include INCLUDE_IPFREESCALE. For
+        the Freescale P10XXRDB board set two parameters as follows:
+
+\cs
+        SEC2_CORE_VERSION = "3.3"
+        SEC2_DEVICE_FAMILY = "3"
+\ce
+
+        build this VIP.
+
+    2.3 Test the Security Engine
+
+        Download the image file, then issue the command 'freescale test all'
+        from the VxWorks kernel shell.
+
+        For the Freescale P10XXRDB board you should see:
+
+\cs
+        -> ipcom_run_cmd "freescale test all"                                          
+        freescale :: testing md5 hash...success                                        
+        freescale :: testing md5 hmac...success                                        
+        freescale :: testing sha1 hash...success                                       
+        freescale :: testing sha1 hmac...success                                       
+        freescale :: testing des cbc cipher...success                                  
+        freescale :: testing des ecb cipher...success                                  
+        freescale :: testing 3des cbc cipher...success                                 
+        freescale :: testing 3des ecb cipher...success                                 
+        freescale :: testing aes cbc cipher...success                                  
+        freescale :: testing aes ecb cipher...success                                  
+        freescale :: testing rng oper...success                                        
+        freescale :: testing mod exp...success 
+\ce
+
+\sh AMP with wrload and MIPC
+
+The default bootrom provided from the fsl_p10xx_rdb BSP could be used to boot
+the board with UP, AMP or SMP images.
+
+You must use the Workbench or vxprj to build AMP BSPs. You can build any image
+for core0 from the fsl_p10xx_rdb BSP. This image is configured for AMP,
+wrload. For core1 you can build a RAM based image (vxWorks). It is configured
+to be loaded using wrload and to route the console to core0.
+
+When in AMP mode, the eTSEC interfaces can be allocated to either core.
+The default configuration assigns motetsec0 to the first core and motetsec1
+and motetsec2 to the second. This can be changed by three configurable 
+parameters ETSEC0_CORE_NUM, ETSEC1_CORE_NUM and ETSEC2_CORE_NUM in 
+INCLUDE_ETSEC_VXB_END, these parameters specify the assignment of devices to 
+CPUs. When operating in UP or SMP mode, all 3 ETSEC interfaces are available
+together.
+
+Note that while there are 3 separate eTSEC controllers, only the MDIO
+registers on ETSEC0 are actually functional, and ETSEC1 and ETSEC2
+Ethernet PHYs are wired to this port.
+
+In the file sysLib.c for BSP, you can control the assignment of devices
+to CPUs by using struct ampCpuTable definitions for devices. For example,
+on P1025RDB board, suppose two console UARTs are entered in a sysLib.c file,
+as follows:
+
+\cs
+AMP_CPU_TABLE p1025rdbAmpCpuTable[] = {
+#ifdef INCLUDE_ETSEC_VXB_END
+    { ETSEC_NAME,           0,  ETSEC0_CORE_NUM },
+    { ETSEC_NAME,           1,  ETSEC1_CORE_NUM },
+    { ETSEC_NAME,           2,  ETSEC2_CORE_NUM },
+#endif /@ INCLUDE_ETSEC_VXB_END @/
+    { "ns16550",            0,  DEVICE_CORE0 }, ===> for core0
+    { "ns16550",            1,  DEVICE_CORE0 }, ===> for core0
+    { "quiccEngine",        0,  DEVICE_CORE0 }, ===> for core0
+    { "quiccEngineIntCtlr", 0,  DEVICE_CORE0 }, ===> for core0
+    { "qefcc",              0,  DEVICE_CORE0 }, ===> for core0
+    { "qefcc",              1,  DEVICE_CORE0 }, ===> for core0
+    { "qeUart",             2,  DEVICE_CORE0 }, ===> for core0
+    { "qeUart",             3,  DEVICE_CORE0 }, ===> for core0
+    { "norFlash",           0,  DEVICE_CORE0 }, ===> for core0
+    { "fslI2c",             0,  DEVICE_CORE0 }, ===> for core0
+    { "fslI2c",             1,  DEVICE_CORE0 }, ===> for core0
+    { "openPicTimer",       0,  DEVICE_CORE0 }, ===> for core0
+    { "openPicTimer",       1,  DEVICE_CORE0 }, ===> for core0
+    { "m85xxCCSR",          0,  DEVICE_CORE0 }, ===> for core0
+    { "m85xxPci",           0,  DEVICE_CORE0 }, ===> for core0
+    { "vxbPlbUsbEhci",      0,  DEVICE_CORE0 }, ===> for core0
+    { "fslDma",             0,  DEVICE_CORE0 }, ===> for core0
+    { "sdhci",              0,  DEVICE_CORE0 }, ===> for core0
+};
+\ce
+
+If you want to allocate the console UART to the secondary core, you can make
+the following change:
+
+\cs
+AMP_CPU_TABLE p1025rdbAmpCpuTable[] = {
+#ifdef INCLUDE_ETSEC_VXB_END
+    { ETSEC_NAME,           0,  ETSEC0_CORE_NUM },
+    { ETSEC_NAME,           1,  ETSEC1_CORE_NUM },
+    { ETSEC_NAME,           2,  ETSEC2_CORE_NUM },
+#endif /@ INCLUDE_ETSEC_VXB_END @/
+    { "ns16550",            0,  DEVICE_CORE1 }, ===> for core1
+    { "ns16550",            1,  DEVICE_CORE1 }, ===> for core1
+    { "quiccEngine",        0,  DEVICE_CORE0 }, ===> for core0
+    { "quiccEngineIntCtlr", 0,  DEVICE_CORE0 }, ===> for core0
+    { "qefcc",              0,  DEVICE_CORE0 }, ===> for core0
+    { "qefcc",              1,  DEVICE_CORE0 }, ===> for core0
+    { "qeUart",             2,  DEVICE_CORE0 }, ===> for core0
+    { "qeUart",             3,  DEVICE_CORE0 }, ===> for core0
+    { "norFlash",           0,  DEVICE_CORE0 }, ===> for core0
+    { "fslI2c",             0,  DEVICE_CORE0 }, ===> for core0
+    { "fslI2c",             1,  DEVICE_CORE0 }, ===> for core0
+    { "openPicTimer",       0,  DEVICE_CORE0 }, ===> for core0
+    { "openPicTimer",       1,  DEVICE_CORE0 }, ===> for core0
+    { "m85xxCCSR",          0,  DEVICE_CORE0 }, ===> for core0
+    { "m85xxPci",           0,  DEVICE_CORE0 }, ===> for core0
+    { "vxbPlbUsbEhci",      0,  DEVICE_CORE0 }, ===> for core0
+    { "fslDma",             0,  DEVICE_CORE0 }, ===> for core0
+    { "sdhci",              0,  DEVICE_CORE0 }, ===> for core0
+};
+\ce
+
+Note:
+1) On the P10XX, the two DUART share one internal interrupt line, so they must
+be assigned to the same core.
+
+2) On P1025RDB board, devices "quiccEngine","quiccEngineIntCtlr","qefcc_0","qefcc_1",
+"qeUart_0", "qeUart_1" and "fslI2c_0" must be assigned to the core_0.
+
+The image for core 0 must be configured with
+INCLUDE_AMP and INCLUDE_WRLOAD which adds all required MultiOS components, and the optional
+but very useful WDB proxy. Additionally, the primary core must be configured with
+INCLUDE_AMP_CPU_00 (Kernel configurations:
+hardware -> BSP configuration variants -> vxWorks AMP core build).
+Note: Component INCLUDE_P1023RDB should be added for building P1023RDB AMP core 0 image.
+(For non-AMP images, such as UP and SMP, component INCLUDE_P1023RDB is not needed.)
+
+The image for core 1 must be configured with INCLUDE_AMP and INCLUDE_WRLOAD_IMAGE_BUILD
+which provides the correct image offset for wrload. Additionally, the secondary
+core must be configured with
+INCLUDE_AMP_CPU_01 (Kernel configurations:
+hardware -> BSP configuration variants -> vxWorks AMP core build).
+Note component INCLUDE_P1023RDB should be added for building P1023RDB AMP core 1 image.
+
+The secondary core image uses the DEFAULT_BOOT_LINE by default,  you can set this parameter in your vxWorks Image Project.
+For example (all on one line, no breaks, note the escaped internal double-quotes):
+
+$ vxprj parameter set DEFAULT_BOOT_LINE "\"motetsec(2,0)host:<image_dir>/vxWorks
+h=192.168.1.1 e=192.168.1.2 u=vxworks pw=vxworks f=0x0\""
+
+Boot the image created with INCLUDE_AMP_CPU_00 from the bootrom.
+Call wrload using the following either add as part of the usrAppInit or call
+from a shell such as the kernel shell.
+For Example:
+
+-> wrload "-file <image dir>/vxWorks -cpu 1"
+
+The image you load should be the image built with INCLUDE_AMP_CPU_01.
+
+SPECIAL CONSIDERATIONS
+
+\sh Make Targets
+The make targets are listed as the names of object-format files.
+Other images not listed here have not been validated.
+
+\ts
+`bootrom'
+`bootrom.bin'
+`bootrom_uncmp'
+`bootrom_uncmp.bin'
+`vxWorks' (with `vxWorks.sym')
+`vxWorks.st'
+\te
+
+\sh BSP Bootloaders and Bootroms
+
+\ts
+Bootloader/Bootrom   | status
+----------------------------------
+bootrom              | SUPPORTED
+bootrom_uncmp        | SUPPORTED
+bootrom_res          | UNSUPPORTED
+vxWorks_rom          | SUPPORTED
+vxWorks_romCompress  | SUPPORTED
+vxWorks_romResident  | SUPPORTED
+\te
+
+\sh BSP Validated Tools
+
+\ts
+Tool                         | Connection/Type | Status
+-------------------------------------------------------
+Workbench Debugger           | ETHERNET/WDB    | SUPPORTED
+Workbench System Viewer      | ETHERNET/WDB    | SUPPORTED
+Workbench MemScope           | ETHERNET/WDB    | SUPPORTED
+Workbench ProfileScope       | ETHERNET/WDB    | SUPPORTED
+Workbench StethoScope        | ETHERNET/WDB    | SUPPORTED
+Workbench CoverageScope      | ETHERNET/WDB    | SUPPORTED
+Workbench Core File Analysis | ETHERNET/WDB    | UNVALIDATED
+Workbench Sensor Points      | ETHERNET/WDB    | UNVALIDATED
+Workbench OCD Debugger       | JTAG            | UNVALIDATED
+Workbench OCD Flash          | JTAG            | UNVALIDATED
+\te
+
+\sh Known Problems
+
+For P1025RDB board, eLBC bus is muxed with QE UCC1, so when the QE_UCC Ethernet
+ports or QE_UCC UARTs are enabled, devices on the eLBC bus (NOR Flash,
+NAND Flash and CPLD) could not be operated. For the more, QE_UCC_END ports could
+not be serviced as boot device.
+
+P1024E single core mode is displayed as P1011E rather than P1015E; P1025E single
+core mode is displayed as P1012E rather than P1016E. It is conflict with the
+content in
+\tb P1024 QorIQ Integrated Processor Reference Manual
+\tb P1024RDB-PA Specification
+\tb P1024 QorIQ Integrated Processor Reference Manual
+\tb P1024RDB-PA Specification
+It is a SOC's hardware issue and maybe addressed in silicon/board changes in the
+future. The single core modes is not supported by fsl_p10xx_rdb untill this issue
+fixed.
+
+For P1023RDB board, I2C driver is not verified as the pull-up resistor for
+I2C is incorrect.
+
+BOARD LAYOUT
+
+P1021RDB-PC REV B board is like this:
+\bs
++------------+---+---+------+---+-------+-------+---+-------+-------+--+------++
+|            |USB|   |UART-1|   | SW-P6 | SW-P4 |   |ETSEC-3|ETSEC-2|  |POWER ||
+|            +---+   +------+   +-------+-------+   +-------+-------+  |SWITCH||
+|                    |UART-2|   | SW-P7 | SW-P5 |                      +------+|
+|                    +------+   +-------+-------+                              |
+|                                                                              |
+|                                                                              |
+|                                    +-------+                                 |
+|                                    |       |                                 |
+|                                    |VSC7385|                                 |
+|                                    |       |                            PCIE |
+|     NorFlash                       +-------+                            +--+ |
+|     +------+                                                            |  | |
+|     |      |                                                            |  | |
+|     +------+                                                            |  | |
+|     |      |                                                            +--+ |
+|     +------+                    +-----------+             +-++-+             |
+|     NandFlash                   |           |             | || |             |
+|                                 |   QorIQ   |       SATA1 | || | SATA2       |
+|    SW3        SW4               |   P1021E  |             | || |       +---+ |
+|    +------+   +------+          |           |             +-++-+       |   | |
+|    |      |   |      |          +-----------+                          | A | |
+|    +------+   +------+                                                 | T | |
+|                                                                        | X | |
+| +---------+     +--------------------+                                 |   | |
+| |  JTAG   |     |    DDR-II RAM      |                                 +---+ |
+| +----+----+     +--------------------+                                       |
++------------------------------------------------------------------------------+
+\be
+
+
+P1024RDB-PA REV A board is like this:
+\bs
++------+-----+-----+-----+------+---+---+------+----+-------+-------+--+------++
+|      |FAX-0|FAX-4|FAX-2|      |USB|   |UART-1|    |ETSEC-1|ETSEC-2|  |POWER ||
+|      +-----+-----+-----+      +---+   +------+    +-------+-------+  |SWITCH||
+|            |FAX-3|FAX-1|              |UART-2|            |ETSEC-3|  +------+|
+|            +-----+-----+              +------+            +-------+          |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                         PCIE |
+|     NorFlash                                                            +--+ |
+|     +------+                                                            |  | |
+|     |      |                                                            |  | |
+|     +------+                                                            |  | |
+|     |      |                                                            +--+ |
+|     +------+                    +-----------+                                |
+|     NandFlash                   |           |                                |
+|                                 |   QorIQ   |                                |
+|    SW3        SW4               |   P1024E  |                          +---+ |
+|    +------+   +------+          |           |                          |   | |
+|    |      |   |      |          +-----------+                          | A | |
+|    +------+   +------+                                                 | T | |
+|                                                                        | X | |
+| +---------+     +--------------------+                                 |   | |
+| |  JTAG   |     |    DDR-II RAM      |                                 +---+ |
+| +----+----+     +--------------------+                                       |
++------------------------------------------------------------------------------+
+\be
+
+P1025RDB-PA REV A board is like this:
+\bs
++--------+---+---+------+-+-------+-------+-+-----+-+-------+-------+--+------++
+|        |USB|   |UART-1| |RS422-1|RS422-2| |UEC-5| |ETSEC-1|ETSEC-2|  |POWER ||
+|        +---+   +------+ +-------+-------+ +-----+ +-------+-------+  |SWITCH||
+|                |UART-2|                   |UEC-1|         |ETSEC-3|  +------+|
+|                +------+                   +-----+         +-------+          |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                              |
+|                                                                         PCIE |
+|     NorFlash                                                            +--+ |
+|     +------+                                                            |  | |
+|     |      |                                                            |  | |
+|     +------+                                                            |  | |
+|     |      |                                                            +--+ |
+|     +------+                    +-----------+                                |
+|     NandFlash                   |           |                                |
+|                                 |   QorIQ   |                                |
+|    SW3        SW4               |   P1025E  |                          +---+ |
+|    +------+   +------+          |           |                          |   | |
+|    |      |   |      |          +-----------+                          | A | |
+|    +------+   +------+                                                 | T | |
+|                                                                        | X | |
+| +---------+     +--------------------+                                 |   | |
+| |  JTAG   |     |    DDR-II RAM      |                                 +---+ |
+| +----+----+     +--------------------+                                       |
++------------------------------------------------------------------------------+
+\be
+
+P1023RDB board is like this:
+\bs
++--------+---+---+------+-+-------+-------+-+-----+-+-------+-------+--+------++
+|        |USB|                                      |ETSEC-1|ETSEC-2|  |POWER ||
+|        +---+                                      +-------+-------+  |SWITCH||
+|        |USB|                                                         +------+|
+|        +---+                                                                 |
+|                                                                              |
+|                                                                              |
+|     SW2      SW3                                                        POE  |
+|   +----+   +----+                +---------+                           +---+ |
+|   |    |   |    |                |  JTAG   |                           |   | |
+|   +----+   +----+                +----+----+                           |   | |
+|   NOR flash  NAND flash                                                |   | |
+|   +------+   +------+                                                  |   | |
+|   |      |   |      |            +-----------+                         |   | |
+|   +------+   +------+            |           |                         |   | |
+|                                  |   QorIQ   |                         |   | |
+|                                  |   P1023E  |                         +---+ |
+|                                  |           |                               |
+|                                  +-----------+                               |
+|                            +------------------+                              |
+|                            |    DDR-II RAM    |                              |
+|                            +------------------+                              |
+|                                                 +---+ +---+                  |
+|                                            Mini |   | |   | Mini             |
+|     +----------+                           PCIE |   | |   | PCIE             |
+|     |Mini PCIE |                                |   | |   |                  |
+|     +----------+                                |   | |   |                  |
+|                                                 +---+ +---+                  |
++------------------------------------------------------------------------------+
+\be
+SEE ALSO
+
+\tb Workbench User's Guide: Introduction
+
+\tb VxWorks Programmer's Guide: Configuration
+
+\tb VxWorks Programmer's Guide: Architecture Appendix
+
+BIBLIOGRAPHY
+
+\tb P1021 QorIQ Integrated Processor Reference Manual
+
+\tb P1021 QorIQ Integrated Processor Hardware Specifications
+
+\tb P1021RDB-PC Quick Start Guide
+
+\tb P1021RDB-PC Specification QorIQ Integrated Communications Processor
+
+\tb P1024 QorIQ Integrated Processor Reference Manual
+
+\tb P1024 QorIQ Integrated Processor Hardware Specifications
+
+\tb P1024RDB-PA Quick Start Guide
+
+\tb P1024RDB-PA Specification QorIQ Integrated Communications Processor
+
+\tb P1025 QorIQ Integrated Processor Reference Manual
+
+\tb P1025 QorIQ Integrated Processor Hardware Specifications
+
+\tb P1025RDB-PA Quick Start Guide
+
+\tb P1025RDB-PA Specification QorIQ Integrated Communications Processor
+
+\tb P1023 QorIQ Integrated Processor Reference Manual
+
+\tb P1023RDB Quick Start Guide
+
+\tb P1023RDB QorIQ Integrated Communication Processor User's Manual
+
+\tb PowerPC E500 Core Reference Manual
+
+\tb Motorola PowerPC Microprocessor Family: The Programming Environments
+

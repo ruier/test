@@ -1,0 +1,4 @@
+#ifdef INCLUDE_FCC_VXB_END
+#include "../src/hwif/h/end/fccVxbEnd.h"
+#endif
+

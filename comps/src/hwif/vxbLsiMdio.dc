@@ -1,0 +1,3 @@
+#ifdef INCLUDE_LSI_MDIO
+#   include "../src/hwif/h/mii/vxbLsiMdio.h"
+#endif /* INCLUDE_LSI_MDIO */

@@ -1,0 +1,9 @@
+#if defined (DRV_VXBEND_TEI82598) && defined (DRV_VXBEND2_TEI8259X)
+#error "DRV_VXBEND_TEI82598 and DRV_VXBEND2_TEI8259X are both defined"
+#endif
+
+#if defined (DRV_VXBEND2_TEI8259X) && !defined (INCLUDE_END2)
+#error "DRV_VXBEND2_TEI8259X requires INCLUDE_END2"
+#endif
+
+IMPORT void teiEnd2Register(void);

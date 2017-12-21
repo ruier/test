@@ -1,0 +1,3 @@
+#ifdef INCLUDE_DUMMY_MDIO
+    dummyMdioRegister();
+#endif

@@ -1,0 +1,51 @@
+
+           README: Freescale P2020DS (fsl_p2020_ds)
+
+This file contains board-specific information for the Freescale P2020DS
+target board.  This file documents BSP interface changes from previous software
+or hardware versions, and notifies the user of serious caveats that must be
+noted before using this BSP.  Additionally, the target board's reference entry
+(i.e. fsl_p2020_ds/target.ref) provides board-specific information necessary
+to run VxWorks and should be read fully before this BSP is used.
+
+--------------------------------------------------------------------------------
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Fixed SPI_LOOP macro in sysFslSpi.h (WIND00253070)
+    Update the description of Security Engine. (WIND00331832)
+    Remove the component INCLUDE_AIM_MMU_SHOW for footprint. (WIND00334904)
+    Modify the OR0 value to improve the flash performance. (WIND00181515)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+    Moved L1 cache parity error handling to the arch library.  L1 cache parity
+       checking is now enabled by default. L1 parity errors now generate
+       (in many cases recoverable) machine check exceptions.  (WIND00309426)
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+    Added workaround for EXT_IRQ8~EXT_IRQ11. (WIND00214271) 
+    Modify switches default configuration in target.ref file, refer to P2020DS 
+       BSP User Manual, Rev 2.0. (WIND00223157)
+    Replace manual cache flushing in sysCpuEnable with calls to architecture
+       functions. (WIND00239454)
+    Modify the sysToMonitor SMP shutdown sequence so each CPU flushes its data
+       cache before resetting. (WIND00242091)
+
+Version 2.0/1
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8    
+    
+    Remove unused INCLUDE_PPC_FPU. (WIND00153695)
+        
+Version 2.0/0
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Initial release.

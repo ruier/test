@@ -1,0 +1,3 @@
+#ifdef DRV_INTCTLR_IMX51
+    vxbImx51IntCtlrRegister ();
+#endif /* DRV_INTCTLR_IMX51 */

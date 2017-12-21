@@ -1,0 +1,3 @@
+#ifdef INCLUDE_VXB_IBM_TAH
+extern void tahRegister(void);
+#endif /* INCLUDE_VXB_IBM_TAH */

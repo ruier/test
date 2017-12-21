@@ -1,0 +1,130 @@
+
+                 README: Wind River SBC834x (wrSbc834x)
+
+This file contains board-specific information for the Wind River SBC834x
+target board.  Specifically, this file contains information on any BSP
+interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+Additionally, the target board's reference entry (i.e., 'man wrSbc834x')
+provides board-specific information necessary to run VxWorks, and
+should be read before this BSP is used.
+
+------------------------------------------------------------------------------
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    Remove default interrupt priority description in target.ref. (WIND00414331)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+    Corrected the name of TSEC Ethernet END driver.(WIND00248986)
+    
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+
+    Fixed WIND00183778 - remove legacy PCI driver in sysLib.c.
+
+RELEASE 2.0/9
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Fixed WIND00160963 - remove _MMU_UBAT_VP from all static BAT items.
+    Fixed WIND00088032 - remove legacy PCI driver.
+    Fixed sysUsDelay accuracy. (WIND00173100)
+    Fixed the usb compile error. (WIND00178065)
+    Move vxSvrGet() from sysALib.s to vxALib.s.
+
+RELEASE 2.0/8
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Support END2 versions of TSEC drivers 
+
+RELEASE 2.0/7
+    Released from Wind River for VxWorks 6.6
+
+    Modify eeprom.c to pass the BSPVTS nvram test (WIND00046100). 
+    Modify sysTffs.c to fix the boot failure error after running 
+    sysTffsFormat command (WIND00062975).
+    Remove priority setting code in sysTffsFormat(). (WIND00066633)
+
+RELEASE 2.0/6:
+
+    Release from Wind River for VxWorks 6.5
+        
+    Added support for the IPNet Network Stack.
+
+RELEASE 2.0/5
+        
+    Released from Wind River for Workbench 2.6, VxWorks 6.4 
+
+RELEASE 2.0/4
+    FCS Release for vxWorks 6.3
+    
+    New in this release:
+    - USB Host support
+    - PCI autoconfiguration support
+
+RELEASE 2.0/3
+    FCS Release for vxWorks 6.1
+    
+    New in this release:
+    - Manual configuration of an Intel Pro1000 Ethernet PCI adaptor is
+        supported.
+
+RELEASE 2.0/2
+    New in this release:
+    - Full 128MB local bus SDRAM is accessible at 133Mhz.
+
+RELEASE 2.0/1
+    New in this release:
+    - Non-volatile memory support added, including boot parameter and
+      MAC address storage.
+    - Added support for assigning MAC addresses via the bootrom 'M' command.
+    - System start type, used by ED&R, is now supported;
+    - Expanded support for the 7-segment LED.
+    - Moved the TFFS area to 0xff800000 -> 0xffc00000, so it no longer
+      includes the reset configuration word and boot image areas.
+
+RELEASE 2.0/0
+    
+    EAR Release for vxWorks 6.1
+    
+    Known Hardware Issues:
+    - Bootrom doesn't always execute after power-on reset or when
+       	  reset button is pressed (possibly due to MPC834x errata RESET1);
+    - Only 64MB of 128MB local bus SDRAM is accessible;
+    - Local bus SDRAM can only run up to 66Mhz;
+    - PCI Autoconfiguration will not work (MPC834x errata);
+    - If an unpopulated PCI slot is accessed at boot time (via a
+      configuration cycle), the board will hang;
+    - To avoid mechanical interferences with the Plexiglas enclosure,
+      the PCI slot should only be used in the stand-alone configuration.
+    - Machine Check Exception is not supported and will cause the board to
+      hang if triggered;
+    - USB and I2C interface circuitry are untested.
+    
+    Known Software Issues:
+    - Non-volatile memory and boot parameter storage are not supported;
+    - System start type, used by ED&R, is not supported;
+    - The MAC addresses for the 'mottsec' interfaces are hardcoded in the
+      load string in sysMotTsecEnd.c, function sysMotTsecEndLoad();
+    - TFFS support is only for part of the flash (0xffc00000 -> 0xffffffff),
+        which includes the reset configuration word and boot image areas.
+        To include TFFS, cfiscs.o must be added to MACH_EXTRA in Makefile;
+
+
+
+
+
+
+
+
+
+
+
+

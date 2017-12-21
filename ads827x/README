@@ -1,0 +1,110 @@
+
+                 README: Motorola MPC827X ADS (ads8272)
+
+This file contains board-specific information for the Motorola MPC8272
+ADS target board.  Specifically, this file contains information on any BSP
+interface changes from previous software or hardware versions, and
+contains caveats that the user must be aware of before using this BSP.
+Additionally, the target board's reference entry (i.e., 'man ads827x')
+provides board-specific information necessary to run VxWorks, and
+should be read before this BSP is used.
+
+
+PLEASE NOTE
+-----------
+
+When used with Tornado 2.2.1, this BSP requires modified versions of 
+several driver files.  The relevant SPRs are SPR #94578 and SPR #94579.
+The files are included in patch_SPR94578.zip, which is included in the
+distribution for this BSP.  Unzip and install this patch to obtain
+the modified driver files.
+
+The modified driver files should be included in a future Tornado 2.2.X
+release and/or in a cumulative driver patch.  If this BSP is used with
+version of Tornado subsequent to 2.2.1 or with cumulative driver patch
+number 2 or later, check whether the SPR modifications have already been
+included before installing the patch included with this BSP.
+The patch is not provided for vxWorks 6.x. 
+
+------------------------------------------------------------------------------
+RELEASE 6.9/2
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.3
+
+    Fix prevent errors. (WIND00419006)
+
+RELEASE 6.9/1
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9.2
+
+RELEASE 6.9/0
+
+    Released from Wind River for General Purpose Platform 6.9, VxWorks 6.9
+    
+    Delete _MMU_UBAT_VP attribute(WIND00162540)
+    Fixed potential memory corruption caused by sysNvRamGet(). (WIND00101057)
+
+RELEASE 2.0/5
+
+    Released from Wind River for General Purpose Platform 3.8, VxWorks 6.8
+
+    Correct MPC827x's interrupt numbers. (WIND00086544)
+    
+RELEASE 2.0/4
+
+    Released from Wind River for General Purpose Platform 3.7, VxWorks 6.7
+
+    Add VxBus support, replace legacy FCC driver with corresponding VxBus version. 
+
+RELEASE 2.0/3
+
+    Release from Wind River for VxWorks 6.5
+
+    Added support for the IPNet Network Stack.
+
+RELEASE 2.0/2
+
+    WIND00071187 - sysModel fails if MMU not initialized
+    
+    WIND00088466 - fix sysModel test
+        
+RELEASE 2.0/1
+
+    FCC SNOOP not initalized by default. Best performance when enabled. 
+    Enable in config.h USER_D_CACHE_MODE (CACHE_COPYBACK | CACHE_SNOOP_ENABLE)
+    New bootrom required and MACH address needs to be updated via M command at 
+    bootprompt.
+
+RELEASE 2.0/0
+
+    No longer require patch for drivers with vxWorks6.x
+    Added support for extra BAT registers.
+    Use CPU_VARIANT _g2le which includes support for additional h/w breakpoints.
+    Fixed PHY issues with FCC and added support for Phy interrupt.
+    MAC address is now stored in pseudo NVRAM (flash).
+    startType is supported.
+    FCC now initialized with SNOOP enabled.
+    
+    IMPORTANT:
+    Requires a new bootrom to be installed.
+    
+    RELEASE 1.2/1
+    
+    Added BSP support for the Security Engine interrupt.
+    
+    Fixed SPRs 
+    99953 : FCC Clk settings were causing some performance issues
+    98762 : bootrom has a problem with serial and configuring the boot parameters 
+    
+    RELEASE 1.2/0
+    
+    SPR 93050 : Machine check for offboard address error
+    SPR 93051 : FCC transmit is very slow using blasterTCP
+    SPR 93052 : PCI Errata workaround doesn't work. IDMA done bit not being set, waiting for confirmation from Motorola.
+
+
+
+
+
+
+
